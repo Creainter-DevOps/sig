@@ -24,8 +24,10 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->registerPolicies();
-        Passport::routes();
-        //
+      $this->registerPolicies();
+      \Illuminate\Support\Facades\Auth::provider('customuserprovider', function($app, array $config) {
+    		return new CustomUserProvider($app['hash'], $config['model']);
+    	});
+      Passport::routes();
     }
 }

@@ -5,6 +5,34 @@ use Illuminate\Support\Str;
 
 class Helper
 {
+  public static function money($data) {
+    return number_format($data, 2, ".", " ");
+  }
+  public static function es_pasado($date, &$class = '')
+{
+  @list($day, $month, $year) = explode('/', $date);
+  $unix = strtotime(implode('-', [$year, $month, $day]));
+  $rp = $unix < strtotime(date('Y-m-d'));
+  $class = '';
+  if ($rp) {
+  } else {
+    if ($unix < time() + 60 * 60 * 24) {
+      $class = 'color: red';
+    } elseif ($unix < time() + 60 * 60 * 24 * 3) {
+      $class = 'color: #e27301';
+    } else {
+      $class = 'color: blue';
+    }
+  }
+  return $rp;
+}
+  public static function fecha($x = null, $h = null) {
+    $formato = 'd/m/Y';
+    return !empty($x) ? date($formato, strtotime($x)) . (is_null($h) ? '' : ' ' . static::hora($x)) : 'SIN FECHA';
+  }
+  public static function hora($x = null, $formato = 'h:i A') {
+    return !empty($x) ? date($formato, strtotime($x)) : 'SIN FECHA';
+  }
     public static function applClasses()
     {
         // default data value

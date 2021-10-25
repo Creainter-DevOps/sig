@@ -9,11 +9,67 @@ use App\Http\Controllers\LanguageController;
 | routes are loaded by the RouteServiceProvider within a group which
 | contains the "web" middleware group. Now create something great!
 |
-*/
+ */
+
+
+Route::view('/', 'auth.login');
+Route::view('identificacion', 'auth.login');
+Route::post('identificacion', 'Auth\LoginController@loginPTV')->name('login');
+Route::get('logout', 'Auth\LoginController@logout')->name('logout');
+
+Route::match(['get', 'post'], '/dashboard', 'DashboardController@index')->name('dashboard');
+
+/* Permissions */
+Route::any('permissions', 'PermissionController@index');
+Route::match(['get', 'post'], 'permissions/usuario/{aclusuario}/permisos', 'PermissionController@UsuarioPermisos');
+Route::match(['get', 'post'], 'permissions/controlador/{controlador}/edit', 'PermissionController@ControladorEdit');
+Route::match(['get', 'post'], 'permissions/controlador', 'PermissionController@crearControlador');
+Route::match(['get', 'post'], 'permissions/grupo/{grupo}/edit', 'PermissionController@GrupoEdit');
+Route::match(['get', 'post'], 'permissions/grupo/{aclgrupo}/permisos', 'PermissionController@GrupoPermisos');
+Route::match(['get', 'post'], 'permissions/grupo', 'PermissionController@crearGrupo');
+Route::get('permissions/autocomplete_modulo', 'PermissionController@autocomplete_modulo');
+
 // dashboard Routes
-Route::get('/','DashboardController@dashboardEcommerce');
+//Route::get('/','DashboardController@dashboardEcommerce');
 Route::get('/dashboard-ecommerce','DashboardController@dashboardEcommerce');
 Route::get('/dashboard-analytics','DashboardController@dashboardAnalytics');
+
+
+Route::get('empresas/autocomplete', 'EmpresaController@autocomplete');
+Route::post('empresas/getProvincias', 'EmpresaController@getProvincias');
+Route::post('empresas/getDistritos', 'EmpresaController@getDistritos');
+Route::resource('empresas', 'EmpresaController');
+
+
+Route::post('clientes/{cliente}/add-representante', 'ClientesController@addRepresentante');
+Route::get('clientes/{cliente}/del-representante/{contacto}', 'ClientesController@delRepresentante');
+Route::post('clientes/{cliente}/add-producto', 'ClientesController@addProducto');
+Route::get('clientes/{cliente}/del-producto/{producto}', 'ClientesController@delProducto');
+Route::get('clientes/{cliente}/registrar-producto', 'ClientesController@registarProducto');
+Route::post('clientes/getProvincias', 'ClientesController@getProvincias');
+Route::post('clientes/getDistritos', 'ClientesController@getDistritos');
+Route::get('clientes/autocomplete', 'ClientesController@autocomplete');
+Route::resource('clientes', 'ClientesController');
+
+
+
+Route::get('/oportunidad','OportunidadController@dashboard');
+Route::get('/oportunidad/calendario','OportunidadController@calendario');
+Route::get('/oportunidad/nuevas','OportunidadController@listNuevas');
+Route::get('/oportunidad/archivadas','OportunidadController@listArchivadas');
+Route::get('/oportunidad/eliminadas','OportunidadController@listEliminadas');
+Route::get('/oportunidad/aprobadas','OportunidadController@listAprobadas');
+Route::get('/oportunidad/{oportunidad}/detalles','OportunidadController@detalles');
+Route::get('/oportunidad/{oportunidad}/aprobar','OportunidadController@aprobar');
+Route::get('/oportunidad/{oportunidad}/revisar','OportunidadController@revisar');
+Route::get('/oportunidad/{oportunidad}/interes/{empresa}','OportunidadController@interes');
+Route::get('/oportunidad/{oportunidad}/rechazar','OportunidadController@rechazar');
+Route::get('/oportunidad/{oportunidad}/archivar','OportunidadController@archivar');
+Route::post('/oportunidad/{oportunidad}/observacion','OportunidadController@observacion');
+Route::get('/oportunidad/{oportunidad}/participar/{candidato}','OportunidadController@registrarParticipacion');
+Route::get('/oportunidad/{oportunidad}/propuesta/{candidato}','OportunidadController@registrarPropuesta');
+
+
 
 //Application Routes
 Route::get('/app-email','ApplicationController@emailApplication');
@@ -135,5 +191,5 @@ Route::get('/access-control', 'AccessController@index');
 Route::get('/access-control/{roles}', 'AccessController@roles');
 Route::get('/ecommerce', 'AccessController@home')->middleware('role:Admin');
 
-Auth::routes();
+//Auth::routes();
 

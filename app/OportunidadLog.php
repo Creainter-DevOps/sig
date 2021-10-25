@@ -7,19 +7,25 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use App\Oportunidad;
+use Auth;
 
-class User extends Authenticatable
+class OportunidadLog extends Model
 {
-    use Notifiable,HasApiTokens,HasRoles;
 
-    protected $table = 'public.usuario';
+    protected $connection = 'interno';
+  protected $table = 'osce.oportunidad_log';
+    const UPDATED_AT = null;
+    const CREATED_AT = null;
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'usuario', 'clave','tenant_id',
+        'usuario_id','oportunidad_id','evento','texto',
     ];
 
     /**
@@ -39,17 +45,19 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
       ];
-
-//    public function getAuthIdentifier() {
-//        return $this->getKey();
-//    }
-    public function getAuthPassword() {
-      return $this->clave;
+    public static function boot()
+     {
+        parent::boot();
+        static::creating(function($model)
+        {
+            $model->created_by = Auth::user()->id;
+        });
     }
-    public function username() {
-      return 'usuario';
-    }
-    public function tenants() {
-      return $this->hasMany('App\Empresa', 'tenant_id', 'tenant_id')->get();
+    public function creado() {
+      $rp = $this->belongsTo('App\User', 'created_by')->first();
+      if(!empty($rp)) {
+        return strtoupper($rp->usuario);
+      }
+      return 'No Identificado';
     }
 }

@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', 'mysql'),
+    'default' => 'interno',#env('DB_CONNECTION', 'mysql'),
 
     /*
     |--------------------------------------------------------------------------
@@ -35,6 +35,18 @@ return [
 
     'connections' => [
 
+      'interno' => [
+            'driver' => 'pgsql',
+            'host' => '127.0.0.1',
+            'port' => '4040',
+            'database' => 'postgres',
+            'username' => 'postgres',
+            'password' => '123456',
+            'charset' => 'utf8',
+            'prefix' => '',
+            'schema' => 'public',
+            'sslmode' => 'prefer',
+        ],
         'sqlite' => [
             'driver' => 'sqlite',
             'url' => env('DATABASE_URL'),
