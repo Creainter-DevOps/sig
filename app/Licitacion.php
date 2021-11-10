@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use App\Empresa;
 use App\Oportunidad;
 use App\CandidatoOportunidad;
+use Auth;
 
 class Licitacion extends Model
 {
@@ -48,6 +49,9 @@ class Licitacion extends Model
     protected $casts = [
         'email_verified_at' => 'datetime',
       ];
+    public function oportunidad() {
+      return Oportunidad::where('licitacion_id',$this->id)->where('tenant_id', Auth::user()->tenant_id)->first();
+    }
     public function participacion() {
       return Helper::fecha($this->fecha_participacion_desde, true) . ' al ' . Helper::fecha($this->fecha_participacion_hasta, true);
     }
@@ -67,5 +71,29 @@ class Licitacion extends Model
         return $datos->listaCronograma;
       }
       return [];
+    }
+    public function estado() {
+      $oportunidad = $this->oportunidad();
+      if(!empty($oportunidad)) {
+        return $oportunidad->estado();
+      }
+      $ahora = time();
+      $participacion_hasta = strtotime($this->fecha_participacion_hasta);
+
+      if($ahora >= $participacion_hasta) {
+          return [
+            'timeout' => true,
+            'status' => false,
+            'class' => 'badge badge-light-danger',
+            'message' => 'TIMEOUT3',
+          ];
+      } else {
+          return [
+            'timeout' => false,
+            'status' => false,
+            'class' => 'badge badge-light-warning',
+            'message' => 'PARTICIPACIÓN',
+          ];
+      }
     }
 }

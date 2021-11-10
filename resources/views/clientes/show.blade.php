@@ -17,9 +17,9 @@
             class="users-avatar-shadow rounded-circle" height="64" width="64">
         </a>
         <div class="media-body pt-25">
-          <h4 class="media-heading">{{ $cliente->nombre }}</h4>
-          <span>ID:</span>
-          <span>{{ $cliente->id }}</span>
+          <h4 class="media-heading">{{ $empresa->razon_social }}</h4>
+          <span>RUC:</span>
+          <span>{{ $empresa->ruc }}</span>
         </div>
       </div>
     </div>
@@ -42,23 +42,27 @@
                 </tr>
                 <tr>
                   <td>Ultima Comunicación:</td>
-                  <td class="users-view-latest-activity">{{ Helper::fecha($cliente->ultima_comunicacion()) }}</td>
+                  <td>{{ Helper::fecha($cliente->ultima_comunicacion()) }}</td>
                 </tr>
                 <tr>
-                  <td>RUC:</td>
-                  <td class="users-view-role">Staff</td>
+                  <td>Seudonimo:</td>
+                  <td>{{ $empresa->seudonimo }}</td>
                 </tr>
                 <tr>
                   <td>Dirección:</td>
-                  <td class="users-view-role">Staff</td>
+                  <td>{{ $empresa->direccion }}</td>
                 </tr>
                 <tr>
-                  <td>Correo:</td>
-                  <td class="users-view-verified">Yes</td>
+                  <td>Referencia:</td>
+                  <td>{{ $empresa->referencia }}</td>
                 </tr>
                 <tr>
                   <td>Telefono:</td>
-                  <td class="users-view-role">Staff</td>
+                  <td>{{ $empresa->telefono }}</td>
+                </tr>
+                <tr>
+                  <td>Correo:</td>
+                  <td>{{ $empresa->correo_electronico }}</td>
                 </tr>
                 <tr>
                   <td>Vinculación Actual:</td>
@@ -213,14 +217,14 @@
 @foreach($cliente->oportunidades() as $v)
                 <tr>
                   <td class="py-1">
-                    {{ $v->oportunidad()->rotulo }}
+                    {!! $v->rotulo() !!}
                   </td>
                   <td class="py-1" style="width: 150px;">
                     <i class="bx bx-trending-up text-success align-middle mr-50"></i><span>{{ $v->margen() }}</span>
                   </td>
                   <td class="py-1 text-center">
                     <span class="{{ $v->estado()['class'] }}">{{ $v->estado()['message'] }}</span>
-                    <div style="font-size:11px;">{{ Helper::fecha($v->oportunidad()->fecha_participacion_hasta, true) }}</div>
+                    <div style="font-size:11px;">{{ Helper::fecha($v->licitacion()->fecha_participacion_hasta, true) }}</div>
                   </td>
                   <td class="text-center py-1">
                     <a href="/oportunidad/{{ $v->id }}/detalles" class="invoice-action-view mr-1">

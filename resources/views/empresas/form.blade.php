@@ -32,35 +32,6 @@
 
     <div class="col-12">
         <div class="form-group">
-            <label>Ciudad </label>
-            <div class="row">
-                <div class="col-md-4">
-                    <select class="form-control form-ajax" name="departamento" @if(@$distrito) data-value="{{ @$distrito->coddepa }}" @endif data-ajax="/empresas/getProvincias" required>
-                        @foreach ($departamentos as $departamento)
-                        <option value="{{ $departamento->id }}">{{ $departamento->value }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <select class="form-control form-ajax" name="provincia" @if(@$distrito) data-value="{{ substr(@$distrito->ubigeo, 0, 4) }}" @endif data-ajax="/empresas/getDistritos" required>
-                        @foreach ($provincias as $provincia)
-                        <option value="{{ $provincia->id }}">{{ $provincia->value }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <select class="form-control" @if(@$distrito) data-value="{{ @$distrito->ubigeo }}" @endif name="ubigeo_id" required>
-                        @foreach ($distritos as $distrito)
-                        <option value="{{ $distrito->id }}">{{ $distrito->value }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-12">
-        <div class="form-group">
             <label>Dirección </label>
             <input type="text" name="direccion" id="direccion" value="{{ old('direccion', @$empresa->direccion) }}" placeholder="Dirección" required class="form-control">
             @if ($errors->has('direccion'))

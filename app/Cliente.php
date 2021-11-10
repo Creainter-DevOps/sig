@@ -10,7 +10,8 @@ use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use App\Helpers\Helper;
-use App\CandidatoOportunidad;
+use App\Oportunidad;
+use Auth;
 
 class Cliente extends Model {
   use Notifiable,HasApiTokens,HasRoles;
@@ -25,7 +26,7 @@ class Cliente extends Model {
      * @var array
      */
     protected $fillable = [
-      'nombre','slug','empresa_id',
+      'empresa_id','descripcion',
     ];
 
     /**
@@ -60,21 +61,23 @@ class Cliente extends Model {
     }
   public function oportunidades() {
     $rp = DB::select("
-      SELECT C.*
-      FROM osce.candidato C
-      WHERE C.cliente_id = " . $this->id);
-    return CandidatoOportunidad::hydrate($rp);
+      SELECT O.*
+      FROM osce.licitacion L
+      JOIN osce.oportunidad O ON O.licitacion_id = L.id AND O.tenant_id = " . Auth::user()->tenant_id . " AND O.aprobado_el IS NOT NULL
+      WHERE L.empresa_id = " . $this->empresa_id . " AND L.eliminado IS NULL
+      ORDER BY L.id DESC");
+    return Oportunidad::hydrate($rp);
   }
     public function ultima_comunicacion() {
       return '';
     }
     public static function search($term) {
         $term = strtolower(trim($term));
-        return static::join('comercial.empresa', 'comercial.empresa.id', '=', 'comercial.cliente.empresa_id')
-        ->select('comercial.cliente.*')
+        return static::join('osce.empresa', 'osce.empresa.id', '=', 'osce.cliente.empresa_id')
+        ->select('osce.cliente.*')
         ->where(function($query) use($term) {
-            $query->WhereRaw("LOWER(comercial.empresa.razon_social) LIKE ?",["%{$term}%"])
-            ->orWhereRaw("LOWER(comercial.empresa.ruc) LIKE ?",["%{$term}%"])
+            $query->WhereRaw("LOWER(osce.empresa.razon_social) LIKE ?",["%{$term}%"])
+            ->orWhereRaw("LOWER(osce.empresa.ruc) LIKE ?",["%{$term}%"])
             ;
         });
     }

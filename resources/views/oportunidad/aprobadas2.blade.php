@@ -40,78 +40,35 @@ tr.block_details>td>div {
   <!-- create invoice button-->
   <!-- Options and filter dropdown button-->
   <div class="table-responsive">
-    <table class="table table-dark mb-0" style="width:100%">
+    <table class="table table-sm mb-0" style="width:100%">
       <thead>
         <tr>
+          <th>Nomenclatura</th>
           <th>Institución</th>
           <th>Proceso</th>
           <th>Objeto</th>
           <th>Rótulo</th>
           <th>Participación</th>
-          <th>Acciones</th>
+          <th>Estado</th>
         </tr>
       </thead>
+      <tbody>
       @foreach ($list as $oportunidad)
-      <tbody class="block" data-licitacion-id="{{ $oportunidad->licitacion()->id }}" data-oportunidad-id="{{ $oportunidad->id }}">
-        <tr class="block_header">
+        <tr>
+          <td><a href="/oportunidad/{{ $oportunidad->licitacion_id }}/detalles">{{ $oportunidad->licitacion()->nomenclatura }}</a></td>
           <td>{{ $oportunidad->licitacion()->entidad }}</td>
           <td>{{ $oportunidad->licitacion()->tipo_proceso }}</td>
           <td>{{ $oportunidad->licitacion()->tipo_objeto }}</td>
           <td>{{ $oportunidad->licitacion()->rotulo }}</td>
-          <td>{{ Helper::fecha($oportunidad->licitacion()->fecha_participacion_hasta) }}<br /><span class="{{ $oportunidad->estado()['class'] }}">{{ $oportunidad->estado()['message'] }}</span></td>
-          <td style="vertical-align: top;">
-<!--             <a href="javascript:void(0);" class="btn btn-sm btn-success shadow mr-1 mb-1">Aprobar</a>
-            <a href="javascript:void(0);" class="btn btn-sm btn-danger glow mr-1 mb-1">Rechazar</a>  -->
-          </td>
+          <td>{{ Helper::fecha($oportunidad->licitacion()->fecha_participacion_hasta) }}</td>
+@if(!$oportunidad->estado()['timeout'])
+          <td><span class="{{ $oportunidad->estado()['class'] }}">{{ $oportunidad->estado()['message'] }}</span></td>
+          @else
+            <td><a href="/oportunidad/{{ $oportunidad->id }}/archivar" class="{{ $oportunidad->estado()['class'] }}">{{ $oportunidad->estado()['message'] }}</a></td>
+            @endif
         </tr>
-        <tr class="block_details">
-          <td colspan="7"><div>
-            <table class="table table-borderless">
-              <tbody>
-                <tr>
-                  <td>Nomenclatura:</td>
-                  <td><a href="/oportunidad/{{ $oportunidad->licitacion_id }}/detalles">{{ $oportunidad->licitacion()->nomenclatura }}</a></td>
-                </tr>
-                <tr>
-                  <td>Registrado:</td>
-                  <td>{{ Helper::fecha($oportunidad->licitacion()->created_on) }}</td>
-                </tr>
-                <tr>
-                  <td>Descripción:</td>
-                  <td>{{ $oportunidad->licitacion()->descripcion }}</td>
-                </tr>
-                <tr>
-                  <td>Participación:</td>
-                  <td>{{ $oportunidad->licitacion()->participacion() }}</td>
-                </tr>
-                <tr>
-                  <td>Propuesta:</td>
-                  <td>{{ $oportunidad->licitacion()->propuesta() }}</td>
-                </tr>
-                <tr>
-                  <td>Adjuntos:</td>
-                  <td>
-<ul>
-            @foreach($oportunidad->licitacion()->adjuntos() as $a)
-              <li><a target="_blank" href="http://prodapp.seace.gob.pe/SeaceWeb-PRO/SdescargarArchivoAlfresco?fileCode={{ $a->codigoAlfresco }}">{{ $a->tipoDocumento }}</a></li>
-            @endforeach
-          </ul>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Estado:</td>
-                  <td><span class="{{ $oportunidad->estado()['class'] }}">{{ $oportunidad->estado()['message'] }}</span></td>
-                </tr>
-              </tbody>
-            </table>
-            <div class="btns_actions">
-<!--              <a href="javascript:void(0);" class="btn btn-success shadow mr-1 mb-1">Aprobar</a>
-              <a href="javascript:void(0);" class="btn btn-danger glow mr-1 mb-1">Rechazar</a> -->
-            </div>
-          </div></td>
-        </tr>
-        </tbody>
         @endforeach
+        </tbody>
     </table>
   </div>
 </section>
@@ -131,14 +88,14 @@ tr.block_details>td>div {
 <script>
 $(document).on('click', '.block .btn-success', function(e) {
   e.stopPropagation();
-  var id = $(this).closest('tbody').attr('data-licitacion-id');
+  var id = $(this).closest('tbody').attr('data-oportunidad-id');
   $(this).closest('tbody').remove();
   $.ajax({ url: '/oportunidad/' + id + '/aprobar'});
   console.log('Aprobar', id);
 });
 $(document).on('click', '.block .btn-danger', function(e) {
   e.stopPropagation();
-  var id = $(this).closest('tbody').attr('data-licitacion-id');
+  var id = $(this).closest('tbody').attr('data-oportunidad-id');
   $(this).closest('tbody').remove();
   $.ajax({ url: '/oportunidad/' + id + '/rechazar'});
   console.log('Eliminar', id);

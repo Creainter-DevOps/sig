@@ -29,16 +29,22 @@ Route::match(['get', 'post'], 'permissions/grupo/{aclgrupo}/permisos', 'Permissi
 Route::match(['get', 'post'], 'permissions/grupo', 'PermissionController@crearGrupo');
 Route::get('permissions/autocomplete_modulo', 'PermissionController@autocomplete_modulo');
 
+
+
 // dashboard Routes
 //Route::get('/','DashboardController@dashboardEcommerce');
 Route::get('/dashboard-ecommerce','DashboardController@dashboardEcommerce');
 Route::get('/dashboard-analytics','DashboardController@dashboardAnalytics');
 
+//Route::resource('proyectos', 'ProyectoController');
+Route::resource('proyectos', 'ProyectoController')->parameters([
+    'proyectos' => 'proyecto'
+]);
 
-Route::get('empresas/autocomplete', 'EmpresaController@autocomplete');
-Route::post('empresas/getProvincias', 'EmpresaController@getProvincias');
-Route::post('empresas/getDistritos', 'EmpresaController@getDistritos');
-Route::resource('empresas', 'EmpresaController');
+#Route::get('empresas/autocomplete', 'EmpresaController@autocomplete');
+#Route::post('empresas/getProvincias', 'EmpresaController@getProvincias');
+#Route::post('empresas/getDistritos', 'EmpresaController@getDistritos');
+#Route::resource('empresas', 'EmpresaController');
 
 
 Route::post('clientes/{cliente}/add-representante', 'ClientesController@addRepresentante');
@@ -49,6 +55,7 @@ Route::get('clientes/{cliente}/registrar-producto', 'ClientesController@registar
 Route::post('clientes/getProvincias', 'ClientesController@getProvincias');
 Route::post('clientes/getDistritos', 'ClientesController@getDistritos');
 Route::get('clientes/autocomplete', 'ClientesController@autocomplete');
+Route::get('clientes/{empresa}', 'ClientesController@show');
 Route::resource('clientes', 'ClientesController');
 
 
@@ -59,15 +66,15 @@ Route::get('/oportunidad/nuevas','OportunidadController@listNuevas');
 Route::get('/oportunidad/archivadas','OportunidadController@listArchivadas');
 Route::get('/oportunidad/eliminadas','OportunidadController@listEliminadas');
 Route::get('/oportunidad/aprobadas','OportunidadController@listAprobadas');
-Route::get('/oportunidad/{oportunidad}/detalles','OportunidadController@detalles');
-Route::get('/oportunidad/{oportunidad}/aprobar','OportunidadController@aprobar');
-Route::get('/oportunidad/{oportunidad}/revisar','OportunidadController@revisar');
-Route::get('/oportunidad/{oportunidad}/interes/{empresa}','OportunidadController@interes');
-Route::get('/oportunidad/{oportunidad}/rechazar','OportunidadController@rechazar');
-Route::get('/oportunidad/{oportunidad}/archivar','OportunidadController@archivar');
-Route::post('/oportunidad/{oportunidad}/observacion','OportunidadController@observacion');
-Route::get('/oportunidad/{oportunidad}/participar/{candidato}','OportunidadController@registrarParticipacion');
-Route::get('/oportunidad/{oportunidad}/propuesta/{candidato}','OportunidadController@registrarPropuesta');
+Route::get('/oportunidad/{licitacion}/detalles','OportunidadController@detalles');
+Route::get('/oportunidad/{licitacion}/aprobar','OportunidadController@aprobar');
+Route::get('/oportunidad/{licitacion}/revisar','OportunidadController@revisar');
+Route::get('/oportunidad/{licitacion}/interes/{empresa}','OportunidadController@interes');
+Route::get('/oportunidad/{licitacion}/rechazar','OportunidadController@rechazar');
+Route::get('/oportunidad/{licitacion}/archivar','OportunidadController@archivar');
+Route::post('/oportunidad/{licitacion}/observacion','OportunidadController@observacion');
+Route::get('/oportunidad/{licitacion}/participar/{candidato}','OportunidadController@registrarParticipacion');
+Route::get('/oportunidad/{licitacion}/propuesta/{candidato}','OportunidadController@registrarPropuesta');
 
 
 

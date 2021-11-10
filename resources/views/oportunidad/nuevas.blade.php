@@ -59,7 +59,7 @@ tr.block_details>td>div {
           <td>{{ $oportunidad->licitacion()->tipo_objeto }}</td>
           <td>{{ $oportunidad->licitacion()->rotulo }}</td>
           <td>{{ Helper::fecha($oportunidad->licitacion()->fecha_participacion_hasta) }}<br /><span class="{{ $oportunidad->estado()['class'] }}">{{ $oportunidad->estado()['message'] }}</span></td>
-          <td>
+          <td style="vertical-align: top;">
             <a href="javascript:void(0);" class="btn btn-sm btn-success shadow mr-1 mb-1">Aprobar</a>
             <a href="javascript:void(0);" class="btn btn-sm btn-danger glow mr-1 mb-1">Rechazar</a>
           </td>
@@ -131,14 +131,14 @@ tr.block_details>td>div {
 <script>
 $(document).on('click', '.block .btn-success', function(e) {
   e.stopPropagation();
-  var id = $(this).closest('tbody').attr('data-oportunidad-id');
+  var id = $(this).closest('tbody').attr('data-licitacion-id');
   $(this).closest('tbody').remove();
   $.ajax({ url: '/oportunidad/' + id + '/aprobar'});
   console.log('Aprobar', id);
 });
 $(document).on('click', '.block .btn-danger', function(e) {
   e.stopPropagation();
-  var id = $(this).closest('tbody').attr('data-oportunidad-id');
+  var id = $(this).closest('tbody').attr('data-licitacion-id');
   $(this).closest('tbody').remove();
   $.ajax({ url: '/oportunidad/' + id + '/rechazar'});
   console.log('Eliminar', id);

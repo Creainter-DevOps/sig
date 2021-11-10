@@ -8,10 +8,11 @@ use App\OportunidadLog;
 use Illuminate\Support\Facades\Auth;
 use App\Empresa;
 use App\CandidatoOportunidad;
-
+use App\Licitacion;
 
 class OportunidadController extends Controller {
   public $fieldsPublic = [
+    'que_es'     => '¿Qué solicita?',
     'monto_base' => 'Monto Base',
     'instalacion_dias' => 'Instalación (días)',
     'duracion_dias' => 'Servicio (días)',
@@ -47,10 +48,12 @@ class OportunidadController extends Controller {
     public function calendario(){
       return view('oportunidad.calendar');
     }
-    public function detalles(Request $request, Oportunidad $oportunidad){
-      return view('oportunidad.detalle', compact('oportunidad'));
+    public function detalles(Request $request, Licitacion $licitacion) {
+      $oportunidad = $licitacion->oportunidad();
+      return view('oportunidad.detalle', compact('licitacion','oportunidad'));
     }
-    public function observacion(Request $request, Oportunidad $oportunidad) {
+    public function observacion(Request $request, Licitacion $licitacion) {
+      $oportunidad = $licitacion->oportunidad();
       foreach($this->fieldsPublic as $k => $v) {
         $texto = $request->input($k);
         if(!empty($texto)) {
@@ -60,8 +63,9 @@ class OportunidadController extends Controller {
       }
       return back();
     }
-public function aprobar(Request $request, Oportunidad $oportunidad)
+public function aprobar(Request $request, Licitacion $licitacion)
 {
+  $oportunidad = $licitacion->oportunidad();
   $oportunidad->aprobar();
       return response()->json([
         'status'  => 'success',
@@ -69,21 +73,24 @@ public function aprobar(Request $request, Oportunidad $oportunidad)
         'data' => $oportunidad
       ]);
 }
-public function revisar(Request $request, Oportunidad $oportunidad)
+public function revisar(Request $request, Licitacion $licitacion)
 {
+  $oportunidad = $licitacion->oportunidad();
   if(empty($oportunidad->revisado_el)) {
     $oportunidad->revisar();
-    return redirect('/oportunidad/' . $oportunidad->id . '/detalles');
+    return redirect('/oportunidad/' . $licitacion->id . '/detalles');
   } else {
-    return redirect('/oportunidad/aprobadas');
+    return redirect('/oportunidad/');
   }
 }
-public function interes(Request $request, Oportunidad $oportunidad, Empresa $empresa) {
+public function interes(Request $request, Licitacion $licitacion, Empresa $empresa) {
+  $oportunidad = $licitacion->oportunidad();
   $oportunidad->registrar_interes($empresa);
-  return redirect('/oportunidad/' . $oportunidad->id . '/detalles');
+  return redirect('/oportunidad/' . $licitacion->id . '/detalles');
 }
-public function rechazar(Request $request, Oportunidad $oportunidad)
+public function rechazar(Request $request, Licitacion $licitacion)
 {
+  $oportunidad = $licitacion->oportunidad();
   $oportunidad->rechazar();
   if($request->ajax()) {
       return response()->json([
@@ -95,16 +102,19 @@ public function rechazar(Request $request, Oportunidad $oportunidad)
     return redirect('/oportunidad');
   }
 }
-  public function archivar(Request $request, Oportunidad $oportunidad) {
+public function archivar(Request $request, Licitacion $licitacion) {
+  $oportunidad = $licitacion->oportunidad();
     $oportunidad->archivar();
-    return redirect('/oportunidad/aprobadas');
+    return redirect('/oportunidad');
   }
-  public function registrarParticipacion(Request $request, Oportunidad $oportunidad, CandidatoOportunidad $candidato) {
+public function registrarParticipacion(Request $request, Licitacion $licitacion, CandidatoOportunidad $candidato) {
+  $oportunidad = $licitacion->oportunidad();
     $candidato->registrar_participacion();
-    return redirect('/oportunidad/' . $oportunidad->id . '/detalles');
+    return redirect('/oportunidad/' . $licitacion->id . '/detalles');
   }
-  public function registrarPropuesta(Request $request, Oportunidad $oportunidad, CandidatoOportunidad $candidato) {
+public function registrarPropuesta(Request $request, Licitacion $licitacion, CandidatoOportunidad $candidato) {
+  $oportunidad = $licitacion->oportunidad();
     $candidato->registrar_propuesta();
-    return redirect('/oportunidad/' . $oportunidad->id . '/detalles');
+    return redirect('/oportunidad/' . $licitacion->id . '/detalles');
   }
 }

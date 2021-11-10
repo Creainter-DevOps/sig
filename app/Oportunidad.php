@@ -29,7 +29,7 @@ class Oportunidad extends Model
      * @var array
      */
     protected $fillable = [
-        'licitacion_id','tenant_id','aprobado_por','aprobado_el','rechazado_por','rechazado_el','motivo','monto_base','duracion_dias','instalacion_dias','garantia_dias','estado','fecha_participacion','fecha_propuesta',
+        'licitacion_id','tenant_id','aprobado_por','aprobado_el','rechazado_por','rechazado_el','motivo','monto_base','duracion_dias','instalacion_dias','garantia_dias','estado','fecha_participacion','fecha_propuesta','que_es',
     ];
 
     /**
@@ -60,9 +60,17 @@ class Oportunidad extends Model
     public function licitacion() {
       return $this->belongsTo('App\Licitacion', 'licitacion_id')->first();
     }
+    public function comentarios() {
+      return 0;
+    }
     public function rotulo() {
-        $rp = $this->licitacion()->descripcion;
-      return substr($rp, 0, 100);
+      if(empty($this->que_es)) {
+        $lista = strtoupper($this->licitacion()->rotulo);
+        $rp = strtoupper($this->licitacion()->rotulo . ' ' . $this->licitacion()->descripcion);
+      } else {
+        $rp = '-- ' . strtoupper($this->que_es) . ' --';
+      }
+      return (!empty($this->importancia) ? '<span class="favorite warning"><i class="bx bxs-star"></i></span>' : '') . substr($rp, 0, 100) . (!empty($this->revisado_el) ? ' <b>[R]</b>' : '');
     }
     public function participacion() {
       return Helper::fecha($this->fecha_participacion_desde, true) . ' al ' . Helper::fecha($this->fecha_participacion_hasta, true);
@@ -71,11 +79,7 @@ class Oportunidad extends Model
       return Helper::fecha($this->fecha_propuesta_desde, true) . ' al ' . Helper::fecha($this->fecha_propuesta_hasta, true);
     }
     public function adjuntos() {
-      $datos = json_decode($this->licitacion()->datos);
-      if(!empty($datos->listaDocumentos)) {
-        return $datos->listaDocumentos;
-      }
-      return [];
+      return $this->licitacion->adjuntos();
     }
     public function cronograma() {
       $datos = json_decode($this->licitacion()->datos);
@@ -90,7 +94,7 @@ class Oportunidad extends Model
         FROM osce.empresa E
         LEFT JOIN osce.candidato C ON C.oportunidad_id = " . $this->id . " AND C.empresa_id = E.id
         WHERE E.tenant_id = " . $this->tenant_id . "
-        ORDER BY E.razon_social ASC
+        ORDER BY E.id ASC
         LIMIT 10");
       return array_map(function($n) {
         return new Empresa((array) $n);
@@ -126,25 +130,59 @@ LIMIT 50");
       return static::hydrate($rp);
     }
    static function listado_participanes_por_vencer() {
-      $rp = DB::select("
-    SELECT O.*
+/*      $rp = DB::select("
+SELECT x.*
+FROM(
+SELECT O.*, L.fecha_participacion_hasta,
+  (SELECT COUNT(*) FROM osce.candidato WHERE oportunidad_id = O.id AND interes_el IS NOT NULL) cantidad_interes,
+  (SELECT COUNT(*) FROM osce.candidato WHERE oportunidad_id = O.id AND participacion_el IS NOT NULL) cantidad_participadas
 FROM osce.oportunidad O
-JOIN osce.licitacion L ON L.id = O.licitacion_id AND L.eliminado IS NULL
-WHERE O.aprobado_el IS NOT NULL AND O.rechazado_el IS NULL AND O.archivado_el IS NULL
-AND ((L.fecha_participacion_desde >= NOW() AND L.fecha_participacion_hasta <= NOW()) OR (L.fecha_participacion_hasta >= NOW() - INTERVAL '1' DAY AND L.fecha_participacion_hasta <= NOW() + INTERVAL '1' DAY))
-AND O.fecha_participacion IS NULL
-ORDER BY L.fecha_participacion_hasta ASC, O.id ASC");
+JOIN osce.licitacion L ON L.id = O.licitacion_id AND L.eliminado IS NULL AND L.fecha_participacion_desde - INTERVAL '1' DAY <= NOW() AND L.fecha_participacion_hasta + INTERVAL '1' DAY >= NOW()
+WHERE O.aprobado_el IS NOT NULL AND O.rechazado_el IS NULL AND O.archivado_el IS NULL) x
+WHERE x.cantidad_interes = 0 OR x.cantidad_interes <> x.cantidad_participadas
+ORDER BY x.fecha_participacion_hasta ASC, x.id ASC"); */
+     $rp = DB::select("
+SELECT x.*
+FROM (
+SELECT O.*,
+  (SELECT COUNT(*) FROM osce.candidato WHERE oportunidad_id = O.id AND interes_el IS NOT NULL) cantidad_interes,
+  (SELECT COUNT(*) FROM osce.candidato WHERE oportunidad_id = O.id AND participacion_el IS NOT NULL) cantidad_participadas
+FROM osce.oportunidad O
+WHERE O.aprobado_el >= NOW() - INTERVAL '40' DAY AND O.rechazado_el IS NULL AND O.archivado_el IS NULL)x
+JOIN osce.licitacion L ON L.id = x.licitacion_id AND L.eliminado IS NULL 
+AND 
+  ((L.fecha_participacion_desde - INTERVAL '1' DAY <= NOW() AND L.fecha_participacion_hasta + INTERVAL '1' DAY >= NOW())
+  OR (L.fecha_participacion_hasta - INTERVAL '4' DAY <= NOW() AND L.fecha_participacion_hasta + INTERVAL '2' DAY >= NOW()))
+-- WHERE x.cantidad_interes = 0 OR x.cantidad_interes <> x.cantidad_participadas
+ORDER BY L.fecha_participacion_hasta ASC, id DESC");
       return static::hydrate($rp);
    }
     static function listado_propuestas_por_vencer() {
-      $rp = DB::select("
-    SELECT O.*
+/*      $rp = DB::select("
+    SELECT O.*,
+    (SELECT COUNT(*) FROM osce.candidato WHERE oportunidad_id = O.id AND participacion_el IS NOT NULL) cantidad_participadas,
+    (SELECT COUNT(*) FROM osce.candidato WHERE oportunidad_id = O.id AND propuesta_el IS NOT NULL) cantidad_propuestas
 FROM osce.oportunidad O
 JOIN osce.licitacion L ON L.id = O.licitacion_id AND L.eliminado IS NULL
 WHERE O.aprobado_el IS NOT NULL AND O.rechazado_el IS NULL AND O.archivado_el IS NULL
 AND ((L.fecha_propuesta_desde >= NOW() AND L.fecha_propuesta_hasta <= NOW()) OR (L.fecha_propuesta_hasta >= NOW() - INTERVAL '1' DAY AND L.fecha_propuesta_hasta <= NOW() + INTERVAL '1' DAY))
-AND O.fecha_participacion IS NOT NULL AND O.fecha_propuesta IS NULL
-ORDER BY L.fecha_propuesta_hasta ASC, O.id ASC");
+AND O.fecha_participacion IS NOT NULL
+AND ((SELECT COUNT(*) FROM osce.candidato WHERE oportunidad_id = O.id AND participacion_el IS NOT NULL) <> (SELECT COUNT(*) FROM osce.candidato WHERE oportunidad_id = O.id AND propuesta_el IS NOT NULL))
+ORDER BY L.fecha_propuesta_hasta ASC, O.id ASC");*/
+      $rp = DB::select("
+SELECT x.*
+FROM (
+SELECT O.*,
+  (SELECT COUNT(*) FROM osce.candidato WHERE oportunidad_id = O.id AND participacion_el IS NOT NULL) cantidad_participadas,
+  (SELECT COUNT(*) FROM osce.candidato WHERE oportunidad_id = O.id AND propuesta_el IS NOT NULL) cantidad_propuestas
+FROM osce.oportunidad O
+WHERE O.aprobado_el >= NOW() - INTERVAL '40' DAY AND O.rechazado_el IS NULL AND O.archivado_el IS NULL AND O.fecha_participacion IS NOT NULL)x
+JOIN osce.licitacion L ON L.id = x.licitacion_id AND L.eliminado IS NULL
+AND
+  ((L.fecha_propuesta_desde - INTERVAL '1' DAY <= NOW() AND L.fecha_propuesta_hasta + INTERVAL '1' DAY >= NOW())
+  OR (L.fecha_propuesta_hasta - INTERVAL '4' DAY <= NOW() AND L.fecha_propuesta_hasta + INTERVAL '2' DAY >= NOW()))
+-- WHERE x.cantidad_propuestas = 0 OR x.cantidad_propuestas <> x.cantidad_participadas
+ORDER BY L.fecha_propuesta_hasta ASC, id DESC");
       return static::hydrate($rp);
     }
     static function listado_propuestas_buenas_pro() {
@@ -195,8 +233,18 @@ ORDER BY O.aprobado_el DESC, O.id ASC");
     public function timeline() {
       return $this->hasMany('App\OportunidadLog','oportunidad_id')->orderBy('id', 'desc')->get();
     }
+    public function similares() {
+      if(empty($this->que_es)) {
+        $lista = strtoupper($this->licitacion()->rotulo);
+//        $lista = explode(' ', $lista);
+//        $lista = array_filter($lista, function($t) { $t = trim($t); return strlen($t) > 7 && preg_match("/^\w+$/", $t); });
+      } else {
+        $lista = $this->que_es;#explode(',', $this->que_es);
+      }
+      return static::busqueda_de_similares($lista, $this->licitacion_id);
+    }
     public function margen() {
-      return Helper::money(!empty($this->monto_base) ? ($this->monto_propuesto - $this->monto_base) * 100 / $this->monto_propuesto : 0) . '%';
+      return '';#Helper::money(!empty($this->monto_base) ? ($this->monto_propuesto - $this->monto_base) * 100 / $this->monto_propuesto : 0) . '%';
     }
     public function mensualidad() {
       if(!empty($this->duracion_dias)) {
@@ -205,7 +253,6 @@ ORDER BY O.aprobado_el DESC, O.id ASC");
       return 'No existe duración';
     }
     public function estado() {
-//      dd($this->licitacion());
       $ahora = time();
       $participacion_desde = strtotime($this->licitacion()->fecha_participacion_desde);
       $participacion_hasta = strtotime($this->licitacion()->fecha_participacion_hasta);
@@ -241,7 +288,7 @@ ORDER BY O.aprobado_el DESC, O.id ASC");
             'timeout' => false,
             'status' => false,
             'class' => 'badge badge-light-warning',
-            'message' => 'PROPUESTA',
+            'message' => 'REQUIERE',
           ];
         } else {
           return [
@@ -258,7 +305,7 @@ ORDER BY O.aprobado_el DESC, O.id ASC");
             'timeout' => false,
             'status' => true,
             'class' => 'badge badge-light-success',
-            'message' => 'REGISTRADO',
+            'message' => 'PARTICIPANDO',
           ];
         } else {
           return [
@@ -274,14 +321,14 @@ ORDER BY O.aprobado_el DESC, O.id ASC");
             'timeout' => false,
             'status' => true,
             'class' => 'badge badge-light-success',
-            'message' => 'REGISTRADO',
+            'message' => 'PARTICIPANDO',
           ];
         } else {
           return [
             'timeout' => false,
             'status' => false,
             'class' => 'badge badge-light-warning',
-            'message' => 'PARTICIPACIÓN',
+            'message' => 'REQUIERE',
           ];
         }
       } else {
@@ -292,5 +339,15 @@ ORDER BY O.aprobado_el DESC, O.id ASC");
           'message' => 'ESPERANDO',
         ];
       }
+    }
+    public static function busqueda_de_similares($q, $referencia_id) {
+      if(is_array($q)) {
+        $q = implode('%', $q);
+      }
+      $q = '%' . $q . '%';
+      return DB::select("
+        SELECT *, array_to_string(B.licitaciones_id,',') ids
+        FROM osce.busqueda_licitaciones_similares(:q, :referencia) B
+        LIMIT 20", ['q' => $q, 'referencia' => $referencia_id]);
     }
 }

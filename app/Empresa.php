@@ -4,7 +4,8 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use App\CandidatoOportunidad;
-
+use Auth;
+use App\Cliente;
 
 class Empresa extends Model
 {
@@ -20,6 +21,7 @@ class Empresa extends Model
     protected $casts = [
         'email_verified_at' => 'datetime',
       ];
+
     public function __construct(array $data = array())
     {
       $empresa = $data;
@@ -31,6 +33,9 @@ class Empresa extends Model
         $data['id'] = $data['c_candidato_id'];
         $this->candidato = new CandidatoOportunidad($data);
       }
+    }
+    public function cliente() {
+      return Cliente::where('empresa_id', $this->id)->where('tenant_id', Auth::user()->tenant_id)->first();
     }
     static function TipoSectores() {
         return [

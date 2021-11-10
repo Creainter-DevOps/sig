@@ -162,32 +162,33 @@
           <div class="card-header d-flex justify-content-between align-items-center pb-1">
             <h4 class="card-title">Participaciones por Vencer ({{ count($participaciones_por_vencer) }})</h4>
           </div>
-          <div class="table-responsive">
-            <!-- table start -->
-            <table id="table-marketing-campaigns" class="table table-borderless table-marketing-campaigns mb-0">
+          <div class="table-responsive" style="padding: 0 15px;">
+            <table class="table table-striped table-reduce">
               <thead>
                 <tr>
                   <th>Nomenclatura</th>
                   <th>Base</th>
-                  <th>Estado</th>
-                  <th class="text-center">Action</th>
+                  <th style="width:120px;">Estado</th>
+                  <th style="width:20px;"></th>
                 </tr>
               </thead>
               <tbody>
 @foreach($participaciones_por_vencer as $v)
                 <tr>
-                  <td class="py-1" style="width:400px;">
-                    {{ $v->rotulo() }}
+                  <td class="">
+                    {!! $v->rotulo() !!}
                   </td>
-                  <td class="py-1" style="width:100px;">
-                    <i class="bx bx-trending-up text-success align-middle mr-50"></i><span>{{ $v->monto_base }}</span>
+                  <td class="text-center" style="width:100px;">
+                    <span>{{ Helper::money($v->monto_base) }}</span>
+                    <div style="font-size: 10px;">({{ $v->timeline()->count() }} obs.)</div>
                   </td>
-                  <td class="py-1 text-center" style="width:100px;">
+                  <td class="text-center" style="width:120px;">
                     <span class="{{ $v->estado()['class'] }}">{{ $v->estado()['message'] }}</span>
                     <div style="font-size:11px;">{{ Helper::fecha($v->licitacion()->fecha_participacion_hasta, true) }}</div>
+                    <div style="font-size:11px;">{{ $v->cantidad_participadas }} de {{ $v->cantidad_interes }}</div>
                   </td>
-                  <td class="text-center py-1" style="width:50px;">
-                    <a href="/oportunidad/{{ $v->id }}/detalles" class="invoice-action-view mr-1">
+                  <td class="text-center" style="width:20px;">
+                    <a href="/oportunidad/{{ $v->licitacion_id }}/detalles">
                       <i class="bx bx-show-alt"></i>
                     </a>
                   </td>
@@ -204,32 +205,33 @@
           <div class="card-header d-flex justify-content-between align-items-center pb-1">
             <h4 class="card-title">Propuestas por Vencer ({{ count($propuestas_por_vencer) }})</h4>
           </div>
-          <div class="table-responsive">
-            <!-- table start -->
-            <table id="table-marketing-campaigns" class="table table-borderless table-marketing-campaigns mb-0">
+          <div class="table-responsive" style="padding: 0 15px;">
+            <table class="table table-striped table-reduce">
               <thead>
                 <tr>
                   <th>Nomenclatura</th>
                   <th>Base</th>
-                  <th>Estado</th>
-                  <th class="text-center">Action</th>
+                  <th style="width:120px;">Estado</th>
+                  <th style="width:20px;"></th>
                 </tr>
               </thead>
               <tbody>
 @foreach($propuestas_por_vencer as $v)
                 <tr>
-                  <td class="py-1" style="width:400px;">
-                    {{ $v->rotulo() }}
+                  <td class="">
+                    {!! $v->rotulo() !!}
                   </td>
-                  <td class="py-1" style="width:100px;">
-                    <i class="bx bx-trending-up text-success align-middle mr-50"></i><span>{{ $v->monto_base }}</span>
+                  <td class="text-center" style="width:100px;">
+                    <span>{{ Helper::money($v->monto_base) }}</span>
+                    <div style="font-size: 10px;">({{ $v->timeline()->count() }} obs.)</div>
                   </td>
-                  <td class="py-1 text-center" style="width:100px;">
+                  <td class="text-center" style="width:120px;">
                     <span class="{{ $v->estado()['class'] }}">{{ $v->estado()['message'] }}</span>
                     <div style="font-size:11px;">{{ Helper::fecha($v->licitacion()->fecha_propuesta_hasta, true) }}</div>
+                    <div style="font-size:11px;">{{ $v->cantidad_propuestas }} de {{ $v->cantidad_participadas }}</div>
                   </td>
-                  <td class="text-center py-1" style="width:50px;">
-                    <a href="/oportunidad/{{ $v->id }}/detalles" class="invoice-action-view mr-1">
+                  <td class="text-center" style="width:20px;">
+                    <a href="/oportunidad/{{ $v->licitacion_id }}/detalles">
                       <i class="bx bx-show-alt"></i>
                     </a>
                   </td>
@@ -248,32 +250,32 @@
           <div class="card-header d-flex justify-content-between align-items-center pb-1">
             <h4 class="card-title">Buenas Pro ({{ count($propuestas_en_pro) }})</h4>
           </div>
-          <div class="table-responsive">
-            <!-- table start -->
-            <table id="table-marketing-campaigns" class="table table-borderless table-marketing-campaigns mb-0">
+         <div class="table-responsive" style="padding: 0 15px;">
+            <table class="table table-striped table-reduce">
               <thead>
                 <tr>
                   <th>Nomenclatura</th>
                   <th>Base</th>
-                  <th>Estado</th>
-                  <th class="text-center">Action</th>
+                  <th style="width:120px;">Estado</th>
+                  <th style="width:20px;"></th>
                 </tr>
               </thead>
               <tbody>
 @foreach($propuestas_en_pro as $v)
                 <tr>
-                  <td class="py-1" style="width:400px;">
-                    {{ $v->rotulo() }}
+                  <td>
+                    {!! $v->rotulo() !!}
                   </td>
-                  <td class="py-1" style="width:100px;">
-                    <i class="bx bx-trending-up text-success align-middle mr-50"></i><span>{{ $v->monto_base }}</span>
+                  <td class="text-center" style="width:120px;">
+                    <span>{{ Helper::money($v->monto_base) }}</span>
+                    <div style="font-size: 10px;">({{ $v->timeline()->count() }} obs.)</div>
                   </td>
-                  <td class="py-1 text-center" style="width:100px;">
+                  <td class="text-center" style="width:120px;">
                     <span class="{{ $v->estado()['class'] }}">{{ $v->estado()['message'] }}</span>
                     <div style="font-size:11px;">{{ Helper::fecha($v->licitacion()->fecha_buena_hasta, true) }}</div>
                   </td>
-                  <td class="text-center py-1" style="width:50px;">
-                    <a href="/oportunidad/{{ $v->id }}/detalles" class="invoice-action-view mr-1">
+                  <td class="text-center" style="width:20px;">
+                    <a href="/oportunidad/{{ $v->licitacion_id }}/detalles">
                       <i class="bx bx-show-alt"></i>
                     </a>
                   </td>

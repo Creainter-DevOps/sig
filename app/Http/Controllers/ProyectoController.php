@@ -3,26 +3,26 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Cliente;
+use App\Proyecto;
 use App\Contacto;
 use App\Empresa;
 use App\Persona;
 use App\Ubigeo;
 
-class ClientesController extends Controller {
+class ProyectoController extends Controller {
   public function __construct()
-    {
-//        parent::__construct();
+  {
+    $this->middleware('auth');
   }
   public function index(Request $request)
     {
         $search = $request->input('search');
         if(!empty($search)) {
-            $listado = Cliente::search($search)->paginate(15)->appends(request()->query());
+            $listado = Proyecto::search($search)->paginate(15)->appends(request()->query());
         } else {
-            $listado = Cliente::orderBy('created_on', 'desc')->paginate(15)->appends(request()->query());
+            $listado = Proyecto::orderBy('created_on', 'desc')->paginate(15)->appends(request()->query());
         }
-        return view('clientes.index', ['listado' => $listado]);
+        return view('proyectos.index', ['listado' => $listado]);
     }
     public function create(Request $request)
     {
@@ -40,7 +40,7 @@ class ClientesController extends Controller {
             $empresa->correo_electronico = 'comercial@creainter.com.pe';
             $empresa->web = 'web';
         }
-        return view($request->ajax() ? 'clientes.fast' : 'clientes.create', compact('empresa', 'distrito', 'departamentos', 'provincias', 'distritos'));      
+        return view($request->ajax() ? 'proyectos.fast' : 'proyectos.create', compact('empresa', 'distrito', 'departamentos', 'provincias', 'distritos'));      
     }
 
     /**
@@ -62,13 +62,13 @@ class ClientesController extends Controller {
             $empresa = Empresa::create($request->all());
         }
 
-        $existe_vinculo = Cliente::where('empresa_id', '=', $empresa->id)->first();
+        $existe_vinculo = Proyecto::where('empresa_id', '=', $empresa->id)->first();
         if ($existe_vinculo !== null) {
             $error = 'La empresa ya ha sido registrada como cliente, y es la siguiente:';
             goto response;
         }
 
-        $cliente = new Cliente;
+        $cliente = new Proyecto;
         $cliente->empresa_id = $empresa->id;
         $cliente->tenant_id = Auth::user()->id;
         $cliente->descripcion = $request->input('descripcion');
@@ -95,10 +95,10 @@ class ClientesController extends Controller {
             if(!empty($error)) {
 //                Session::flash('message_error', $error);
                 //return back();
-                return redirect()->route('clientes.edit', [$existe_vinculo->id]);
+                return redirect()->route('proyectos.edit', [$existe_vinculo->id]);
             } else {
 //                Session::flash('message_success', 'Se ha realizado registro con éxito.');
-                return redirect()->route('clientes.edit', [$cliente->id]);
+                return redirect()->route('proyectos.edit', [$cliente->id]);
             }
         }
     }
@@ -110,12 +110,9 @@ class ClientesController extends Controller {
      * @param  \DummyFullModelClass  $DummyModelVariable
      * @return \Illuminate\Http\Response
      */
-    public function show(Empresa $empresa)
+    public function show(Proyecto $proyecto)
     {
-      $cliente = $empresa->cliente();
-      $contactos = $cliente->getContactos();
-      $empresa = $cliente->empresa();
-      return view('clientes.show', compact('cliente','empresa'));
+      return view('proyectos.show', compact('proyecto'));
     }
 
     /**
@@ -125,22 +122,9 @@ class ClientesController extends Controller {
      * @param  \DummyFullModelClass  $DummyModelVariable
      * @return \Illuminate\Http\Response
      */
-    public function edit(Cliente $cliente)
+    public function edit(Proyecto $proyecto)
     {
-      $empresa = $cliente->empresa();
-        if (!empty($empresa->ubigeo_id)) {
-
-            $distrito      = Ubigeo::distrito($empresa->ubigeo_id);
-            $departamentos = Ubigeo::departamentos($empresa->ubigeo_id);
-            $provincias    = Ubigeo::provincias($empresa->ubigeo_id);
-            $distritos     = Ubigeo::distritos($empresa->ubigeo_id);
-        } else {
-            $distrito      = null;
-            $departamentos = Ubigeo::departamentos();
-            $provincias    = [];
-            $distritos     = [];
-        }
-        return view('clientes.edit', compact('cliente','empresa', 'distrito', 'departamentos', 'provincias', 'distritos'));
+      return view('proyectos.edit', compact('proyecto'));
     }
 
     /**
@@ -151,7 +135,7 @@ class ClientesController extends Controller {
      * @param  \DummyFullModelClass  $DummyModelVariable
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Cliente $cliente)
+    public function update(Request $request, Proyecto $cliente)
     {
 //        Session::flash('message_success', 'Se ha realizado la modificación con éxito.');
       $cliente->empresa()->update($request->all());
@@ -170,18 +154,18 @@ class ClientesController extends Controller {
     public function destroy()
     {
         /* Proceso para eliminar */
-        return Redirect::to('/clientes');
+        return Redirect::to('/proyectos');
     }
     public function autocomplete(Request $request)
     {
         $query = strtolower($request->input('query'));
-        $data = Cliente::select("comercial.empresa.razon_social as value",'comercial.cliente.id')
+        $data = Proyecto::select("comercial.empresa.razon_social as value",'comercial.cliente.id')
                 ->join('comercial.empresa', 'comercial.empresa.id', '=', 'comercial.cliente.empresa_id')
                 ->whereRaw("LOWER(comercial.empresa.razon_social) LIKE ? OR LOWER(comercial.empresa.seudonimo) LIKE ?", ["%{$query}%", "%{$query}%"])
                 ->get();
         return response()->json($data);
     }
-     public function addRepresentante(Request $request, Cliente $cliente)
+     public function addRepresentante(Request $request, Proyecto $cliente)
      {
         $persona = Persona::updateOrCreate([
             'tipo_documento_id' => $request->input('tipo_documento_id'),
@@ -204,7 +188,7 @@ class ClientesController extends Controller {
         ]);
         return back();
      }
-     public function delRepresentante(Request $request, Cliente $cliente, Contacto $contacto)
+     public function delRepresentante(Request $request, Proyecto $cliente, Contacto $contacto)
      {
         $contacto->delete();
 //        Session::flash('message_success', 'Se ha eliminado correctamente.');

@@ -21,23 +21,27 @@
           <img src="{{asset('images/portrait/small/avatar-s-26.jpg')}}" alt="users view avatar" class="users-avatar-shadow rounded-circle" height="64" width="64" />
         </a>
         <div class="media-body pt-25">
-          <h4 class="media-heading">{{ $oportunidad->licitacion()->nomenclatura }}</h4>
-          <span>{{ $oportunidad->licitacion()->entidad }}</span>
+          <h4 class="media-heading">{{ $licitacion->nomenclatura }}</h4>
+          <span>{{ $licitacion->entidad }}</span>
         </div>
       </div>
     </div>
     <div class="col-12 col-sm-5 px-0 d-flex justify-content-end align-items-center px-1 mb-2">
+@if(empty($oportunidad))
+<div>Seguir</div>
+@else
 @if(!empty($oportunidad->rechazado_el))
   Rechazado el {{ Helper::fecha($oportunidad->rechazado_el, true) }}
 @elseif(!empty($oportunidad->archivado_el))
   Archivado el {{ Helper::fecha($oportunidad->archivado_el, true) }}
 @elseif(empty($oportunidad->revisado_el))
-  <a href="/oportunidad/{{ $oportunidad->id }}/revisar" class="btn btn-sm btn-success mr-25">Revisar</a>
-  <a href="/oportunidad/{{ $oportunidad->id }}/rechazar" class="btn btn-sm btn-danger mr-25">Rechazar</a>
+  <a href="/oportunidad/{{ $licitacion->id }}/revisar" class="btn btn-sm btn-success mr-25">Revisar</a>
+  <a href="/oportunidad/{{ $licitacion->id }}/rechazar" class="btn btn-sm btn-danger mr-25">Rechazar</a>
 @elseif($oportunidad->estado == 'PENDIENTE')
-  <a href="/oportunidad/{{ $oportunidad->id }}/rechazar" class="btn btn-sm btn-danger mr-25">Rechazar</a>
+  <a href="/oportunidad/{{ $licitacion->id }}/rechazar" class="btn btn-sm btn-danger mr-25">Rechazar</a>
 @else
-  <a href="/oportunidad/{{ $oportunidad->id }}/archivar" class="btn btn-sm btn-danger">Archivar</a>
+  <a href="/oportunidad/{{ $licitacion->id }}/archivar" class="btn btn-sm btn-danger">Archivar</a>
+@endif
 @endif
     </div>
   </div>
@@ -52,42 +56,51 @@
               <tbody>
                 <tr>
                   <td style="width:200px;">Entidad:</td>
-                  <td><a href="/clientes/{{ $oportunidad->cliente_id }}/ver">{{ $oportunidad->licitacion()->entidad }}</a></td>
+                  <td><a href="/clientes/{{ $licitacion->empresa_id }}">{{ $licitacion->entidad }}</a></td>
                 </tr>
                 <tr>
                   <td>Procedimiento:</td>
-                  <td>{{ $oportunidad->licitacion()->procedimiento_id }}</td>
+                  <td>{{ $licitacion->procedimiento_id }}</td>
+                </tr>
+                <tr>
+                  <td>Nomenclatura:</td>
+                  <td>{{ $licitacion->nomenclatura }}</td>
                 </tr>
                 <tr>
                   <td>Rotulo:</td>
-                  <td>{{ $oportunidad->licitacion()->rotulo }}</td>
+                  <td>{{ $licitacion->rotulo }}</td>
                 </tr>
                 <tr>
                   <td>Descripción:</td>
-                  <td>{{ $oportunidad->licitacion()->descripcion }}</td>
+                  <td>{{ $licitacion->descripcion }}</td>
                 </tr>
                 <tr>
                   <td>Participación:</td>
-                  <td>{{ $oportunidad->licitacion()->participacion() }}</td>
+                  <td>{{ $licitacion->participacion() }}</td>
                 </tr>
                 <tr>
                   <td>Propuesta:</td>
-                  <td>{{ $oportunidad->licitacion()->propuesta() }}</td>
+                  <td>{{ $licitacion->propuesta() }}</td>
                 </tr>
                 <tr>
                   <td>Estado:</td>
-                  <td><span class="{{ $oportunidad->estado()['class'] }}">{{ $oportunidad->estado()['message'] }}</span></td>
+                  <td><span class="{{ $licitacion->estado()['class'] }}">{{ $licitacion->estado()['message'] }}</span></td>
                 </tr>
                 <tr>
                   <td>Adjuntos:</td>
                   <td>
 <ul>
-            @foreach($oportunidad->adjuntos() as $a)
+            @foreach($licitacion->adjuntos() as $a)
               <li><a target="_blank" href="http://prodapp.seace.gob.pe/SeaceWeb-PRO/SdescargarArchivoAlfresco?fileCode={{ $a->codigoAlfresco }}">{{ $a->tipoDocumento }}</a></li>
             @endforeach
           </ul>
                   </td>
                 </tr>
+                <tr>
+                  <td>Valor Referencial:</td>
+                  <td>{{ Helper::money($licitacion->monto) }}</td>
+                </tr>
+@if(!empty($oportunidad))
                 <tr>
                   <td>Monto Base:</td>
                   <td>{{ Helper::money($oportunidad->monto_base) }}</td>
@@ -102,12 +115,17 @@
                 </tr>
                 <tr>
                   <td>Garantía:</td>
-                  <td>{{ $oportunidad->garantía_dias }} días</td>
+                  <td>{{ $oportunidad->garantia_dias }} días</td>
                 </tr>
                 <tr>
                   <td>Min. Mensualidad:</td>
                   <td>{{ $oportunidad->mensualidad() }}</td>
                 </tr>
+                <tr>
+                  <td>¿Qué solicita?:</td>
+                  <td>{{ $oportunidad->que_es }}</td>
+                </tr>
+@endif
               </tbody>
             </table>
           </div>
@@ -115,7 +133,7 @@
             <h5>Cronograma</h5>
             <div class="table-responsive">
               <table class="table mb-0 table-sm" style="font-size: 10px;">
-            @foreach ($oportunidad->cronograma() as $cro)
+            @foreach ($licitacion->cronograma() as $cro)
               <tr>
                 <th>{{ $cro->descripcionEtapa }}</th>
                 @if (!Helper::es_pasado($cro->fechaInicio, $class))
@@ -133,6 +151,7 @@
               </table>
             </div>
             <br />
+@if(!empty($oportunidad))
             <h5>Oportunidad</h5>
             <table class="table table-borderless" style="width:100%;">
               <tbody>
@@ -142,15 +161,15 @@
                 </tr>
                 <tr>
                   <td style="width:200px;">Fecha de Actualización:</td>
-                  <td>{{ Helper::fecha($oportunidad->licitacion()->updated_on, true) }}</td>
+                  <td>{{ Helper::fecha($licitacion->updated_on, true) }}</td>
                 </tr>
                 <tr>
                   <td style="width:200px;">Fecha de Aprobación:</td>
-                  <td>{{ Helper::fecha($oportunidad->aprobado_el, true) }} {{ $oportunidad->aprobado_por }}</td>
+                  <td>{{ Helper::fecha($oportunidad->aprobado_el, true) }} x {{ Auth::user($oportunidad->aprobado_por)->usuario }}</td>
                 </tr>
                 <tr>
                   <td style="width:200px;">Fecha de Revisión:</td>
-                  <td>{{ Helper::fecha($oportunidad->revisado_el, true) }} {{ $oportunidad->revisado_por }}</td>
+                  <td>{{ Helper::fecha($oportunidad->revisado_el, true) }} x {{ Auth::user($oportunidad->revisado_por)->usuario }}</td>
                 </tr>
                 <tr>
                   <td style="width:200px;">Registro de Participación:</td>
@@ -162,20 +181,22 @@
                 </tr>
                 <tr>
                   <td>Fecha de Archivo:</td>
-                  <td>{{ Helper::fecha($oportunidad->archivado_el, true) }} {{ $oportunidad->archivado_por }}</td>
+                  <td>{{ Helper::fecha($oportunidad->archivado_el, true) }} x {{ Auth::user($oportunidad->archivado_por)->usuario }}</td>
                 </tr>
                 <tr>
                   <td>Fecha de Rechazo:</td>
-                  <td>{{ Helper::fecha($oportunidad->rechazado_el, true) }} {{ $oportunidad->rechazado_por }}</td>
+                  <td>{{ Helper::fecha($oportunidad->rechazado_el, true) }} x {{ Auth::user($oportunidad->rechazado_por)->usuario }}</td>
                 </tr>
               </tbody>
             </table>
+@endif
           </div>
         </div>
       </div>
     </div>
   </div>
   <!-- users view card data ends -->
+@if(!empty($oportunidad))
 <h5>Candidatos</h5>
 <div class="row">
 @foreach($oportunidad->empresas() as $e)
@@ -196,21 +217,20 @@
 <div>Debe marcar como <b>REVISADO</b></div>
 @elseif(!empty($oportunidad->rechazado_el) || !empty($oportunidad->archivado_el))
 <div>No disponible acciones</div>
-@elseif(empty($e->candidato))
+@elseif(empty($e->candidato) && strtotime($licitacion->fecha_participacion_hasta) > time())
 <div class="text-center">
-  <a class="btn btn-sm btn-success" href="/oportunidad/{{ $oportunidad->id }}/interes/{{ $e->id }}">Interés</a>
+  <a class="btn btn-sm btn-success" href="/oportunidad/{{ $licitacion->id }}/interes/{{ $e->id }}">Interés</a>
 </div>
+@elseif(empty($e->candidato) && strtotime($licitacion->fecha_participacion_hasta) <= time())
+<div>Fuera de plazo</div>
 @else
 <div class="d-flex justify-content-end">
-@if(!$e->candidato->estado()['timeout'] || true)
-@if(empty($e->candidato->participacion_el))
-  <a href="/oportunidad/{{ $oportunidad->id }}/participar/{{ $e->candidato->id }}" class="btn btn-sm btn-info mr-25">Registrar Participación</a>
-@elseif(empty($e->candidato->propuesta_el))
-  <a href="/oportunidad/{{ $oportunidad->id }}/propuesta/{{ $e->candidato->id }}" class="btn btn-sm btn-dark">Enviar Propuesta</a>
-@endif
-@elseif(empty($oportunidad->archivado))
-
-  <a href="/oportunidad/{{ $oportunidad->id }}/archivar" class="btn btn-sm btn-danger">Archivar</a>
+@if(!$e->candidato->estado()['timeout'])
+  @if(empty($e->candidato->participacion_el))
+    <a href="/oportunidad/{{ $licitacion->id }}/participar/{{ $e->candidato->id }}" class="btn btn-sm btn-info mr-25">Registrar Participación</a>
+  @elseif(empty($e->candidato->propuesta_el))
+    <a href="/oportunidad/{{ $licitacion->id }}/propuesta/{{ $e->candidato->id }}" class="btn btn-sm btn-dark">Enviar Propuesta</a>
+  @endif
 @endif
 </div>
 @endif
@@ -221,6 +241,9 @@
 </div>
 @endforeach
 </div>
+
+<div class="row">
+<div class="col-6 col-sm-6">
     <!-- Timeline Widget Starts -->
     <div class="timline-card">
       <div class="card ">
@@ -231,10 +254,9 @@
         </div>
         <div class="card-content">
           <div class="card-body">
-<button type="button" class="btn btn-outline-success" data-toggle="modal" data-target="#inlineForm">
-                      <i class="bx bx-plus"></i>Add
-                    </button>
-<!--login form Modal -->
+            <button type="button" class="btn btn-outline-success" data-toggle="modal" data-target="#inlineForm">
+              <i class="bx bx-plus"></i>Add
+            </button>
               <div class="modal fade text-left" id="inlineForm" tabindex="-1" role="dialog"
                 aria-labelledby="myModalLabel33" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
@@ -245,10 +267,13 @@
                         <i class="bx bx-x"></i>
                       </button>
                     </div>
-                    <form action="/oportunidad/{{ $oportunidad->id }}/observacion" method="post">
+                    <form action="/oportunidad/{{ $licitacion->id }}/observacion" method="post">
                       {{ csrf_field() }}
                       <div class="modal-body">
-
+                        <div class="form-group">
+                          <label>¿Qué pide?:</label>
+                          <input type="text" name="que_es" placeholder="Ingresa la descripción" class="form-control" style="text-transform:uppercase;" onkeyup="javascript:this.value=this.value.toUpperCase();" />
+                        </div>
                         <div class="form-group">
                           <label>Monto Base:</label>
                           <input type="number" name="monto_base" placeholder="Ingresa un monto" class="form-control" />
@@ -299,7 +324,7 @@
 @elseif(in_array($c->evento, ['monto_base']))
 <h6 class="timeline-title">{{ $c->creado() }} ha definido un monto:</h6>
 <div class="timeline-content"><div>Monto Base: {{ Helper::money($c->texto) }} soles</div></div>
-@elseif(in_array($c->evento, ['accion']))
+@elseif(in_array($c->evento, ['accion','que_es']))
 <h6 class="timeline-title">{{ $c->creado() }}:</h6>
 <div class="timeline-content"><div>{{ $c->texto }}</div></div>
 @else
@@ -314,7 +339,55 @@
       </div>
     </div>
     <!-- Timeline Widget Ends -->
+</div>
+<div class="col-6 col-sm-6">
+      <div class="card ">
+        <div class="card-header">
+          <h4 class="card-title">
+            Análisis de Oportunidad
+          </h4>
+        </div>
+        <div class="card-content">
+          <div class="card-body">
+<table class="table mb-0 table-sm" style="font-size:11px;">
+<thead>
+<tr>
+  <td>Servicio</th>
+  <td>Min</th>
+  <td>Prom.</td>
+  <th>Max.</th>
+</tr>
+</thead>
+<tbody>
+@foreach($oportunidad->similares() as $s)
+<tr>
+  <td>
+    <div style="font-weight: bold;font-size: 9px;">{{ $s->licitaciones}} x {{ $s->entidad }} - {{ $s->anho }}</div>
+    <div style="">{{ $s->rotulo }}</div>
+<div>
+@foreach(explode(',', $s->ids) as $l)
+<a href="/oportunidad/{{ $l }}/detalles" style="margin-right:5px;">{{ $l }}</a>
+@endforeach
+</div>
+  </td>
+@if($s->minimo == $s->maximo)
+  <td colspan="3" style="width:80px;font-size:11px;text-align:right;">{{ Helper::money($s->minimo) }}</td>
+@else
+  <td style="width:80px;font-size:11px;text-align:right;">{{ Helper::money($s->minimo) }}</td>
+  <td style="width:80px;font-size:11px;text-align:right;">{{ Helper::money($s->promedio) }}</td>
+  <td style="width:80px;font-size:11px;text-align:right;">{{ Helper::money($s->maximo) }}</td>
+@endif
+</tr>
+@endforeach
+</tbody>
+</table>
 
+</div>
+</div>
+</div>
+@endif
+</div>
+</div>
 </section>
 <!-- users view ends -->
 @endsection
