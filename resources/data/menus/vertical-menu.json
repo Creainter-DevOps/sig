@@ -23,7 +23,64 @@
       ]
     },
     {
+      "navheader": "Oportunidades"
+    },    
+    {
+      "url": "oportunidad",
+      "name": "Dashboard",
+      "i18n": "Oportunidad",
+      "icon": "line-chart"
+    },
+    {
+      "url": "oportunidad/nuevas",
+      "name": "Nuevas",
+      "i18n": "Nuevas",
+      "icon": "search"
+    },
+    {
+      "url": "oportunidad/archivadas",
+      "name": "Archivadas",
+      "i18n": "Archivadas",
+      "icon": "box"
+    },    
+    {
       "navheader": "Apps"
+    },
+    {
+      "url": "clientes",
+      "name": "Clientes",
+      "i18n": "Clientes",
+      "icon": "building"
+    },
+    {
+      "url": "contactos",
+      "name": "Contactos",
+      "i18n": "Contactosl",
+      "icon": "users"
+    },
+    {
+      "url": "cotizaciones",
+      "name": "Cotizaciones",
+      "i18n": "Cotizaciones",
+      "icon": "morph-doc"
+    },
+    {
+      "url": "proyectos",
+      "name": "Proyectos",
+      "i18n": "Proyectos",
+      "icon": "desktop"
+    },
+    {
+      "url": "actividades",
+      "name": "Actividades",
+      "i18n": "Actividades",
+      "icon": "check"
+    },
+    {
+      "url" :  "kanban",
+      "name": "Kanban",
+      "i18n": "Kanban",
+      "icon": "grid"
     },
     {
       "url": "app-email",

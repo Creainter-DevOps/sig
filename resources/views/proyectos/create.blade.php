@@ -1,80 +1,36 @@
 @extends('layouts.contentLayoutMaster')
-
+@section('title', 'Nuevo Proyecto')
+@section('vendor-styles')
+<link rel="stylesheet" type="text/css" href="{{asset('vendors/css/vendors.min.css')}} ">
+<link rel="stylesheet" type="text/css" href="{{asset('vendors/css/pickers/pickadate/pickadate.css')}}">
+<link rel="stylesheet" type="text/css" href="{{asset('vendors/css/extensions/toastr.css')}}">
+@endsection
 @section('content')
-<div class="content">
-    <h2 class="content-heading">Nuevo Cliente</h2>
-    @if(session()->has('message'))
-    <div class="alert alert-success">
-        {{ session()->get('message') }}
+<div class="col-12">
+  <div class="card">
+    <div class="card-content">
+      <div class="card-header">
+        <h5 class="card-title"> Nuevo Proyecto  </h5>
+      </div>
+      <div class="card-body">
+          <form action="{{ route('proyectos.store') }}" autocomplete="nope"  method="POST" class="form-horizontal " id="form-data" >
+              @include('proyectos.formulario')
+          </form>
+      </div>
     </div>
-    @endif
-    <div class="block">
-        <div class="block-header block-header-default">
-            <h3 class="block-title">Datos Personales</h3>
-        </div>
-        <div class="block-content">
-            <form action="/clientes" method="POST" class="form-horizontal">
-                @include('empresas.form')
-    <div class="col-12">
-        <div class="form-group">
-            <label>Breve Descripción</label>
-            <textarea name="descripcion" placeholder="Descripción" class="form-control">{{ old('descripcion', @$cliente->descripcion) }}</textarea>
-            @if ($errors->has('descripcion'))
-            <div class="invalid-feedback">{{ $errors->first('descripcion') }}</div>
-            @endif
-        </div>
-    </div>
-
-            </form>
-        </div>
-    </div>
-
-    <div class="block">
-        <div class="block-header block-header-default">
-            <h3 class="block-title">Representantes</h3>
-        </div>
-        <div class="block-content">
-            <div class="table-responsive">
-                <table class="table table-striped table-vcenter">
-                    <thead>
-                        <th>Tipo Doc.</th>
-                        <th># Doc.</th>
-                        <th>Nombres</th>
-                        <th>Cargo</th>
-                        <th>Género</th>
-                        <th>Telefono</th>
-                        <th>Correo</th>
-                        <th width="5%">Opciones</th>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-                <div class="form-group" style="margin-left:20px;">0 Representante(s)</div>
-            </div>
-        </div>
-    </div>
-    <div class="block">
-        <div class="block-header block-header-default">
-            <h3 class="block-title">Productos</h3>
-        </div>
-        <div class="block-content">
-            <div class="table-responsive">
-                <table class="table table-striped table-vcenter">
-                    <thead>
-                        <th>Cod. Producto</th>
-                        <th>Nombre</th>
-                        <th>Familia</th>
-                        <th>Estado</th>
-                        <th width="5%">Opciones</th>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-                <div class="form-group" style="margin-left:20px;">0 Producto(s)</div>
-            </div>
-
-        </div>
-    </div>
+  </div>
 </div>
 <!-- TODO: Current Tasks -->
 @endsection
+@section('vendor-scripts')
+<script src="{{asset('vendors/js/pickers/pickadate/picker.js')}}"></script>
+<script src="{{asset('vendors/js/pickers/pickadate/picker.date.js')}}"></script>
+<script src="{{asset('vendors/js/extensions/toastr.min.js') }}"></script>
+@endsection
+
+@section('page-scripts')
+<script src="{{asset('js/scripts/cotizacion/save.js')}}"></script>
+@endsection
+
+
+

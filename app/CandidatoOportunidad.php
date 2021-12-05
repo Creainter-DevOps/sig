@@ -18,12 +18,11 @@ use Auth;
 class CandidatoOportunidad extends Model
 {
   use Notifiable,HasApiTokens,HasRoles;
-
+  
   protected $connection = 'interno';
   protected $table = 'osce.candidato';
   const UPDATED_AT = null;
   const CREATED_AT = null;
-
 
   public function oportunidad() {
     return $this->belongsTo('App\Oportunidad', 'oportunidad_id')->first();

@@ -29,16 +29,39 @@ Route::match(['get', 'post'], 'permissions/grupo/{aclgrupo}/permisos', 'Permissi
 Route::match(['get', 'post'], 'permissions/grupo', 'PermissionController@crearGrupo');
 Route::get('permissions/autocomplete_modulo', 'PermissionController@autocomplete_modulo');
 
-
-
 // dashboard Routes
 //Route::get('/','DashboardController@dashboardEcommerce');
 Route::get('/dashboard-ecommerce','DashboardController@dashboardEcommerce');
 Route::get('/dashboard-analytics','DashboardController@dashboardAnalytics');
 
 //Route::resource('proyectos', 'ProyectoController');
+Route::get('proyectos/autocomplete', 'ProyectoController@autocomplete'); 
+Route::post('proyectos/{proyecto}/observacion', 'ProyectoController@observacion'); 
 Route::resource('proyectos', 'ProyectoController')->parameters([
     'proyectos' => 'proyecto'
+  ]);
+
+Route::get('empresas/autocomplete', 'EmpresaController@autocomplete'); 
+Route::resource('empresas','EmpresaController')->parameters([ 
+  'empresas' => 'empresa'
+]);
+
+Route::get('usuarios/autocomplete', 'UsuarioController@autocomplete'); 
+Route::resource('usuarios','UsuarioController')->parameters([ 
+  'usuarios' => 'usuario'
+]);
+
+Route::resource('bloques', 'BloqueController')->parameters([ 
+  'bloques' => 'bloque'
+]);
+
+Route::get('/kanban', 'KanbanController@index');
+Route::get('/kanban/actividades', 'KanbanController@actividades');
+
+Route::get('actividades/autocomplete', 'ActividadController@autocomplete'); 
+Route::post('actividades/{actividad}/observacion', 'ActividadController@observacion'); 
+Route::resource('actividades', 'ActividadController')->parameters([
+    'actividades' => 'actividad'
 ]);
 
 #Route::get('empresas/autocomplete', 'EmpresaController@autocomplete');
@@ -46,7 +69,9 @@ Route::resource('proyectos', 'ProyectoController')->parameters([
 #Route::post('empresas/getDistritos', 'EmpresaController@getDistritos');
 #Route::resource('empresas', 'EmpresaController');
 
-
+Route::get('clientes/autocomplete', 'ClientesController@autocomplete');
+Route::post('clientes/{cliente}/observacion', 'ClientesController@observacion');
+Route::resource('clientes', 'ClientesController');
 Route::post('clientes/{cliente}/add-representante', 'ClientesController@addRepresentante');
 Route::get('clientes/{cliente}/del-representante/{contacto}', 'ClientesController@delRepresentante');
 Route::post('clientes/{cliente}/add-producto', 'ClientesController@addProducto');
@@ -54,29 +79,43 @@ Route::get('clientes/{cliente}/del-producto/{producto}', 'ClientesController@del
 Route::get('clientes/{cliente}/registrar-producto', 'ClientesController@registarProducto');
 Route::post('clientes/getProvincias', 'ClientesController@getProvincias');
 Route::post('clientes/getDistritos', 'ClientesController@getDistritos');
-Route::get('clientes/autocomplete', 'ClientesController@autocomplete');
-Route::get('clientes/{empresa}', 'ClientesController@show');
-Route::resource('clientes', 'ClientesController');
+
+Route::get('cotizacion/autocomplete', 'CotizacionController@autocomplete');
+Route::post('cotizacion/{cotizacion}/observacion', 'CotizacionController@observacion');
+Route::resource('cotizaciones', 'CotizacionController')->parameters([
+  'cotizaciones' => 'cotizacion'
+]);
+
+Route::get('contactos/autocomplete', 'ContactoController@autocomplete');
+Route::post('contactos/{contacto}/observacion', 'ContactoController@observacion');
+Route::get('contactos/fast', 'ContactoController@fast');
+Route::resource('contactos', 'ContactoController')->parameters([
+    'contactos' => 'contacto'
+]);
 
 
+Route::get('productos/autocomplete', 'ProductoController@autocomplete');
+Route::resource('productos', 'ProductoController')->parameters([
+  'productos' => 'producto'
+]);
 
-Route::get('/oportunidad','OportunidadController@dashboard');
-Route::get('/oportunidad/calendario','OportunidadController@calendario');
-Route::get('/oportunidad/nuevas','OportunidadController@listNuevas');
-Route::get('/oportunidad/archivadas','OportunidadController@listArchivadas');
-Route::get('/oportunidad/eliminadas','OportunidadController@listEliminadas');
-Route::get('/oportunidad/aprobadas','OportunidadController@listAprobadas');
-Route::get('/oportunidad/{licitacion}/detalles','OportunidadController@detalles');
-Route::get('/oportunidad/{licitacion}/aprobar','OportunidadController@aprobar');
-Route::get('/oportunidad/{licitacion}/revisar','OportunidadController@revisar');
-Route::get('/oportunidad/{licitacion}/interes/{empresa}','OportunidadController@interes');
-Route::get('/oportunidad/{licitacion}/rechazar','OportunidadController@rechazar');
-Route::get('/oportunidad/{licitacion}/archivar','OportunidadController@archivar');
-Route::post('/oportunidad/{licitacion}/observacion','OportunidadController@observacion');
-Route::get('/oportunidad/{licitacion}/participar/{candidato}','OportunidadController@registrarParticipacion');
-Route::get('/oportunidad/{licitacion}/propuesta/{candidato}','OportunidadController@registrarPropuesta');
-
-
+Route::get('licitaciones/autocomplete','LicitacionController@autocomplete');
+Route::get('licitaciones','LicitacionController@dashboard');
+Route::post('licitaciones/actualizar/{licitacion}','LicitacionController@update')->name("licitacion.update");
+Route::get('licitaciones/calendario','LicitacionController@calendario');
+Route::get('licitaciones/nuevas','LicitacionController@listNuevas');
+Route::get('licitaciones/archivadas','LicitacionController@listArchivadas');
+Route::get('licitaciones/eliminadas','LicitacionController@listEliminadas');
+Route::get('licitaciones/aprobadas','LicitacionController@listAprobadas');
+Route::get('licitaciones/{licitacion}/detalles','LicitacionController@detalles');
+Route::get('licitaciones/{licitacion}/aprobar','LicitacionController@aprobar');
+Route::get('licitaciones/{licitacion}/revisar','LicitacionController@revisar');
+Route::get('licitaciones/{licitacion}/interes/{empresa}','LicitacionController@interes');
+Route::get('licitaciones/{licitacion}/rechazar','LicitacionController@rechazar');
+Route::get('licitaciones/{licitacion}/archivar','LicitacionController@archivar');
+Route::post('licitaciones/{licitacion}/observacion','LicitacionController@observacion');
+Route::get('licitaciones/{licitacion}/participar/{candidato}','LicitacionController@registrarParticipacion');
+Route::get('licitaciones/{licitacion}/propuesta/{candidato}','LicitacionController@registrarPropuesta');
 
 //Application Routes
 Route::get('/app-email','ApplicationController@emailApplication');

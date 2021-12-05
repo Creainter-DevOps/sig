@@ -52,6 +52,10 @@ class Licitacion extends Model
     public function oportunidad() {
       return Oportunidad::where('licitacion_id',$this->id)->where('tenant_id', Auth::user()->tenant_id)->first();
     }
+    public function empresa() {
+      return $this->belongsTo('App\Empresa', 'empresa_id')->first();
+    }
+
     public function participacion() {
       return Helper::fecha($this->fecha_participacion_desde, true) . ' al ' . Helper::fecha($this->fecha_participacion_hasta, true);
     }

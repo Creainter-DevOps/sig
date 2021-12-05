@@ -12,7 +12,7 @@ use App\Helpers\Helper;
 use Illuminate\Support\Facades\DB;
 use App\Empresa;
 use App\CandidatoOportunidad;
-use App\OportunidadLog;
+use App\Actividad;
 use Auth;
 
 class Pago extends Model
@@ -48,13 +48,15 @@ class Pago extends Model
      */
     protected $casts = [
     ];
+    
     public function log($evento, $texto) {
-      OportunidadLog::create([
+      Actividad::create([
         'oportunidad_id' => $this->id,
         'evento' => $evento,
         'texto'  => $texto,
       ]);
     }
+
     public function oportunidad() {
       return $this->belongsTo('App\Oportunidad', 'oportunidad_id')->first();
     }

@@ -18,7 +18,7 @@ class Cliente extends Model {
 
   protected $connection = 'interno';
   protected $table = 'osce.cliente';
-      const UPDATED_AT = null;
+    const UPDATED_AT = null;
     const CREATED_AT = null;
     /**
      * The attributes that are mass assignable.
@@ -26,7 +26,7 @@ class Cliente extends Model {
      * @var array
      */
     protected $fillable = [
-      'empresa_id','descripcion',
+      'id','empresa_id','descripcion',
     ];
 
     /**
@@ -48,7 +48,13 @@ class Cliente extends Model {
       ];
      public function empresa() {
         return $this->belongsTo('App\Empresa')->first();
+     }
+    public function rotulo() {
+      return $this->empresa()->rotulo();
     }
+     public function cotizaciones(){
+       return $this->hasMany('App\Cotizacion', 'cliente_id', 'id');  
+     }
     public function getContactos() {
         return $this->hasMany('App\Contacto')->get();
     }
@@ -74,11 +80,21 @@ class Cliente extends Model {
     public static function search($term) {
         $term = strtolower(trim($term));
         return static::join('osce.empresa', 'osce.empresa.id', '=', 'osce.cliente.empresa_id')
-        ->select('osce.cliente.*')
         ->where(function($query) use($term) {
             $query->WhereRaw("LOWER(osce.empresa.razon_social) LIKE ?",["%{$term}%"])
             ->orWhereRaw("LOWER(osce.empresa.ruc) LIKE ?",["%{$term}%"])
             ;
         });
+    }
+    public function log($evento, $texto ) {
+      Actividad::create([
+         'tipo'      => 'log',
+        'cliente_id' => $this->id,
+        'evento'     => $evento,
+        'texto'      => $texto
+      ]);
+    }
+    public function timeline() {
+      return $this->hasMany('App\Actividad','cliente_id')->orderBy('id' , 'DESC')->get();
     }
 }

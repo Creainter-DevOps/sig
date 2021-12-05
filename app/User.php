@@ -52,4 +52,11 @@ class User extends Authenticatable
     public function tenants() {
       return $this->hasMany('App\Empresa', 'tenant_id', 'tenant_id')->get();
     }
+    public static function search($term ) {
+      $term = strtolower(trim($term));
+      return  static::where( function ($query ) use( $term ) {
+        $query->WhereRaw('LOWER(usuario) LIKE ?', ["%{$term}%"]);
+      });
+    }
+
 }

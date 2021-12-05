@@ -12,7 +12,7 @@ use App\Helpers\Helper;
 use Illuminate\Support\Facades\DB;
 use App\Empresa;
 use App\CandidatoOportunidad;
-use App\OportunidadLog;
+use App\Actividad;
 use Auth;
 
 class Proyecto extends Model
@@ -29,8 +29,8 @@ class Proyecto extends Model
      * @var array
      */
     protected $fillable = [
-      'tenant_id','cliente_id','contacto_id','oportunidad_id','candidato_id','cotizacion_id','nombre','nomenclatura',
-      'dias_servicio','dias_garantia','dias_instalacion','fecha_desde','fecha_hasta',
+      'tenant_id','cliente_id','contacto_id','oportunidad_id','candidato_id','cotizacion_id','nombre','codigo','nomenclatura','rotulo',
+      'dias_servicio', 'estado', 'dias_garantia','dias_instalacion','tipo' ,'fecha_desde','fecha_hasta', 'eliminado', 'empresa_id'
     ];
 
     /**
@@ -49,7 +49,26 @@ class Proyecto extends Model
      */
     protected $casts = [
     ];
+    public static function generarCodigo($year = null)
+    {
+      $year = $year ?? date('Y');
+      $cod = collect(DB::select("
+          SELECT COUNT(id) as cantidad
+          FROM osce.proyecto"))->first();
+      return 'PP-' . $year . '-' . str_pad($cod->cantidad + 1, 4, '0', STR_PAD_LEFT);
+    }
+    public function log($evento, $texto = null ){
+      Actividad::create([
+        'tipo'        => 'log',
+        'proyecto_id' => $this->id,
+        'evento'      => $evento,
+        'texto'       => $texto
+      ]);   
+    }
 
+    public function empresa() {
+      return $this->belongsTo('App\Empresa', 'empresa_id')->first();
+    }
     public function oportunidad() {
       return $this->belongsTo('App\Oportunidad', 'oportunidad_id')->first();
     }
@@ -62,7 +81,19 @@ class Proyecto extends Model
     public function candidato() {
       return $this->belongsTo('App\Candidato', 'candidato_id')->first();
     }
-    public function empresa() {
-      return $this->belongsTo('App\Empresa', 'empresa_id')->first();
+    public function cotizacion() {
+      return $this->belongsTo('App\Cotizacion', 'cotizacion_id')->first();
+    }
+    public static  function search( $term ) {
+      $term = strtolower(trim($term));
+      return static::where( function ($query) use($term){
+        $query->whereRaw("LOWER(nombre) LIKE ? ", [ "%{$term}%"])
+          ->orWhereRaw("LOWER(codigo) LIKE ? ", ["%{$term}%"])
+          ->orWhereRaw("LOWER(nomenclatura) LIKE ?", ["%{$term}%"]);
+      }); 
+    }
+
+    public function timeline() {
+      return $this->hasMany('App\Actividad','proyecto_id')->orderBy('id', 'DESC' )->get(); 
     }
 }

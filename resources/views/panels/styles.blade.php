@@ -12,6 +12,7 @@
 
     <!-- BEGIN: Theme CSS-->
     <link rel="stylesheet" type="text/css" href="{{asset('css/bootstrap.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('css/themes/layout.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('css/bootstrap-extended.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('css/colors.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('css/components.css')}}">

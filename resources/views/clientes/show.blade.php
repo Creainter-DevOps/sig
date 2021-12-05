@@ -1,6 +1,6 @@
 @extends('layouts.contentLayoutMaster')
 {{-- page title --}}
-@section('title','Users View')
+@section('title', 'Clientes')
 {{-- page styles --}}
 @section('page-styles')
 <link rel="stylesheet" type="text/css" href="{{asset('css/pages/page-users.css')}}">
@@ -32,167 +32,7 @@
   <div class="card">
     <div class="card-content">
       <div class="card-body">
-        <div class="row">
-          <div class="col-12 col-md-4">
-            <table class="table table-borderless">
-              <tbody>
-                <tr>
-                  <td style="width:200px;">Registrado:</td>
-                  <td>{{ Helper::fecha($cliente->created_on, true)}}</td>
-                </tr>
-                <tr>
-                  <td>Ultima Comunicación:</td>
-                  <td>{{ Helper::fecha($cliente->ultima_comunicacion()) }}</td>
-                </tr>
-                <tr>
-                  <td>Seudonimo:</td>
-                  <td>{{ $empresa->seudonimo }}</td>
-                </tr>
-                <tr>
-                  <td>Dirección:</td>
-                  <td>{{ $empresa->direccion }}</td>
-                </tr>
-                <tr>
-                  <td>Referencia:</td>
-                  <td>{{ $empresa->referencia }}</td>
-                </tr>
-                <tr>
-                  <td>Telefono:</td>
-                  <td>{{ $empresa->telefono }}</td>
-                </tr>
-                <tr>
-                  <td>Correo:</td>
-                  <td>{{ $empresa->correo_electronico }}</td>
-                </tr>
-                <tr>
-                  <td>Vinculación Actual:</td>
-                  <td><span class="badge badge-light-success">Active</span></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="col-12 col-md-8">
-            <div class="table-responsive">
-              <table class="table mb-0">
-                <thead>
-                  <tr>
-                    <th>Module Permission</th>
-                    <th>Read</th>
-                    <th>Write</th>
-                    <th>Create</th>
-                    <th>Delete</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Users</td>
-                    <td>Yes</td>
-                    <td>No</td>
-                    <td>No</td>
-                    <td>Yes</td>
-                  </tr>
-                  <tr>
-                    <td>Articles</td>
-                    <td>No</td>
-                    <td>Yes</td>
-                    <td>No</td>
-                    <td>Yes</td>
-                  </tr>
-                  <tr>
-                    <td>Staff</td>
-                    <td>Yes</td>
-                    <td>Yes</td>
-                    <td>No</td>
-                    <td>No</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <!-- users view card data ends -->
-  <!-- users view card details start -->
-  <div class="card">
-    <div class="card-content">
-      <div class="card-body">
-        <div class="row bg-primary bg-lighten-5 rounded mb-2 mx-25 text-center text-lg-left">
-          <div class="col-12 col-sm-3 p-2 text-center">
-            <h6 class="text-primary mb-0">OSCE: <span class="font-large-1 align-middle">2</span></h6>
-          </div>
-          <div class="col-12 col-sm-3 p-2 text-center">
-            <h6 class="text-primary mb-0">CARTAS: <span class="font-large-1 align-middle">0</span></h6>
-          </div>
-          <div class="col-12 col-sm-3 p-2 text-center">
-            <h6 class="text-primary mb-0">COTIZACIONES: <span class="font-large-1 align-middle">0</span></h6>
-          </div>
-          <div class="col-12 col-sm-3 p-2 text-center">
-            <h6 class="text-primary mb-0">PROYECTOS: <span class="font-large-1 align-middle">0</span></h6>
-          </div>
-        </div>
-        <div class="col-12">
-          <table class="table table-borderless">
-            <tbody>
-              <tr>
-                <td>Username:</td>
-                <td class="users-view-username">dean3004</td>
-              </tr>
-              <tr>
-                <td>Name:</td>
-                <td class="users-view-name">Dean Stanley</td>
-              </tr>
-              <tr>
-                <td>E-mail:</td>
-                <td class="users-view-email">deanstanley@gmail.com</td>
-              </tr>
-              <tr>
-                <td>Comapny:</td>
-                <td>XYZ Corp. Ltd.</td>
-              </tr>
-
-            </tbody>
-          </table>
-          <h5 class="mb-1"><i class="bx bx-link"></i> Social Links</h5>
-          <table class="table table-borderless">
-            <tbody>
-              <tr>
-                <td>Twitter:</td>
-                <td><a href="#">https://www.twitter.com/</a></td>
-              </tr>
-              <tr>
-                <td>Facebook:</td>
-                <td><a href="#">https://www.facebook.com/</a></td>
-              </tr>
-              <tr>
-                <td>Instagram:</td>
-                <td><a href="#">https://www.instagram.com/</a></td>
-              </tr>
-            </tbody>
-          </table>
-          <h5 class="mb-1"><i class="bx bx-info-circle"></i> Personal Info</h5>
-          <table class="table table-borderless mb-0">
-            <tbody>
-              <tr>
-                <td>Birthday:</td>
-                <td>03/04/1990</td>
-              </tr>
-              <tr>
-                <td>Country:</td>
-                <td>USA</td>
-              </tr>
-              <tr>
-                <td>Languages:</td>
-                <td>English</td>
-              </tr>
-              <tr>
-                <td>Contact:</td>
-                <td>+(305) 254 24668</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        @include('clientes.table')
       </div>
     </div>
   </div>
@@ -203,7 +43,6 @@
             <h4 class="card-title">OSCE</h4>
           </div>
           <div class="table-responsive">
-            <!-- table start -->
             <table id="table-marketing-campaigns" class="table mb-0">
               <thead>
                 <tr>
@@ -214,7 +53,7 @@
                 </tr>
               </thead>
               <tbody>
-@foreach($cliente->oportunidades() as $v)
+                @foreach($cliente->oportunidades() as $v)
                 <tr>
                   <td class="py-1">
                     {!! $v->rotulo() !!}
@@ -232,16 +71,18 @@
                     </a>
                   </td>
                 </tr>
-@endforeach
+                @endforeach
               </tbody>
             </table>
             <!-- table ends -->
           </div>
         </div>
       </div>
+      <div class="col-sm-12 col-md-5">
+        @include('clientes.timeline')
+      </div>
   </div>
   <!-- users view card details ends -->
-
 </section>
 <!-- users view ends -->
 @endsection

@@ -8,7 +8,7 @@
 @if($configData['mainLayoutType'] === 'vertical-menu-boxicons'){{'boxicon-layout'}}@endif 
 @if($configData['isCardShadow'] === false){{'no-card-shadow'}}@endif" 
 data-open="click" data-menu="vertical-menu-modern" data-col="2-columns">
-
+  <div id="sip_body"></div>
   <!-- BEGIN: Header-->
   @include('panels.navbar')
   <!-- END: Header-->
@@ -54,7 +54,7 @@ data-open="click" data-menu="vertical-menu-modern" data-col="2-columns">
 	@endif
   </div>
   <!-- END: Content-->
-  @if($configData['isCustomizer'] === true && isset($configData['isCustomizer']))
+  @if(false && $configData['isCustomizer'] === true && isset($configData['isCustomizer']))
   <!-- BEGIN: Customizer-->
   <div class="customizer d-none d-md-block">
     <a class="customizer-close" href="#"><i class="bx bx-x"></i></a>
@@ -64,17 +64,11 @@ data-open="click" data-menu="vertical-menu-modern" data-col="2-columns">
   <!-- End: Customizer-->
 
   <!-- Buynow Button-->
-  <div class="buy-now">
-    @include('pages.buy-now')
-  </div>
   @endif
   <!-- demo chat-->
-  <div class="widget-chat-demo">
-    @include('pages.widget-chat')
-  </div>
 
-  <div class="sidenav-overlay"></div>
-  <div class="drag-target"></div>
+<!--  <div class="sidenav-overlay"></div> -->
+<!--  <div class="drag-target"></div> -->
 
   <!-- BEGIN: Footer-->
     @include('panels.footer')

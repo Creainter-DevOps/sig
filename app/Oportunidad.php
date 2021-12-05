@@ -12,7 +12,7 @@ use App\Helpers\Helper;
 use Illuminate\Support\Facades\DB;
 use App\Empresa;
 use App\CandidatoOportunidad;
-use App\OportunidadLog;
+use App\Actividad;
 use Auth;
 
 class Oportunidad extends Model
@@ -29,7 +29,7 @@ class Oportunidad extends Model
      * @var array
      */
     protected $fillable = [
-        'licitacion_id','tenant_id','aprobado_por','aprobado_el','rechazado_por','rechazado_el','motivo','monto_base','duracion_dias','instalacion_dias','garantia_dias','estado','fecha_participacion','fecha_propuesta','que_es',
+        'codigo','licitacion_id','tenant_id','aprobado_por','aprobado_el','rechazado_por','rechazado_el','motivo','monto_base','duracion_dias','instalacion_dias','garantia_dias','estado','fecha_participacion','fecha_propuesta','que_es',
     ];
 
     /**
@@ -51,7 +51,7 @@ class Oportunidad extends Model
       'rechazado_el' => 'datetime',
     ];
     public function log($evento, $texto) {
-      OportunidadLog::create([
+      Actividad::create([
         'oportunidad_id' => $this->id,
         'evento' => $evento,
         'texto'  => $texto,
@@ -63,6 +63,15 @@ class Oportunidad extends Model
     public function comentarios() {
       return 0;
     }
+    public static function search($query) {
+      $query = strtolower($query);
+      return Oportunidad::join('osce.licitacion', 'oportunidad.licitacion_id','licitacion.id')
+        ->WhereRaw("LOWER(licitacion.rotulo) LIKE ? ", ["%{$query}%" ])
+        ->orWhereRaw("LOWER(licitacion.nomenclatura) LIKE ? ", ["%{$query}%" ])
+        ->orWhereRaw("LOWER(oportunidad.codigo) LIKE ? ", ["%{$query}%" ])
+        ->orWhereRaw("licitacion.procedimiento_id::text LIKE ? ", ["%{$query}%" ])
+        ->orWhereRaw("LOWER(licitacion.descripcion) LIKE ? ", ["%{$query}%" ]);
+    }
     public function rotulo() {
       if(empty($this->que_es)) {
         $lista = strtoupper($this->licitacion()->rotulo);
@@ -70,6 +79,8 @@ class Oportunidad extends Model
       } else {
         $rp = '-- ' . strtoupper($this->que_es) . ' --';
       }
+      $rp = substr($this->codigo, 8) . ': ' . $rp;
+//      $rp = $this->licitacion()->procedimiento_id . ': ' . $rp;
       return (!empty($this->importancia) ? '<span class="favorite warning"><i class="bx bxs-star"></i></span>' : '') . substr($rp, 0, 100) . (!empty($this->revisado_el) ? ' <b>[R]</b>' : '');
     }
     public function participacion() {
@@ -102,11 +113,11 @@ class Oportunidad extends Model
     }
     static function listado_nuevas() {
       $rp = DB::select("
-SELECT O.*
-FROM osce.oportunidad O
-JOIN osce.licitacion L ON L.id = O.licitacion_id AND L.eliminado IS NULL
-WHERE O.archivado_el IS NULL AND O.rechazado_el IS NULL AND O.aprobado_el IS NULL
-ORDER BY L.fecha_participacion_hasta ASC");
+            SELECT O.*
+            FROM osce.oportunidad O
+            JOIN osce.licitacion L ON L.id = O.licitacion_id AND L.eliminado IS NULL
+            WHERE O.archivado_el IS NULL AND O.rechazado_el IS NULL AND O.aprobado_el IS NULL
+            ORDER BY L.fecha_participacion_hasta ASC");
       return static::hydrate($rp);
     }
     static function listado_archivadas() {
@@ -180,7 +191,7 @@ WHERE O.aprobado_el >= NOW() - INTERVAL '40' DAY AND O.rechazado_el IS NULL AND 
 JOIN osce.licitacion L ON L.id = x.licitacion_id AND L.eliminado IS NULL
 AND
   ((L.fecha_propuesta_desde - INTERVAL '1' DAY <= NOW() AND L.fecha_propuesta_hasta + INTERVAL '1' DAY >= NOW())
-  OR (L.fecha_propuesta_hasta - INTERVAL '4' DAY <= NOW() AND L.fecha_propuesta_hasta + INTERVAL '2' DAY >= NOW()))
+  OR (L.fecha_propuesta_hasta - INTERVAL '8' DAY <= NOW() AND L.fecha_propuesta_hasta + INTERVAL '4' DAY >= NOW()))
 -- WHERE x.cantidad_propuestas = 0 OR x.cantidad_propuestas <> x.cantidad_participadas
 ORDER BY L.fecha_propuesta_hasta ASC, id DESC");
       return static::hydrate($rp);
@@ -206,7 +217,11 @@ ORDER BY O.aprobado_el DESC, O.id ASC");
       return static::hydrate($rp);
     }
     public function aprobar() {
-      DB::select('UPDATE osce.oportunidad SET aprobado_el = NOW(), archivado_por = ' . Auth::user()->id . ' WHERE id = ' . $this->id);
+      $this->update([
+        'codigo'       => DB::raw('osce.fn_generar_codigo_oportunidad(id)'),
+        'aprobado_el'  => DB::raw('now'),
+        'aprobado_por' => Auth::user()->id,
+      ]);
       $this->log('aprobar', null);
     }
     public function revisar() {
@@ -231,7 +246,7 @@ ORDER BY O.aprobado_el DESC, O.id ASC");
       $this->log('accion', 'Ha mostrado interés con la empresa ' . $empresa->razon_social);
     }
     public function timeline() {
-      return $this->hasMany('App\OportunidadLog','oportunidad_id')->orderBy('id', 'desc')->get();
+      return $this->hasMany('App\Actividad','oportunidad_id')->orderBy('id', 'desc')->get();
     }
     public function similares() {
       if(empty($this->que_es)) {
@@ -251,6 +266,130 @@ ORDER BY O.aprobado_el DESC, O.id ASC");
         return Helper::money($this->monto_propuesto * $this->duracion_dias / $this->duracion_dias);
       }
       return 'No existe duración';
+    }
+    public function estado_participacion() {
+      $ahora = time();
+      $participacion_desde = strtotime($this->licitacion()->fecha_participacion_desde);
+      $participacion_hasta = strtotime($this->licitacion()->fecha_participacion_hasta);
+      $propuesta_desde = strtotime($this->licitacion()->fecha_propuesta_desde);
+      $propuesta_hasta = strtotime($this->licitacion()->fecha_propuesta_hasta);
+
+      if($ahora >= $participacion_hasta) {
+        if(!empty($this->fecha_participacion)) {
+          return [
+            'timeout' => false,
+            'status' => true,
+            'class' => 'badge badge-light-success',
+            'message' => 'PARTICIPANDO',
+          ];
+        } else {
+          return [
+            'timeout' => true,
+            'status' => false,
+            'class' => 'badge badge-light-danger',
+            'message' => 'TIMEOUT3',
+          ];
+        }
+      } elseif($ahora >= $participacion_desde) {
+        if(!empty($this->fecha_participacion)) {
+          return [
+            'timeout' => false,
+            'status' => true,
+            'class' => 'badge badge-light-success',
+            'message' => 'PARTICIPANDO',
+          ];
+        } else {
+          return [
+            'timeout' => false,
+            'status' => false,
+            'class' => 'badge badge-light-warning',
+            'message' => 'REQUIERE',
+          ];
+        }
+      } else {
+        return [
+          'timeout' => false,
+          'status' => true,
+          'class' => 'badge badge-light-secondary',
+          'message' => 'ESPERANDO',
+        ];
+      }
+    }
+    public function estado_propuesta() {
+      $ahora = time();
+      $participacion_desde = strtotime($this->licitacion()->fecha_participacion_desde);
+      $participacion_hasta = strtotime($this->licitacion()->fecha_participacion_hasta);
+      $propuesta_desde = strtotime($this->licitacion()->fecha_propuesta_desde);
+      $propuesta_hasta = strtotime($this->licitacion()->fecha_propuesta_hasta);
+
+      if($ahora >= $propuesta_hasta) {
+        if(!empty($this->fecha_propuesta)) {
+          return [
+            'timeout' => false,
+            'status' => true,
+            'class' => 'badge badge-light-success',
+            'message' => 'ENVIADO',
+          ];
+        } else {
+          return [
+            'timeout' => true,
+            'status' => false,
+            'class' => 'badge badge-light-danger',
+            'message' => 'TIMEOUT1',
+          ];
+        }
+      } elseif($ahora >= $propuesta_desde) {
+        if(!empty($this->fecha_propuesta)) {
+          return [
+            'timeout' => false,
+            'status' => true,
+            'class' => 'badge badge-light-success',
+            'message' => 'ENVIADO',
+          ];
+        } if(!empty($this->fecha_participacion)) {
+          return [
+            'timeout' => false,
+            'status' => false,
+            'class' => 'badge badge-light-warning',
+            'message' => 'REQUIERE',
+          ];
+        } else {
+          return [
+            'timeout' => true,
+            'status' => false,
+            'class' => 'badge badge-light-danger',
+            'message' => 'TIMEOUT2',
+          ];
+        }
+      } else {
+        return [
+          'timeout' => false,
+          'status' => true,
+          'class' => 'badge badge-light-secondary',
+          'message' => 'ESPERANDO',
+        ];
+      }
+    }
+    public function estado_pro() {
+      $ahora = time();
+      $pro_desde = strtotime($this->licitacion()->fecha_buena_desde);
+      $pro_hasta = strtotime($this->licitacion()->fecha_buena_hasta);
+
+      if($ahora >= $pro_desde) {
+          return [
+            'timeout' => false,
+            'status' => true,
+            'class' => 'badge badge-light-success',
+            'message' => 'PUBLICADO',
+          ];
+      } else {
+        return [
+          'timeout' => false,
+          'status' => true,
+          'class' => 'badge badge-light-secondary',
+          'message' => 'ESPERANDO',
+        ];
+      }
     }
     public function estado() {
       $ahora = time();
@@ -340,6 +479,9 @@ ORDER BY O.aprobado_el DESC, O.id ASC");
         ];
       }
     }
+    /*public function licitacion(){
+       return $this->belongsTo('App\Cotizacion', 'licitacion_id','id')->first(); 
+    }*/
     public static function busqueda_de_similares($q, $referencia_id) {
       if(is_array($q)) {
         $q = implode('%', $q);
@@ -349,5 +491,8 @@ ORDER BY O.aprobado_el DESC, O.id ASC");
         SELECT *, array_to_string(B.licitaciones_id,',') ids
         FROM osce.busqueda_licitaciones_similares(:q, :referencia) B
         LIMIT 20", ['q' => $q, 'referencia' => $referencia_id]);
+    }
+    static function estadistica_barra_cantidades() {
+      return DB::select("SELECT fecha eje_x, cantidad eje_y, tipo collection FROM osce.estadistica_rapida_oportunidades(7, 1)");
     }
 }

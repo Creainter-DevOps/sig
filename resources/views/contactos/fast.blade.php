@@ -1,0 +1,45 @@
+<div class="card-body">
+  <h5 class="card-title">Nuevo contacto </h5>
+  <form class="form" action="{{ route('contactos.store') }}" method="post" >
+      @csrf
+      <div class="form-body">
+        <div class="row">
+          <div class="col-md-12 col-12">
+            <div class="form-label-group">
+               <input type="text" id="cliente_id" autofocus data-ajax="/clientes/autocomplete"  class="form-control autocomplete" name="cliente_id"
+                  placeholder="Cliente(*)" required value="">
+              <label for="">Cliente(*)</label>
+            </div>
+          </div>
+          <div class="col-md-6  col-12">
+            <div class="form-label-group">
+                <input type="text" class="form-control" placeholder="Nombres(*)"   id="nombres" name="nombres" required>
+                <label for="">Nombres(*)</label>
+            </div>
+          </div>
+          <div class="col-md-6  col-12">
+            <div class="form-label-group" >
+               <input type="text" class="form-control" placeholder="Apellidos(*) "   id="apellidos" name="apellidos" required> 
+               <label for=""> Apellidos(*)</label>
+            </div>
+          </div>
+          <div class="col-md-6 col-12">
+            <div class="form-label-group" >
+              <input type="mail" class="form-control"  name="correo"  placeholder="Correo" >
+              <label for="">Correo(*)</label>
+            </div>
+          </div>
+          <div class="col-md-6 col-12">
+            <div class="form-label-group">
+              <input type="text" id="celular" class="form-control" name="celular" placeholder="Celular" required>
+              <label for="plazo-servicio">Celular</label>
+            </div>
+          </div>
+          <div class="col-12 d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary mr-1 mb-1">Guardar </button>
+            <button type="reset" class="btn btn-light-danger  mr-1 mb-1" data-dismiss="modal"   >Cancelar</button>
+          </div>
+        </div>
+      </div>
+   </form>
+</div>

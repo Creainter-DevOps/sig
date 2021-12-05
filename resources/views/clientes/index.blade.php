@@ -1,6 +1,6 @@
 @extends('layouts.contentLayoutMaster')
 {{-- page title --}}
-@section('title','Invoice List')
+@section('title','Clientes')
 {{-- vendor style --}}
 @section('vendor-styles')
 <link rel="stylesheet" type="text/css" href="{{asset('vendors/css/tables/datatable/datatables.min.css')}}">
@@ -54,30 +54,30 @@ tr.block_details>td>div {
     <table class="table table-sm mb-0" style="width:100%">
       <thead>
         <tr>
-                        <th>RUC</th>
-                        <th>Razon social</th>
-                        <th>Seudonimo</th>
-                        <th>Telefono</th>
-                        <th>Web</th>
-                        <th width="5%">Opciones</th>
+          <th>RUC</th>
+          <th>Razon social</th>
+          <th>Seudonimo</th>
+          <th>Telefono</th>
+          <th>Web</th>
+          <th width="5%">Opciones</th>
         </tr>
       </thead>
       <tbody>
       @foreach ($listado as $cliente)
         <tr>
-                                <td>{{ $cliente->empresa()->ruc }}</td>
-                                <td>{{ $cliente->empresa()->razon_social }}</td>
-                                <td>{{ $cliente->empresa()->seudonimo }}</td>
-                                <td>{{ $cliente->empresa()->telefono }}</td>
-                                <td>{{ $cliente->empresa()->web }}</td>
+          <td>{{ $cliente->empresa()->ruc }}</td>
+          <td>{{ $cliente->empresa()->razon_social }}</td>
+          <td>{{ $cliente->empresa()->seudonimo }}</td>
+          <td>{{ $cliente->empresa()->telefono }}</td>
+          <td>{{ $cliente->empresa()->web }}</td>
           <td class="text-center py-1">
               <div class="dropdown">
                 <span class="bx bx-dots-vertical-rounded font-medium-3 dropdown-toggle nav-hide-arrow cursor-pointer" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="menu">
                 </span>
                 <div class="dropdown-menu dropdown-menu-right" x-placement="top-end" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(19px, -7px, 0px);">
-                  <a class="dropdown-item" href="/clientes/{{ $cliente->empresa_id }}/"><i class="bx bx-show-alt mr-1"></i> show</a>
-                  <a class="dropdown-item" href="/clientes/{{ $cliente->id }}/editar"><i class="bx bx-edit-alt mr-1"></i> edit</a>
-<!--                  <a class="dropdown-item" href="/clientes/{{ $cliente->id }}/remove"><i class="bx bx-trash mr-1"></i> delete</a> -->
+                  <a class="dropdown-item" href="{{ route('clientes.show', ['cliente' => $cliente->id ]) }}"><i class="bx bx-show-alt mr-1"></i> Ver Mas </a>
+                  <a class="dropdown-item" href="{{ route('clientes.edit', [ 'cliente' =>  $cliente->id ]) }}"  ><i class="bx bx-edit-alt mr-1"></i> Editar</a>
+                  <a class="dropdown-item" data-confirm-remove="{{ route('clientes.destroy', ['cliente' => $cliente->id ]) }}" href="#" ><i class="bx bx-trash mr-1"></i> Eliminar</a> 
                 </div>
               </div>
             </td>

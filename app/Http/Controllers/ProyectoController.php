@@ -6,13 +6,20 @@ use Illuminate\Http\Request;
 use App\Proyecto;
 use App\Contacto;
 use App\Empresa;
+use App\Cliente;
 use App\Persona;
 use App\Ubigeo;
 
 class ProyectoController extends Controller {
+  protected $viewBag; 
   public function __construct()
   {
     $this->middleware('auth');
+    $this->viewBag['pageConfigs'] = ['pageHeader' => true ];
+    $this->viewBag['breadcrumbs'] = [
+      ["link" => "/dashboard", "name" => "Home" ],
+      ["link" => "/proyectos", "name" => "Proyectos" ]
+    ];
   }
   public function index(Request $request)
     {
@@ -20,27 +27,15 @@ class ProyectoController extends Controller {
         if(!empty($search)) {
             $listado = Proyecto::search($search)->paginate(15)->appends(request()->query());
         } else {
-            $listado = Proyecto::orderBy('created_on', 'desc')->paginate(15)->appends(request()->query());
+            $listado = Proyecto::where( 'eliminado', false )->orderBy('fecha_desde', 'desc')->paginate(15)->appends(request()->query());
         }
         return view('proyectos.index', ['listado' => $listado]);
     }
-    public function create(Request $request)
+    public function create(Request $request, proyecto $proyecto)
     {
-        $empresa       = null;
-        $ubigeo        = '150101';
-        $distrito      = Ubigeo::distrito($ubigeo);
-        $departamentos = Ubigeo::departamentos($ubigeo);
-        $provincias    = Ubigeo::provincias($ubigeo);
-        $distritos     = Ubigeo::distritos($ubigeo);
-
-        if ($request->ajax()) {
-            $empresa = new Empresa;
-            $empresa->direccion = 'Lima';
-            $empresa->telefono  = '000 000 000';
-            $empresa->correo_electronico = 'comercial@creainter.com.pe';
-            $empresa->web = 'web';
-        }
-        return view($request->ajax() ? 'proyectos.fast' : 'proyectos.create', compact('empresa', 'distrito', 'departamentos', 'provincias', 'distritos'));      
+        $this->viewBag['proyecto'] = $proyecto;
+        $this->viewBag['breadcrumbs'][] = [ 'name' => "Nuevo Proyecto" ];  
+        return view($request->ajax() ? 'proyectos.fast' : 'proyectos.create', $this->viewBag );      
     }
 
     /**
@@ -50,57 +45,13 @@ class ProyectoController extends Controller {
      * @param  \App\lain  $lain
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, Proyecto $proyecto )
     {
-        $existe_ruc = Empresa::where('ruc', '=', $request->input('ruc'))->first();
-        $existe_razon = Empresa::where('razon_social', '=', $request->input('razon_social'))->first();
-        if ($existe_ruc !== null) {
-            $empresa = $existe_ruc;
-        } else if ($existe_razon !== null) {
-            $empresa = $existe_razon;
-        } else {
-            $empresa = Empresa::create($request->all());
-        }
-
-        $existe_vinculo = Proyecto::where('empresa_id', '=', $empresa->id)->first();
-        if ($existe_vinculo !== null) {
-            $error = 'La empresa ya ha sido registrada como cliente, y es la siguiente:';
-            goto response;
-        }
-
-        $cliente = new Proyecto;
-        $cliente->empresa_id = $empresa->id;
-        $cliente->tenant_id = Auth::user()->id;
-        $cliente->descripcion = $request->input('descripcion');
-        $cliente->save();
-
-        response:
-        if($request->ajax()) {
-            if(!empty($error)) {
-                return response()->json([
-                    'status'  => 'error',
-                    'message' => $error,
-                ]);
-            } else {
-                return response()->json([
-                    'status'  => 'success',
-                    'message' => 'Se ha realizado registro con éxito.',
-                    'data' => [
-                        'id'    => $cliente->id,
-                        'value' => $cliente->empresa()->razon_social,
-                    ],
-                ]);
-            }
-        } else {
-            if(!empty($error)) {
-//                Session::flash('message_error', $error);
-                //return back();
-                return redirect()->route('proyectos.edit', [$existe_vinculo->id]);
-            } else {
-//                Session::flash('message_success', 'Se ha realizado registro con éxito.');
-                return redirect()->route('proyectos.edit', [$cliente->id]);
-            }
-        }
+        $proyecto->fill($request->all());
+        $proyecto->codigo = Proyecto::generarCodigo();
+        $proyecto->save();
+        $proyecto->log("creado");
+        return response()->json(['status'=> "success", 'redirect' => "/proyectos" ]);
     }
 
     /**
@@ -112,7 +63,9 @@ class ProyectoController extends Controller {
      */
     public function show(Proyecto $proyecto)
     {
-      return view('proyectos.show', compact('proyecto'));
+      $cliente = Cliente::find($proyecto->cliente_id);
+      $contacto = Contacto::find($proyecto->contacto_id); 
+      return view('proyectos.show', compact('proyecto', 'contacto', 'cliente'));
     }
 
     /**
@@ -124,6 +77,7 @@ class ProyectoController extends Controller {
      */
     public function edit(Proyecto $proyecto)
     {
+      $this->viewBag['proyecto'] = $proyecto; 
       return view('proyectos.edit', compact('proyecto'));
     }
 
@@ -135,13 +89,12 @@ class ProyectoController extends Controller {
      * @param  \DummyFullModelClass  $DummyModelVariable
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Proyecto $cliente)
+    public function update(Request $request, Proyecto $proyecto )
     {
-//        Session::flash('message_success', 'Se ha realizado la modificación con éxito.');
-      $cliente->empresa()->update($request->all());
-      $cliente->update($request->all());
-
-        return back();
+      // Session::flash('message_success', 'Se ha realizado la modificación con éxito.');
+      $proyecto->update($request->all());
+      $proyecto->log("editado");
+      return response()->json(['status'=> "success" , 'redirect' => "/proyectos" ]);
     }
 
     /**
@@ -151,18 +104,18 @@ class ProyectoController extends Controller {
      * @param  \DummyFullModelClass  $DummyModelVariable
      * @return \Illuminate\Http\Response
      */
-    public function destroy()
+    public function destroy(Proyecto $proyecto)
     {
-        /* Proceso para eliminar */
-        return Redirect::to('/proyectos');
+      /* Proceso para eliminar */
+        $proyecto->eliminado = true;
+        $proyecto->save();
+        $proyecto->log("eliminado");
+        return response()->json(['status'=> true , 'refresh' => true ]);
     }
     public function autocomplete(Request $request)
     {
         $query = strtolower($request->input('query'));
-        $data = Proyecto::select("comercial.empresa.razon_social as value",'comercial.cliente.id')
-                ->join('comercial.empresa', 'comercial.empresa.id', '=', 'comercial.cliente.empresa_id')
-                ->whereRaw("LOWER(comercial.empresa.razon_social) LIKE ? OR LOWER(comercial.empresa.seudonimo) LIKE ?", ["%{$query}%", "%{$query}%"])
-                ->get();
+        $data = Proyecto::search( $query )->selectRaw("id, CONCAT_WS(':', codigo,nombre) as value")->get();
         return response()->json($data);
     }
      public function addRepresentante(Request $request, Proyecto $cliente)
@@ -191,7 +144,12 @@ class ProyectoController extends Controller {
      public function delRepresentante(Request $request, Proyecto $cliente, Contacto $contacto)
      {
         $contacto->delete();
-//        Session::flash('message_success', 'Se ha eliminado correctamente.');
+     // Session::flash('message_success', 'Se ha eliminado correctamente.');
         return back();
+     }
+
+     public function observacion(Request $request, Proyecto $proyecto) {
+         $proyecto->log('texto',$request->input('texto'));
+         return back();
      }
 }

@@ -40,6 +40,20 @@
           "slug": "email-application"
         },
         {
+          "url": "oportunidades",
+          "name": "Oportunidad",
+          "i18n": "Oportunidad",
+          "icon": "bx bx-check-alt",
+          "slug": "email-application"
+        },
+        {
+          "url": "contactos",
+          "name": "Contactos",
+          "i18n": "Contactos",
+          "icon": "bx bx-check-alt",
+          "slug": "email-application"
+        },
+        {
           "url": "app-chat",
           "name": "Chat",
           "i18n": "Chat",

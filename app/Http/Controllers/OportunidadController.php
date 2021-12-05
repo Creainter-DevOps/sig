@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Empresa;
 use App\CandidatoOportunidad;
 use App\Licitacion;
+use App\Helpers\Chartjs;
+use App\Helpers\Helper;
 
 class OportunidadController extends Controller {
   public $fieldsPublic = [
@@ -22,11 +24,36 @@ class OportunidadController extends Controller {
   public function __construct() {
     $this->middleware('auth');
   }
-  public function dashboard() {
+  public function dashboard(Request $request ) {
+    if (!empty( $request->input("search") )){
+      $query = strtolower($request->input("search")); 
+      $list = Oportunidad::search($query)->take(20)->get();
+      //dd($list);
+      return view('oportunidad.index', compact("list"));
+    } 
     $participaciones_por_vencer = Oportunidad::listado_participanes_por_vencer();
     $propuestas_por_vencer = Oportunidad::listado_propuestas_por_vencer();
     $propuestas_en_pro = Oportunidad::listado_propuestas_buenas_pro();
-    return view('oportunidad.dashboard', compact('participaciones_por_vencer','propuestas_por_vencer','propuestas_en_pro'));
+    $chartjs['barras'] = Oportunidad::estadistica_barra_cantidades();
+    $chartjs['barras'] = Chartjs::line($chartjs['barras'], [
+      'PARTICIPACIÓN' => array(
+        'rotulo'     => 'PARTICIPACIÓN',
+        'color'      => '#5A8DEE',
+      ),
+      'PROPUESTA' => array(
+        'rotulo'     => 'PROPUESTAS',
+        'color'      => '#56DF9B',
+      ),
+      'TIMEOUT/PARTICIPACIÓN' => array(
+        'rotulo'     => 'TIMEOUT/PARTICIPACIÓN',
+        'color'      => '#DF8F28',
+      ),
+      'TIMEOUT/PROPUESTA' => array(
+        'rotulo'     => 'TIMEOUT/PROPUESTA',
+        'color'      => '#DF2001',
+      ),
+    ]);
+    return view('oportunidad.dashboard', compact('participaciones_por_vencer','propuestas_por_vencer','propuestas_en_pro','chartjs'));
   }
 
     public function listNuevas(){
@@ -52,7 +79,7 @@ class OportunidadController extends Controller {
       $oportunidad = $licitacion->oportunidad();
       return view('oportunidad.detalle', compact('licitacion','oportunidad'));
     }
-    public function observacion(Request $request, Licitacion $licitacion) {
+    public function observacion( Request $request, Licitacion $licitacion) {
       $oportunidad = $licitacion->oportunidad();
       foreach($this->fieldsPublic as $k => $v) {
         $texto = $request->input($k);
@@ -102,6 +129,34 @@ public function rechazar(Request $request, Licitacion $licitacion)
     return redirect('/oportunidad');
   }
 }
+
+/*public function update(Request $request, Oportunidad $oportunidad){
+  $oportunidad->update($request->all());
+  if(is_numeric($oportunidad-> )
+  return response()->json(['status' => true ]);
+}*/
+
+public function update( Request $request, Oportunidad $oportunidad ){
+  $dato =  $request->input("field");
+  $value = $request->input($dato);
+  $oportunidad->update($request->all());
+  $oportunidad->log($dato,$value);
+  if( is_numeric($value)){
+    $value = Helper::money($value);
+  } 
+  return response()->json(['status' => true , 'value' => $value ]);
+}
+
+public function covertirproyecto($id){
+  $oportunidad = Oportunidad::find($id);
+  $proyecto = new Proyecto();
+  $proyecto->oportunidad_id = $oportunidad->id;
+  $proyecto->empresa_id    = $oportunidad->id;
+  $proyecto->oportunidad_id = $oportunidad->id;
+  $proyecto->oportunidad_id = $oportunidad->id;
+
+  
+}
 public function archivar(Request $request, Licitacion $licitacion) {
   $oportunidad = $licitacion->oportunidad();
     $oportunidad->archivar();
@@ -113,8 +168,14 @@ public function registrarParticipacion(Request $request, Licitacion $licitacion,
     return redirect('/oportunidad/' . $licitacion->id . '/detalles');
   }
 public function registrarPropuesta(Request $request, Licitacion $licitacion, CandidatoOportunidad $candidato) {
-  $oportunidad = $licitacion->oportunidad();
+    $oportunidad = $licitacion->oportunidad();
     $candidato->registrar_propuesta();
     return redirect('/oportunidad/' . $licitacion->id . '/detalles');
   }
+public function autocomplete(Request $request ){
+    $query = $request->input('query');
+    $list = Oportunidad::search( $query )->selectRaw(" oportunidad.id,  CONCAT_WS( ':', licitacion.procedimiento_id , licitacion.rotulo) as value " )->get();
+     return response()->json($list); 
+  }
+
 }

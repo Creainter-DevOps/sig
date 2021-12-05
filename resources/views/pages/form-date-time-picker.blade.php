@@ -381,7 +381,6 @@
 </section>
 <!-- Bootstrap DateRange Picker end -->
 @endsection
-
 {{-- vendor scripts --}}
 @section('vendor-scripts')
 <script src="{{asset('vendors/js/pickers/pickadate/picker.js')}}"></script>

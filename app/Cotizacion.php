@@ -12,7 +12,7 @@ use App\Helpers\Helper;
 use Illuminate\Support\Facades\DB;
 use App\Empresa;
 use App\CandidatoOportunidad;
-use App\OportunidadLog;
+use App\Oportunidad;;
 use Auth;
 
 class Cotizacion extends Model
@@ -29,8 +29,8 @@ class Cotizacion extends Model
      * @var array
      */
     protected $fillable = [
-      'tenant_id','cliente_id','contacto_id','oportunidad_id','plazo_garantia','plazo_instalacion','plazo_servicio','monto_neto','monto_igv','monto_total',
-      'descripcion','codigo','fecha','validez','empresa_id',
+      'tenant_id', 'cliente_id', 'contacto_id', 'oportunidad_id', 'plazo_garantia', 'plazo_instalacion', 'plazo_servicio', 'monto_base', 'monto_igv', 'monto_total',
+      'descripcion','codigo','fecha','validez','empresa_id', 'observacion'
     ];
 
     /**
@@ -49,14 +49,47 @@ class Cotizacion extends Model
      */
     protected $casts = [
     ];
+    public static function generarCodigo($year = null)
+    {
+        $year = $year ?? date('Y');
+        $cod = collect(DB::select("
+            SELECT COUNT(id) as cantidad
+            FROM osce.cotizacion"))->first();
+        return 'CR-' . $year . '-' . str_pad($cod->cantidad + 1, 4, '0', STR_PAD_LEFT);
+    }
     public function log($evento, $texto) {
-      OportunidadLog::create([
-        'oportunidad_id' => $this->id,
+      Actividad::create([
+        'tipo'          => 'log',
+        'cotizacion_id' => $this->id,
         'evento' => $evento,
         'texto'  => $texto,
       ]);
     }
+    public function timeline() {
+      return $this->hasMany('App\Actividad','cotizacion_id')->orderBy('id' , 'DESC')->get();
+    }
+
+    public function rotulo(){
+      return $this->codigo . ":" . $this->descripcion; 
+    }
+
     public function oportunidad() {
       return $this->belongsTo('App\Oportunidad', 'oportunidad_id')->first();
+    }
+    public function cliente(){
+      return $this->belongsTo ('App\Cliente' ,'cliente_id' ,'id')->first();
+    }
+    public function empresa(){
+      return $this->belongsTo('App\Empresa','empresa_id', 'id')->first();
+    }
+    public function contacto(){
+     return $this->belongsTo ('App\Contacto', 'contacto_id', 'id')->first();
+    }
+    public static function search($term) {
+      $term = strtolower(trim($term));
+      return static::where(function($query) use($term) {
+        $query->WhereRaw("LOWER(codigo) LIKE ?",["%{$term}%"])
+          ->orWhereRaw("LOWER( descripcion) LIKE ?", ["%{$term}%"]);
+      });
     }
 }
