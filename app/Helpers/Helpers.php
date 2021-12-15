@@ -5,9 +5,13 @@ use Illuminate\Support\Str;
 
 class Helper
 {
-  public static function money($data) {
+  public static function money($data, $moneda_id = 1) {
     $dd = number_format($data, 2, ".", " ");
-    return str_replace('.00','', $dd);
+    $dd = str_replace('.00','', $dd);
+    if($moneda_id == 1) {
+      return 'S/. ' . $dd;
+    }
+    return $dd . ' USD';
   }
   public static function es_pasado($date, &$class = '')
 {

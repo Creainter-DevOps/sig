@@ -42,7 +42,7 @@
         <tr>
           <td><div>{{ $proyecto->codigo }}</div></td>
           <td>{{ isset($proyecto->empresa_id) ?   $proyecto->empresa()->rotulo() : ''  }}</td>
-          <td>{{ $proyecto->cliente()->empresa()->rotulo() }}</td>
+          <td>{{ isset($proyecto->cliente_id) ?  $proyecto->cliente()->empresa()->rotulo() : '' }}</td>
           <td>{{ $proyecto->nombre }}</td>
           <td>{{ Helper::fecha( $proyecto->fecha_desde) }}</td>
           <td>{{ Helper::fecha( $proyecto->fecha_hasta) }}</td>

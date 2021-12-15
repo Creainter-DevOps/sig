@@ -74,6 +74,17 @@
     </div>
     <div class="col-md-6  col-12">
       <div class="form-label-group">
+        <input type="hidden" >
+        <select class="form-control" name="importancia" >
+          <option value="baja"  {{ $actividad->importancia == 'baja' ? 'selected' : '' }} >Baja</option>
+          <option value="media" {{ $actividad->importancia == 'media' ? 'selected' : '' }} >Media</option>
+          <option value="alta"  {{ $actividad->importancia == 'alta' ? 'selected' : '' }} >Alta</option>
+        </select>    
+        <label for="">Importancia(*) </label>
+      </div>
+    </div>
+    <div class="col-md-6  col-12">
+      <div class="form-label-group">
             <input type="text" class="form-control  autocomplete" placeholder="Asignado(*)" data-ajax="/usuarios/autocomplete"
              value="{{ old ( 'asignado_id', $actividad->asignado_id  ?? '' ) }}"  id="orden"
              name="asignado_id" required data-value="{{ isset($actividad->asignado_id) ? $actividad->usuario() : '' }}" >

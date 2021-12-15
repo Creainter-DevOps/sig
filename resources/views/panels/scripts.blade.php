@@ -26,7 +26,7 @@
     <script src="{{asset('js/scripts/footer.js')}}"></script>
     <script src="{{asset('js/scripts/customizer.js')}}"></script>
     <script src="{{asset('js/scripts/typeahead.js')}}"></script>
-<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{{asset('js/scripts/helpers/toast.js')}}"></script>
     <script src="{{asset('assets/js/scripts.js')}}"></script>
     <!-- END: Theme JS-->

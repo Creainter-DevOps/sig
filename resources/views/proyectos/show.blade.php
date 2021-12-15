@@ -29,106 +29,83 @@
     </div>
   </div>
   <div class="row">
-    <div class="col-12 col-md-12">
-      <div class="card">
-        <div class="card-content">
-          <div class="card-body">
-            <table class="table table-sm table-borderless">
-              <tbody>
-                <tr>
-                  <th>Empresa Encargada</th>
-                  <td>{{ $proyecto->empresa()->razon_social }}</td>
-                <tr>
-                  <th>Cliente:</th>
-                  <td>{{ $proyecto->cliente()->empresa()->razon_social }}</td>
-                </tr>
-                <tr>
-                  <th>Contacto:</th>
-                  <td>{{ !empty($proyecto->contacto_id) ? $proyecto->Contacto()->NombresApellidos() : ''  }}</td>
-                </tr>
-                <tr>
-                  <th>Licitación:</th>
-                  <td>{!! !empty($proyecto->oportundiad_id)?  $proyecto->oportunidad()->rotulo() : ''  !!}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-sm-12">
-    <div class="row bg-primary bg-lighten-5 rounded mb-2 mx-25 text-center text-lg-left">
-      <div class="col-12 col-sm-3 p-2 text-center">
-        <h6 class="text-primary mb-0">CARTAS: <span class="font-large-1 align-middle">2</span></h6>
-      </div>
-      <div class="col-12 col-sm-3 p-2 text-center">
-        <h6 class="text-primary mb-0">CORREOS: <span class="font-large-1 align-middle">0</span></h6>
-      </div>
-      <div class="col-12 col-sm-3 p-2 text-center">
-        <h6 class="text-primary mb-0">: <span class="font-large-1 align-middle">0</span></h6>
-      </div>
-      <div class="col-12 col-sm-3 p-2 text-center">
-        <h6 class="text-primary mb-0">PROYECTOS: <span class="font-large-1 align-middle">0</span></h6>
-      </div>
-    </div>
-    </div>
-    @if (!empty($proyecto->contacto_id))
-      <div class="col-sm-12">
-        <div class="card">
-          <div class="card-body">
-            @include('contactos.table')
-          </div>
-        </div>
-      </div>
-    @endif
     @if (!empty($proyecto->cliente_id))
-      <div class="col-sm-12">
+      <div class="col-sm-6">
         <div class="card">
           <div class="card-body">
             @include('clientes.table')
           </div>
         </div>
       </div>
-    @endif
-    <div  class="col-6 col-sm-6">
-      @include('proyectos.timeline')
-    </div>
-    @if(!empty($proyecto->candidato_id))
+      @endif
+      @if(!empty($proyecto->oportunidad()->licitacion_id))
     <div class="col-6 col-md-6">
       <div class="card">
         <div class="card-content">
           <div class="card-body">
-            <table class="table table-borderless">
-              <tbody>
-                <tr>
-                  <td>Licitación:</td>
-                  <td>{!! $proyecto->oportunidad()->rotulo() !!}</td>
-                </tr>
-                <tr>
-                  <td>Nomenclatura:</td>
-                  <td>{{ $proyecto->oportunidad()->licitacion()->nomenclatura }}</td>
-                </tr>
-                <tr>
-                  <td>Adjuntos:</td>
-                  <td>
-                  <ul>
-                  @foreach($proyecto->oportunidad()->licitacion()->adjuntos() as $a)
-                    <li>
-                      <a target="_blank" href="http://prodapp.seace.gob.pe/SeaceWeb-PRO/SdescargarArchivoAlfresco?fileCode={{ $a->codigoAlfresco }}">
-                        {{ $a->tipoDocumento }}
-                      </a>
-                    </li>
-                  @endforeach
-                  </ul>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            @include('licitacion.table', ['licitacion' => $proyecto->oportunidad()->licitacion()])
           </div>
         </div>
       </div>
     </div>
     @endif
+    @if (!empty($proyecto->oportunidad()))
+      <div class="col-sm-6">
+        <div class="card">
+          <div class="card-body">
+            @include('oportunidad.table', ['oportunidad' => $proyecto->oportunidad()])
+          </div>
+        </div>
+      </div>
+    @endif
+    <div class="col-6 col-md-6">
+      <div class="card">
+        <div class="card-content">
+          <div class="card-body">
+            @include('proyectos.table', compact('proyecto'))
+          </div>
+        </div>
+      </div>
+    </div>
+    @if (!empty($proyecto->cotizacion_id))
+      <div class="col-sm-6">
+        <div class="card">
+          <div class="card-body">
+            @include('cotizacion.table', ['cotizacion' => $proyecto->cotizacion()])
+          </div>
+        </div>
+      </div>
+    @endif
+    @if (!empty($proyecto->contacto_id))
+      <div class="col-sm-6">
+        <div class="card">
+          <div class="card-body">
+            @include('contactos.table')
+          </div>
+        </div>
+      </div>
+      @endif
+    <div class="col-12">
+    <div class="row">
+    <div class="col-sm-6">
+        <div class="card">
+          <div class="card-body">
+            @include('proyectos.entregables')
+          </div>
+        </div>
+      </div>
+    <div class="col-sm-6">
+        <div class="card">
+          <div class="card-body">
+            @include('proyectos.pagos')
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+    <div class="col-6 col-sm-6">
+      @include('proyectos.timeline')
+    </div>
   </div>
   <!-- users view card data ends -->
 

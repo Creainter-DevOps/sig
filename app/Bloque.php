@@ -13,7 +13,7 @@ class Bloque extends Model
     const UPDATED_AT = null;
     const CREATED_AT = null;
 
-    protected $fillable = [ 'id' , 'proyecto_id','orden', 'nombre', 'created_by'];
+    protected $fillable = [ 'id' , 'proyecto_id','orden', 'nombre', 'eliminado','created_by','eliminado'];
 
     public function empresa(){
         return belongsTo('App\Proyecto', 'Proyecto');
@@ -26,15 +26,10 @@ class Bloque extends Model
      $this->orden = $cod->cantidad + 1;
     } 
     public function item(){
+      return $this->hasMany('App\Actividad', 'bloque_id','id' )->where('eliminado', false )  ;
+    }
+    public function actividades(){
       return $this->hasMany('App\Actividad', 'bloque_id','id' );
     }
-    
 
-    /*public function toArray(){
-      return [
-       'id'    => $this->id,
-       'title' => $this->nombre,
-       'item'  => $this->item() 
-     ];
-    }*/
 }

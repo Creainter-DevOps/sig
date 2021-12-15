@@ -26,7 +26,7 @@ class Actividad extends Model
      */
     protected $fillable = [
       'usuario_id', 'oportunidad_id', 'cliente_id', 'contacto_id', 'cotizacion_id', 'proyecto_id', 'evento', 'empresa_id', 'candidato_id', 'texto', 'created_by', 'tipo'
-       ,'fecha_limite', 'asignado_id', 'orden', 'bloque_id' , 'nombre'
+       ,'fecha_limite', 'asignado_id','fecha_comienzo', 'color', 'orden', 'bloque_id' , 'nombre', 'eliminado'
     ];
 
     /**
@@ -45,7 +45,7 @@ class Actividad extends Model
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-      ];
+    ];
     public static function boot()
      {
         parent::boot();
@@ -73,15 +73,9 @@ class Actividad extends Model
        return $this->belongsTo('App\Empresa', 'empresa_id', 'id' );
     }
     public function usuario() {
-      $rpt = $this->belongsTo('App\User', 'asignado_id');
-      return isset($rpt) ? $rpt->usuario : 'No Asignado';
+      $rpt = $this->belongsTo('App\User', 'asignado_id')->first();
+      return isset($rpt) ? $rpt->usuario : '' ;
     }
-
-   public function usuarios() {
-      return $this->hasMany('App\User', 'asignado_id');
-    }
-
-    
 
     public static function search($term){
       $term = strtolower(trim($term));

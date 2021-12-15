@@ -49,6 +49,19 @@ class Proyecto extends Model
      */
     protected $casts = [
     ];
+
+    public function rotulo() {
+      if(!empty($this->nombre)) {
+        return $this->nombre;
+      }
+      if(!empty($this->oportunidad_id)) {
+        return $this->oportunidad()->rotulo();
+      }
+      return 'xx';
+    }
+    public function folder() {
+      return '\\PROYECTOS\\' . $this->codigo . '\\';
+    }
     public static function generarCodigo($year = null)
     {
       $year = $year ?? date('Y');
@@ -67,13 +80,13 @@ class Proyecto extends Model
     }
 
     public function empresa() {
-      return $this->belongsTo('App\Empresa', 'empresa_id')->first();
+      return $this->belongsTo('App\Empresa', 'empresa_id')->first() ?? new Empresa;
     }
     public function oportunidad() {
       return $this->belongsTo('App\Oportunidad', 'oportunidad_id')->first();
     }
     public function cliente() {
-      return $this->belongsTo('App\Cliente', 'cliente_id')->first();
+      return $this->belongsTo('App\Cliente', 'cliente_id')->first() ?? new Cliente;
     }
     public function contacto() {
       return $this->belongsTo('App\Contacto', 'contacto_id')->first();
@@ -92,8 +105,14 @@ class Proyecto extends Model
           ->orWhereRaw("LOWER(nomenclatura) LIKE ?", ["%{$term}%"]);
       }); 
     }
-
+    public function entregables() {
+      return $this->hasMany('App\Entregable','proyecto_id')->orderBy('numero', 'ASC')->get();
+    }
+    public function pagos() {
+      return $this->hasMany('App\Pago','proyecto_id')->orderBy('numero', 'ASC')->get();
+    }
     public function timeline() {
       return $this->hasMany('App\Actividad','proyecto_id')->orderBy('id', 'DESC' )->get(); 
     }
+
 }

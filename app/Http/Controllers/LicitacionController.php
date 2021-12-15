@@ -24,7 +24,7 @@ class LicitacionController extends Controller {
   public function __construct() {
     $this->middleware('auth');
   }
-  public function dashboard(Request $request ) {
+  public function index(Request $request ) {
     if (!empty( $request->input("search") )){
       $query = strtolower($request->input("search")); 
       $list = Oportunidad::search($query)->take(20)->get();
@@ -56,30 +56,30 @@ class LicitacionController extends Controller {
     return view('licitacion.dashboard', compact('participaciones_por_vencer','propuestas_por_vencer','propuestas_en_pro','chartjs'));
   }
 
-    public function listNuevas(){
-      $list = Oportunidad::listado_nuevas();
-      return view('licitacion.nuevas', compact('list'));
-    }
-    public function listAprobadas(){
-      $list = Oportunidad::listado_aprobadas();
-      return view('licitacion.aprobadas', compact('list'));
-    }
-    public function listArchivadas(){
-      $list = Oportunidad::listado_archivadas();
-      return view('licitacion.aprobadas', compact('list'));
-    }
-    public function listEliminadas(){
-      $list = Oportunidad::listado_eliminados();
-      return view('licitacion.aprobadas', compact('list'));
-    }
-    public function calendario(){
-      return view('licitacion.calendar');
-    }
-    public function detalles(Request $request, Licitacion $licitacion) {
-      $oportunidad = $licitacion->oportunidad();
-      return view('licitacion.detalle', compact('licitacion','oportunidad'));
-    }
-    public function observacion( Request $request, Licitacion $licitacion) {
+  public function listNuevas(){
+    $list = Oportunidad::listado_nuevas();
+    return view('licitacion.nuevas', compact('list'));
+  }
+  public function listAprobadas(){
+    $list = Oportunidad::listado_aprobadas();
+    return view('licitacion.aprobadas', compact('list'));
+  }
+  public function listArchivadas(){
+    $list = Oportunidad::listado_archivadas();
+    return view('licitacion.aprobadas', compact('list'));
+  }
+  public function listEliminadas(){
+    $list = Oportunidad::listado_eliminados();
+    return view('licitacion.aprobadas', compact('list'));
+  }
+  public function calendario(){
+    return view('licitacion.calendar');
+  }
+  public function detalles(Request $request, Licitacion $licitacion) {
+    $oportunidad = $licitacion->oportunidad();
+    return view('licitacion.detalle', compact('licitacion','oportunidad'));
+  }
+  public function observacion( Request $request, Licitacion $licitacion) {
       $oportunidad = $licitacion->oportunidad();
       foreach($this->fieldsPublic as $k => $v) {
         $texto = $request->input($k);
@@ -105,15 +105,15 @@ public function revisar(Request $request, Licitacion $licitacion)
   $oportunidad = $licitacion->oportunidad();
   if(empty($oportunidad->revisado_el)) {
     $oportunidad->revisar();
-    return redirect('/oportunidad/' . $licitacion->id . '/detalles');
+    return redirect('/licitaciones/' . $licitacion->id . '/detalles');
   } else {
-    return redirect('/oportunidad/');
+    return redirect('/licitaciones/');
   }
 }
 public function interes(Request $request, Licitacion $licitacion, Empresa $empresa) {
   $oportunidad = $licitacion->oportunidad();
   $oportunidad->registrar_interes($empresa);
-  return redirect('/oportunidad/' . $licitacion->id . '/detalles');
+  return redirect('/licitaciones/' . $licitacion->id . '/detalles');
 }
 public function rechazar(Request $request, Licitacion $licitacion)
 {
@@ -126,7 +126,7 @@ public function rechazar(Request $request, Licitacion $licitacion)
         'data' => $oportunidad
       ]);
   } else {
-    return redirect('/oportunidad');
+    return redirect('/licitaciones');
   }
 }
 
@@ -136,12 +136,12 @@ public function rechazar(Request $request, Licitacion $licitacion)
   return response()->json(['status' => true ]);
 }*/
 
-public function update( Request $request, Oportunidad $oportunidad ){
+public function update(Request $request, Oportunidad $oportunidad) {
   $dato =  $request->input("field");
   $value = $request->input($dato);
   $oportunidad->update($request->all());
   $oportunidad->log($dato,$value);
-  if( is_numeric($value)){
+  if(is_numeric($value)) {
     $value = Helper::money($value);
   } 
   return response()->json(['status' => true , 'value' => $value ]);
@@ -160,17 +160,17 @@ public function covertirproyecto($id){
 public function archivar(Request $request, Licitacion $licitacion) {
   $oportunidad = $licitacion->oportunidad();
     $oportunidad->archivar();
-    return redirect('/oportunidad');
+    return redirect('/licitaciones');
   }
 public function registrarParticipacion(Request $request, Licitacion $licitacion, CandidatoOportunidad $candidato) {
   $oportunidad = $licitacion->oportunidad();
     $candidato->registrar_participacion();
-    return redirect('/oportunidad/' . $licitacion->id . '/detalles');
+    return redirect('/licitaciones/' . $licitacion->id . '/detalles');
   }
 public function registrarPropuesta(Request $request, Licitacion $licitacion, CandidatoOportunidad $candidato) {
     $oportunidad = $licitacion->oportunidad();
     $candidato->registrar_propuesta();
-    return redirect('/oportunidad/' . $licitacion->id . '/detalles');
+    return redirect('/licitaciones/' . $licitacion->id . '/detalles');
   }
 public function autocomplete(Request $request ){
     $query = $request->input('query');

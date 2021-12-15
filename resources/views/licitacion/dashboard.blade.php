@@ -389,8 +389,8 @@ var $primary = '#5A8DEE',
               <thead>
                 <tr>
                   <th>Nomenclatura</th>
-                  <th>Base</th>
                   <th style="width:120px;">Estado</th>
+                  <th>Condición</th>
                   <th style="width:20px;"></th>
                 </tr>
               </thead>
@@ -400,13 +400,16 @@ var $primary = '#5A8DEE',
                   <td>
                     {!! $v->rotulo() !!}
                   </td>
-                  <td class="text-center" style="width:120px;">
+                  <!--<td class="text-center" style="width:120px;">
                     <span>{{ Helper::money($v->monto_base) }}</span>
                     <div style="font-size: 10px;">({{ $v->timeline()->count() }} obs.)</div>
-                  </td>
+                  </td>-->
                   <td class="text-center" style="width:120px;">
                     <span class="{{ $v->estado_pro()['class'] }}">{{ $v->estado_pro()['message'] }}</span>
-                    <div style="font-size:11px;">{{ Helper::fecha($v->licitacion()->fecha_buena_hasta, true) }}</div>
+                    <div style="font-size:11px;">{{ Helper::fecha($v->licitacion()->buenapro_fecha, true) }}</div>
+                  </td>
+                  <td class="text-center" style="width:120px;">
+                    <span>{{ substr(strtoupper($v->estado),0,1) }}</span>
                   </td>
                   <td class="text-center" style="width:20px;">
                     <a href="/licitaciones/{{ $v->licitacion_id }}/detalles">

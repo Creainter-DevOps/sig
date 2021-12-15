@@ -53,75 +53,40 @@
   </div>
   <!-- users view media object ends -->
   <!-- users view card data start -->
+  <div class="row">
+  <div class="col-6">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-body">
+        @include('licitacion.table', compact('licitacion'))
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-body">
+        @include('licitacion.cronograma', compact('licitacion'))
+        </div>
+      </div>
+    </div>
+@if(!empty($oportunidad))
+    <div class="card">
+      <div class="card-content">
+        <div class="card-body">
+        @include('oportunidad.table', compact('oportunidad'))
+        </div>
+      </div>
+    </div>
+  @endif
+  </div>
+  <div class="col-6">
   <div class="card">
     <div class="card-content">
       <div class="card-body">
-        <div class="row">
-          <div class="col-12 col-md-7">
             <table class="table table-borderless">
               <tbody>
-@if(!empty($oportunidad))
-                <tr>
-                  <td>Código</td>
-                  <td>
-                    <div style="font-size: 20px;color: #546b84;">{{ $oportunidad->codigo }}</div>
-                  </td>
-                </tr>
-@endif
-                <tr>
-                  <td style="width:200px;">Entidad:</td>
-                  <td><a href="/clientes/{{ $licitacion->empresa_id }}">{{ $licitacion->entidad }}</a></td>
-                </tr>
-                <tr>
-                  <td>Expediente:</td>
-                  <td>{{ $licitacion->expediente_id }}</td>
-                </tr>
-                <tr>
-                  <td>Procedimiento:</td>
-                  <td>{{ $licitacion->procedimiento_id }}</td>
-                </tr>
-                <tr>
-                  <td>Nomenclatura:</td>
-                  <td>{{ $licitacion->nomenclatura }}</td>
-                </tr>
-                <tr>
-                  <td>Rotulo:</td>
-                  <td>{{ $licitacion->rotulo }}</td>
-                </tr>
-                <tr>
-                  <td>Descripción:</td>
-                  <td>{{ $licitacion->descripcion }}</td>
-                </tr>
-                <tr>
-                  <td>Participación:</td>
-                  <td>{{ $licitacion->participacion() }}</td>
-                </tr>
-                <tr>
-                  <td>Propuesta:</td>
-                  <td>{{ $licitacion->propuesta() }}</td>
-                </tr>
-                <tr>
-                  <td>Estado:</td>
-                  <td><span class="{{ $licitacion->estado()['class'] }}">{{ $licitacion->estado()['message'] }}</span></td>
-                </tr>
-                <tr>
-                  <td>Adjuntos:</td>
-                  <td>
-<ul>
-            @foreach($licitacion->adjuntos() as $a)
-              <li>
-                {{ $a->tipoDocumento }}
-                <a target="_blank" href="http://prodapp.seace.gob.pe/SeaceWeb-PRO/SdescargarArchivoAlfresco?fileCode={{ $a->codigoAlfresco }}">[1]</a>
-                <a target="_blank" href="https://prodcont.seace.gob.pe/alfresco/d/a/workspace/SpacesStore/{{ $a->codigoAlfresco }}/{{ $a->nombreArchivo }}">[2]</a>
-              </li>
-            @endforeach
-          </ul>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Valor Referencial:</td>
-                  <td>{{ Helper::money($licitacion->monto) }}</td>
-                </tr>
                   @if(!empty($oportunidad))
                 <tr>
                   <td>Monto Base:</td>
@@ -148,82 +113,35 @@
                   </td>
                 </tr>
                 <tr>
-                  <td>Min. Mensualidad:</td>
-                  <td>{{ $oportunidad->mensualidad() }}</td>
-                </tr>
-                <tr>
-                  <td>¿Qué solicita?:</td>
-                  <td>{{ $oportunidad->que_es }}</td>
+                  <td>Estado </td>
+                  <td>
+                    <select class="form-control select-data" data-url="/licitaciones/actualizar/{{ $oportunidad->id }}" id="select-estado" data-name="estado">
+                      <option value=""  {{ empty($oportunidad->estado) ? 'selected' : '' }} >Pendiente</option>
+                      <option value="ganado"  {{ $oportunidad->estado == 'ganado' ? 'selected' : '' }} >Ganado</option>
+                      <option value="perdido" {{ $oportunidad->estado == 'perdido' ? 'selected' : '' }} >Perdido</option>
+                    </select> 
+                   </td>  
                 </tr>
 @endif
               </tbody>
             </table>
-          </div>
-          <div class="col-12 col-md-5">
-            <h5>Cronograma</h5>
-            <div class="table-responsive">
-              <table class="table mb-0 table-sm" style="font-size: 10px;">
-            @foreach ($licitacion->cronograma() as $cro)
-              <tr>
-                <th>{{ $cro->descripcionEtapa }}</th>
-                @if (!Helper::es_pasado($cro->fechaInicio, $class))
-                  <td style="padding-right: 10px;{{ $class }};">{{ $cro->fechaInicio }} {{ $cro->horaInicio }}</td>
-                @else
-                  <td class="tachado" style="padding-right: 10px;{{ $class }};">{{ $cro->fechaInicio }} {{ $cro->horaInicio }}</td>
-                @endif
-                @if (!Helper::es_pasado($cro->fechaFin, $class)) 
-                  <td style="{{ $class }};">{{ $cro->fechaFin }} {{ $cro->horaFin }}</td>
-                @else
-                  <td class="tachado" style="{{ $class }};">{{ $cro->fechaFin }} {{ $cro->horaFin }}</td>
-                @endif
-              </tr>
-            @endforeach
-              </table>
-            </div>
-            <br />
-@if(!empty($oportunidad))
-            <h5>Oportunidad</h5>
-            <table class="table table-borderless" style="width:100%;">
-              <tbody>
-                <tr>
-                  <td style="width:200px;">Fecha de Registro:</td>
-                  <td>{{ Helper::fecha($oportunidad->created_on, true) }}</td>
-                </tr>
-                <tr>
-                  <td style="width:200px;">Fecha de Actualización:</td>
-                  <td>{{ Helper::fecha($licitacion->updated_on, true) }}</td>
-                </tr>
-                <tr>
-                  <td style="width:200px;">Fecha de Aprobación:</td>
-                  <td>{{ Helper::fecha($oportunidad->aprobado_el, true) }} x {{ Auth::user($oportunidad->aprobado_por)->usuario }}</td>
-                </tr>
-                <tr>
-                  <td style="width:200px;">Fecha de Revisión:</td>
-                  <td>{{ Helper::fecha($oportunidad->revisado_el, true) }} x {{ Auth::user($oportunidad->revisado_por)->usuario }}</td>
-                </tr>
-                <tr>
-                  <td style="width:200px;">Registro de Participación:</td>
-                  <td>{{ Helper::fecha($oportunidad->fecha_participacion, true) }}</td>
-                </tr>
-                <tr>
-                  <td style="width:200px;">Envío de Propuesta:</td>
-                  <td>{{ Helper::fecha($oportunidad->fecha_propuesta, true) }}</td>
-                </tr>
-                <tr>
-                  <td>Fecha de Archivo:</td>
-                  <td>{{ Helper::fecha($oportunidad->archivado_el, true) }} x {{ Auth::user($oportunidad->archivado_por)->usuario }}</td>
-                </tr>
-                <tr>
-                  <td>Fecha de Rechazo:</td>
-                  <td>{{ Helper::fecha($oportunidad->rechazado_el, true) }} x {{ Auth::user($oportunidad->rechazado_por)->usuario }}</td>
-                </tr>
-              </tbody>
-            </table>
-@endif
-          </div>
-        </div>
       </div>
     </div>
+  </div>
+  </div>
+  <div class="col-6">
+@if(!empty($oportunidad) && !empty($oportunidad->proyecto()))
+  <div class="card">
+    <div class="card-content">
+      <div class="card-body">
+        <div style="background: #b0ffc5;color: #159905;text-align: center;padding: 10px;margin-bottom: 10px;">Ya es un proyecto!</div>
+        @include('proyectos.table', ['proyecto' => $oportunidad->proyecto()])
+      </div>
+    </div>
+  </div>
+@endif
+  </div>
+  </div>
   </div>
   <!-- users view card data ends -->
 @if(!empty($oportunidad))
@@ -243,8 +161,8 @@
               <span class="{{ $e->candidato->estado()['class'] }}">{{ $e->candidato->estado()['message'] }}</span>
             </div>
              @if( $e->candidato->estado()['message'] == "ENVIADO" )
-                <div class="text-center mb-1">
-                  <span class="{{ $e->candidato->estado()['class'] }}">  proyecto </span>
+                <div  class="text-center mb-1">
+                  <a class="btn btn-light-success" href="{{  route('oportunidad.proyecto', ['candidato' => $e->candidato->id] ) }} " >Pasar proyecto</a>
                 </div>
              @endif
           @endif

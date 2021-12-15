@@ -47,15 +47,6 @@ tr.block_details>td>div {
               <div class="form-body">
                 {!! method_field('PUT') !!}
                   @include('empresas.form')
-    <div class="col-12">
-        <div class="form-group">
-            <label>Breve Descripción</label>
-            <textarea name="descripcion" placeholder="Descripción" class="form-control">{{ old('descripcion', @$cliente->descripcion) }}</textarea>
-            @if ($errors->has('descripcion'))
-            <div class="invalid-feedback">{{ $errors->first('descripcion') }}</div>
-            @endif
-        </div>
-    </div>
               </div>
             </form>
           </div>

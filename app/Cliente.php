@@ -47,10 +47,10 @@ class Cliente extends Model {
         'email_verified_at' => 'datetime',
       ];
      public function empresa() {
-        return $this->belongsTo('App\Empresa')->first();
+        return $this->belongsTo('App\Empresa')->first() ?? new Empresa;
      }
     public function rotulo() {
-      return $this->empresa()->rotulo();
+        return $this->empresa()->rotulo();
     }
      public function cotizaciones(){
        return $this->hasMany('App\Cotizacion', 'cliente_id', 'id');  

@@ -34,7 +34,7 @@ class CotizacionController extends Controller {
   public function show(Request $resquest, Cotizacion $cotizacion){
     $breadcrumbs[] = [ 'name' => "Detalle Cotizacion" ];
     $cliente  = isset( $cotizacion->cliente_id ) ? $cotizacion->cliente() : null;
-    $listado  = $cotizacion->cliente()->getContactos();
+//    $listado  = $cotizacion->cliente()->getContactos();
     $timeline = $cotizacion->timeline();
     $contacto = isset($cotizacion->contacto_id) ? $cotizacion->contacto() : null; 
     return view ('cotizacion.show', compact('cotizacion', 'listado', 'breadcrumbs', 'cliente', 'timeline','contacto' )); 

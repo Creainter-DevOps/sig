@@ -7,175 +7,96 @@ use App\Oportunidad;
 use App\OportunidadLog;
 use Illuminate\Support\Facades\Auth;
 use App\Empresa;
+use Illuminate\Support\Facades\DB;
 use App\CandidatoOportunidad;
 use App\Licitacion;
+use App\Proyecto;
 use App\Helpers\Chartjs;
 use App\Helpers\Helper;
 
 class OportunidadController extends Controller {
-  public $fieldsPublic = [
-    'que_es'     => '¿Qué solicita?',
-    'monto_base' => 'Monto Base',
-    'instalacion_dias' => 'Instalación (días)',
-    'duracion_dias' => 'Servicio (días)',
-    'garantia_dias' => 'Garantía (días)',
-    'texto'         => 'Observación',
-  ];
   public function __construct() {
     $this->middleware('auth');
   }
-  public function dashboard(Request $request ) {
-    if (!empty( $request->input("search") )){
-      $query = strtolower($request->input("search")); 
-      $list = Oportunidad::search($query)->take(20)->get();
-      //dd($list);
-      return view('oportunidad.index', compact("list"));
-    } 
-    $participaciones_por_vencer = Oportunidad::listado_participanes_por_vencer();
-    $propuestas_por_vencer = Oportunidad::listado_propuestas_por_vencer();
-    $propuestas_en_pro = Oportunidad::listado_propuestas_buenas_pro();
-    $chartjs['barras'] = Oportunidad::estadistica_barra_cantidades();
-    $chartjs['barras'] = Chartjs::line($chartjs['barras'], [
-      'PARTICIPACIÓN' => array(
-        'rotulo'     => 'PARTICIPACIÓN',
-        'color'      => '#5A8DEE',
-      ),
-      'PROPUESTA' => array(
-        'rotulo'     => 'PROPUESTAS',
-        'color'      => '#56DF9B',
-      ),
-      'TIMEOUT/PARTICIPACIÓN' => array(
-        'rotulo'     => 'TIMEOUT/PARTICIPACIÓN',
-        'color'      => '#DF8F28',
-      ),
-      'TIMEOUT/PROPUESTA' => array(
-        'rotulo'     => 'TIMEOUT/PROPUESTA',
-        'color'      => '#DF2001',
-      ),
-    ]);
-    return view('oportunidad.dashboard', compact('participaciones_por_vencer','propuestas_por_vencer','propuestas_en_pro','chartjs'));
-  }
-
-    public function listNuevas(){
-      $list = Oportunidad::listado_nuevas();
-      return view('oportunidad.nuevas', compact('list'));
-    }
-    public function listAprobadas(){
-      $list = Oportunidad::listado_aprobadas();
-      return view('oportunidad.aprobadas', compact('list'));
-    }
-    public function listArchivadas(){
-      $list = Oportunidad::listado_archivadas();
-      return view('oportunidad.aprobadas', compact('list'));
-    }
-    public function listEliminadas(){
-      $list = Oportunidad::listado_eliminados();
-      return view('oportunidad.aprobadas', compact('list'));
-    }
-    public function calendario(){
-      return view('oportunidad.calendar');
-    }
-    public function detalles(Request $request, Licitacion $licitacion) {
-      $oportunidad = $licitacion->oportunidad();
-      return view('oportunidad.detalle', compact('licitacion','oportunidad'));
-    }
-    public function observacion( Request $request, Licitacion $licitacion) {
-      $oportunidad = $licitacion->oportunidad();
-      foreach($this->fieldsPublic as $k => $v) {
-        $texto = $request->input($k);
-        if(!empty($texto)) {
-          $oportunidad->update([$k => $texto]);
-          $oportunidad->log($k, $texto);
-        }
+  public function index(Request $request)
+  {
+      $search = $request->input('search');
+      if(!empty($search)) {
+          $listado = Oportunidad::search($search)->paginate(15)->appends(request()->query());
+      } else {
+          $listado = Oportunidad::list()->paginate(15)->appends(request()->query());
       }
-      return back();
+      return view('oportunidad.index', ['listado' => $listado]);
+  }
+  public function create(Request $request, Oportunidad $oportunidad )
+  {
+      return view('oportunidad.create', compact( 'oportunidad'));
+  }
+  public function store(Request $request , Oportunidad $oportunidad )
+  {
+    $oportunidad->fill($request->all());
+    $oportunidad->tenant_id = Auth::user()->tenant_id;
+    $oportunidad->save();
+    $oportunidad->log('creado'); 
+    $oportunidad->update([ 
+      'codigo' => DB::raw('osce.fn_generar_codigo_oportunidad(id)'),
+      'aprobado_el' => DB::raw('now'),
+      'aprovado_por' => Auth::user()->id
+    ]);
+    return response()->json([ 'status' => true , 'redirect' => '/oportundides']);
+  }
+  public function show( Oportunidad $oportunidad )
+  {
+    $contacto = $oportunidad->contacto(); 
+    return view('oportunidad.show', compact('oportunidad'));
+  }
+  public function proyecto(Request $request, CandidatoOportunidad $candidato, Proyecto $proyecto ){
+     $proyecto->oportunidad_id = $candidato->oportunidad_id;
+     $proyecto->empresa_id     = $candidato->empresa_id;
+     $proyecto->candidato_id   = $candidato->id;
+     $proyecto->codigo = $proyecto::generarCodigo();
+     $proyecto->nombre = strtolower($candidato->oportunidad()->licitacion()->rotulo);   
+     //dd($candidato->oportunidad()->licitacion()->rotulo );
+     $proyecto->save();
+     return redirect()->route( 'proyecto.edit', [ 'proyecto' => $proyecto->id ]);
+  }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  \App\lain  $lain
+     * @param  \DummyFullModelClass  $DummyModelVariable
+     * @return \Illuminate\Http\Response
+     */
+  public function edit(Oportunidad $oportunidad)
+  {
+    dd($oportunidad);
+      return view('oportunidad.edit', compact('oportunidad'));
+  }
+  public function update(Request $request, Oportunidad $oportunidad )
+  {
+    $oportunidad->update($request->all());
+    $oportunidad->log( 'editado', null );
+    return  response()->json([ 'status' =>  true]);
+  }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\lain  $lain
+     * @param  \DummyFullModelClass  $DummyModelVariable
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Oportunidad $oportunidad )
+    {
+      $oportunidad->eliminado = true;
+      $oportunidad->save();
+      $oportunidad->log('eliminado');
+      return response()->json(['status'=> true , 'refresh' => true  ]);
     }
-public function aprobar(Request $request, Licitacion $licitacion)
-{
-  $oportunidad = $licitacion->oportunidad();
-  $oportunidad->aprobar();
-      return response()->json([
-        'status'  => 'success',
-        'message' => 'Se ha realizado registro con éxito.',
-        'data' => $oportunidad
-      ]);
-}
-public function revisar(Request $request, Licitacion $licitacion)
-{
-  $oportunidad = $licitacion->oportunidad();
-  if(empty($oportunidad->revisado_el)) {
-    $oportunidad->revisar();
-    return redirect('/oportunidad/' . $licitacion->id . '/detalles');
-  } else {
-    return redirect('/oportunidad/');
-  }
-}
-public function interes(Request $request, Licitacion $licitacion, Empresa $empresa) {
-  $oportunidad = $licitacion->oportunidad();
-  $oportunidad->registrar_interes($empresa);
-  return redirect('/oportunidad/' . $licitacion->id . '/detalles');
-}
-public function rechazar(Request $request, Licitacion $licitacion)
-{
-  $oportunidad = $licitacion->oportunidad();
-  $oportunidad->rechazar();
-  if($request->ajax()) {
-      return response()->json([
-        'status'  => 'success',
-        'message' => 'Se ha realizado registro con éxito.',
-        'data' => $oportunidad
-      ]);
-  } else {
-    return redirect('/oportunidad');
-  }
-}
-
-/*public function update(Request $request, Oportunidad $oportunidad){
-  $oportunidad->update($request->all());
-  if(is_numeric($oportunidad-> )
-  return response()->json(['status' => true ]);
-}*/
-
-public function update( Request $request, Oportunidad $oportunidad ){
-  $dato =  $request->input("field");
-  $value = $request->input($dato);
-  $oportunidad->update($request->all());
-  $oportunidad->log($dato,$value);
-  if( is_numeric($value)){
-    $value = Helper::money($value);
-  } 
-  return response()->json(['status' => true , 'value' => $value ]);
-}
-
-public function covertirproyecto($id){
-  $oportunidad = Oportunidad::find($id);
-  $proyecto = new Proyecto();
-  $proyecto->oportunidad_id = $oportunidad->id;
-  $proyecto->empresa_id    = $oportunidad->id;
-  $proyecto->oportunidad_id = $oportunidad->id;
-  $proyecto->oportunidad_id = $oportunidad->id;
-
-  
-}
-public function archivar(Request $request, Licitacion $licitacion) {
-  $oportunidad = $licitacion->oportunidad();
-    $oportunidad->archivar();
-    return redirect('/oportunidad');
-  }
-public function registrarParticipacion(Request $request, Licitacion $licitacion, CandidatoOportunidad $candidato) {
-  $oportunidad = $licitacion->oportunidad();
-    $candidato->registrar_participacion();
-    return redirect('/oportunidad/' . $licitacion->id . '/detalles');
-  }
-public function registrarPropuesta(Request $request, Licitacion $licitacion, CandidatoOportunidad $candidato) {
-    $oportunidad = $licitacion->oportunidad();
-    $candidato->registrar_propuesta();
-    return redirect('/oportunidad/' . $licitacion->id . '/detalles');
-  }
-public function autocomplete(Request $request ){
-    $query = $request->input('query');
-    $list = Oportunidad::search( $query )->selectRaw(" oportunidad.id,  CONCAT_WS( ':', licitacion.procedimiento_id , licitacion.rotulo) as value " )->get();
-     return response()->json($list); 
-  }
-
+     public function autocomplete(Request $request) {
+       $query = $request->input('query');
+       $data = Oportunidad::search($query)->select(DB::raw("COALESCE(oportunidad.que_es, licitacion.rotulo, licitacion.descripcion, licitacion.nomenclatura) as value"),'oportunidad.id')->get();
+       return Response()->json($data);
+     }
 }

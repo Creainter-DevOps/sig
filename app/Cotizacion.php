@@ -72,7 +72,9 @@ class Cotizacion extends Model
     public function rotulo(){
       return $this->codigo . ":" . $this->descripcion; 
     }
-
+    public function folder() {
+      return '\\OPORTUNIDADES\\' . $this->oportunidad()->codigo . '\\COTIZACIONES\\' . $this->codigo . '\\';
+    }
     public function oportunidad() {
       return $this->belongsTo('App\Oportunidad', 'oportunidad_id')->first();
     }

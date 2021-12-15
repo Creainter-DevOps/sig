@@ -1,11 +1,9 @@
 @extends('layouts.contentLayoutMaster')
 {{-- page title --}}
-@section('title','Invoice List')
+@section('title','Licitaciones Dashboard')
 {{-- vendor style --}}
 @section('vendor-styles')
 <link rel="stylesheet" type="text/css" href="{{asset('vendors/css/tables/datatable/datatables.min.css')}}">
-<link rel="stylesheet" type="text/css" href="{{asset('vendors/css/tables/datatable/extensions/dataTables.checkboxes.css')}}">
-<link rel="stylesheet" type="text/css" href="{{asset('vendors/css/tables/datatable/responsive.bootstrap.min.css')}}">
 @endsection
 {{-- page style --}}
 @section('page-styles')
@@ -114,10 +112,6 @@ tr.block_details>td>div {
 {{-- vendor scripts --}}
 @section('vendor-scripts')
 <script src="{{asset('vendors/js/tables/datatable/datatables.min.js')}}"></script>
-<script src="{{asset('vendors/js/tables/datatable/dataTables.bootstrap4.min.js')}}"></script>
-<script src="{{asset('vendors/js/tables/datatable/datatables.checkboxes.min.js')}}"></script>
-<script src="{{asset('vendors/js/tables/datatable/dataTables.responsive.min.js')}}"></script>
-<script src="{{asset('vendors/js/tables/datatable/responsive.bootstrap.min.js')}}"></script>  
 @endsection
 {{-- page scripts --}}
 @section('page-scripts')

@@ -1,7 +1,7 @@
 <table class="table table-sm mb-0 table-bordered table-vcenter"  style="width:100%">
 <thead>
   <tr>
-    <th colspan="4" class="table-head"><a  href="{{ route('cotizaciones.show', ['cotizacion' => $cotizacion->id ]) }}" target="_blank" >COTIZACIÓN</a></th>
+    <th colspan="4" class="table-head"><a  href="{{ route('cotizaciones.show', ['cotizacion' => $cotizacion->id ]) }}" target="_blank" >Cotización</a></th>
   </tr>
 </thead>
 <tbody>
@@ -28,6 +28,10 @@
       <td>{{ $cotizacion->descripcion }} </td>
       <th>M.Total</th>
    <td>{{ $cotizacion->monto_total }} </td>
+  </tr>
+  <tr>
+    <th>Directorio:</th>
+    <td colspan="3"><a href="#" onclick="window.location.href='odir:{!! addslashes(Auth::user()->dir_sharepoint . $cotizacion->folder()) !!}';">{{ $cotizacion->folder() }}</a></td>
   </tr>
   <tr>
     <th>Observaciones</th>

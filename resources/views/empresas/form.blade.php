@@ -1,6 +1,6 @@
 {!! csrf_field() !!}
 <div class="row">
-    <div class="col-12">
+    <div class="col-6">
         <div class="form-group">
             <label>RUC </label>
             <input type="number" min="0" max="99999999999" name="ruc" id="ruc" value="{{ old('ruc', @$empresa->ruc) }}" placeholder="RUC" required class="form-control">
@@ -10,7 +10,7 @@
         </div>
     </div>
 
-    <div class="col-12">
+    <div class="col-6">
         <div class="form-group">
             <label>Razón social </label>
             <input type="text" name="razon_social" id="razon_social" value="{{ old('razon_social', @$empresa->razon_social) }}" placeholder="Razón social" required class="form-control">
@@ -20,7 +20,7 @@
         </div>
     </div>
 
-    <div class="col-12">
+    <div class="col-6">
         <div class="form-group">
             <label>Seudonimo </label>
             <input type="text" name="seudonimo" id="seudonimo" value="{{ old('seudonimo', @$empresa->seudonimo) }}" placeholder="Seudonimo" required class="form-control">
@@ -30,7 +30,7 @@
         </div>
     </div>
 
-    <div class="col-12">
+    <div class="col-6">
         <div class="form-group">
             <label>Dirección </label>
             <input type="text" name="direccion" id="direccion" value="{{ old('direccion', @$empresa->direccion) }}" placeholder="Dirección" required class="form-control">
@@ -40,7 +40,7 @@
         </div>
     </div>
 
-    <div class="col-12">
+    <div class="col-6">
         <div class="form-group">
             <label>Referencia
         </div>
@@ -50,7 +50,7 @@
         @endif
     </div>
 
-    <div class="col-12">
+    <div class="col-6">
         <div class="form-group">
             <label>Telefonos</label>
             <input type="text" name="telefono" id="telefono" value="{{ old('telefono', @$empresa->telefono) }}" placeholder="Telefonos" class="form-control">
@@ -60,7 +60,7 @@
         </div>
     </div>
 
-    <div class="col-12">
+    <div class="col-6">
         <div class="form-group">
             <label>Correo</label>
             <input type="text" name="correo_electronico" value="{{ old('correo_electronico', @$empresa->correo_electronico) }}" placeholder="Correo electrónico" class="form-control">
@@ -70,7 +70,7 @@
         </div>
     </div>
 
-    <div class="col-12">
+    <div class="col-6">
         <div class="form-group">
             <label>Web</label>
             <input type="text" name="web" value="{{ old('web', @$empresa->web) }}" placeholder="Web" class="form-control">
@@ -80,7 +80,7 @@
         </div>
     </div>
 
-    <div class="col-12">
+    <div class="col-6">
         <div class="form-group">
             <label>Aniversario</label>
             <input type="date" name="aniversario" value="{{ old('aniversario', @$empresa->aniversario) }}" placeholder="Aniversario" class="form-control">
@@ -90,7 +90,7 @@
         </div>
     </div>
 
-    <div class="col-12">
+    <div class="col-6">
         <div class="form-group">
             <label>Sector </label>
             <select name="sector_id" data-value="{{ old('sector_id', @$empresa->sector_id) }}" placeholder="Sector" required class="form-control">
@@ -103,9 +103,7 @@
             @endif
         </div>
     </div>
-
-
-    <div class="col-12">
+    <div class="col-6">
         <div class="form-group">
             <label>Categoria</label>
             <select name="categoria_id" data-value="{{ old('categoria_id', @$empresa->categoria_id) }}" placeholder="Categoria" required class="form-control">
@@ -120,7 +118,7 @@
     </div>
 
 
-    <div class="col-12">
+    <div class="col-6 d-flex align-items-center ">
         <div class="form-group">
             <label>¿Es agente retencion?</label>
             <input type="checkbox" name="es_agente_retencion" value="1" placeholder="Es agente retencion" @if (@$empresa->es_agente_retencion)
@@ -129,6 +127,16 @@
             >
             @if ($errors->has('es_agente_retencion'))
             <div class="invalid-feedback">{{ $errors->first('es_agente_retencion') }}</div>
+            @endif
+        </div>
+    </div>
+    
+    <div class="col-12">
+        <div class="form-group">
+            <label>Breve Descripción</label>
+            <textarea name="descripcion" placeholder="Descripción" class="form-control">{{ old('descripcion', @$cliente->descripcion) }}</textarea>
+            @if ($errors->has('descripcion'))
+            <div class="invalid-feedback">{{ $errors->first('descripcion') }}</div>
             @endif
         </div>
     </div>

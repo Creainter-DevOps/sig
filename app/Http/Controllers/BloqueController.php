@@ -47,9 +47,9 @@ class BloqueController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show( $id)
     {
-        //
+        
     }
 
     /**
@@ -70,9 +70,10 @@ class BloqueController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Bloque  $bloque )
     {
-        //
+      $rpta = $bloque->update($request->all());  
+      return response()->json(['status' => true ]);
     }
 
     /**
@@ -81,8 +82,10 @@ class BloqueController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Bloque $bloque )
     {
-        //
+      $bloque->eliminado = true;
+      $bloque->save();
+      return response()->json([ 'status' => true ]); 
     }
 }

@@ -40,28 +40,42 @@ tr.block_details > td > div {
 @endsection
 
 @section('content')
-
-<div class="col-12">
+<div class="row">
+<div class="col-6">
     <div class="card">
       <div class="card-content">
         <div class="card-body">
           @include('clientes.table')
-          <br />
-          @include('cotizacion.table')
-          <br/>
-          @include('contactos.table')
         </div>
       </div>
    </div>
-</div>  
+</div>
+<div class="col-6">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-body">
+          @include('oportunidad.table', ['oportunidad' => $cotizacion->oportunidad()])
+        </div>
+      </div>
+   </div>
+</div>
+<div class="col-6">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-body">
+          @include('cotizacion.table', compact('cotizacion'))
+        </div>
+      </div>
+   </div>
+</div>
 <div class="col-md-12">
 @if(!empty($cotizacion->cliente_id )) 
-  @include('contactos.list')
 @endif
 </div>
 <div class="col-6 col-sm-6">
     <!-- Timeline Widget Starts -->
     @include('cotizacion.timeline') 
+</div>
 </div>
 @endsection
 

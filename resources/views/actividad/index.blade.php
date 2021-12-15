@@ -1,6 +1,6 @@
 @extends('layouts.contentLayoutMaster')
 {{-- title --}}
-@section('title','Cotizaciones')
+@section('title','Actividades')
 {{-- vendor style --}}
 @section('vendor-styles')
 <link rel="stylesheet" type="text/css" href="{{asset('vendors/css/tables/datatable/datatables.min.css')}}">
@@ -47,7 +47,7 @@
             <td class="">{{ strtoupper( $actividad->evento ) }}</td>
             <td class="pr-0">{{ substr( $actividad->texto ,0 , 40 ) }}</td>
             <td class="text-success" align ="left" >{{ $actividad->creado() }}</td>
-            <td class="" align ="left" >{{ $actividad->correo }}</td>
+            <td class="text-uppercase" align ="left" >{{ $actividad->usuario() }}</td>
             <td>
               <div class="dropdown">
                 <span class="bx bx-dots-vertical-rounded font-medium-2 dropdown-toggle nav-hide-arrow cursor-pointer"

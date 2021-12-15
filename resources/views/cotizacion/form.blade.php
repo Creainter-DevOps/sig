@@ -4,38 +4,33 @@
     <input type="hidden" value="{{$cotizacion->id ?? 0 }}" name="id" id="cotizacion_id"></input>
     <div class="col-md-6  col-12">
       <div class="form-label-group">
-          @if (empty($cotizacion->empresa_id))
-          <input type="text" class="form-control autocomplete"
-             data-ajax="/empresas/autocomplete" name="empresa_id">
-          <label for="">Empresa</label>
-          @else
           <input type="text" class="form-control autocomplete" value="{{ $cotizacion->empresa_id }}"
+          @if (empty($cotizacion->empresa_id))
              data-value="{{ $cotizacion->empresa()->razon_social  }}" 
+          @endif
              data-ajax="/empresas/autocomplete" name="empresa_id">
           <label for="">Empresa</label>
-          @endif
       </div>
     </div>
     <div class="col-md-6  col-12">
       <div class="form-label-group">
-          @if (empty($cotizacion->cliente_id))
-          <input type="text" class="form-control autocomplete"
-             data-ajax="/clientes/autocomplete" name="cliente_id">
-          <label for="cliente_id">Cliente</label>
           @else
           <input type="text" class="form-control autocomplete" value="{{ $cotizacion->cliente_id }}"
-             data-value="{{ $cotizacion->cliente()->empresa()->razon_social  }}" 
-             data-ajax="/clientes/autocomplete" name="cliente_id">
+             @if(empty($cotizacion->cliente_id ))
+               data-value="{{ null != $cotizacion->cliente() ? $cotizacion->cliente()->empresa()->razon_social : ''  }}" 
+             @endif
+             data-ajax="/clientes/autocomplete" name="cliente_id"
+             data-register= "/cliente/fast" 
+               >
           <label for="cliente_id">Cliente</label>
-          @endif
       </div>
     </div>
   <div class="col-md-6 col-12">
     <div class="form-label-group container-autocomplete" >
-      <input type="text" class="form-control autocomplete" name="oportunidad_id" id="oportunidad_id" value="{{ old('cotizacion_id', $cotizacion->oportunidad_id) }}"
+      <input type="text" class="form-control autocomplete" name="oportunidad_id" id="oportunidad_id" value="{{ old('cotizacion_id', $cotizacion->oportunidad_id) }}" required
          data-ajax="/oportunidad/autocomplete"
         @if( !empty($cotizacion->oportunidad_id ))
-         data-value="{{ old ( 'oportunidad', $cotizacion->oportunidad()->rotulo() ) }}"
+         data-value="{{ old ( 'oportunidad', null != $cotizacion->oportunidad() ?  $cotizacion->oportunidad()->rotulo() : '' ) }}"
         @endif
       >
       <label for="oportunidad_id"> Oportunidad </label>

@@ -1,27 +1,27 @@
-@extends('layouts.backend')
+@extends('layouts.contentLayoutMaster')
 
 @section('content')
 
-<div class="content">
     <div class="row">
         <div class="offset-12 col-md-1" style="margin-bottom: 10px;text-align:right;">
-                <a class="btn btn-default" href="/empresas/crear" style="color: #fff; background-color: #007bff; border-color: #007bff;">
+            <a class="btn btn-default" href="/empresas/crear" style="color: #fff; background-color: #007bff; border-color: #007bff;">
                     Nuevo
-                </a>
+             </a>
         </div>
     </div>
-    <div class="block">
-        <div class="block-header block-header-default">
-            <h3 class="block-title">Clientes Registrados</h3>
+    <div class="card">
+        <div class="card-header block-header-default">
+            <h3 class="block-title">Empresas</h3>
         </div>
         @if(session()->has('message'))
         <div class="alert alert-success">
             {{ session()->get('message') }}
         </div>
         @endif
-        <div class="block-content">
+        <div class="card-content">
+          <div class="card-body" >
             <div class="table-responsive">
-                <table class="table table-striped table-vcenter">
+                <table class="table table-sm ">
                     <thead>
                         <th>RUC</th>
                         <th>Razon social</th>
@@ -38,24 +38,28 @@
                                 <td>{{ $empresa->seudonimo }}</td>
                                 <td>{{ $empresa->telefono }}</td>
                                 <td>{{ $empresa->web }}</td>
-                                <td class="text-center">
-                                    <div class="btn-group">
-                                        <a class="btn btn-sm btn-secondary js-tooltip-enabled" href="/empresas/{{ $empresa->id }}/editar">
-                                            <i class="fa fa-pencil"></i>
-                                        </a>
-                                        <a class="btn btn-sm btn-secondary js-tooltip-enabled" href="/empresas/{{ $empresa->id }}">
-                                            <i class="fa fa-eye"></i>
-                                        </a>
+                                <td>
+                                  <div class="dropdown">
+                                    <span class="bx bx-dots-vertical-rounded font-medium-3 dropdown-toggle nav-hide-arrow cursor-pointer"
+                                      data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="menu"></span>
+                                    <div class="dropdown-menu dropdown-menu-right">
+                                      <a class="dropdown-item" href="/empresas/{{$empresa->id}}"><i class="bx bx-show-alt mr-1"></i> Ver más</a>
+                                      <a class="dropdown-item" href="/empresas/{{$empresa->id}}/editar"><i class="bx bx-edit-alt mr-1"></i> Editar</a>
+                                      <a class="dropdown-item" data-confirm-remove="{{ route('empresas.destroy', ['empresa' => $empresa->id ]) }}" href="#" >
+                                       <i class="bx bx-trash mr-1"></i> Eliminar</a>
                                     </div>
+                                  </div>
                                 </td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
-                {{ $listado->links() }}
-                <div class="form-group" style="margin-left:20px;">Mostrando {{ count($listado) }} de {{ $listado->total() }} registros</div>
             </div>
+          </div>
+          <div class="card-footer d-flex flex-row-reverse justify-content-between  ">
+            {{ $listado->links() }}
+             <div class="form-group" style="margin-left:20px;">Mostrando {{ count($listado) }} de {{ $listado->total() }} registros</div>
+          </div>
         </div>
     </div>
-</div>
 @endsection

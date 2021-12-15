@@ -30,7 +30,7 @@
               <tr>
                   <th>Código</th>
                   <th>Cliente</th>
-                  <th>Descripción</th>
+                  <th>Oportunidad</th>
                   <th>M.Total</th>
                   <th>M.Fecha</th>
                   <th>Validez</th>
@@ -39,10 +39,10 @@
               </thead>
               <tbody id="table-body" >
                 @foreach ( $listado as $cotizacion )
-                <tr data-cliente="{{ $cotizacion->cliente()->empresa()->razon_social }}"  data-monto="{{$cotizacion->monto_total }}" >
+                <tr>
                   <td>{{ $cotizacion->codigo }}</td>
-                  <td class="pr-0"> {{ $cotizacion->cliente()->rotulo() }} </td>
-                  <td class="pr-0"> {{ substr($cotizacion->descripcion, 0, 60) }} </td>
+                  <td class="pr-0"> {{ null !==  $cotizacion->cliente() ? $cotizacion->cliente()->rotulo() : ''  }} </td>
+                  <td class="pr-0"> {{ !empty($cotizacion->oportunidad()) ? $cotizacion->oportunidad()->rotulo() : '' }} </td>
                   <td class="text-success" align="left" >{{ $cotizacion->monto_total }}</td>
                   <td class="">{{ Helper::fecha( $cotizacion->fecha ) }}</td>
                   <td class="">{{ Helper::fecha( $cotizacion->validez ) }}</td>

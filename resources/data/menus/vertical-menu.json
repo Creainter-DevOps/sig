@@ -23,28 +23,40 @@
       ]
     },
     {
-      "navheader": "Oportunidades"
+      "navheader": "Licitaciones"
     },    
     {
-      "url": "oportunidad",
+      "url": "licitaciones",
       "name": "Dashboard",
-      "i18n": "Oportunidad",
+      "i18n": "Dashboard",
       "icon": "line-chart"
     },
     {
-      "url": "oportunidad/nuevas",
+      "url": "licitaciones/nuevas",
       "name": "Nuevas",
       "i18n": "Nuevas",
       "icon": "search"
     },
     {
-      "url": "oportunidad/archivadas",
+      "url": "licitaciones/archivadas",
       "name": "Archivadas",
       "i18n": "Archivadas",
       "icon": "box"
     },    
     {
       "navheader": "Apps"
+    },
+    {
+      "url": "oportunidades",
+      "name": "Oportunidades",
+      "i18n": "Clientes",
+      "icon": "bulb"
+    },
+    {
+      "url": "empresas",
+      "name": "Empresas",
+      "i18n": "Empresas",
+      "icon": "diagram"
     },
     {
       "url": "clientes",

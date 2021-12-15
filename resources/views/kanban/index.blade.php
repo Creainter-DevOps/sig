@@ -11,6 +11,7 @@
 {{-- page styles --}}
 @section('page-styles')
 <link rel="stylesheet" type="text/css" href="{{asset('css/pages/app-kanban.css')}}">
+<meta name="csrf-token" content="{{ csrf_token() }}">
 @endsection
 
 @section('content')
@@ -20,7 +21,7 @@
   <div class="row">
     <div class="col-12">
       <button type="button" class="btn btn-primary mb-1" id="add-kanban">
-        <i class='bx bx-add-to-queue mr-50'></i> Add New Board
+        <i class='bx bx-add-to-queue mr-50'></i>Agregar nuevo bloque
       </button>
       <div id="kanban-app"></div>
     </div>
@@ -36,47 +37,69 @@
         </button>
       </div>
       <!-- form start -->
-      <form class="edit-kanban-item">
+      <form class="edit-kanban-item" id="formData" >
         <div class="card-content">
           <div class="card-body">
+            @method('PUT')
             <div class="form-group">
               <label>Titulo</label>
-              <input type="text" class="form-control edit-kanban-item-title" placeholder="kanban Title">
+              <input type="text" class="form-control edit-kanban-item-title" name="evento" placeholder="kanban Title">
             </div>
             <div class="form-group">
               <label>Descripcion</label>
-              <textarea class="form-control edit-kanban-item-description"></textarea>
+              <textarea class="form-control edit-kanban-item-description" name="texto" ></textarea>
             </div>
             <div class="form-group">
-              <label>Fecha</label>
-              <input type="text" class="form-control edit-kanban-item-date" placeholder="21 August, 2019">
+              <label>Fecha comienzo</label>
+              <input type="text" class="form-control edit-kanban-item-comienzo" 
+              name="fecha_comienzo" placeholder="10/06/2020" >
+            </div>
+            <div class="form-group">
+              <label>Fecha limite</label>
+              <input type="text" class="form-control edit-kanban-item-duedate" 
+              name="fecha_limite" placeholder="10/05/2020" >
+            </div>
+            <!--<div class="form-group">
+               <label>Fecha</label>
+              <input type="text" class="form-control edit-kanban-item-duedate" id=""
+                name="fecha_limite" placeholder="21 August, 2019">
+            </div>-->
+            <div class="form-group">
+              <label>Importancia</label>
+              <select class="form-control text-black" name="importancia" >
+                <option value="baja"   class="bg-primary" >Baja</option>
+                <option value="media"  class="bg-success" selected >Media</option>
+                <option value="alta"   class="bg-secondary" >Alta</option>
+              </select>
             </div>
             <div class="row">
               <div class="col-6">
                 <div class="form-group">
                   <label>Color</label>
-                  <select class="form-control text-white">
-                    <option class="bg-primary" selected>Primary</option>
-                    <option class="bg-danger">Danger</option>
-                    <option class="bg-success">Success</option>
-                    <option class="bg-info">Info</option>
-                    <option class="bg-warning">Warning</option>
-                    <option class="bg-secondary">Secondary</option>
+                  <select class="form-control text-white " name="color" >
+                    <option value="primary" class="bg-primary">Primary</option>
+                    <option value="danger" class="bg-danger">Danger</option>
+                    <option value="success" class="bg-success">Success</option>
+                    <option value="info" class="bg-info">Info</option>
+                    <option value="warning" class="bg-warning">Warning</option>
+                    <option value="secondary" class="bg-secondary">Secondary</option>
                   </select>
                 </div>
               </div>
               <div class="col-6">
                 <div class="form-group">
-                  <label>Member</label>
-                  <div class="d-flex align-items-center">
-                    <div class="avatar m-0 mr-1">
-                      <img src="{{asset('images/portrait/small/avatar-s-20.jpg')}}" height="36" width="36"
-                        alt="avtar img holder" title="avatar"  >
-                    </div>
-                    <div class="badge-circle badge-circle-light-secondary">
-                      <i class="bx bx-plus"></i>
-                    </div>
-                  </div>
+                  <label>Asignad@</label>
+                  <input type="text" class="form-control edit-kanban-item-asignado autocomplete" placeholder="Asignado(*)" data-ajax="/usuarios/autocomplete"
+                  name="asignado_id" required>
+                  <!--<div class="d-flex align-items-centeri">
+                      <div class="avatar m-0 mr-1">
+                        <img src="{{asset('images/portrait/small/avatar-s-20.jpg')}}" height="36" width="36"
+                          alt="avtar img holder" title="avatar"  >
+                      </div>
+                      <div class="badge-circle badge-circle-light-secondary">
+                        <i class="bx bx-plus"></i>
+                      </div>
+                  </div> -->
                 </div>
               </div>
             </div>
@@ -130,7 +153,6 @@
 {{-- vendor scripts --}}
 @section('vendor-scripts')
   <script src="{{asset('vendors/js/jkanban/jkanban.min.js')}}"></script>
-  <script src="{{asset('vendors/js/editors/quill/quill.min.js')}}"></script>
   <script src="{{asset('vendors/js/pickers/pickadate/picker.js')}}"></script>
   <script src="{{asset('vendors/js/pickers/pickadate/picker.date.js')}}"></script>
 @endsection
