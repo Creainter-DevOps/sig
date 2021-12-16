@@ -67,6 +67,8 @@ Route::get('/kanban', 'KanbanController@index');
 Route::get('/kanban/actividades', 'KanbanController@actividades');
 
 Route::get('actividades/autocomplete', 'ActividadController@autocomplete'); 
+Route::get('actividades/kanban', 'ActividadController@kanban');
+Route::get('actividades/kanban/json', 'ActividadController@kanban_data');
 Route::post('actividades/{actividad}/observacion', 'ActividadController@observacion'); 
 Route::resource('actividades', 'ActividadController')->parameters([
     'actividades' => 'actividad'

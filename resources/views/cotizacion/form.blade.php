@@ -3,9 +3,9 @@
   <div class="row">
     <input type="hidden" value="{{$cotizacion->id ?? 0 }}" name="id" id="cotizacion_id"></input>
     <div class="col-md-6  col-12">
-      <div class="form-label-group">
+      <div class="form-label-group ">
           <input type="text" class="form-control autocomplete" value="{{ $cotizacion->empresa_id }}"
-          @if (empty($cotizacion->empresa_id))
+          @if (!empty($cotizacion->empresa_id))
              data-value="{{ $cotizacion->empresa()->razon_social  }}" 
           @endif
              data-ajax="/empresas/autocomplete" name="empresa_id">
@@ -14,13 +14,11 @@
     </div>
     <div class="col-md-6  col-12">
       <div class="form-label-group">
-          @else
           <input type="text" class="form-control autocomplete" value="{{ $cotizacion->cliente_id }}"
-             @if(empty($cotizacion->cliente_id ))
+             @if(!empty($cotizacion->cliente_id ))
                data-value="{{ null != $cotizacion->cliente() ? $cotizacion->cliente()->empresa()->razon_social : ''  }}" 
              @endif
              data-ajax="/clientes/autocomplete" name="cliente_id"
-             data-register= "/cliente/fast" 
                >
           <label for="cliente_id">Cliente</label>
       </div>

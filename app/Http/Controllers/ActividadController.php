@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Entregable;
+use App\Actividad;
 use Auth;
-class EntregableController extends Controller
+class ActividadController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,11 +16,11 @@ class EntregableController extends Controller
     {
          $search = $request->input('search');
         if(!empty($search)) {
-            $listado = Entregable::search($search)->paginate(15)->appends(request()->query());
+            $listado = Actividad::search($search)->paginate(15)->appends(request()->query());
         } else {
-            $listado = Entregable::orderBy('created_on', 'desc')->paginate(15)->appends(request()->query());
+            $listado = Actividad::orderBy('created_on', 'desc')->paginate(15)->appends(request()->query());
         }
-        return view('entregable.index', ['listado' => $listado]); 
+        return view('actividad.index', ['listado' => $listado]); 
     }
 
     /**
@@ -31,12 +31,12 @@ class EntregableController extends Controller
     public function create(Request $request)
     { 
       $proyecto_id = $request->input('proyecto_id');
-      $entregable = new Entregable;
-      $entregable->fecha = date('Y-m-d');
+      $actividad = new Actividad;
+      $actividad->fecha = date('Y-m-d');
       if(!empty($proyecto_id)) {
-        $entregable->proyecto_id = $proyecto_id;
+        $actividad->proyecto_id = $proyecto_id;
       }
-      return view($request->ajax() ? 'entregable.fast' : 'entregable.create', compact('entregable'));
+      return view($request->ajax() ? 'actividad.fast' : 'actividad.add', compact('actividad'));
     }
 
     /**
@@ -48,7 +48,7 @@ class EntregableController extends Controller
     public function store(Request $request)
     {
       $data = $request->all();
-      Entregable::registrar($data);
+      Actividad::registrar($data);
       return response()->json(['status' => true , 'refresh' => true ]);
     }
 
@@ -62,6 +62,23 @@ class EntregableController extends Controller
     {
         //
     }
+    public function kanban()
+    {
+        return view('actividad.kanban');
+    }
+    public function kanban_data() {
+      $data = Actividad::kanban();
+      $data = array_map(function($n) {
+        return [
+          'id' => $n->id,
+          'title' => $n->texto,
+          'dueDate' => $n->fecha_limite,
+          'status' => $n->estado,
+          'is_linked' => $n->vinculado,
+        ];
+      }, $data);
+      return response()->json(['status' => true , 'data' => $data]);
+    }
 
     /**
      * Show the form for editing the specified resource.
@@ -69,9 +86,9 @@ class EntregableController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Request $request, Entregable $entregable)
+    public function edit(Request $request, Actividad $actividad)
     {
-        return view($request->ajax() ? 'entregable.fast_edit' : 'entregable.edit', compact('entregable'));
+        return view($request->ajax() ? 'actividad.fast_edit' : 'actividad.edit', compact('actividad'));
     }
 
     /**
@@ -81,11 +98,16 @@ class EntregableController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Entregable $entregable)
+    public function update(Request $request, Actividad $actividad)
     {
       $data = $request->all();
-      $entregable->update($data);
-      return response()->json(['status' => true , 'refresh' => true ]);
+      if(!empty($data['_update'])) {
+        $data[$data['_update']] = $data['value'];
+        unset($data['value']);
+        unset($data['_update']);
+      }
+      $actividad->update($data);
+      return response()->json(['status' => true , 'data' => $data ]);
     }
 
     /**
@@ -101,8 +123,8 @@ class EntregableController extends Controller
 
     public function autocomplete(Request  $request  ) {
       $query = strtolower($request->input('query'));
-      $data = Entregable::search($query)
-        ->selectRaw("osce.entregable.id, CONCAT('ENTREGABLE ', osce.entregable.numero) as value");
+      $data = Actividad::search($query)
+        ->selectRaw("osce.actividad.id, CONCAT('ENTREGABLE ', osce.actividad.numero) as value");
       if($request->input('proyecto_id') != null) {
         $data->where('proyecto_id', '=', $request->input('proyecto_id'));
       }

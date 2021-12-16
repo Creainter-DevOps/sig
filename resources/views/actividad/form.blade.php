@@ -1,7 +1,7 @@
 @csrf
 <div class="form-body">
   <div class="row">
-  <div class="col-md-6  col-12">
+     <!-- <div class="col-md-6  col-12">
       <div class="form-label-group">
           @if (empty($actividad->empresa_id))
           <input type="text" class="form-control autocomplete"
@@ -51,7 +51,7 @@
                 name="contacto_id">
            <label for="contacto_id">Contacto</label>
         </div>
-      </div>
+      </div>-->
       <div class="col-md-12 col-12">
         <div class="form-label-group">
             @if (empty($actividad->proyecto_id) )
@@ -101,13 +101,26 @@
       <input type="hidden">
       <div class="form-label-group">
           <fieldset class="form-label-group position-relative has-icon-left">
-            <input type="text" id="fecha_limite" name="fecha_limite" class="form-control pickadate" 
-                   placeholder="Fecha Limite" value="{{ old ( 'fecha_limite', isset($activiad) ? Helper::fecha( $actividad->fecha_limite ) : '' ) }}" >
+            <input type="text" id="fecha_inicio" name="fecha_inicio" class="form-control pickadate" 
+               placeholder="Fecha inicio" value="{{ old ( 'fecha_comienzo', isset($activiad) ? Helper::fecha( $actividad->fecha_comienzo ) : '' ) }}" >
               <div class="form-control-position">
                  <i class='bx bx-calendar'></i>
               </div>
             </fieldset>
-           <label>Fecha Limite (*) </label>
+           <label>Fecha inicio (*) </label>
+        </div>
+    </div>
+    <div class="col-md-6  col-12">
+      <input type="hidden">
+      <div class="form-label-group">
+          <fieldset class="form-label-group position-relative has-icon-left">
+            <input type="text" id="fecha_limite" name="fecha_limite" class="form-control pickadate" 
+               placeholder="Fecha Limite" value="{{ old ( 'fecha_limite', isset($activiad) ? Helper::fecha( $actividad->fecha_limite ) : '' ) }}" >
+                  <div class="form-control-position">
+                     <i class='bx bx-calendar'></i>
+                  </div>
+            </fieldset>
+           <label>Fecha limite  (*) </label>
         </div>
     </div>
     <div class="col-md-6 col-12">
