@@ -22,29 +22,29 @@ class ProyectoController extends Controller {
     ];
   }
   public function index(Request $request)
-    {
-        $search = $request->input('search');
-        if(!empty($search)) {
-            $listado = Proyecto::search($search)->paginate(15)->appends(request()->query());
-        } else {
-            $listado = Proyecto::where( 'eliminado', false )->orderBy('fecha_desde', 'desc')->paginate(15)->appends(request()->query());
-        }
-        return view('proyectos.index', ['listado' => $listado]);
-    }
-    public function create(Request $request, proyecto $proyecto)
-    {
-        $this->viewBag['proyecto'] = $proyecto;
-        $this->viewBag['breadcrumbs'][] = [ 'name' => "Nuevo Proyecto" ];  
-        return view($request->ajax() ? 'proyectos.fast' : 'proyectos.create', $this->viewBag );      
-    }
+  {
+      $search = $request->input('search');
+      if(!empty($search)) {
+          $listado = Proyecto::search($search)->paginate(15)->appends(request()->query());
+      } else {
+          $listado = Proyecto::where( 'eliminado', false )->orderBy('fecha_desde', 'desc')->paginate(15)->appends(request()->query());
+      }
+      return view('proyectos.index', ['listado' => $listado]);
+  }
+  public function create(Request $request, proyecto $proyecto)
+  {
+      $this->viewBag['proyecto'] = $proyecto;
+      $this->viewBag['breadcrumbs'][] = [ 'name' => "Nuevo Proyecto" ];  
+      return view($request->ajax() ? 'proyectos.fast' : 'proyectos.create', $this->viewBag );      
+  }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\lain  $lain
-     * @return \Illuminate\Http\Response
-     */
+  /**
+   * Store a newly created resource in storage.
+   *
+   * @param  \Illuminate\Http\Request  $request
+   * @param  \App\lain  $lain
+   * @return \Illuminate\Http\Response
+   */
     public function store(Request $request, Proyecto $proyecto )
     {
         $proyecto->fill($request->all());

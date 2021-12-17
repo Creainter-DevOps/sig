@@ -25,8 +25,8 @@ class Actividad extends Model
      * @var array
      */
     protected $fillable = [
-      'usuario_id', 'oportunidad_id', 'cliente_id', 'contacto_id', 'cotizacion_id', 'proyecto_id', 'evento', 'empresa_id', 'candidato_id', 'texto', 'created_by', 'tipo','estado',
-      'fecha_limite', 'asignado_id','fecha_comienzo', 'color', 'orden', 'bloque_id' , 'nombre', 'eliminado'
+      'usuario_id', 'oportunidad_id', 'cliente_id', 'contacto_id', 'cotizacion_id', 'entregable_id', 'proyecto_id', 'evento', 'empresa_id', 'candidato_id', 'texto', 'created_by', 'tipo', 'estado', 'importacia', 'fecha_terminado',
+      'fecha_limite', 'asignado_id','fecha_comienzo', 'color', 'orden', 'bloque_id' , 'nombre', 'eliminado','link'
     ];
 
     /**
@@ -79,9 +79,10 @@ class Actividad extends Model
 
     public static function kanban() {
       return DB::select("
-        SELECT id, tipo, fecha, fecha_limite, texto, created_by, asignado_id, supervisado_por, estado, importancia,color, tiempo_estimado, vinculado
+        SELECT id, tipo, fecha, fecha_limite, texto, created_by, asignado_id, supervisado_por, estado, importancia,color, tiempo_estimado, vinculado, link
         FROM osce.actividad
-        WHERE tipo <> 'log' AND (" . Auth::user()->id . " = ANY(asignado_id) OR " . Auth::user()->id . " = ANY(supervisado_por))
+        WHERE tipo <> 'log' AND (" . Auth::user()->id . " = ANY(asignado_id))
+        -- OR " . Auth::user()->id . " = ANY(supervisado_por))
         ORDER BY id DESC");
     }
     public static function search($term){

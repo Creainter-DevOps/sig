@@ -32,4 +32,11 @@ class Bloque extends Model
       return $this->hasMany('App\Actividad', 'bloque_id','id' );
     }
 
+    public static function search ($term ){
+      $term = strtolower($term);
+      return static::where(function($query) use ($term){
+        $query->whereRaw('LOWER(nombre) LIKE ?',["%{$term}%"])
+      });
+    }
+
 }

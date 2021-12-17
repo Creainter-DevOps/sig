@@ -75,6 +75,7 @@ class ActividadController extends Controller
           'dueDate' => $n->fecha_limite,
           'status' => $n->estado,
           'is_linked' => $n->vinculado,
+          'link' => $n->link,
         ];
       }, $data);
       return response()->json(['status' => true , 'data' => $data]);

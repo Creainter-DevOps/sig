@@ -106,6 +106,15 @@
     <div class="col-6 col-sm-6">
       @include('proyectos.timeline')
     </div>
+    <div class="col-sm-6">
+        <div class="card">
+          <div class="card-body">
+            @include('proyectos.cartas')
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
   </div>
   <!-- users view card data ends -->
 

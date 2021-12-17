@@ -6,7 +6,7 @@
       <th>Código</th>
       <td>{{ $oportunidad->codigo }}</td>
       <th>Rotulo</th>
-      <td>{{ $oportunidad->que_es }} </td>
+      <td>{{ $oportunidad->rotulo }} </td>
     </tr>
     <tr>
       <th>Carpeta</th>

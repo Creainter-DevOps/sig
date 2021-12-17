@@ -1,7 +1,7 @@
 @csrf
 <div class="form-body">
   <div class="row">
-     <!-- <div class="col-md-6  col-12">
+     <div class="col-md-6  col-12">
       <div class="form-label-group">
           @if (empty($actividad->empresa_id))
           <input type="text" class="form-control autocomplete"
@@ -29,7 +29,7 @@
           @endif
       </div>
     </div>
-     <div class="col-md-6 col-12">
+    <div class="col-md-6 col-12">
         <div class="form-label-group container-autocomplete" >
           <input type="text" class="form-control autocomplete" name="oportunidad_id" 
              id="oportunidad_id" value="{{ old('cotizacion_id', $actividad->oportunidad_id ?? '' ) }}"
@@ -46,30 +46,56 @@
             <input type="text" class="form-control autocomplete" name="contacto_id" data-register="/contactos/fast" data-ajax="/contactos/autocomplete"
                 value="{{ old('contacto_id', $actividad->contacto_id ?? '' ) }}"
                 @if (!empty($actividad->contacto_id))
-                data-value=" {{ old( 'contacto_id', $actividad->contacto()->nombres )}}"
+                  data-value="{{ old( 'contacto_id', $actividad->contacto()->nombres )}}"
                 @endif
                 name="contacto_id">
            <label for="contacto_id">Contacto</label>
         </div>
-      </div>-->
+      </div>
       <div class="col-md-12 col-12">
         <div class="form-label-group">
-            @if (empty($actividad->proyecto_id) )
-            <input type="text" class="form-control autocomplete"
-               data-ajax="/proyectos/autocomplete" name="proyecto_id">
-            <label for="">Proyecto</label>
-            @else
             <input type="text" class="form-control autocomplete" value="{{ $actividad->cliente_id }}"
-               data-value="{{ $actividad->proyecto()->nombre }}"
-               data-ajax="/proyectos/autocomplete" name="proyecto_id">
+               data-ajax="/proyectos/autocomplete" 
+               @if (!empty( $actividad->proyecto_id) )  
+                data-value="{{ $actividad->proyecto()->nombre }}"
+               @endif
+               name="proyecto_id">
             <label for="">Proyecto</label>
-            @endif
         </div>
       </div>
+    <div class="col-md-6 col-12">
+      <div class="form-label-group">
+        <input type="text" class="form-control autocomplete" value="{{ $actividad->bloque_id }}"
+           data-ajax="/bloques/autocomplete" 
+           @if (!empty( $actividad->proyecto_id) )  
+            data-value="{{ $actividad->bloque()->nombre }}"
+           @endif
+           name="bloque_id">
+        <label for="">Bloque</label>
+      </div>
+    </div>
+    <div class="col-md-6 col-12">
+      <div class="form-label-group">
+        <input type="text" class="form-control autocomplete" value="{{ $actividad->entregable_id }}"
+           data-ajax="/entregables/autocomplete" 
+           @if (!empty( $actividad->entregable_id) )  
+            data-value="{{ $actividad->entregable()->nombre }}"
+           @endif
+           name="bloque_id">
+        <label for="">Entregable</label>
+      </div>
+    </div>
     <div class="col-md-6  col-12">
       <div class="form-label-group">
-          <input type="text" class="form-control" placeholder="Nombre(*)" value="{{ old ( 'nombres', $actividad->evento ??''  ) }}"  id="nombres" name="evento" required>
-          <label for="">Nombre(*) </label>
+        <input type="hidden" >
+        <select class="form-control" name="importancia" >
+          <option value="entregable"  {{ $actividad->tipo == 'entregable' ? 'selected' : '' }} >Entregable</option>
+          <option value="pago"  {{ $actividad->tipo ==  'pago' ? 'selected' : '' }} >Pago</option>
+          <option value="carta" {{ $actividad->tipo ==  'carta' ? 'selected' : '' }} >Carta</option>
+          <option value="desarrollo" {{ $actividad->tipo  == 'desarrollo' ? 'selected' : '' }} >Desarrollo</option>
+          <option value="llamada"  {{ $actividad->importancia == 'llamada' ? 'selected' : '' }} >Llamada</option>
+        </select>    
+        <label for="">Tipo(*) </label>
       </div>
     </div>
     <div class="col-md-6  col-12">
@@ -97,6 +123,19 @@
           <label for="">Orden (*)</label>
       </div>
     </div>
+    <!--<div class="col-md-6  col-12">
+      <div class="form-label-group">
+        <select class="form-control text-white " name="color" >
+          <option value="primary" class="bg-primary" selected  >Primary</option>
+          <option value="danger" class="bg-danger">Danger</option>
+          <option value="success" class="bg-success">Success</option>
+          <option value="info" class="bg-info">Info</option>
+          <option value="warning" class="bg-warning">Warning</option>
+          <option value="secondary" class="bg-secondary">Secondary</option>
+        </select>
+          <label for="">Color (*)</label>
+      </div>
+    </div>-->
     <div class="col-md-6  col-12">
       <input type="hidden">
       <div class="form-label-group">
@@ -122,6 +161,12 @@
             </fieldset>
            <label>Fecha limite  (*) </label>
         </div>
+    </div>
+    <div class="col-md-6  col-12">
+      <div class="form-label-group">
+          <input type="text" class="form-control" placeholder="Nombre(*)" value="{{ old ( 'nombres', $actividad->evento ??''  ) }}"  id="nombres" name="evento" required>
+          <label for="">Nombre(*) </label>
+      </div>
     </div>
     <div class="col-md-6 col-12">
       <div class="form-label-group">

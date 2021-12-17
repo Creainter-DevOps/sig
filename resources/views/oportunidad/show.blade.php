@@ -17,7 +17,7 @@
             class="users-avatar-shadow rounded-circle" height="64" width="64">
         </a>
         <div class="media-body pt-25">
-          <h4 class="media-heading">{{ $oportunidad->nombre }}</h4>
+          <h4 class="media-heading">{{  isset( $oportunidad->nombre) ? $oportunidad->nombre : $oportunidad->que_es  }}</h4>
           <span>{{ $oportunidad->nomenclatura }}</span>
         </div>
       </div>
@@ -66,21 +66,17 @@
       <div class="col-sm-6">
         <div class="card">
           <div class="card-body">
-            @include('contactos.table')
-          </div>
-        </div>
-      </div>
-    @endif
-    @if (!empty($oportunidad->cliente_id))
-      <div class="col-sm-6">
-        <div class="card">
-          <div class="card-body">
-            @include('clientes.table')
+            @include('contactos.table', ['contacto' => $oportunidad->contacto()] )
           </div>
         </div>
       </div>
     @endif
     <div  class="col-6 col-sm-6">
+        <div class="card">
+          <div class="card-body">
+             @include('cotizacion.list', [ 'listado' => $oportunidad->cotizaciones() ])
+          </div>
+        </div>
     </div>
     @if(!empty($oportunidad->candidato_id))
     <div class="col-6 col-md-6">

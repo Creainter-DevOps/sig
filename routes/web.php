@@ -59,6 +59,7 @@ Route::resource('usuarios','UsuarioController')->parameters([
   'usuarios' => 'usuario'
 ]);
 
+Route::get('bloques/autocompete', 'BloqueController@autocomplete');
 Route::resource('bloques', 'BloqueController')->parameters([ 
   'bloques' => 'bloque'
 ]);
@@ -107,6 +108,11 @@ Route::resource('contactos', 'ContactoController')->parameters([
 Route::get('productos/autocomplete', 'ProductoController@autocomplete');
 Route::resource('productos', 'ProductoController')->parameters([
   'productos' => 'producto'
+]);
+
+Route::get('carta/autocomplete', 'CartaController@autocomplete');
+Route::resource('cartas', 'CartaController')->parameters([
+  'cartas' => 'carta'
 ]);
 
 Route::get('oportunidad/convertir/proyecto/{candidato}','OportunidadController@proyecto')->name( 'oportunidad.proyecto' );

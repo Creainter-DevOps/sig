@@ -18,7 +18,7 @@ class BloqueController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+ Show the form for creating a new resource.
      *
      * @return \Illuminate\Http\Response
      */
@@ -87,5 +87,11 @@ class BloqueController extends Controller
       $bloque->eliminado = true;
       $bloque->save();
       return response()->json([ 'status' => true ]); 
+    }
+
+    public function autocomplete(Request $request){
+      $query =  $request->input('query');
+      $list = Bloque::search($query)->selectRaw('id, nombre as value')->get(); 
+      return response()->json($list);
     }
 }

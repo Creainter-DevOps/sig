@@ -1,6 +1,6 @@
 @extends('layouts.contentLayoutMaster')
 {{-- page title --}}
-@section('title','Invoice List')
+@section('title','Oportunidades')
 {{-- vendor style --}}
 @section('vendor-styles')
 @endsection
@@ -30,10 +30,8 @@
         <tr>
           <th style="width:150px;">Código</th>
           <th>Cliente</th>
-          <th>Licitación</td>
           <th>Rótulo</th>
           <th>Fecha Inicio</th>
-          <th>Fecha Límite</th>
           <th></th>
         </tr>
       </thead>
@@ -42,7 +40,6 @@
         <tr>
           <td><div>{{ $oportunidad->codigo }}</div></td>
           <td>{{ (!empty($oportunidad->cliente()) ? $oportunidad->cliente()->empresa()->rotulo() : '') }}</td>
-          <td>{{ $oportunidad->rotulo() }}</td>
           <td>{{ $oportunidad->rotulo() }}</td>
           <td>{{ Helper::fecha($oportunidad->created_on) }}</td>
           <td class="text-center py-1">

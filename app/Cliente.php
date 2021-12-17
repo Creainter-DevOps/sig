@@ -26,7 +26,7 @@ class Cliente extends Model {
      * @var array
      */
     protected $fillable = [
-      'id','empresa_id','descripcion',
+      'id','empresa_id','nomenclatura',
     ];
 
     /**
@@ -82,7 +82,9 @@ class Cliente extends Model {
         return static::join('osce.empresa', 'osce.empresa.id', '=', 'osce.cliente.empresa_id')
         ->where(function($query) use($term) {
             $query->WhereRaw("LOWER(osce.empresa.razon_social) LIKE ?",["%{$term}%"])
-            ->orWhereRaw("LOWER(osce.empresa.ruc) LIKE ?",["%{$term}%"])
+              ->orWhereRaw("LOWER(osce.empresa.seudonimo) LIKE ?",["%{$term}%"])
+              ->orWhereRaw("LOWER(osce.empresa.ruc) LIKE ?",["%{$term}%"])
+              ->orWhereRaw("LOWER(osce.cliente.nomenclatura) LIKE ?",["%{$term}%"])
             ;
         });
     }

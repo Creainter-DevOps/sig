@@ -15,6 +15,9 @@
 .kanban-drag {
   min-height: 400px!important;
 }
+.kanban-item[data-is_linked=true] {
+  border-right: 5px solid #8fa4b9;
+}
 </style>
 @endsection
 
@@ -146,6 +149,10 @@ $(document).ready(function() {
     dataType: 'json',
     success: function(xhr) {
       data = xhr.data;
+      data.map((n) => {
+        n.title = '<a href="javascript:void(0);">Link</a> | ' + n.title;
+        return n;
+      })
       console.log('DATA', data);
       addBoards();
     }
@@ -172,13 +179,13 @@ $(document).ready(function() {
             }
     ];
     g[0].item = data.filter(function(e) {
-      return e.status == 0;
-    });
-    g[1].item = data.filter(function(e) {
       return e.status == 1;
     });
-    g[2].item = data.filter(function(e) {
+    g[1].item = data.filter(function(e) {
       return e.status == 2;
+    });
+    g[2].item = data.filter(function(e) {
+      return e.status == 3;
     });
     return g;
   };
@@ -190,15 +197,21 @@ $(document).ready(function() {
     buttonContent: "+ Nueva Actividad", // text or html content of the board button
     gutter: '0',
     click: function (el) {
-      return;
+      if(typeof el.dataset.link !== 'undefined' && el.dataset.link) {
+        navigate(el.dataset.link, true);
+        return false;
+      }
+      if(false) {
       $(".kanban-overlay").addClass("show");
       $(".kanban-sidebar").addClass("show");
       kanban_curr_el = el;
       kanban_item_title = $(el).contents()[0].data;
       kanban_curr_item_id = $(el).attr("data-eid");
       $(".edit-kanban-item .edit-kanban-item-title").val(kanban_item_title);
+      }
     },
     buttonClick: function (el, boardId) {
+      console.log('click2');
       var formItem = document.createElement("form");
       formItem.setAttribute("class", "itemform");
       formItem.innerHTML =
@@ -234,7 +247,8 @@ $(document).ready(function() {
       console.log('DRAG2', el);
     },
     dropEl: function (el, target, source, sibling) {
-      if(typeof el.dataset.is_linked !== 'undefined' && el.dataset.is_linked) {
+      if(typeof el.dataset.is_linked !== 'undefined' && el.dataset.is_linked === 'true') {
+        console.log('LINK', el.dataset.is_linked);
         return false;
       }
       console.log('dropEl', jsKan, el, target, source, sibling);

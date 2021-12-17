@@ -9,7 +9,7 @@
       <th>Código</th>
       <td>{{ $cotizacion->codigo }}</td>
       <th>Cliente</th>
-      <td>{{ $cotizacion->cliente()->empresa()->razon_social }}</td>
+      <td>{{  null != $cotizacion->cliente()? $cotizacion->cliente()->rotulo() : '' }}</td>
   </tr>
   <tr>
       <th>Oportunidad</th>

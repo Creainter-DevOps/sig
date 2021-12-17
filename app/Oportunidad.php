@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Helpers\Helper;
 use Illuminate\Support\Facades\DB;
 use App\Empresa;
-use App\CandidatoOportunidad;
+use App\Cotizacion;
 use App\Actividad;
 use Auth;
 
@@ -29,7 +29,7 @@ class Oportunidad extends Model
      * @var array
      */
     protected $fillable = [
-      'codigo','licitacion_id','tenant_id','aprobado_por','aprobado_el','rechazado_por','rechazado_el','motivo','monto_base','duracion_dias','instalacion_dias','garantia_dias','estado','fecha_participacion','fecha_propuesta','empresa_id','cliente_id','contacto_id','que_es', 'revisado_el','revisado_por'
+      'codigo','licitacion_id','tenant_id','aprobado_por','aprobado_el','rechazado_por','rechazado_el','motivo','monto_base','duracion_dias','instalacion_dias','garantia_dias','estado','fecha_participacion','fecha_propuesta','empresa_id','cliente_id','contacto_id','rotulo', 'revisado_el','revisado_por'
     ];
 
     /**
@@ -64,6 +64,9 @@ class Oportunidad extends Model
     public function licitacion() {
       return $this->belongsTo('App\Licitacion', 'licitacion_id')->first();
     }
+    public function cotizaciones(){
+      return $this->hasMany('App\Cotizacion','oportunidad_id','id')->get();
+    }
     public function proyecto() {
       return $this->belongsTo('App\Proyecto', 'id','oportunidad_id')->first();
     }
@@ -89,24 +92,24 @@ class Oportunidad extends Model
         ->WhereRaw("LOWER(licitacion.rotulo) LIKE ? ", ["%{$query}%" ])
         ->orWhereRaw("LOWER(empresa.razon_social) LIKE ? ", ["%{$query}%" ])
         ->orWhereRaw("LOWER(licitacion.descripcion) LIKE ? ", ["%{$query}%" ])
-        ->orWhereRaw("LOWER(oportunidad.que_es) LIKE ? ", ["%{$query}%" ])
+        ->orWhereRaw("LOWER(oportunidad.rotulo) LIKE ? ", ["%{$query}%" ])
         ->orWhereRaw("LOWER(licitacion.nomenclatura) LIKE ? ", ["%{$query}%" ])
         ->orWhereRaw("LOWER(oportunidad.codigo) LIKE ? ", ["%{$query}%" ])
         ->orWhereRaw("licitacion.procedimiento_id::text LIKE ? ", ["%{$query}%" ])
         ->orWhereRaw("LOWER(licitacion.descripcion) LIKE ? ", ["%{$query}%" ]);
     }
     public function rotulo() {
-      if(empty($this->que_es)) {
+      if(empty($this->rotulo)) {
         if(!empty($this->licitacion_id)) {
           $rp = strtoupper($this->licitacion()->rotulo . ' ' . $this->licitacion()->descripcion);
         } else {
           $rp = strtoupper($this->descripcion);
         }
       } else {
-        $rp = '-- ' . strtoupper($this->que_es) . ' --';
+        $rp = '-- ' . strtoupper($this->rotulo) . ' --';
       }
       $rp = substr($this->codigo, 7) . ': ' . $rp;
-      return (!empty($this->importancia) ? '<span class="favorite warning"><i class="bx bxs-star"></i></span>' : '') . substr($rp, 0, 100) . (!empty($this->revisado_el) ? ' <b>[R]</b>' : '');
+      return (!empty($this->importancia) ? '<span class="favorite warning"><i class="bx bxs-star"></i></span>' : '') . substr($rp, 0, 100) . (!empty($this->revisado_el) ? '<b>[R]</b>' : '');
     }
     public function participacion() {
       return Helper::fecha($this->fecha_participacion_desde, true) . ' al ' . Helper::fecha($this->fecha_participacion_hasta, true);
@@ -126,9 +129,9 @@ class Oportunidad extends Model
     }
     public function empresas() {
       $rp = DB::select("
-        SELECT E.razon_social, E.ruc, E.descripcion, E.id e_empresa_id, C.*, C.id c_candidato_id
+        SELECT E.razon_social, E.ruc, E.descripcion, E.id e_empresa_id, C.*, C.id c_cotizacion_id
         FROM osce.empresa E
-        LEFT JOIN osce.candidato C ON C.oportunidad_id = " . $this->id . " AND C.empresa_id = E.id
+        LEFT JOIN osce.cotizacion C ON C.oportunidad_id = " . $this->id . " AND C.empresa_id = E.id
         WHERE E.tenant_id = " . $this->tenant_id . "
         ORDER BY E.id ASC
         LIMIT 10");
@@ -170,8 +173,8 @@ LIMIT 50");
 SELECT x.*
 FROM(
 SELECT O.*, L.fecha_participacion_hasta,
-  (SELECT COUNT(*) FROM osce.candidato WHERE oportunidad_id = O.id AND interes_el IS NOT NULL) cantidad_interes,
-  (SELECT COUNT(*) FROM osce.candidato WHERE oportunidad_id = O.id AND participacion_el IS NOT NULL) cantidad_participadas
+  (SELECT COUNT(*) FROM osce.cotizacion WHERE oportunidad_id = O.id AND interes_el IS NOT NULL) cantidad_interes,
+  (SELECT COUNT(*) FROM osce.cotizacion WHERE oportunidad_id = O.id AND participacion_el IS NOT NULL) cantidad_participadas
 FROM osce.oportunidad O
 JOIN osce.licitacion L ON L.id = O.licitacion_id AND L.eliminado IS NULL AND L.fecha_participacion_desde - INTERVAL '1' DAY <= NOW() AND L.fecha_participacion_hasta + INTERVAL '1' DAY >= NOW()
 WHERE O.aprobado_el IS NOT NULL AND O.rechazado_el IS NULL AND O.archivado_el IS NULL) x
@@ -181,8 +184,8 @@ ORDER BY x.fecha_participacion_hasta ASC, x.id ASC"); */
 SELECT x.*
 FROM (
 SELECT O.*,
-  (SELECT COUNT(*) FROM osce.candidato WHERE oportunidad_id = O.id AND interes_el IS NOT NULL) cantidad_interes,
-  (SELECT COUNT(*) FROM osce.candidato WHERE oportunidad_id = O.id AND participacion_el IS NOT NULL) cantidad_participadas
+  (SELECT COUNT(*) FROM osce.cotizacion WHERE oportunidad_id = O.id AND interes_el IS NOT NULL) cantidad_interes,
+  (SELECT COUNT(*) FROM osce.cotizacion WHERE oportunidad_id = O.id AND participacion_el IS NOT NULL) cantidad_participadas
 FROM osce.oportunidad O
 WHERE O.aprobado_el >= NOW() - INTERVAL '80' DAY AND O.rechazado_el IS NULL AND O.archivado_el IS NULL)x
 JOIN osce.licitacion L ON L.id = x.licitacion_id AND L.eliminado IS NULL 
@@ -196,21 +199,21 @@ ORDER BY L.fecha_participacion_hasta ASC, id DESC");
     static function listado_propuestas_por_vencer() {
 /*      $rp = DB::select("
     SELECT O.*,
-    (SELECT COUNT(*) FROM osce.candidato WHERE oportunidad_id = O.id AND participacion_el IS NOT NULL) cantidad_participadas,
-    (SELECT COUNT(*) FROM osce.candidato WHERE oportunidad_id = O.id AND propuesta_el IS NOT NULL) cantidad_propuestas
+    (SELECT COUNT(*) FROM osce.cotizacion WHERE oportunidad_id = O.id AND participacion_el IS NOT NULL) cantidad_participadas,
+    (SELECT COUNT(*) FROM osce.cotizacion WHERE oportunidad_id = O.id AND propuesta_el IS NOT NULL) cantidad_propuestas
 FROM osce.oportunidad O
 JOIN osce.licitacion L ON L.id = O.licitacion_id AND L.eliminado IS NULL
 WHERE O.aprobado_el IS NOT NULL AND O.rechazado_el IS NULL AND O.archivado_el IS NULL
 AND ((L.fecha_propuesta_desde >= NOW() AND L.fecha_propuesta_hasta <= NOW()) OR (L.fecha_propuesta_hasta >= NOW() - INTERVAL '1' DAY AND L.fecha_propuesta_hasta <= NOW() + INTERVAL '1' DAY))
 AND O.fecha_participacion IS NOT NULL
-AND ((SELECT COUNT(*) FROM osce.candidato WHERE oportunidad_id = O.id AND participacion_el IS NOT NULL) <> (SELECT COUNT(*) FROM osce.candidato WHERE oportunidad_id = O.id AND propuesta_el IS NOT NULL))
+AND ((SELECT COUNT(*) FROM osce.cotizacion WHERE oportunidad_id = O.id AND participacion_el IS NOT NULL) <> (SELECT COUNT(*) FROM osce.cotizacion WHERE oportunidad_id = O.id AND propuesta_el IS NOT NULL))
 ORDER BY L.fecha_propuesta_hasta ASC, O.id ASC");*/
       $rp = DB::select("
 SELECT x.*
 FROM (
 SELECT O.*,
-  (SELECT COUNT(*) FROM osce.candidato WHERE oportunidad_id = O.id AND participacion_el IS NOT NULL) cantidad_participadas,
-  (SELECT COUNT(*) FROM osce.candidato WHERE oportunidad_id = O.id AND propuesta_el IS NOT NULL) cantidad_propuestas
+  (SELECT COUNT(*) FROM osce.cotizacion WHERE oportunidad_id = O.id AND participacion_el IS NOT NULL) cantidad_participadas,
+  (SELECT COUNT(*) FROM osce.cotizacion WHERE oportunidad_id = O.id AND propuesta_el IS NOT NULL) cantidad_propuestas
 FROM osce.oportunidad O
 WHERE O.aprobado_el >= NOW() - INTERVAL '80' DAY AND O.rechazado_el IS NULL AND O.archivado_el IS NULL AND O.fecha_participacion IS NOT NULL)x
 JOIN osce.licitacion L ON L.id = x.licitacion_id AND L.eliminado IS NULL
@@ -262,7 +265,7 @@ ORDER BY L.fecha_buena_hasta ASC, O.id ASC");
       $this->log('archivar', null);
     }
     public function registrar_interes(Empresa $empresa) {
-      CandidatoOportunidad::create([
+      Cotizacion::create([
         'oportunidad_id' => $this->id,
         'empresa_id'     => $empresa->id,
         'interes_el'     => 'NOW()',
@@ -274,12 +277,12 @@ ORDER BY L.fecha_buena_hasta ASC, O.id ASC");
       return $this->hasMany('App\Actividad','oportunidad_id')->orderBy('id', 'desc')->get();
     }
     public function similares() {
-      if(empty($this->que_es)) {
+      if(empty($this->rotulo)) {
         $lista = strtoupper($this->licitacion()->rotulo);
 //        $lista = explode(' ', $lista);
 //        $lista = array_filter($lista, function($t) { $t = trim($t); return strlen($t) > 7 && preg_match("/^\w+$/", $t); });
       } else {
-        $lista = $this->que_es;#explode(',', $this->que_es);
+        $lista = $this->rotulo;#explode(',', $this->rotulo);
       }
       return static::busqueda_de_similares($lista, $this->licitacion_id);
     }

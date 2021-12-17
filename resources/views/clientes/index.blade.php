@@ -54,6 +54,7 @@ tr.block_details>td>div {
     <table class="table table-sm mb-0" style="width:100%">
       <thead>
         <tr>
+          <th>Id</th>
           <th>RUC</th>
           <th>Razon social</th>
           <th>Seudonimo</th>
@@ -65,6 +66,7 @@ tr.block_details>td>div {
       <tbody>
       @foreach ($listado as $cliente)
         <tr>
+          <td>{{ $cliente->id }}</td>
           <td>{{ $cliente->empresa()->ruc }}</td>
           <td>{{ $cliente->empresa()->razon_social }}</td>
           <td>{{ $cliente->empresa()->seudonimo }}</td>

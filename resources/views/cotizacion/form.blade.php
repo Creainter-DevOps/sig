@@ -12,21 +12,11 @@
           <label for="">Empresa</label>
       </div>
     </div>
-    <div class="col-md-6  col-12">
-      <div class="form-label-group">
-          <input type="text" class="form-control autocomplete" value="{{ $cotizacion->cliente_id }}"
-             @if(!empty($cotizacion->cliente_id ))
-               data-value="{{ null != $cotizacion->cliente() ? $cotizacion->cliente()->empresa()->razon_social : ''  }}" 
-             @endif
-             data-ajax="/clientes/autocomplete" name="cliente_id"
-               >
-          <label for="cliente_id">Cliente</label>
-      </div>
-    </div>
   <div class="col-md-6 col-12">
     <div class="form-label-group container-autocomplete" >
       <input type="text" class="form-control autocomplete" name="oportunidad_id" id="oportunidad_id" value="{{ old('cotizacion_id', $cotizacion->oportunidad_id) }}" required
          data-ajax="/oportunidad/autocomplete"
+         data-register="{{  route('oportunidades.create')}}  "
         @if( !empty($cotizacion->oportunidad_id ))
          data-value="{{ old ( 'oportunidad', null != $cotizacion->oportunidad() ?  $cotizacion->oportunidad()->rotulo() : '' ) }}"
         @endif

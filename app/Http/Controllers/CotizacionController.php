@@ -24,9 +24,9 @@ class CotizacionController extends Controller {
   public function index(Request $request) {
     $search = $request->input('search');
     if(!empty($search)) {
-      $listado = Cotizacion::whereNull('eliminado')->search($search)->paginate(15)->appends(request()->query());
+      $listado = Cotizacion::search($search)->paginate(15)->appends(request()->query());
     } else {
-      $listado = Cotizacion::where( 'eliminado', false )->orderBy('id', 'desc')->paginate(15)->appends(request()->query());
+      $listado = Cotizacion::orderBy('id', 'desc')->paginate(15)->appends(request()->query());
     }
     return view('cotizacion.index', ['listado' => $listado]);
   }
@@ -49,7 +49,6 @@ class CotizacionController extends Controller {
   public function store( Request $request, Cotizacion $cotizacion ){
     $cotizacion->fill($request->all());
     $cotizacion->empresa_id  = $request->cliente_id;
-    $cotizacion->codigo =  Cotizacion::generarCodigo();
     $cotizacion->save(); 
     $cotizacion->log("creado", null );
     return response()->json([

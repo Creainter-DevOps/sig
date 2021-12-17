@@ -7,14 +7,14 @@ use App\Oportunidad;
 use App\OportunidadLog;
 use Illuminate\Support\Facades\Auth;
 use App\Empresa;
-use App\CandidatoOportunidad;
+use App\Cotizacion;
 use App\Licitacion;
 use App\Helpers\Chartjs;
 use App\Helpers\Helper;
 
 class LicitacionController extends Controller {
   public $fieldsPublic = [
-    'que_es'     => '¿Qué solicita?',
+    'rotulo'     => '¿Qué solicita?',
     'monto_base' => 'Monto Base',
     'instalacion_dias' => 'Instalación (días)',
     'duracion_dias' => 'Servicio (días)',
@@ -162,14 +162,14 @@ public function archivar(Request $request, Licitacion $licitacion) {
     $oportunidad->archivar();
     return redirect('/licitaciones');
   }
-public function registrarParticipacion(Request $request, Licitacion $licitacion, CandidatoOportunidad $candidato) {
+public function registrarParticipacion(Request $request, Licitacion $licitacion, Cotizacion $cotizacion) {
   $oportunidad = $licitacion->oportunidad();
-    $candidato->registrar_participacion();
+    $cotizacion->registrar_participacion();
     return redirect('/licitaciones/' . $licitacion->id . '/detalles');
   }
-public function registrarPropuesta(Request $request, Licitacion $licitacion, CandidatoOportunidad $candidato) {
+public function registrarPropuesta(Request $request, Licitacion $licitacion, Cotizacion $cotizacion) {
     $oportunidad = $licitacion->oportunidad();
-    $candidato->registrar_propuesta();
+    $cotizacion->registrar_propuesta();
     return redirect('/licitaciones/' . $licitacion->id . '/detalles');
   }
 public function autocomplete(Request $request ){

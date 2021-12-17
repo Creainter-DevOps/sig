@@ -91,34 +91,34 @@
                 <tr>
                   <td>Monto Base:</td>
                   <td style="display:flex;" >
-                    <div data-editable="/licitaciones/actualizar/{{  $oportunidad->id }}" data-name="monto_base"  >{{ Helper::money($oportunidad->monto_base) }}</div>
+                    <div data-editable="/oportunidades/{{  $oportunidad->id }}?_update=monto_base" data-name="monto_base"  >{{ Helper::money($oportunidad->monto_base) }}</div>
                   </td>
                 </tr>
                 <tr>
                   <td>Instalación:</td>
                   <td class="d-flex align-items-end" >
-                    <div data-editable="/licitaciones/actualizar/{{ $oportunidad->id }}" data-name="instalacion_dias">{{ $oportunidad->instalacion_dias ?? 0 }}</div><label>días</label>
+                    <div data-editable="/oportunidades/{{ $oportunidad->id }}?_update=instalacion_dias" data-name="instalacion_dias">{{ $oportunidad->instalacion_dias ?? 0 }}</div><label>días</label>
                   </td>
                 </tr>
                 <tr>
                   <td>Servicio:</td>
                   <td class="d-flex align-items-end ">
-                    <div data-editable="/licitaciones/actualizar/{{ $oportunidad->id }}" data-name="duracion_dias">{{ $oportunidad->duracion_dias ?? 0 }}</div> <label>días</label>
+                    <div data-editable="/oportunidades/{{ $oportunidad->id }}?_update=duracion_dias" data-name="duracion_dias">{{ $oportunidad->duracion_dias ?? 0 }}</div> <label>días</label>
                   </td>
                 </tr>
                 <tr>
                   <td>Garantía:</td>
                   <td class="d-flex align-items-end">
-                    <div data-editable="/licitaciones/actualizar/{{ $oportunidad->id }}" data-name="garantia_dias">{{ $oportunidad->garantia_dias ?? 0 }}</div> <label>días</label>
+                    <div data-editable="/oportunidades/{{ $oportunidad->id }}?_update=garantia_dias" data-name="garantia_dias">{{ $oportunidad->garantia_dias ?? 0 }}</div> <label>días</label>
                   </td>
                 </tr>
                 <tr>
                   <td>Estado </td>
                   <td>
-                    <select class="form-control select-data" data-url="/licitaciones/actualizar/{{ $oportunidad->id }}" id="select-estado" data-name="estado">
-                      <option value=""  {{ empty($oportunidad->estado) ? 'selected' : '' }} >Pendiente</option>
-                      <option value="ganado"  {{ $oportunidad->estado == 'ganado' ? 'selected' : '' }} >Ganado</option>
-                      <option value="perdido" {{ $oportunidad->estado == 'perdido' ? 'selected' : '' }} >Perdido</option>
+                    <select class="form-control select-data" data-editable="/oportunidades/{{ $oportunidad->id }}?_update=estado" data-value="{{ $oportunidad->estado }}">
+                      <option value="PENDIENTE">Pendiente</option>
+                      <option value="PERDIDO">Perdido</option>
+                      <option value="GANADO">Ganado</option>
                     </select> 
                    </td>  
                 </tr>
@@ -257,7 +257,7 @@
                   @elseif(in_array($c->evento, ['monto_base']))
                     <h6 class="timeline-title">{{ $c->creado() }} ha definido un monto:</h6>
                     <div class="timeline-content"><div>Monto Base: {{ Helper::money($c->texto) }} soles</div></div>
-                  @elseif(in_array($c->evento, ['accion','que_es']))
+                  @elseif(in_array($c->evento, ['accion','rotulo']))
                     <h6 class="timeline-title">{{ $c->creado() }}:</h6>
                     <div class="timeline-content"><div>{{ $c->texto }}</div></div>
                   @else

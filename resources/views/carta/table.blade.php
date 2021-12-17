@@ -1,6 +1,5 @@
 <table class="table table-sm mb-0 table-bordered table-vcenter"  style="width:100%">
- 
-   <tr>
+  <tr>
     <th colspan="4" class="table-head"><a class="link-primary"  href="{{ route('contactos.show', [ 'contacto' => $contacto->id ]) }}" target="_blank">CONTACTO</a></th>
   </tr>
     <tr>
@@ -21,10 +20,4 @@
       <th>Correo</th>
       <td>{{ $contacto->correo ?? '' }} </td>
     </tr>
-   @if(empty($contacto))
-     <tr>
-      <th colspan="4">Sin informacion de cliente</th>
-    </tr> 
-   @endif
-     
 </table>

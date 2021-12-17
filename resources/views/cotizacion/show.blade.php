@@ -41,11 +41,29 @@ tr.block_details > td > div {
 
 @section('content')
 <div class="row">
+    <div class="col-12 col-sm-7">
+      <div class="media mb-2">
+        <a class="mr-1" href="#">
+          <img src="https://sig.creainter.com.pe/images/portrait/small/avatar-s-26.jpg" alt="users view avatar" class="users-avatar-shadow rounded-circle" height="64" width="64">
+        </a>
+        <div class="media-body pt-25">
+          <h4 class="media-heading">{{ $cotizacion->descripcion}}  </h4>
+          <span>{{ $cotizacion->codigo }} </span>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-sm-5 px-0 d-flex justify-content-end align-items-center px-1 mb-2">
+      <a href="#" class="btn btn-sm mr-25 border"><i class="bx bx-envelope font-small-3"></i></a>
+      <a href="#" class="btn btn-sm mr-25 border">Profile</a>
+      <a href="https://sig.creainter.com.pe/page-users-edit" class="btn btn-sm btn-primary">Edit</a>
+    </div>
+  </div>
+<div class="row">
 <div class="col-6">
     <div class="card">
       <div class="card-content">
         <div class="card-body">
-          @include('clientes.table')
+          @include('clientes.table', ['cliente' => $cotizacion->oportunidad()->cliente() ])
         </div>
       </div>
    </div>

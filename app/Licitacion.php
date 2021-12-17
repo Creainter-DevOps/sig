@@ -12,7 +12,7 @@ use App\Helpers\Helper;
 use Illuminate\Support\Facades\DB;
 use App\Empresa;
 use App\Oportunidad;
-use App\CandidatoOportunidad;
+use App\Cotizacion;
 use Auth;
 
 class Licitacion extends Model

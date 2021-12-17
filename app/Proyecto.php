@@ -115,4 +115,8 @@ class Proyecto extends Model
       return $this->hasMany('App\Actividad','proyecto_id')->orderBy('id', 'DESC' )->get(); 
     }
 
+    public function cartas(){
+      return $this->hasMany('App\Carta','proyecto_id')->orderBy('id','DESC')->get();
+    }
+
 }

@@ -23,7 +23,7 @@
     </div>
     <div class="col-mb-6 col-12" >
       <div class="form-label-group">
-         <textarea class="form-control" placeholder="descripcion" name="descripcion" ></textarea>
+         <textarea class="form-control" placeholder="nomenclatura" name="nomenclatura" ></textarea>
          <label>Descripcion</label>
       </div>
     </div>

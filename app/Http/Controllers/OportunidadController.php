@@ -8,7 +8,7 @@ use App\OportunidadLog;
 use Illuminate\Support\Facades\Auth;
 use App\Empresa;
 use Illuminate\Support\Facades\DB;
-use App\CandidatoOportunidad;
+use App\Cotizacion;
 use App\Licitacion;
 use App\Proyecto;
 use App\Helpers\Chartjs;
@@ -22,7 +22,7 @@ class OportunidadController extends Controller {
   {
       $search = $request->input('search');
       if(!empty($search)) {
-          $listado = Oportunidad::search($search)->paginate(15)->appends(request()->query());
+          $listado = Oportunidad::search($search)->selectRaw('licitacion.*,  empresa.* ,oportunidad.*')->paginate(15)->appends(request()->query()) ;
       } else {
           $listado = Oportunidad::list()->paginate(15)->appends(request()->query());
       }
@@ -30,7 +30,7 @@ class OportunidadController extends Controller {
   }
   public function create(Request $request, Oportunidad $oportunidad )
   {
-      return view('oportunidad.create', compact( 'oportunidad'));
+      return view( $request->ajax() ? 'oportunidad.fast' : 'oportunidad.create', compact( 'oportunidad'));
   }
   public function store(Request $request , Oportunidad $oportunidad )
   {
@@ -50,13 +50,13 @@ class OportunidadController extends Controller {
     $contacto = $oportunidad->contacto(); 
     return view('oportunidad.show', compact('oportunidad'));
   }
-  public function proyecto(Request $request, CandidatoOportunidad $candidato, Proyecto $proyecto ){
-     $proyecto->oportunidad_id = $candidato->oportunidad_id;
-     $proyecto->empresa_id     = $candidato->empresa_id;
-     $proyecto->candidato_id   = $candidato->id;
+  public function proyecto(Request $request, Cotizacion $cotizacion, Proyecto $proyecto ){
+     $proyecto->oportunidad_id = $cotizacion->oportunidad_id;
+     $proyecto->empresa_id     = $cotizacion->empresa_id;
+     $proyecto->cotizacion_id   = $cotizacion->id;
      $proyecto->codigo = $proyecto::generarCodigo();
-     $proyecto->nombre = strtolower($candidato->oportunidad()->licitacion()->rotulo);   
-     //dd($candidato->oportunidad()->licitacion()->rotulo );
+     $proyecto->nombre = strtolower($cotizacion->oportunidad()->licitacion()->rotulo);   
+     //dd($cotizacion->oportunidad()->licitacion()->rotulo );
      $proyecto->save();
      return redirect()->route( 'proyecto.edit', [ 'proyecto' => $proyecto->id ]);
   }
@@ -70,14 +70,18 @@ class OportunidadController extends Controller {
      */
   public function edit(Oportunidad $oportunidad)
   {
-    dd($oportunidad);
       return view('oportunidad.edit', compact('oportunidad'));
   }
   public function update(Request $request, Oportunidad $oportunidad )
   {
-    $oportunidad->update($request->all());
-    $oportunidad->log( 'editado', null );
-    return  response()->json([ 'status' =>  true]);
+    $data = $request->all();
+    if(!empty($data['_update'])) {
+      $data[$data['_update']] = $data['value'];
+      unset($data['value']);
+      unset($data['_update']);
+    }
+    $oportunidad->update($data);
+    return response()->json([ 'status' =>  true]);
   }
 
     /**
@@ -96,7 +100,7 @@ class OportunidadController extends Controller {
     }
      public function autocomplete(Request $request) {
        $query = $request->input('query');
-       $data = Oportunidad::search($query)->select(DB::raw("COALESCE(oportunidad.que_es, licitacion.rotulo, licitacion.descripcion, licitacion.nomenclatura) as value"),'oportunidad.id')->get();
+       $data = Oportunidad::search($query)->select(DB::raw("COALESCE(oportunidad.rotulo, licitacion.rotulo, licitacion.descripcion, licitacion.nomenclatura) as value"),'oportunidad.id')->get();
        return Response()->json($data);
      }
 }
