@@ -54,6 +54,10 @@ class Actividad extends Model
             $model->created_by = Auth::user()->id;
         });
     }
+    public function oportunidad(){
+      return $this->belongsTo('App\Oportunidad', 'oportunidad_id', 'id')->first();  
+    }
+
     public function creado() {
       $rp = $this->belongsTo('App\User', 'created_by')->first();
       if(!empty($rp)) {
@@ -69,14 +73,44 @@ class Actividad extends Model
         'texto'  => $texto 
       ]);
     }
-    public function empresa( $evento ){
-       return $this->belongsTo('App\Empresa', 'empresa_id', 'id' );
-    }
-    /* public function usuario() {
-      $rpt = $this->belongsTo('App\User', 'asignado_id')->first();
-      return isset($rpt) ? $rpt->usuario : '' ;
-    }*/
 
+    public function empresa(){
+       return $this->belongsTo('App\Empresa', 'empresa_id', 'id')->first();
+    }
+
+    public function contacto(){
+      return $this->belongsTo('App\Contacto', 'contacto_id', 'id' )->first();
+    }
+
+    public function cliente(){
+      return $this->belongsTo('App\Cliente', 'cliente_id','id' )->first();
+    }
+
+    public function proyecto(){
+      return $this->belongsTo('App\Proyecto', 'proyecto_id', 'id')->first();
+    }
+    
+    public function bloque(){
+      return $this->belongsTo('App\Proyecto', 'bloque_id', 'id')->first();
+    }
+        
+    public function entregable(){
+      return $this->belongsTo('App\Entregable', 'entregable_id', 'id')->first();
+    }
+
+    public function usuario() {
+      $users =   DB::select("SELECT U.id, U.usuario FROM osce.actividad  A 
+                          JOIN osce.usuario U on U.id = any(A.asignado_id)
+                          where A.id = {$this->id}");
+      //dd( $users );
+      $users = array_map( function($user)  {
+        return $user->usuario;
+      }, $users );
+
+      return isset($user[0]) ? $user[0] : '' ;
+    
+    }
+    
     public static function kanban() {
       return DB::select("
         SELECT id, tipo, fecha, fecha_limite, texto, created_by, asignado_id, supervisado_por, estado, importancia,color, tiempo_estimado, vinculado, link
@@ -85,6 +119,7 @@ class Actividad extends Model
         -- OR " . Auth::user()->id . " = ANY(supervisado_por))
         ORDER BY id DESC");
     }
+
     public static function search($term){
       $term = strtolower(trim($term));
 
@@ -92,5 +127,36 @@ class Actividad extends Model
         $query->WhereRaw("LOWER(evento) LIKE ? ", ["%{$term}%"])
               ->orWhereRaw("LOWER(texto) LIKE ? ", ["%{$term}%"]);    
       }); 
+    }
+
+    public function  tipo(){
+      if( is_numeric( $this->tipo ) ) {
+        return static::fillTipo()[$this->tipo];
+      }else{
+        return $this->tipo;
+      }
+    }
+
+    public static function fillTipo() {
+      return [   
+          1 => 'Entregable' ,
+          2 => 'Llamada' ,
+          3 => 'Pago' 
+      ];
+    }
+    public static function inportancia(){
+      if( is_numeric($this->importancia) ){
+        return static::fillImportancia()[$this->importancia]; 
+      } else {
+
+        return $this->importancia;
+      }
+    }
+    public static function fillImportancia() {
+      return [   
+          1 => 'Baja',
+          2 => 'Media',
+          3 => 'Alta' 
+      ];
     }
 }

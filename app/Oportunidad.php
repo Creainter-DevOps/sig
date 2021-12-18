@@ -64,8 +64,8 @@ class Oportunidad extends Model
     public function licitacion() {
       return $this->belongsTo('App\Licitacion', 'licitacion_id')->first();
     }
-    public function cotizaciones(){
-      return $this->hasMany('App\Cotizacion','oportunidad_id','id')->get();
+    public function cotizaciones() {
+      return $this->hasMany('App\Cotizacion','oportunidad_id','id')->orderBy('numero','ASC')->get();
     }
     public function proyecto() {
       return $this->belongsTo('App\Proyecto', 'id','oportunidad_id')->first();
@@ -89,14 +89,16 @@ class Oportunidad extends Model
       $query = strtolower($query);
       return Oportunidad::leftJoin('osce.licitacion', 'oportunidad.licitacion_id','licitacion.id')
         ->leftJoin('osce.empresa', 'empresa.id','licitacion.empresa_id')
-        ->WhereRaw("LOWER(licitacion.rotulo) LIKE ? ", ["%{$query}%" ])
-        ->orWhereRaw("LOWER(empresa.razon_social) LIKE ? ", ["%{$query}%" ])
-        ->orWhereRaw("LOWER(licitacion.descripcion) LIKE ? ", ["%{$query}%" ])
-        ->orWhereRaw("LOWER(oportunidad.rotulo) LIKE ? ", ["%{$query}%" ])
-        ->orWhereRaw("LOWER(licitacion.nomenclatura) LIKE ? ", ["%{$query}%" ])
-        ->orWhereRaw("LOWER(oportunidad.codigo) LIKE ? ", ["%{$query}%" ])
-        ->orWhereRaw("licitacion.procedimiento_id::text LIKE ? ", ["%{$query}%" ])
-        ->orWhereRaw("LOWER(licitacion.descripcion) LIKE ? ", ["%{$query}%" ]);
+        ->where(function($r) use($query) {
+          $r->WhereRaw("LOWER(licitacion.rotulo) LIKE ? ", ["%{$query}%" ])
+          ->orWhereRaw("LOWER(empresa.razon_social) LIKE ? ", ["%{$query}%" ])
+          ->orWhereRaw("LOWER(licitacion.descripcion) LIKE ? ", ["%{$query}%" ])
+          ->orWhereRaw("LOWER(oportunidad.rotulo) LIKE ? ", ["%{$query}%" ])
+          ->orWhereRaw("LOWER(licitacion.nomenclatura) LIKE ? ", ["%{$query}%" ])
+          ->orWhereRaw("LOWER(oportunidad.codigo) LIKE ? ", ["%{$query}%" ])
+          ->orWhereRaw("licitacion.procedimiento_id::text LIKE ? ", ["%{$query}%" ])
+          ->orWhereRaw("LOWER(licitacion.descripcion) LIKE ? ", ["%{$query}%" ]);
+      });
     }
     public function rotulo() {
       if(empty($this->rotulo)) {
@@ -219,7 +221,7 @@ WHERE O.aprobado_el >= NOW() - INTERVAL '80' DAY AND O.rechazado_el IS NULL AND 
 JOIN osce.licitacion L ON L.id = x.licitacion_id AND L.eliminado IS NULL
 AND
   ((L.fecha_propuesta_desde - INTERVAL '2' DAY <= NOW() AND L.fecha_propuesta_hasta + INTERVAL '2' DAY >= NOW())
-  OR (L.fecha_propuesta_hasta - INTERVAL '8' DAY <= NOW() AND L.fecha_propuesta_hasta + INTERVAL '4' DAY >= NOW()))
+  OR (L.fecha_propuesta_hasta - INTERVAL '25' DAY <= NOW() AND L.fecha_propuesta_hasta + INTERVAL '10' DAY >= NOW()))
 -- WHERE x.cantidad_propuestas = 0 OR x.cantidad_propuestas <> x.cantidad_participadas
 ORDER BY L.fecha_propuesta_hasta ASC, id DESC");
       return static::hydrate($rp);
@@ -246,7 +248,6 @@ ORDER BY L.fecha_buena_hasta ASC, O.id ASC");
     }
     public function aprobar() {
       $this->update([
-        'codigo'       => DB::raw('osce.fn_generar_codigo_oportunidad(id)'),
         'aprobado_el'  => DB::raw('now'),
         'aprobado_por' => Auth::user()->id,
       ]);

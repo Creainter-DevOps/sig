@@ -19,7 +19,7 @@ class ClienteController extends Controller
         if(!empty($search)) {
             $listado = Cliente::search($search)->paginate(15)->appends(request()->query());
         } else {
-            $listado = Cliente::orderBy('created_on', 'desc')->paginate(15)->appends(request()->query());
+            $listado = Cliente::where('eliminado',false )->orderBy('created_on', 'desc')->paginate(15)->appends(request()->query());
         }
         return view('clientes.index', ['listado' => $listado]); 
     }
@@ -29,9 +29,9 @@ class ClienteController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create(Cliente $cliente)
-    { 
-       return view('clientes.create', compact('cliente'));
+    public function create( Request $request, Cliente $cliente)
+    {
+       return view(  $request->ajax() ?  'clientes.fast'  : 'clientes.create' , compact('cliente'));
     }
 
     /**
@@ -40,11 +40,9 @@ class ClienteController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request , Cliente $cliente )
     {
-
-      Cliente::create($request->all());
-      
+      $cliente->fill( $request->all());
       return response()->json(['status' => true , 'redirect' => '/clientes' ] );
     }
 
@@ -56,7 +54,7 @@ class ClienteController extends Controller
      */
     public function show(Cliente $cliente)
     {
-      $empresa = Empresa::find ($cliente->empresa_id);
+      $empresa = Empresa::find($cliente->empresa_id);
       return view('clientes.show',compact('empresa','cliente')) ;
     }
 
@@ -69,7 +67,7 @@ class ClienteController extends Controller
     public function edit(Cliente $cliente )
     {
        $empresa = Empresa::find($cliente->empresa_id);
-        return view ('clientes.edit',compact('cliente','empresa' ));
+       return view ('clientes.edit',compact('cliente','empresa' ));
     }
 
     /**
@@ -81,7 +79,16 @@ class ClienteController extends Controller
      */
     public function update(Request $request, Cliente $cliente )
     {
-       $cliente->update( $request->all() ); 
+      $count = count( Cliente::where( 'empresa_id' , $cliente->empresa_id )->get());
+      if($count > 0  ){
+        $response['status'] = false;
+        $response['message'] = "La empresa ya fue registrada como cliente";
+      } else {
+        $cliente->update( $request->all()); 
+        $response['status'] = true;
+        $response['redirect'] = "/clientes";
+      }
+      return response()->json($response);
     }
 
     /**
@@ -93,7 +100,8 @@ class ClienteController extends Controller
     public function destroy(Cliente $cliente )
     {
       $cliente->eliminado = true;
-      $cliente->save(); 
+      $cliente->save();
+      return response()->json([ 'status' => true , 'refresh' => true ] ); 
     }
 
     public function autocomplete(Request  $request  ) {

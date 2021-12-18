@@ -29,7 +29,7 @@ class Proyecto extends Model
      * @var array
      */
     protected $fillable = [
-      'tenant_id','cliente_id','contacto_id','oportunidad_id','candidato_id','cotizacion_id','nombre','codigo','nomenclatura','rotulo',
+      'tenant_id','cliente_id','contacto_id','oportunidad_id','cotizacion_id','nombre','codigo','nomenclatura','rotulo',
       'dias_servicio', 'estado', 'dias_garantia','dias_instalacion','tipo' ,'fecha_desde','fecha_hasta', 'eliminado', 'empresa_id'
     ];
 
@@ -91,9 +91,6 @@ class Proyecto extends Model
     public function contacto() {
       return $this->belongsTo('App\Contacto', 'contacto_id')->first();
     }
-    public function candidato() {
-      return $this->belongsTo('App\Candidato', 'candidato_id')->first();
-    }
     public function cotizacion() {
       return $this->belongsTo('App\Cotizacion', 'cotizacion_id')->first();
     }
@@ -114,9 +111,11 @@ class Proyecto extends Model
     public function timeline() {
       return $this->hasMany('App\Actividad','proyecto_id')->orderBy('id', 'DESC' )->get(); 
     }
-
     public function cartas(){
       return $this->hasMany('App\Carta','proyecto_id')->orderBy('id','DESC')->get();
+    }
+    public function actas(){
+      return $this->hasMany('App\Acta','proyecto_id')->orderBy('id','DESC')->get();
     }
 
 }

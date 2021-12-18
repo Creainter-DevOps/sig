@@ -3,7 +3,8 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-use App\CandidatoOportunidad;
+use App\Cotizacion;
+use App\Actividad;;
 use Auth;
 use App\Cliente;
 
@@ -29,10 +30,18 @@ class Empresa extends Model
         $empresa['id'] = $data['e_empresa_id'];
       }
       $this->fill($empresa);
-      if(!empty($data['c_candidato_id'])) {
-        $data['id'] = $data['c_candidato_id'];
-        $this->candidato = new CandidatoOportunidad($data);
+      if(!empty($data['c_cotizacion_id'])) {
+        $data['id'] = $data['c_cotizacion_id'];
+        $this->cotizacion = new Cotizacion($data);
       }
+    }
+    public function log($evento, $texto = null){
+      Actividad::create( [
+         'tipo' => 'log',
+         'empresa_id' => $this->id,
+         'evento'      => $evento,
+         'texto'       => $texto
+       ]);
     }
     public function rotulo() {
       if(!empty($this->seudonimo)) {
@@ -64,12 +73,12 @@ class Empresa extends Model
         return static::TipoCategorias()[$this->categoria_id];
     }
 
-    public static  function search($term){
+    public static function search($term){
       $term = strtolower(trim($term));
-        return static:: where(function($query) use($term) {
+        return static::where(function($query) use($term) {
             $query->WhereRaw("LOWER(razon_social) LIKE ?",["%{$term}%"])
               ->orWhereRaw("LOWER(seudonimo) LIKE ?",["%{$term}%"])
             ;
-        });    
+        });
     } 
 }

@@ -1,21 +1,6 @@
 @csrf
 <div class="form-body">
   <div class="row">
-    <input type="hidden" value="{{$oportunidad->id ?? 0 }}" name="id" id="cotizacion_id"></input>
-    <div class="col-md-12  col-12">
-      <div class="form-label-group">
-          @if (empty($oportunidad->empresa_id))
-          <input type="text" class="form-control autocomplete"
-             data-ajax="/empresas/autocomplete" name="empresa_id" autocomplete="nope"   >
-          <label for="cliente_id">Empresa</label>
-          @else
-          <input type="text" class="form-control autocomplete" value="{{ $oportunidad->empresa_id }}"
-             data-value="{{ $oportunidad->empresa()->razon_social  }}"
-             data-ajax="/empresas/autocomplete" name="empresa_id">
-          <label for="cliente_id">Empresa</label>
-          @endif
-      </div>
-    </div>
     <div class="col-md-6  col-12">
       <div class="form-label-group">
           <input type="text" class="form-control autocomplete"
@@ -44,7 +29,7 @@
       <div class="form-label-group">
         <input type="hidden" >
           <textarea class ="form-control" name="rotulo">{{ @$oportunidad->rotulo }}</textarea>
-        <label>Descripcion</label>
+        <label>Rótulo</label>
       </div>
     </div>
   <div class="col-12 d-flex justify-content-end">

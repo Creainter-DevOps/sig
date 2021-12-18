@@ -16,9 +16,10 @@
       <div class="card">
         <div class="card-content">
           <div class="card-header">
+            <h5 class="card-title">Editar actividad</h5>
           </div> 
           <div class="card-body">
-            <form class="form" action="{{ route('actividad.update', [ 'contacto' => $contacto->id ])}}" method="post" id="form-data" >
+            <form class="form" action="{{ route('actividades.update',[ 'actividad'=>$actividad->id ])}}" method="post" id="form-data" >
             @method('PUT')  
                @include('actividad.form') 
             </form>

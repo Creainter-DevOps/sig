@@ -1,5 +1,6 @@
 
 @extends('layouts.contentLayoutMaster')
+@section('title','Registrar empresa')
 @section('content')
 <div class="col-12">
   <div class="card">
@@ -15,7 +16,7 @@
                   <h3 class="block-title">Nueva empresa</h3>
               </div>
               <div class="block-content">
-                  <form action="/clientes" method="POST" class="form-horizontal">
+                  <form action="/empresas" method="POST" class="form-horizontal form-data" id="" >
                       @include('empresas.form')
                   </form>
               </div>
@@ -25,4 +26,7 @@
   </div>
 </div>
 <!-- TODO: Current Tasks -->
+@endsection
+@section('page-scripts')
+  <script src="{{ asset('js/scripts/helpers/basic.crud.js') }}"></script>
 @endsection

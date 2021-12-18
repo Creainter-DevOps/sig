@@ -43,7 +43,7 @@
         <tbody id="table-body" >
           @foreach ( $listado as $actividad ) 
           <tr>
-            <td class="">{{ strtoupper( $actividad->tipo ) }}</td>
+            <td class="">{{ strtoupper( $actividad->tipo() ) }}</td>
             <td class="">{{ strtoupper( $actividad->evento ) }}</td>
             <td class="pr-0">{{ substr( $actividad->texto ,0 , 40 ) }}</td>
             <td class="text-success" align ="left" >{{ $actividad->creado() }}</td>
@@ -55,7 +55,8 @@
                 <div class="dropdown-menu dropdown-menu-right">
                   <a class="dropdown-item" href="{{ route( 'actividades.show', [ 'actividad' => $actividad->id ] ) }}"><i class="bx bx-show-alt mr-1"></i> Ver más</a>
                   <a class="dropdown-item" href="{{ route( 'actividades.edit', [ 'actividad' => $actividad->id ] ) }}"><i class="bx bx-edit-alt mr-1"></i> Editar</a>
-                  <a class="dropdown-item" data-confirm-remove="{{ route('actividades.destroy', [ 'actividad' => $actividad->id ])}}" href="#" ><i class="bx bx-trash mr-1"></i> Eliminar</a>
+                  <a class="dropdown-item" data-confirm-remove="{{ route('actividades.destroy', [ 'actividad' => $actividad->id ])}}" href="#" >
+                    <i class="bx bx-trash mr-1"></i> Eliminar</a>
                 </div>
               </div>
             </td>

@@ -49,11 +49,18 @@
       </div>
     </div>
     @endif
-    @if (!empty($proyecto->oportunidad()))
+    @if (!empty($proyecto->cotizacion_id))
       <div class="col-sm-6">
         <div class="card">
           <div class="card-body">
             @include('oportunidad.table', ['oportunidad' => $proyecto->oportunidad()])
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6">
+        <div class="card">
+          <div class="card-body">
+            @include('cotizacion.table', ['cotizacion' => $proyecto->cotizacion()])
           </div>
         </div>
       </div>
@@ -67,15 +74,6 @@
         </div>
       </div>
     </div>
-    @if (!empty($proyecto->cotizacion_id))
-      <div class="col-sm-6">
-        <div class="card">
-          <div class="card-body">
-            @include('cotizacion.table', ['cotizacion' => $proyecto->cotizacion()])
-          </div>
-        </div>
-      </div>
-    @endif
     @if (!empty($proyecto->contacto_id))
       <div class="col-sm-6">
         <div class="card">
@@ -101,18 +99,24 @@
           </div>
         </div>
       </div>
-    </div>
-    </div>
-    <div class="col-6 col-sm-6">
-      @include('proyectos.timeline')
-    </div>
-    <div class="col-sm-6">
+    <div class="col-6">
         <div class="card">
           <div class="card-body">
             @include('proyectos.cartas')
           </div>
         </div>
       </div>
+    <div class="col-6">
+        <div class="card">
+          <div class="card-body">
+            @include('proyectos.actas')
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-sm-6">
+      @include('proyectos.timeline')
+    </div>
     </div>
     </div>
   </div>

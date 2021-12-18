@@ -17,7 +17,7 @@
               <h3 class="block-title">Datos Personales</h3>
           </div>
           <div class="block-content">
-              <form action="/empresas/{{ $empresa->id }}" method="POST" class="form-horizontal">
+              <form action="/empresas/{{ $empresa->id }}" method="POST" class="form-data form-horizontal">
                   {!! method_field('PUT') !!}
                   @include('empresas.form')
               </form>
@@ -27,4 +27,7 @@
   </div>
 </div>
 <!-- TODO: Current Tasks -->
+@endsection
+@section('page-scripts')
+  <script src="{{ asset('js/scripts/helpers/basic.crud.js') }}"></script>
 @endsection

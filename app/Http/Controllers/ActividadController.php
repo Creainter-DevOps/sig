@@ -45,11 +45,12 @@ class ActividadController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request,Actividad $actividad)
     {
-      $data = $request->all();
-      Actividad::registrar($data);
-      return response()->json(['status' => true , 'refresh' => true ]);
+      $actividad->fill($request->all());
+      $actividad->asignado_id = '{ ' . $request->input('asignado_id') .  '}';
+      $actividad->save();
+      return response()->json(['status' => true , 'refresh' => true , 'redirect' => '/actividades' ]);
     }
 
     /**
@@ -60,12 +61,14 @@ class ActividadController extends Controller
      */
     public function show($id)
     {
-        //
+       //
     }
+
     public function kanban()
     {
-        return view('actividad.kanban');
+      return view('actividad.kanban');
     }
+
     public function kanban_data() {
       $data = Actividad::kanban();
       $data = array_map(function($n) {
@@ -111,15 +114,17 @@ class ActividadController extends Controller
       return response()->json(['status' => true , 'data' => $data ]);
     }
 
+
     /**
      * Remove the specified resource from storage.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy( Actividad  $actividad)
     {
-        //
+      $actividad->eliminado = true;
+      return response()->json(['status' => true,'refresh' => true ]);  
     }
 
     public function autocomplete(Request  $request  ) {

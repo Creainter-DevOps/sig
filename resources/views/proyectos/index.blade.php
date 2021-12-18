@@ -28,6 +28,7 @@
     <table class="table table-sm mb-0" style="width:100%">
       <thead>
         <tr>
+          <th>ID</th>
           <th style="width:150px;">Código</th>
           <th>Empresa</th>
           <th>Cliente</th>
@@ -40,6 +41,7 @@
       <tbody>
       @foreach ($listado as $proyecto)
         <tr>
+          <td>{{ $proyecto->cotizacion_id }}</td>
           <td><div>{{ $proyecto->codigo }}</div></td>
           <td>{{ isset($proyecto->empresa_id) ?   $proyecto->empresa()->rotulo() : ''  }}</td>
           <td>{{ isset($proyecto->cliente_id) ?  $proyecto->cliente()->empresa()->rotulo() : '' }}</td>

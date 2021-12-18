@@ -1,7 +1,10 @@
 <table class="table table-sm mb-0 table-bordered table-vcenter"  style="width:100%">
+  <thead>
   <tr>
     <th colspan="4" class="table-head"><a class="link-primary"  href="{{ route('oportunidades.show', [ 'oportunidad' => $oportunidad->id ]) }}" target="_blank">Oportunidad</a></th>
   </tr>
+</thead>
+<tbody>
     <tr>
       <th>Código</th>
       <td>{{ $oportunidad->codigo }}</td>
@@ -30,4 +33,5 @@
       <th>Propuesta</th>
       <td>{{ Helper::fecha($oportunidad->fecha_propuesta, true) }} </td>
     </tr>
+</tbody>
 </table>

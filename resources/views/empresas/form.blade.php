@@ -121,7 +121,7 @@
     <div class="col-6 d-flex align-items-center ">
         <div class="form-group">
             <label>¿Es agente retencion?</label>
-            <input type="checkbox" name="es_agente_retencion" value="1" placeholder="Es agente retencion" @if (@$empresa->es_agente_retencion)
+            <input type="checkbox" name="es_agente_retencion" placeholder="Es agente retencion" @if (@$empresa->es_agente_retencion)
             checked
             @endif
             >

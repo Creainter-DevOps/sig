@@ -1,7 +1,6 @@
 @extends('layouts.contentLayoutMaster')
-
+@section('title','Empresas')
 @section('content')
-
     <div class="row">
         <div class="offset-12 col-md-1" style="margin-bottom: 10px;text-align:right;">
             <a class="btn btn-default" href="/empresas/crear" style="color: #fff; background-color: #007bff; border-color: #007bff;">

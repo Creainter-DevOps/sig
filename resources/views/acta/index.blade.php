@@ -1,6 +1,6 @@
 @extends('layouts.contentLayoutMaster')
 {{-- title --}}
-@section('title','Contactos')
+@section('title','Cotizaciones')
 {{-- vendor style --}}
 @section('vendor-styles')
 <link rel="stylesheet" type="text/css" href="{{asset('vendors/css/tables/datatable/datatables.min.css')}}">
@@ -87,9 +87,4 @@
 <script src="{{asset('vendors/js/pickers/daterange/daterangepicker.js')}}"></script>
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="{{asset('js/scripts/helpers/basic.crud.js')}}"></script>
-
-@endsection
-{{-- page scripts --}}
-@section('page-scripts')
-  <script src="{{asset('js/scripts/cotizacion/index.js')}}"></script>
 @endsection

@@ -40,46 +40,46 @@ class CotizacionController extends Controller {
     return view ('cotizacion.show', compact('cotizacion', 'listado', 'breadcrumbs', 'cliente', 'timeline','contacto' )); 
   }
 
-  public function create() {
-    $this->viewBag['cotizacion']  = new Cotizacion();
-    $this->viewBag['breadcrumbs'][]  = [ 'name' => "Nueva Cotizacion" ];
-    return view('cotizacion.create', $this->viewBag );
+  public function create(Request $request) {
+    $cotizacion = new Cotizacion;
+    $cotizacion->monto = 0;
+    if(!empty($_GET['oportunidad_id'])) {
+      $cotizacion->oportunidad_id = $_GET['oportunidad_id'];
+    }
+    return view($request->ajax() ? 'cotizacion.fast' : 'cotizacion.create', compact('cotizacion'));
   }
 
-  public function store( Request $request, Cotizacion $cotizacion ){
-    $cotizacion->fill($request->all());
-    $cotizacion->empresa_id  = $request->cliente_id;
-    $cotizacion->save(); 
-    $cotizacion->log("creado", null );
+  public function store(Request $request){
+    $cotizacion = Cotizacion::create($request->all());
+    //    $cotizacion->log("creado", null );
+    return response()->json(['status' => true , 'refresh' => true ]);
+    return back();
     return response()->json([
         'status' => true,
         'redirect' => '/cotizaciones'
       ]); 
   }
 
-  public function edit( Cotizacion $cotizacion ) {
-    $this->viewBag['cotizacion'] = $cotizacion; 
-    $this->viewBag['breadcrumbs'][] = [ 'name' => "Editar" ];   
-    return view('cotizacion.edit',$this->viewBag );    
-  }
-
-  public  function destroy( Cotizacion $cotizacion ){
-    $cotizacion->eliminado = true;
-    $cotizacion->save();
-    $cotizacion->log("eliminado",null);
-    return response()->json(['status'=> true , 'refresh' => true ]); 
+  public function edit(Request $request, Cotizacion $cotizacion) {
+    return view($request->ajax() ? 'cotizacion.fast_edit' : 'cotizacion.edit', compact('cotizacion'));    
   }
 
   public function update( Request  $request  , Cotizacion $cotizacion){
     $cotizacion->update($request->all());    
-    $cotizacion->log("editado", null );
+    return response()->json(['status' => true , 'refresh' => true ]);
     return response()->json([ 
         'status' => true , 
         'redirect' => '/cotizaciones']);
   }
+  public  function destroy( Cotizacion $cotizacion ){
+    $cotizacion->eliminado = true;
+    $cotizacion->save();
+    $cotizacion->log("eliminado",null);
+    return response()->json(['status'=> true , 'refresh' => true ]);
+  }
   public function autocomplete(Request $request ){
     $query = $request->input("query");
-    $data = Cotizacion::search($query)->selectRaw(" cotizacion.id, CONCAT_WS(':' , cotizacion.codigo, cotizacion.descripcion ) as value ")->get() ; 
+    $data = Cotizacion::search($query)->selectRaw(" cotizacion.id, CONCAT(oportunidad.codigo,':',licitacion.id, ' ', cotizacion.descripcion) as value ")->get() ; 
     return Response()->json($data); 
   }
   public function observacion(Request $request, Cotizacion $cotizacion ) {

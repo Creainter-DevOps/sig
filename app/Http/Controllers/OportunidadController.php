@@ -28,22 +28,26 @@ class OportunidadController extends Controller {
       }
       return view('oportunidad.index', ['listado' => $listado]);
   }
-  public function create(Request $request, Oportunidad $oportunidad )
+  public function create(Request $request)
   {
-      return view( $request->ajax() ? 'oportunidad.fast' : 'oportunidad.create', compact( 'oportunidad'));
+    $oportunidad = new Oportunidad;
+    $oportunidad->rotulo = '';
+    return view( $request->ajax() ? 'oportunidad.fast' : 'oportunidad.create', compact( 'oportunidad'));
   }
-  public function store(Request $request , Oportunidad $oportunidad )
+  public function store(Request $request)
   {
-    $oportunidad->fill($request->all());
-    $oportunidad->tenant_id = Auth::user()->tenant_id;
-    $oportunidad->save();
-    $oportunidad->log('creado'); 
-    $oportunidad->update([ 
-      'codigo' => DB::raw('osce.fn_generar_codigo_oportunidad(id)'),
-      'aprobado_el' => DB::raw('now'),
-      'aprovado_por' => Auth::user()->id
-    ]);
-    return response()->json([ 'status' => true , 'redirect' => '/oportundides']);
+    $data = $request->all();
+    $data['tenant_id'] = Auth::user()->tenant_id;
+    $data['aprobado_el'] = DB::raw('now');
+    $data['aprobado_por'] = Auth::user()->id;
+    $oportunidad = Oportunidad::create($data)->fresh();
+    if($request->ajax()) {
+      return response()->json([ 'status' => true , 'data' => [
+        'id'    => $oportunidad->id,
+        'value' => $oportunidad->rotulo()
+      ] ]);
+    }
+    return response()->json([ 'status' => true , 'redirect' => '/oportunidades']);
   }
   public function show( Oportunidad $oportunidad )
   {
@@ -100,7 +104,11 @@ class OportunidadController extends Controller {
     }
      public function autocomplete(Request $request) {
        $query = $request->input('query');
-       $data = Oportunidad::search($query)->select(DB::raw("COALESCE(oportunidad.rotulo, licitacion.rotulo, licitacion.descripcion, licitacion.nomenclatura) as value"),'oportunidad.id')->get();
-       return Response()->json($data);
+       $data = Oportunidad::search($query)
+         ->select(DB::raw("COALESCE(oportunidad.rotulo, licitacion.rotulo, licitacion.descripcion, licitacion.nomenclatura) as value"),'oportunidad.id');
+       if(isset($_GET['directas'])) {
+         $data->whereRaw('osce.oportunidad.licitacion_id IS NULL');
+       }
+       return Response()->json($data->get());
      }
 }

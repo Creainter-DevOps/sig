@@ -40,10 +40,10 @@
               <tbody id="table-body" >
                 @foreach ( $listado as $cotizacion )
                 <tr>
-                  <td>{{ $cotizacion->codigo }}</td>
+                  <td>{{ $cotizacion->numero }}</td>
                   <td class="pr-0"> {{ null !==  $cotizacion->oportunidad()->cliente() ? $cotizacion->oportunidad()->cliente()->rotulo() : ''  }} </td>
                   <td class="pr-0"> {{ !empty($cotizacion->oportunidad()) ? $cotizacion->oportunidad()->rotulo() : '' }} </td>
-                  <td class="text-success" align="left" >{{ $cotizacion->monto_total }}</td>
+                  <td class="text-success" align="left" >{{ $cotizacion->monto() }}</td>
                   <td class="">{{ Helper::fecha( $cotizacion->fecha ) }}</td>
                   <td class="">{{ Helper::fecha( $cotizacion->validez ) }}</td>
                   <td>

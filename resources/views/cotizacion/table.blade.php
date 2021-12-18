@@ -7,35 +7,25 @@
 <tbody>
   <tr>
       <th>Código</th>
-      <td>{{ $cotizacion->codigo }}</td>
-      <th>Cliente</th>
-      <td>{{  null != $cotizacion->cliente()? $cotizacion->cliente()->rotulo() : '' }}</td>
+      <td>{{ $cotizacion->codigo() }}</td>
+      <th>Fecha</th>
+      <td style="width:200px">{{ $cotizacion->fecha }}</td>
   </tr>
   <tr>
       <th>Oportunidad</th>
       <td>{{   isset($cotizacion->oportunidad_id) ? $cotizacion->oportunidad()->rotulo() : " "   }}</td>
-      <th>Contacto</th>
-      <td>{{ $cotizacion->contacto_id ?? 0 }}</td>
+      <th>Empresa</th>
+      <td>{{ $cotizacion->empresa()->seudonimo }}</td>
   </tr>
   <tr>
-      <th>Fecha</th>
-      <td>{{ Helper::fecha( $cotizacion->fecha ) }} </td>
-      <th>Validez</th>
-      <td> {{Helper::fecha( $cotizacion->validez )}} </td>
-   </tr>
-   <tr>
-      <th>Descripción</th>
-      <td>{{ $cotizacion->descripcion }} </td>
-      <th>M.Total</th>
-   <td>{{ $cotizacion->monto_total }} </td>
+    <th>Monto</th>
+    <td>{{ $cotizacion->monto() }} </td>
+    <th>Validez</th>
+    <td> {{Helper::fecha( $cotizacion->validez )}} </td>
   </tr>
   <tr>
     <th>Directorio:</th>
     <td colspan="3"><a href="#" onclick="window.location.href='odir:{!! addslashes(Auth::user()->dir_sharepoint . $cotizacion->folder()) !!}';">{{ $cotizacion->folder() }}</a></td>
-  </tr>
-  <tr>
-    <th>Observaciones</th>
-    <td colspan="3"><textarea class="form-control"  disabled >{{ $cotizacion->observacion  }}</textarea></td>  
   </tr>
 </tbody>
 </table>

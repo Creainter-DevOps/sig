@@ -74,7 +74,7 @@
     <div  class="col-6 col-sm-6">
         <div class="card">
           <div class="card-body">
-             @include('cotizacion.list', [ 'listado' => $oportunidad->cotizaciones() ])
+             @include('oportunidad.cotizaciones', [ 'oportunidad' => $oportunidad])
           </div>
         </div>
     </div>

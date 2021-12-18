@@ -35,7 +35,7 @@ class Bloque extends Model
     public static function search ($term ){
       $term = strtolower($term);
       return static::where(function($query) use ($term){
-        $query->whereRaw('LOWER(nombre) LIKE ?',["%{$term}%"])
+        $query->whereRaw('LOWER(nombre) LIKE ?',["%{$term}%"]);
       });
     }
 

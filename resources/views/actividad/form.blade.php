@@ -16,10 +16,12 @@
       </div>
     </div>
     <div class="col-md-6  col-12">
-      <div class="form-label-group">
+      <div class="form-label-group container-autocomplete">
           @if (empty($actividad->cliente_id))
           <input type="text" class="form-control autocomplete"
-             data-ajax="/clientes/autocomplete" name="cliente_id">
+             data-ajax="/clientes/autocomplete" name="cliente_id"
+              data-register="/clientes/crear"
+              >
           <label for="cliente_id">Cliente</label>
           @else
           <input type="text" class="form-control autocomplete" value="{{ $actividad->cliente_id }}"
@@ -81,19 +83,17 @@
            @if (!empty( $actividad->entregable_id) )  
             data-value="{{ $actividad->entregable()->nombre }}"
            @endif
-           name="bloque_id">
+           name="entregable_id">
         <label for="">Entregable</label>
       </div>
     </div>
     <div class="col-md-6  col-12">
       <div class="form-label-group">
         <input type="hidden" >
-        <select class="form-control" name="importancia" >
-          <option value="entregable"  {{ $actividad->tipo == 'entregable' ? 'selected' : '' }} >Entregable</option>
-          <option value="pago"  {{ $actividad->tipo ==  'pago' ? 'selected' : '' }} >Pago</option>
-          <option value="carta" {{ $actividad->tipo ==  'carta' ? 'selected' : '' }} >Carta</option>
-          <option value="desarrollo" {{ $actividad->tipo  == 'desarrollo' ? 'selected' : '' }} >Desarrollo</option>
-          <option value="llamada"  {{ $actividad->importancia == 'llamada' ? 'selected' : '' }} >Llamada</option>
+        <select class="form-control" name="tipo" data-value="{ old('tipo', $actividad->tipo ?? '' )} "  >
+          @foreach( $actividad::fillTipo() as $k => $v )
+            <option value="{{ $k }}" >{{ $v }}</option>
+          @endforeach
         </select>    
         <label for="">Tipo(*) </label>
       </div>
@@ -101,10 +101,10 @@
     <div class="col-md-6  col-12">
       <div class="form-label-group">
         <input type="hidden" >
-        <select class="form-control" name="importancia" >
-          <option value="baja"  {{ $actividad->importancia == 'baja' ? 'selected' : '' }} >Baja</option>
-          <option value="media" {{ $actividad->importancia == 'media' ? 'selected' : '' }} >Media</option>
-          <option value="alta"  {{ $actividad->importancia == 'alta' ? 'selected' : '' }} >Alta</option>
+        <select class="form-control" name="importancia" data-value="{ old('importancia', $actividad->importancia ?? '' )} "  >
+          @foreach( $actividad::fillImportancia() as $k => $v )
+            <option value="{{ $k }}" >{{ $v }}</option>
+          @endforeach
         </select>    
         <label for="">Importancia(*) </label>
       </div>
@@ -113,13 +113,13 @@
       <div class="form-label-group">
             <input type="text" class="form-control  autocomplete" placeholder="Asignado(*)" data-ajax="/usuarios/autocomplete"
              value="{{ old ( 'asignado_id', $actividad->asignado_id  ?? '' ) }}"  id="orden"
-             name="asignado_id" required data-value="{{ isset($actividad->asignado_id) ? $actividad->usuario() : '' }}" >
+             name="asignado_id" required data-value="{!!  isset($actividad->asignado_id) ? $actividad->usuario() : '' !!}" >
           <label for="">Asignado (*) </label>
       </div>
     </div>
     <div class="col-md-6  col-12">
       <div class="form-label-group">
-          <input type="number" class="form-control" placeholder="Orden(*)" value="{{ old ( 'orden', $actividad->orden  ?? '' ) }}"  id="orden" name="evento" required>
+          <input type="number" class="form-control" placeholder="Orden(*)" value="{{ old ( 'orden', $actividad->orden  ?? '' ) }}"  id="orden" name="orden" required >
           <label for="">Orden (*)</label>
       </div>
     </div>

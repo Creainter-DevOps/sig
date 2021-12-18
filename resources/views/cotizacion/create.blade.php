@@ -16,7 +16,7 @@
           <div class="card-header">
           </div>
           <div class="card-body">
-            <form action="{{ route('cotizaciones.store') }}" class="form" method="post" id="form-data" >
+            <form action="{{ route('cotizaciones.store') }}" class="form" method="post">
               @include('cotizacion.form')              
             </form>
           </div>
@@ -29,8 +29,4 @@
 <script src="{{asset('vendors/js/pickers/pickadate/picker.js')}}"></script>
 <script src="{{asset('vendors/js/pickers/pickadate/picker.date.js')}}"></script>
 <script src="{{asset('vendors/js/extensions/toastr.min.js') }}"></script>
-@endsection
-
-@section('page-scripts')
-<script src="{{asset('js/scripts/cotizacion/save.js')}}"></script>
 @endsection

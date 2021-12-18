@@ -31,6 +31,7 @@
           <th style="width:150px;">Código</th>
           <th>Cliente</th>
           <th>Rótulo</th>
+          <th>Proyecto</th>
           <th>Fecha Inicio</th>
           <th></th>
         </tr>
@@ -41,6 +42,7 @@
           <td><div>{{ $oportunidad->codigo }}</div></td>
           <td>{{ (!empty($oportunidad->cliente()) ? $oportunidad->cliente()->empresa()->rotulo() : '') }}</td>
           <td>{{ $oportunidad->rotulo() }}</td>
+          <td>{{ !empty($oportunidad->proyecto()) ? $oportunidad->proyecto()->codigo : '' }}</td>
           <td>{{ Helper::fecha($oportunidad->created_on) }}</td>
           <td class="text-center py-1">
               <div class="dropdown">

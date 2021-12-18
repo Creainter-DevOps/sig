@@ -1,8 +1,18 @@
 @csrf
 <div class="form-body">
   <div class="row">
-    <input type="hidden" value="{{$proyecto->id ?? 0 }}" name="id" id="cotizacion_id"></input>
-    <div class="col-md-12  col-12">
+    <div class="col-6">
+      <div class="form-label-group">
+          <input type="text" class="form-control autocomplete" value="{{ $proyecto->cotizacion_id }}"
+             @if(!empty($proyecto->cotizacion_id))
+                data-value="{{ $proyecto->cotizacion()->codigo()  }}"
+              @endif
+             data-ajax="/cotizaciones/autocomplete" name="cotizacion_id">
+          <label for="cliente_id">Cotización</label>
+      </div>
+    </div>
+
+    <div class="col-md-6">
       <div class="form-label-group">
           @if (empty($proyecto->empresa_id))
           <input type="text" class="form-control autocomplete"
@@ -33,7 +43,8 @@
     <div class="col-md-6 col-12">
       <div class="form-label-group container-autocomplete" >
         <input type="text" class="form-control autocomplete" name="oportunidad_id" id="oportunidad_id" value="{{ old('cotizacion_id', $proyecto->oportunidad_id) }}"
-           data-ajax="/oportunidad/autocomplete"
+           data-ajax="/oportunidades/autocomplete"
+            data-register="/oportunidades/crear"
           @if( !empty($proyecto->oportunidad_id ))
            data-value="{{ old ( 'oportunidad', $proyecto->oportunidad()->rotulo() ) }}"
           @endif
@@ -62,19 +73,6 @@
               @endif
               name="contacto_id" >
          <label for="contacto_id">Contacto</label>
-      </div>
-    </div>
-    <div class="col-md-6  col-12">
-      <div class="form-label-group ">
-          <input type="text" class="form-control autocomplete"
-           data-ajax="/cotizacion/autocomplete"
-           name="cotizacion_id"
-          @if (!empty($proyecto->cotizacion_id))
-           value="{{ old('cotizacion_id', $proyecto->cotizacion_id ) }}"
-            data-value="{{ old( 'cotizacion',$proyecto->cotizacion()->rotulo() ) }}"
-          @endif
- > 
-         <label for="cotizacion_id">Cotizacion</label>
       </div>
     </div>
     <div class="col-md-6 col-12">

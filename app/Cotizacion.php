@@ -10,7 +10,6 @@ use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use App\Oportunidad;
-use App\CandidatoLog;
 use App\Helpers\Helper;
 use Auth;
 
@@ -23,6 +22,7 @@ class Cotizacion extends Model
   protected $table = 'osce.cotizacion';
   const UPDATED_AT = null;
   const CREATED_AT = null;
+
 
   public function oportunidad() {
     return $this->belongsTo('App\Oportunidad', 'oportunidad_id')->first();
@@ -39,7 +39,7 @@ class Cotizacion extends Model
      * @var array
      */
     protected $fillable = [
-        'id','empresa_id','monto_base','monto_propuesto','duracion_meses','rotulo','oportunidad_id','interes_el','interes_por','participacion_el','participacion_por','propuesta_el','propuesta_por',
+        'id','empresa_id','fecha','monto','monto_propuesto','duracion_meses','rotulo','oportunidad_id','interes_el','interes_por','participacion_el','participacion_por','propuesta_el','propuesta_por',
     ];
 
     /**
@@ -59,7 +59,29 @@ class Cotizacion extends Model
     protected $casts = [
         'email_verified_at' => 'datetime',
       ];
+
+
+    public function proyecto() {
+      return $this->belongsTo('App\Proyecto', 'id','cotizacion_id')->first();
+    }
+    public function codigo() {
+      return $this->oportunidad()->codigo . '-' . $this->numero;
+    }
+    public function monto() {
+      if(in_array(Auth::user()->id, [1,3,15])) {
+        $m = $this->monto;
+      } else {
+        $m = 1;
+      }
+      return Helper::money($m, 1);
+    }
+    public function folder() {
+      return '\\OPORTUNIDADES\\' . $this->oportunidad()->codigo . '\\COTIZACIONES\\' . str_pad($this->numero, 3, '0', STR_PAD_LEFT) . '\\';
+    }
     public function rotulo() {
+      if(!empty($this->rotulo)) {
+        return $this->rotulo;
+      }
 //      $rp  = trim($this->rotulo);
 //      if(empty($rp)) {
         $rp = $this->oportunidad()->nomenclatura;
@@ -85,7 +107,7 @@ class Cotizacion extends Model
       }
     }
     public function timeline() {
-      return $this->hasMany('App\CandidatoLog','cotizacion_id')->orderBy('id', 'desc')->get();
+      return $this->hasMany('App\Actividad','cotizacion_id')->orderBy('id', 'desc')->get();
     }
     public function margen() {
       return Helper::money(!empty($this->monto_base) ? ($this->monto_propuesto - $this->monto_base) * 100 / $this->monto_propuesto : 0) . '%';
@@ -187,5 +209,21 @@ class Cotizacion extends Model
           'message' => 'ESPERANDO',
         ];
       }
+    }
+    public static function search($query) {
+      $query = strtolower($query);
+      return static::join('osce.oportunidad', 'oportunidad.id','cotizacion.oportunidad_id')
+        ->leftJoin('osce.empresa','empresa.id', 'oportunidad.empresa_id')
+        ->leftJoin('osce.licitacion','licitacion.id','oportunidad.licitacion_id')
+        ->where(function($r) use($query) {
+          $r->orWhereRaw("LOWER(empresa.razon_social) LIKE ? ", ["%{$query}%" ])
+          ->orWhereRaw("LOWER(empresa.seudonimo) LIKE ? ", ["%{$query}%" ])
+          ->orWhereRaw("LOWER(licitacion.descripcion) LIKE ? ", ["%{$query}%" ])
+          ->orWhereRaw("LOWER(oportunidad.rotulo) LIKE ? ", ["%{$query}%" ])
+          ->orWhereRaw("LOWER(oportunidad.codigo) LIKE ? ", ["%{$query}%" ])
+          ->orWhereRaw("LOWER(licitacion.nomenclatura) LIKE ? ", ["%{$query}%" ])
+          ->orWhereRaw("licitacion.procedimiento_id::text LIKE ? ", ["%{$query}%" ])
+          ->orWhereRaw("LOWER(licitacion.descripcion) LIKE ? ", ["%{$query}%" ]);
+      });
     }
 }

@@ -9,6 +9,7 @@ use App\Empresa;
 use App\Persona;
 use App\Ubigeo;
 use App\Actividad;
+use Auth;
 
 class EmpresaController extends Controller {
 
@@ -36,7 +37,7 @@ class EmpresaController extends Controller {
     {
         $this->viewBag['breadcrumbs'][]  = [ 'name' => 'Nueva Empresa' ];
         $this->viewBab['empresa'] = $empresa;
-        return view( 'empresas.create', $this->viewBag )  ;
+        return view( $request->ajax() ? 'empresas.fast' : 'empresas.create ', $this->viewBag )  ;
     }
 
     /**
@@ -48,7 +49,6 @@ class EmpresaController extends Controller {
      */
     public function store(Request $request, Empresa $empresa )
     {
-      dd($request->all());
       $empresa->fill($request->all());
       $empresa->save();
       $empresa->log('creado');
@@ -58,7 +58,7 @@ class EmpresaController extends Controller {
           "value" => $empresa->razon_social,
           "id" => $empresa->id
         ],
-        'redirect' => '/contactos'
+        'redirect' => '/empresas'
       ]);
     }
 
@@ -72,7 +72,6 @@ class EmpresaController extends Controller {
     public function show(Request $request, Empresa $empresa)
     {
       $cliente = $empresa->cliente();
-
       return view('empresas.show', compact('cliente','empresa'));
     }
 
@@ -108,13 +107,17 @@ class EmpresaController extends Controller {
      * @param  \DummyFullModelClass  $DummyModelVariable
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Cliente $cliente)
+    public function update(Request $request, Empresa $empresa )
     {
-//    Session::flash('message_success', 'Se ha realizado la modificación con éxito.');
-      $cliente->empresa()->update($request->all());
-      $cliente->update($request->all());
-      $cliente->log( 'editado', null );
-      return back();
+      // Session::flash('message_success', 'Se ha realizado la modificación con éxito.');
+      //$cliente->empresa()->update($request->all());
+      $empresa->es_agente_retencion = $request->boolean('es_agente_retencion');
+      $empresa->update($request->all());
+      $empresa->log( 'editado', null );
+      return response()->json([
+        'status' => "success",
+        'redirect' => '/empresas'
+      ]);
     }
 
     /**
@@ -130,7 +133,6 @@ class EmpresaController extends Controller {
       $cliente->eliminado = true;
       $cliente->save();
       $cliente->log('eliminado');
-      //return Redirect::to('/clientes');
       return response()->json(['status'=> true , 'refresh' => true  ]); 
     }
     public function addRepresentante(Request $request, Cliente $cliente)
@@ -163,14 +165,15 @@ class EmpresaController extends Controller {
      }
      public function autocomplete(Request $request) {
        $query = $request->input('query');
-       $data = Empresa::search($query)->select("osce.empresa.razon_social as value",'osce.empresa.id')->get();
-       return Response()->json($data);
+       $data = Empresa::search($query)
+         ->select("osce.empresa.razon_social as value",'osce.empresa.id');
+       if(isset($_GET['propias'])) {
+         $data->whereRaw('tenant_id = ' . Auth::user()->tenant_id);
+       }
+       return Response()->json($data->get());
      }
-     public function observacion(Request $request, Cliente $cliente ) {
-       $cliente->log('texto',$request->input('texto'));
+     public function observacion(Request $request, Empresa $empresa ) {
+       $empresa->log('texto',$request->input('texto'));
        return back();
-     }
-     public function fast(){
-      return view('empresas.fast');
      }
 }

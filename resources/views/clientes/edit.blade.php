@@ -7,46 +7,20 @@
 <link rel="stylesheet" type="text/css" href="{{asset('vendors/css/tables/datatable/extensions/dataTables.checkboxes.css')}}">
 <link rel="stylesheet" type="text/css" href="{{asset('vendors/css/tables/datatable/responsive.bootstrap.min.css')}}">
 @endsection
-{{-- page style --}}
-@section('page-styles')
-<link rel="stylesheet" type="text/css" href="{{asset('css/pages/app-invoice.css')}}">
-<style>
-tr.block_header {
-  cursor: pointer;
-}
-tr.block_details {
-  display:none;
-}
-tr.block_details>td {
-  padding: 5px;
-}
-tr.block_details>td>div {
-  background: #f2f4f4;
-  border-radius: 2px;
-  padding: 5px;
-  margin: 5px 10px;
-  color: #000;
-}
-.btns_actions {
-  color: #fff;
-  text-align: right;
-}
-</style>
-@endsection
 
 @section('content')
 <div class="row" id="basic-table">
   <div class="col-12">
 <div class="card">
         <div class="card-header">
-          <h4 class="card-title">Formulario</h4>
+          <h4 class="card-title">Editar Cliente</h4>
         </div>
         <div class="card-content">
           <div class="card-body">
-            <form class="form form-horizontal" action="/clientes/{{ $cliente->id }}" method="POST">
+            <form class="form form-horizontal form-data" action="/clientes/{{ $cliente->id }}" method="POST">
               <div class="form-body">
                 {!! method_field('PUT') !!}
-                  @include('empresas.form')
+                  @include('clientes.form')
               </div>
             </form>
           </div>
@@ -54,7 +28,7 @@ tr.block_details>td>div {
       </div>
   </div>
   <div>
-    <div class="block">
+    <!--<div class="block">
         <div class="block-header block-header-default">
             <h3 class="block-title">Representantes</h3>
         </div>
@@ -101,7 +75,7 @@ tr.block_details>td>div {
                     </button>
                 </div>
             </div>
-        </div>
+        </div>-->
     </div>
 </div>
 </div>
@@ -117,24 +91,5 @@ tr.block_details>td>div {
 @endsection
 {{-- page scripts --}}
 @section('page-scripts')
-<script src="{{asset('js/scripts/pages/app-invoice.js')}}"></script>
-<script>
-$(document).on('click', '.block .btn-success', function(e) {
-  e.stopPropagation();
-  var id = $(this).closest('tbody').attr('data-candidato-id');
-  $(this).closest('tbody').remove();
-  $.ajax({ url: '/oportunidad/' + id + '/aprobar'});
-  console.log('Aprobar', id);
-});
-$(document).on('click', '.block .btn-danger', function(e) {
-  e.stopPropagation();
-  var id = $(this).closest('tbody').attr('data-candidato-id');
-  $(this).closest('tbody').remove();
-  $.ajax({ url: '/oportunidad/' + id + '/rechazar'});
-  console.log('Eliminar', id);
-});
-$(document).on('click', '.block_header', function() {
-  $(this).parent().find('.block_details').toggle();
-});
-</script>
+  <script src="{{ asset('js/scripts/helpers/basic.crud.js') }}"></script>
 @endsection
