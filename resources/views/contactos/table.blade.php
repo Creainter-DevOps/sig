@@ -21,6 +21,12 @@
       <th>Correo</th>
       <td>{{ $contacto->correo ?? '' }} </td>
     </tr>
+
+    <tr>
+      <th>Area</th>
+      <td>{{ $contacto->area ?? '' }}</td>
+      
+    </tr>
    @if(empty($contacto))
      <tr>
       <th colspan="4">Sin informacion de cliente</th>
