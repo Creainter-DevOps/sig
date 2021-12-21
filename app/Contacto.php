@@ -18,7 +18,7 @@ class Contacto extends Model
      * @var array
      */
     protected $fillable = [
-       'dni' , 'nombres', 'area', 'apellidos', 'correo', 'celular','cliente_id','eliminado'
+       'dni' , 'nombres', 'area', 'apellidos', 'correo','area', 'celular','cliente_id','eliminado'
     ];
 
     /**
