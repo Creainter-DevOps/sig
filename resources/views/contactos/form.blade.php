@@ -49,7 +49,7 @@
 
     <div class="col-md-6 col-12">
       <div class="form-label-group">
-        <input type="number" id="area" class="form-control" name="area" value="{{ old ( 'area', $contacto->dni ) }}"  placeholder="Area">
+        <input type="text" id="area" class="form-control" name="area" value="{{ old ( 'area', $contacto->dni ) }}"  placeholder="Area">
         <label for="dni">Area</label>
       </div>
     </div>
