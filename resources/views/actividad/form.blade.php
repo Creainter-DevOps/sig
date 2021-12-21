@@ -65,28 +65,6 @@
             <label for="">Proyecto</label>
         </div>
       </div>
-    <div class="col-md-6 col-12">
-      <div class="form-label-group">
-        <input type="text" class="form-control autocomplete" value="{{ $actividad->bloque_id }}"
-           data-ajax="/bloques/autocomplete" 
-           @if (!empty( $actividad->proyecto_id) )  
-            data-value="{{ $actividad->bloque()->nombre }}"
-           @endif
-           name="bloque_id">
-        <label for="">Bloque</label>
-      </div>
-    </div>
-    <div class="col-md-6 col-12">
-      <div class="form-label-group">
-        <input type="text" class="form-control autocomplete" value="{{ $actividad->entregable_id }}"
-           data-ajax="/entregables/autocomplete" 
-           @if (!empty( $actividad->entregable_id) )  
-            data-value="{{ $actividad->entregable()->nombre }}"
-           @endif
-           name="entregable_id">
-        <label for="">Entregable</label>
-      </div>
-    </div>
     <div class="col-md-6  col-12">
       <div class="form-label-group">
         <input type="hidden" >

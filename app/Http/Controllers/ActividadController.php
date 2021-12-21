@@ -31,12 +31,26 @@ class ActividadController extends Controller
     public function create(Request $request)
     { 
       $proyecto_id = $request->input('proyecto_id');
+      $tipo        = $request->input('tipo');
+
       $actividad = new Actividad;
       $actividad->fecha = date('Y-m-d');
+      $actividad->realizado = false;
+      $actividad->importancia = 1;
+      $actividad->tipo = $tipo;
+
       if(!empty($proyecto_id)) {
         $actividad->proyecto_id = $proyecto_id;
       }
-      return view($request->ajax() ? 'actividad.fast' : 'actividad.add', compact('actividad'));
+
+      if($tipo == 'LLAMADA') {
+        $actividad->direccion = 'SALIDA';
+        $actividad->tiempo_estimado = '00:05:00';
+      }
+      if(!empty($proyecto_id)) {
+        $actividad->proyecto_id = $proyecto_id;
+      }
+      return view($request->ajax() ? 'actividad.fast' : 'actividad.add', compact('tipo','actividad'));
     }
 
     /**
@@ -79,6 +93,7 @@ class ActividadController extends Controller
           'status' => $n->estado,
           'is_linked' => $n->vinculado,
           'link' => $n->link,
+          'completed' => $n->realizado,
         ];
       }, $data);
       return response()->json(['status' => true , 'data' => $data]);
@@ -135,5 +150,10 @@ class ActividadController extends Controller
         $data->where('proyecto_id', '=', $request->input('proyecto_id'));
       }
       return response()->json($data->get());
+    }
+    public function timeline(Request $request) {
+      $data = $request->all();
+      $timeline = Actividad::timeline($data);
+      return response()->json($timeline);
     }
 }

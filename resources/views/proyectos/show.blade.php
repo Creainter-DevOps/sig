@@ -114,8 +114,8 @@
         </div>
       </div>
     </div>
-    <div class="col-6 col-sm-6">
-      @include('proyectos.timeline')
+    <div class="col-12">
+      @include('actividad.create', ['into' => ['proyecto_id' => $proyecto->id]])
     </div>
     </div>
     </div>

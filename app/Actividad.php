@@ -10,6 +10,7 @@ use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use App\Oportunidad;
+use App\Actividad;
 use Auth;
 
 class Actividad extends Model
@@ -26,7 +27,7 @@ class Actividad extends Model
      */
     protected $fillable = [
       'usuario_id', 'oportunidad_id', 'cliente_id', 'contacto_id', 'cotizacion_id', 'entregable_id', 'proyecto_id', 'evento', 'empresa_id', 'candidato_id', 'texto', 'created_by', 'tipo', 'estado', 'importacia', 'fecha_terminado',
-      'fecha_limite', 'asignado_id','fecha_comienzo', 'color', 'orden', 'bloque_id' , 'nombre', 'eliminado','link'
+      'fecha_limite', 'asignado_id','fecha_comienzo', 'color', 'orden', 'bloque_id' , 'nombre', 'eliminado','link','direccion','realizado'
     ];
 
     /**
@@ -152,11 +153,24 @@ class Actividad extends Model
         return $this->importancia;
       }
     }
+    public static function fillDireccion() {
+      return [
+        'SALIDA'  => 'SALIDA',
+        'ENTRADA' => 'ENTRADA',
+      ];
+    }
     public static function fillImportancia() {
       return [   
           1 => 'Baja',
           2 => 'Media',
           3 => 'Alta' 
       ];
+    }
+    public static function timeline($into) {
+      if(!empty($into['proyecto_id'])) {
+        return Actividad::where('proyecto_id', '=', $into['proyecto_id'])
+          ->orderBy('id', 'DESC' )->get();
+      }
+      return [];
     }
 }

@@ -135,7 +135,7 @@
     <div class="card-content">
       <div class="card-body">
         <div style="background: #b0ffc5;color: #159905;text-align: center;padding: 10px;margin-bottom: 10px;">Ya es un proyecto!</div>
-        @include('proyectos.table', ['proyecto' => $oportunidad->proyecto()])
+          @include('proyectos.table', ['proyecto' => $oportunidad->proyecto()])
       </div>
     </div>
   </div>
@@ -143,15 +143,19 @@
   </div>
   </div>
   </div>
-  <!-- users view card data ends -->
+
+
+
+
+
 @if(!empty($oportunidad))
-<h5>Candidatos</h5>
+<h5>Cotizaciones</h5>
 <div class="row">
 @foreach($oportunidad->empresas() as $e)
   <div class="col-2 col-sm-2">
     <div class="card">
       <div class="card-header">
-        <h4 class="card-title">{{ $e->razon_social }} <span class="small"> - {{ $e->ruc }}</span></h4>
+        <h6 class="card-title">{{ $e->razon_social }} <span class="small"> - {{ $e->ruc }}</span></h6>
       </div>
       <div class="card-content">
         <div class="card-body">
@@ -167,33 +171,35 @@
              @endif
           @endif
 @if(empty($oportunidad->revisado_el))
-<div>Debe marcar como <b>REVISADO</b></div>
+  <div>Debe marcar como <b>REVISADO</b></div>
 @elseif(!empty($oportunidad->rechazado_el) || !empty($oportunidad->archivado_el))
-<div>No disponible acciones</div>
+  <div>No disponible acciones</div>
 @elseif(empty($e->cotizacion) && strtotime($licitacion->fecha_participacion_hasta) > time())
-<div class="text-center">
-  <a class="btn btn-sm btn-success" href="/licitaciones/{{ $licitacion->id }}/interes/{{ $e->id }}">Interés</a>
-</div>
+  <div class="text-center">
+    <a class="btn btn-sm btn-success" href="/licitaciones/{{ $licitacion->id }}/interes/{{ $e->id }}">Interés</a>
+  </div>
 @elseif(empty($e->cotizacion) && strtotime($licitacion->fecha_participacion_hasta) <= time())
-<div>Fuera de plazo</div>
+  <div>Fuera de plazo</div>
 @else
-<div class="d-flex justify-content-end">
-@if(!$e->cotizacion->estado()['timeout'])
-  @if(empty($e->cotizacion->participacion_el))
-    <a href="/licitaciones/{{ $licitacion->id }}/participar/{{ $e->cotizacion->id }}" class="btn btn-sm btn-info mr-25">Registrar Participación</a>
-  @elseif(empty($e->cotizacion->propuesta_el))
-    <a href="/licitaciones/{{ $licitacion->id }}/propuesta/{{ $e->cotizacion->id }}" class="btn btn-sm btn-dark">Enviar Propuesta</a>
+  <div class="d-flex justify-content-end">
+  @if(!$e->cotizacion->estado()['timeout'])
+    @if(empty($e->cotizacion->participacion_el))
+      <a href="/licitaciones/{{ $licitacion->id }}/participar/{{ $e->cotizacion->id }}" class="btn btn-sm btn-info mr-25">Registrar Participación</a>
+    @elseif(empty($e->cotizacion->propuesta_el))
+      <a href="/licitaciones/{{ $licitacion->id }}/propuesta/{{ $e->cotizacion->id }}" class="btn btn-sm btn-dark">Enviar Propuesta</a>
+    @endif
   @endif
+  </div>
 @endif
-</div>
-@endif
-
 </div>
 </div>
 </div>
 </div>
 @endforeach
 </div>
+
+
+
 
 <div class="row">
 <div class="col-6 col-sm-6">

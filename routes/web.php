@@ -67,6 +67,8 @@ Route::resource('bloques', 'BloqueController')->parameters([
 Route::get('/kanban', 'KanbanController@index');
 Route::get('/kanban/actividades', 'KanbanController@actividades');
 
+
+Route::post('actividades/timeline', 'ActividadController@timeline');
 Route::get('actividades/autocomplete', 'ActividadController@autocomplete'); 
 Route::get('actividades/kanban', 'ActividadController@kanban');
 Route::get('actividades/kanban/json', 'ActividadController@kanban_data');

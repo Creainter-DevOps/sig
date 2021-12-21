@@ -221,7 +221,7 @@ WHERE O.aprobado_el >= NOW() - INTERVAL '80' DAY AND O.rechazado_el IS NULL AND 
 JOIN osce.licitacion L ON L.id = x.licitacion_id AND L.eliminado IS NULL
 AND
   ((L.fecha_propuesta_desde - INTERVAL '2' DAY <= NOW() AND L.fecha_propuesta_hasta + INTERVAL '2' DAY >= NOW())
-  OR (L.fecha_propuesta_hasta - INTERVAL '25' DAY <= NOW() AND L.fecha_propuesta_hasta + INTERVAL '10' DAY >= NOW()))
+  OR (L.fecha_propuesta_hasta - INTERVAL '38' DAY <= NOW() AND L.fecha_propuesta_hasta + INTERVAL '15' DAY >= NOW()))
 -- WHERE x.cantidad_propuestas = 0 OR x.cantidad_propuestas <> x.cantidad_participadas
 ORDER BY L.fecha_propuesta_hasta ASC, id DESC");
       return static::hydrate($rp);
