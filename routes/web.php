@@ -64,6 +64,12 @@ Route::resource('bloques', 'BloqueController')->parameters([
   'bloques' => 'bloque'
 ]);
 
+Route::resource('llamadas', 'CallerController')->parameters([ 
+  'llamadas' => 'llamada'
+]);
+
+
+
 Route::get('/kanban', 'KanbanController@index');
 Route::get('/kanban/actividades', 'KanbanController@actividades');
 

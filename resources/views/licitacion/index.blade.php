@@ -76,7 +76,7 @@ tr.block_details>td>div {
               <tbody>
                 <tr>
                   <td>Nomenclatura</td>
- <td><a href="/licitaciones/{{ $oportunidad->licitacion_id }}/detalles">{{ $oportunidad->licitacion()->nomenclatura }}</a></td>                
+ <td><a href="/licitaciones/{{ $oportunidad->licitacion_id }}/detalles">{{  null !==     $oportunidad->licitacion() ? $oportunidad->licitacion()->nomenclatura :''  }}</a></td>                
 </tr>
                 <tr>
                   <td>Registrado</td>

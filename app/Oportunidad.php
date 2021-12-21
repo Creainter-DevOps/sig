@@ -221,7 +221,7 @@ WHERE O.aprobado_el >= NOW() - INTERVAL '80' DAY AND O.rechazado_el IS NULL AND 
 JOIN osce.licitacion L ON L.id = x.licitacion_id AND L.eliminado IS NULL
 AND
   ((L.fecha_propuesta_desde - INTERVAL '2' DAY <= NOW() AND L.fecha_propuesta_hasta + INTERVAL '2' DAY >= NOW())
-  OR (L.fecha_propuesta_hasta - INTERVAL '38' DAY <= NOW() AND L.fecha_propuesta_hasta + INTERVAL '15' DAY >= NOW()))
+  OR (L.fecha_propuesta_hasta - INTERVAL '48' DAY <= NOW() AND L.fecha_propuesta_hasta + INTERVAL '35' DAY >= NOW()))
 -- WHERE x.cantidad_propuestas = 0 OR x.cantidad_propuestas <> x.cantidad_participadas
 ORDER BY L.fecha_propuesta_hasta ASC, id DESC");
       return static::hydrate($rp);
@@ -422,10 +422,10 @@ ORDER BY L.fecha_buena_hasta ASC, O.id ASC");
     }
     public function estado() {
       $ahora = time();
-      $participacion_desde = strtotime($this->licitacion()->fecha_participacion_desde);
-      $participacion_hasta = strtotime($this->licitacion()->fecha_participacion_hasta);
-      $propuesta_desde = strtotime($this->licitacion()->fecha_propuesta_desde);
-      $propuesta_hasta = strtotime($this->licitacion()->fecha_propuesta_hasta);
+      $participacion_desde =  null !==   $this->licitacion()  ?  strtotime($this->licitacion()->fecha_participacion_desde) : '' ;
+      $participacion_hasta =   null !== $this->licitacion()  ?strtotime($this->licitacion()->fecha_participacion_hasta) : '';
+      $propuesta_desde =  null !==  $this->licitacion() ? strtotime($this->licitacion()->fecha_propuesta_desde) : '' ;
+      $propuesta_hasta =   null !== $this->licitacion()  ?  strtotime($this->licitacion()->fecha_propuesta_hasta) :'' ;
 
       if($ahora >= $propuesta_hasta) {
         if(!empty($this->fecha_propuesta)) {

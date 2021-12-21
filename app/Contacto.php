@@ -11,7 +11,7 @@ class Contacto extends Model
     protected $table = 'osce.contacto';
     const UPDATED_AT = null;
     const CREATED_AT = null;
-
+    
     /**
      * The attributes that are mass assignable.
      *

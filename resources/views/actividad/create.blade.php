@@ -54,7 +54,7 @@ function actualizar_timeline() {
         let box = $('<li>').addClass('timeline-items timeline-icon-success active');
         box.append($('<div>').addClass('timeline-time').text(n.created_on));
         box.append($('<div>').addClass('timeline-content').text(n.texto));
-        if(n.completed) {
+        if(n.realizado) {
           ll.append(box);
         } else {
           llc.append(box);

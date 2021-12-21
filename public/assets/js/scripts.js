@@ -669,7 +669,7 @@ function render_dom_popup() {
                     .attr("aria-labelledby", "modal-fadein")
                     .attr("aria-hidden", "true");
                 modal.html(
-                    '<div class="modal-dialog" role="document"><div class="modal-content" style="min-width:600px;">Cargando...</div></div>'
+                    '<div class="modal-dialog" role="document"><div class="modal-content" style="min-width:700px;">Cargando...</div></div>'
                 );
                 $("body").append(modal);
                 Fetchx({

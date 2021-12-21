@@ -37,7 +37,10 @@ class Entregable extends Model
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-    ];
+      ];
+    public function rotulo() {
+      return 'Entregable ' . $this->numero;
+    }
     public function folder() {
       return $this->proyecto()->folder() . 'ENTREGABLES\\ENTREGABLE ' . str_pad($this->numero, 3, '0', STR_PAD_LEFT) . '\\';
     }
