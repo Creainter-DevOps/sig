@@ -1,7 +1,5 @@
 <h5 class="card-title">Reunión</h5>
 @csrf
-<input type="hidden" name="proyecto_id" value="{{ $actividad->proyecto_id }}">
-
 <div class="form-body">
   <div class="row">
     <div class="col-md-6  col-12">

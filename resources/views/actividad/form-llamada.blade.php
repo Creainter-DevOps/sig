@@ -71,6 +71,13 @@
          <label for="">Descripcion(*)</label>
       </div>
     </div>
+    <div>Opcional</div>
+    <div class="col-md-12 col-12">
+      <div class="form-label-group">
+         <textarea type="text" class="form-control" placeholder="Descripcion(*)" required name="texto">{{ old ( 'texto', $actividad->texto ?? '' ) }}</textarea>
+         <label for="">Descripcion(*)</label>
+      </div>
+    </div>
     <div class="col-12 d-flex justify-content-end">
       <button type="submit" class="btn btn-primary mr-1 mb-1">Guardar </button>
       <button type="reset" class="btn btn-light-secondary mr-1 mb-1">Limpiar </button>
