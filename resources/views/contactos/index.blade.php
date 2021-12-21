@@ -38,6 +38,7 @@
             <th>Apellidos</th>
             <th>Celular</th>
             <th>Correo</th>
+            <th>Area</th>
             <th></th>
           </tr>
         </thead>
@@ -51,6 +52,7 @@
               <span data-outgoing="{{ $contacto->celular}}" data-outgoing-title="{{ $contacto->nombres }}"></span>
             </td>
             <td class="" align ="left" >{{ $contacto->correo }}</td>
+            <td class="" align ="left" >{{ $contacto->area }}</td>
             <td>
               <div class="dropdown">
                 <span class="bx bx-dots-vertical-rounded font-medium-2 dropdown-toggle nav-hide-arrow cursor-pointer"
