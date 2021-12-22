@@ -50,7 +50,7 @@
     <div class="col-md-6 col-12">
       <div class="form-label-group">
         <input type="text" id="area" class="form-control" name="area" value="{{ old ( 'area', $contacto->area ) }}"  placeholder="Area">
-        <label for="dni">Area</label>
+        <label for="">Area</label>
       </div>
     </div>
     <div class="col-12 d-flex justify-content-end">
