@@ -166,7 +166,7 @@
             </div>
              @if( $e->cotizacion->estado()['message'] == "ENVIADO" )
                 <div  class="text-center mb-1">
-                  <a class="btn btn-light-success" href="{{  route('oportunidad.proyecto', ['cotizacion' => $e->cotizacion->id] ) }} " >Pasar proyecto</a>
+                  <a class="btn btn-light-success" href="{{  route('cotizaciones.proyecto', ['cotizacion' => $e->cotizacion->id] ) }} " >Pasar proyecto</a>
                 </div>
              @endif
           @endif

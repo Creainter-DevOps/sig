@@ -50,23 +50,23 @@ tr.block_details>td>div {
           <th>Estado</th>
         </tr>
       </thead>
-      @foreach ($list as $oportunidad )
-      <tbody class="block" data-oportunidad-id="{{ $oportunidad->id }}" data-candidato-id="{{ $oportunidad->id }}">
+      @foreach ($list as $licitacion )
+      <tbody class="block" data-licitacion-id="{{ $licitacion->id }}" data-oportunidad-id="{{ $licitacion->id }}">
         <tr class="block_header">
-          <td>{{ $oportunidad->entidad }}</td>
-          <td>{{ $oportunidad->tipo_proceso }}</td>
-          <td>{{ $oportunidad->tipo_objeto }}</td>
-          <td>{{ $oportunidad->rotulo }}</td>
-          <td>{{ Helper::fecha( $oportunidad->fecha_participacion_hasta ) }}</td>
+          <td>{{ $licitacion->entidad }}</td>
+          <td>{{ $licitacion->tipo_proceso }}</td>
+          <td>{{ $licitacion->tipo_objeto }}</td>
+          <td>{{ $licitacion->rotulo }}</td>
+          <td>{{ Helper::fecha( $licitacion->fecha_participacion_hasta ) }}</td>
            <td>
-            @if ( !empty( $oportunidad->fecha_participacion ))
-              <span class="badge  badge-light-success"> Participando :</br> {{ Helper::fecha($oportunidad->fecha_participacion,true ) }}</span>
-            @elseif ( !empty($oportunidad->rechazado_el ))
-              <span class="badge  badge-light-danger">Rechazado : </br> {{  Helper::fecha($oportunidad->rechazado_el, true ) }}</span>
-            @elseif ( !empty($oportunidad->archivado_el ))
-              <span class="badge  badge-light-info">Archivado : </br> {{ Helper::fecha( $oportunidad->archivado_el, true ) }}</span>
+            @if ( !empty( $licitacion->fecha_participacion ))
+              <span class="badge  badge-light-success"> Participando :</br> {{ Helper::fecha($licitacion->fecha_participacion,true ) }}</span>
+            @elseif ( !empty($licitacion->rechazado_el ))
+              <span class="badge  badge-light-danger">Rechazado : </br> {{  Helper::fecha($licitacion->rechazado_el, true ) }}</span>
+            @elseif ( !empty($licitacion->archivado_el ))
+              <span class="badge  badge-light-info">Archivado : </br> {{ Helper::fecha( $licitacion->archivado_el, true ) }}</span>
             @else
-              <span class="{{ $oportunidad->estado()['class'] }}">{{ $oportunidad->estado()['message'] }}</span>
+              <span class="{{ $licitacion->estado()['class'] }}">{{ $licitacion->estado()['message'] }}</span>
             @endif
             </td>
         </tr>
@@ -76,23 +76,23 @@ tr.block_details>td>div {
               <tbody>
                 <tr>
                   <td>Nomenclatura</td>
- <td><a href="/licitaciones/{{ $oportunidad->licitacion_id }}/detalles">{{  null !==     $oportunidad->licitacion() ? $oportunidad->licitacion()->nomenclatura :''  }}</a></td>                
-</tr>
+                  <td><a href="/licitaciones/{{ $licitacion->id }}/detalles">{{ $licitacion->nomenclatura }}</a></td> 
+                </tr>
                 <tr>
                   <td>Registrado</td>
-                  <td>{{ Helper::fecha($oportunidad->created_on) }}</td>
+                  <td>{{ Helper::fecha($licitacion->created_on) }}</td>
                 </tr>
                 <tr>
                   <td>Descripción</td>
-                  <td>{{ $oportunidad->descripcion }}</td>
+                  <td>{{ $licitacion->descripcion }}</td>
                 </tr>
                 <tr>
                   <td>Participación</td>
-                  <td>{{ $oportunidad->participacion() }}</td>
+                  <td>{{ $licitacion->participacion() }}</td>
                 </tr>
                 <tr>
                   <td>Propuesta</td>
-                  <td>{{ $oportunidad->propuesta() }}</td>
+                  <td>{{ $licitacion->propuesta() }}</td>
                 </tr>
                 <tr>
                   <td>Adjuntos</td>

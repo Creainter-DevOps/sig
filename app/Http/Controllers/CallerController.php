@@ -64,8 +64,8 @@ class CallerController extends Controller
      */
     public function show( Caller $caller )
     {
+      dd($caller);
       return view('llamadas.show', compact('caller'));
-
     }
 
     /**
@@ -74,8 +74,9 @@ class CallerController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Caller $caller )
+    public function edit( $id )
     {
+       $caller = Caller::find( $id );
        return view('llamadas.edit', compact('caller') );
     }
 

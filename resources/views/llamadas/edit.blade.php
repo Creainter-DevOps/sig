@@ -20,7 +20,7 @@
         </div>
         <div class="card-content">
           <div class="card-body">
-            <form class="form form-horizontal"   action=" {{ route('llamadas.update', ['llamada' => $llamada->id ]) }}" method="POST" id="form-data" >
+            <form class="form form-horizontal"   action=" " method="POST" id="form-data" >
                {!! method_field('PUT') !!}
               <div class="form-body">
               
