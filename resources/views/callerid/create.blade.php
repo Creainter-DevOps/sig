@@ -13,8 +13,8 @@
         <h5 class="card-title"> Nuevo </h5>
       </div>
       <div class="card-body">
-          <form action="{{ route('llamadas.store') }}" autocomplete="nope"  method="POST" class="form-horizontal " id="form-data" >
-              @include('llamadas.formulario')
+          <form action="{{ route('callerids.store') }}" autocomplete="nope"  method="POST" class="form-horizontal " id="form-data" >
+              @include('callerid.formulario')
           </form>
       </div>
     </div>

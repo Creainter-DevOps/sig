@@ -28,55 +28,6 @@
       </div>
   </div>
   <div>
-    <!--<div class="block">
-        <div class="block-header block-header-default">
-            <h3 class="block-title">Representantes</h3>
-        </div>
-        <div class="block-content">
-            <div class="table-responsive">
-                <table class="table table-striped table-vcenter">
-                    <thead>
-                        <th>Tipo Doc.</th>
-                        <th># Doc.</th>
-                        <th>Nombres</th>
-                        <th>Cargo</th>
-                        <th>Género</th>
-                        <th>Telefono</th>
-                        <th>Correo</th>
-                        <th width="5%">Opciones</th>
-                    </thead>
-                    <tbody>
-                        @foreach ($cliente->getContactos() as $contacto)
-                        <tr>
-                            <td>{{ $contacto->persona()->getTipoDocumento() }}</td>
-                            <td>{{ $contacto->persona()->numero_documento }}</td>
-                            <td>{{ $contacto->persona()->nombres }} {{ $contacto->persona()->apellidos }}</td>
-                            <td>{{ $contacto->getCargo() }}</td>
-                            <td>{{ $contacto->persona()->getGenero() }}</td>
-                            <td>{{ $contacto->telefono }}</td>
-                            <td>{{ $contacto->correo_electronico }}</td>
-                            <td class="text-center">
-                                <div class="btn-group">
-                                    <a type="button" href="/clientes/{{ $cliente->id }}/del-representante/{{ $contacto->id }}" data-confirm="Eliminar" class="btn btn-sm btn-secondary js-tooltip-enabled" data-toggle="tooltip" title="" data-original-title="Delete">
-                                        <i class="fa fa-times"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-                <div class="form-group" style="margin-left:20px;">{{count($cliente->getContactos())}} Representante(s)</div>
-            </div>
-            <div class="form-group row">
-                <div class="col-12">
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addRepresentanteModal" style="width: 170px;">
-                        Añadir representante
-                    </button>
-                </div>
-            </div>
-        </div>-->
-    </div>
 </div>
 </div>
 @endsection

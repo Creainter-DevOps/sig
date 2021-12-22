@@ -30,7 +30,7 @@
   </div>
   <div class="row">
     @if (!empty($caller->empresa_id))
-      <div class="col-sm-6">
+      <div class="col-sm-12">
         <div class="card">
           <div class="card-body">
             @include('empresas.table', ['empresa' => $caller->empresa() ] )

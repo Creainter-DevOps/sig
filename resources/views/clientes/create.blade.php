@@ -12,10 +12,13 @@
     </div>
     <div class="card-content">
        <div class="card-body">
-        <form action="/clientes" method="POST" class="form-horizontal">
+        <form action="/clientes" method="POST" class="form-horizontal form-data" id="form-data" >
             @include('clientes.form')
         </form>
       </div>  
     </div>
 </div>
+@endsection
+@section('page-scripts')
+  <script src="{{ asset('js/scripts/helpers/basic.crud.js') }}"></script>
 @endsection

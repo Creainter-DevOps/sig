@@ -64,11 +64,10 @@ Route::resource('bloques', 'BloqueController')->parameters([
   'bloques' => 'bloque'
 ]);
 
-Route::resource('llamadas', 'CallerController')->parameters([ 
-  'llamadas' => 'llamada'
+Route::get('callerids/autocomplete', 'CalleridController@autocomplete');
+Route::resource('callerids', 'CalleridController')->parameters([ 
+  'callerids' => 'callerid'
 ]);
-
-
 
 Route::get('/kanban', 'KanbanController@index');
 Route::get('/kanban/actividades', 'KanbanController@actividades');

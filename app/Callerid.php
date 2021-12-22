@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 use App\Empresa;
 
-class Caller extends Model
+class Callerid extends Model
 {
      
     protected $table = 'osce.callerid';
@@ -18,9 +18,14 @@ class Caller extends Model
     ];
 
     public function empresa(){
-      return  $this->belongsTo('App\Empresa', 'empresa_id')->first();
+      return $this->belongsTo('App\Empresa', 'empresa_id')->first();
     } 
-    public function search( $term ){
+    
+    /*public function rotulo(){
+      return $this->rotulo; 
+    }*/
+
+    public static function search( $term ){
       $term = strtolower(trim($term));
       return static::where(function ($query) use  ($term){
         $query->whereRaw("rotulo like ?", ["%{$term}%"])

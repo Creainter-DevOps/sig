@@ -89,13 +89,7 @@ class CotizacionController extends Controller {
     return back();
   }
   public function proyecto(Request $request, Cotizacion $cotizacion) {
-    $proyecto = new Proyecto;
-    $proyecto->cotizacion_id = $cotizacion->id;
-    $proyecto->empresa_id = $cotizacion->empresa_id;
-    $proyecto->nombre = $cotizacion->oportunidad()->rotulo();
-    $proyecto->tipo = 'LICITACION';
-    $proyecto->nomenclatura = $cotizacion->oportunidad()->licitacion()->nomenclatura;
-    $proyecto->save();
-    return redirect()->route( 'proyectos.show', [ 'proyecto' => $proyecto->id ]);
+    $id = $cotizacion->migrateProyecto();
+    return redirect()->route( 'proyectos.show', [ 'proyecto' => $id ]);
   }
 }

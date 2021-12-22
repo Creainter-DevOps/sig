@@ -1,6 +1,6 @@
 @extends('layouts.contentLayoutMaster')
 {{-- page title --}}
-@section('title','Invoice List')
+@section('title','Callerids')
 {{-- vendor style --}}
 @section('vendor-styles')
 @endsection
@@ -11,7 +11,7 @@
 @section('content')
     <div class="row">
         <div class="offset-12 col-md-1" style="margin-bottom: 10px;text-align:right;">
-          <a class="btn btn-default" href="/llamadas/crear" style="color: #fff; background-color: #007bff; border-color: #007bff;">
+          <a class="btn btn-default" href="/callerids/crear" style="color: #fff; background-color: #007bff; border-color: #007bff;">
               Nuevo
           </a>
         </div>
@@ -20,7 +20,7 @@
   <div class="col-12">
     <div class="card">
       <div class="card-header">
-        <h4 class="card-title">Llamadas</h4>
+        <h4 class="card-title">Callerids</h4>
       </div>
       <div class="card-content">
         <div class="card-body">
@@ -37,21 +37,21 @@
         </tr>
       </thead>
       <tbody>
-      @foreach ($listado as $llamada)
+      @foreach ($listado as $callerid)
         <tr>
-          <td>{{ $llamada->id }}</td>
-          <td><div>{{ isset($llamada->empresa_id) ? $llamada->empresa()->rotulo() : ''  }}</div></td>
-          <td>{{ $llamada->rotulo }}</td>
-          <td>{{ $llamada->uri }}</td>
-          <td>{{ $llamada->number }}</td>
+          <td>{{ $callerid->id }}</td>
+          <td><div>{{ isset($callerid->empresa_id) ? $callerid->empresa()->rotulo() : ''  }}</div></td>
+          <td>{{ $callerid->rotulo }}</td>
+          <td>{{ $callerid->uri }}</td>
+          <td>{{ $callerid->number }}</td>
           <td class="text-center py-1">
               <div class="dropdown">
                 <span class="bx bx-dots-vertical-rounded font-medium-3 dropdown-toggle nav-hide-arrow cursor-pointer" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="menu">
                 </span>
                 <div class="dropdown-menu dropdown-menu-right" x-placement="top-end" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(19px, -7px, 0px);">
-                  <a class="dropdown-item" href="/llamadas/{{ $llamada->id }}/"><i class="bx bx-show-alt mr-1"></i> Ver mas</a>
-                  <a class="dropdown-item" href="{{ route('llamadas.edit', ['llamada'=>  $llamada->id ]) }}"><i class="bx bx-edit-alt mr-1"></i> Editar</a>
-                  <a class="dropdown-item" data-confirm-remove="/llamadas/{{ $llamada->id }}" href="#" > <i class="bx bx-trash mr-1"></i> Eliminar</a> 
+                  <a class="dropdown-item" href="/callerids/{{ $callerid->id }}/"><i class="bx bx-show-alt mr-1"></i> Ver mas</a>
+                  <a class="dropdown-item" href="{{ route('callerids.edit', ['callerid'=>  $callerid->id ]) }}"><i class="bx bx-edit-alt mr-1"></i> Editar</a>
+                  <a class="dropdown-item" data-confirm-remove="/callerids/{{ $callerid->id }}" href="#" > <i class="bx bx-trash mr-1"></i> Eliminar</a> 
                 </div>
               </div>
             </td>

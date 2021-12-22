@@ -3,34 +3,36 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Caller;
+use App\Callerid;
 
 
-class CallerController extends Controller
+class CalleridController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function __construct(){
+   protected $viewBag = [];
+   public function __construct(){
        $this->middleware('auth');
        
         $this->viewBag['pageConfigs'] = ['pageHeader' => true ];
         $this->viewBag['breadcrumbs'] = [
           ["link" => "/dashboard", "name" => "Home" ],
-          ["link" => "/callers", "name" => "Llamadas" ]
+          ["link" => "/callerids", "name" => "Callerids" ]
         ];
     }
 
     public function index(Request $request )
     {
       $search = $request->input('search');
-      /*if(empty( $search ) ){
-        $list = Caller::search($search)->paginate(15)->appends($request->input('query'));
-      }*/
-      $list = Caller::paginate(15);
-      return view('llamadas.index',[ 'listado' =>  $list ] );  
+      if(empty( $search ) ){
+        $this->viewBag['listado'] = Callerid::search($search)->paginate(15)->appends($request->input('query'));
+      }else{
+        $this->viewBag['listado'] = Callerid::paginate(15);
+      }
+      return view('callerid.index', $this->viewBag );  
     }
 
     /**
@@ -38,9 +40,9 @@ class CallerController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create(Caller $caller)
+    public function create(Callerid $caller)
     {
-         return view('llamadas.create',compact('caller'));
+         return view('callerid.create',compact('caller'));
     }
 
     /**
@@ -49,7 +51,7 @@ class CallerController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request , Caller $caller )
+    public function store(Request $request , Callerid $caller )
     {
       $caller->fill( $request->all() );
       $caller->save();
@@ -64,7 +66,7 @@ class CallerController extends Controller
      */
     public function show(  $id )
     {
-      $caller = Caller::find( $id );
+      $caller = Callerid::find( $id );
       return view('llamadas.show', compact('caller'));
     }
 
@@ -76,8 +78,8 @@ class CallerController extends Controller
      */
     public function edit( $id )
     {
-       $caller = Caller::find( $id );
-       return view('llamadas.edit', compact('caller') );
+       $caller = Callerid::find( $id );
+       return view('callerid.edit', compact('caller') );
     }
 
     /**
@@ -89,7 +91,7 @@ class CallerController extends Controller
      */
     public function update(Request $request, $id)
     {
-       $caller = Caller::find($id);
+       $caller = Callerid::find($id);
        $caller->update($request->all());
        return response()->json([ 'status' => true , 'redirect' => '/llamadas' ]); 
     }
@@ -105,5 +107,11 @@ class CallerController extends Controller
        $caller->eliminado = true;
        $caller->save();
        return response()->json([ 'status' => true ]);
+    }
+
+    public function autocomplete(Request $request ){
+      $term =  $request->input('query');
+      $data = Callerid::search($term)->selectRaw(" id, rotulo as value ")->get();
+      return response()->json($data);
     }
 }

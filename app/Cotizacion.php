@@ -106,6 +106,9 @@ class Cotizacion extends Model
         ]);
       }
     }
+    public function migrateProyecto() {
+      return DB::select('SELECT osce.fn_migrar_cotizacion_a_proyecto(' . $this->id . ') id;')[0]->id;
+    }
     public function timeline() {
       return $this->hasMany('App\Actividad','cotizacion_id')->orderBy('id', 'desc')->get();
     }
