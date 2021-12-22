@@ -101,6 +101,7 @@ Route::post('clientes/getDistritos', 'ClienteController@getDistritos');
 
 Route::get('cotizaciones/autocomplete', 'CotizacionController@autocomplete');
 Route::post('cotizaciones/{cotizacion}/observacion', 'CotizacionController@observacion');
+Route::get('cotizaciones/{cotizacion}/proyecto', 'CotizacionController@proyecto')->name('cotizaciones.proyecto');
 Route::resource('cotizaciones', 'CotizacionController')->parameters([
   'cotizaciones' => 'cotizacion'
 ]);

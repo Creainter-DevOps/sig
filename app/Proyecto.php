@@ -83,7 +83,7 @@ class Proyecto extends Model
       return $this->belongsTo('App\Empresa', 'empresa_id')->first() ?? new Empresa;
     }
     public function oportunidad() {
-      return $this->belongsTo('App\Oportunidad', 'oportunidad_id')->first();
+      return $this->cotizacion()->oportunidad();
     }
     public function cliente() {
       return $this->belongsTo('App\Cliente', 'cliente_id')->first() ?? new Cliente;

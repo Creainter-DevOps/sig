@@ -62,9 +62,9 @@ class CallerController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show( Caller $caller )
+    public function show(  $id )
     {
-      dd($caller);
+      $caller = Caller::find( $id );
       return view('llamadas.show', compact('caller'));
     }
 
@@ -87,10 +87,11 @@ class CallerController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request,Caller $caller )
+    public function update(Request $request, $id)
     {
+       $caller = Caller::find($id);
        $caller->update($request->all());
-       return response()->json([ 'status' => true ]); 
+       return response()->json([ 'status' => true , 'redirect' => '/llamadas' ]); 
     }
 
     /**

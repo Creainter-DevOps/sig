@@ -210,6 +210,12 @@ class Cotizacion extends Model
         ];
       }
     }
+    public static function visible() {
+      return static::select('osce.cotizacion.*')
+        ->join('osce.oportunidad', 'oportunidad.id','cotizacion.oportunidad_id')
+        ->leftJoin('osce.empresa','empresa.id', 'oportunidad.empresa_id')
+        ->whereRaw('osce.oportunidad.licitacion_id IS NULL');
+    }
     public static function search($query) {
       $query = strtolower($query);
       return static::join('osce.oportunidad', 'oportunidad.id','cotizacion.oportunidad_id')

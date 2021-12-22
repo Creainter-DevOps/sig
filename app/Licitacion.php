@@ -102,4 +102,20 @@ class Licitacion extends Model
           ];
       }
     }
+    public static function search($query) {
+      $query = strtolower($query);
+      return static::leftJoin('osce.oportunidad', 'oportunidad.licitacion_id','licitacion.id')
+        ->select('osce.licitacion.*')
+        ->leftJoin('osce.empresa', 'empresa.id','licitacion.empresa_id')
+        ->where(function($r) use($query) {
+          $r->orWhereRaw("LOWER(licitacion.rotulo) LIKE ? ", ["%{$query}%" ])
+          ->orWhereRaw("LOWER(licitacion.descripcion) LIKE ? ", ["%{$query}%" ])
+          ->orWhereRaw("LOWER(licitacion.nomenclatura) LIKE ? ", ["%{$query}%" ])
+          ->orWhereRaw("licitacion.procedimiento_id::text LIKE ? ", ["%{$query}%" ])
+          ->orWhereRaw("LOWER(licitacion.descripcion) LIKE ? ", ["%{$query}%" ])
+          ->orWhereRaw("LOWER(empresa.razon_social) LIKE ? ", ["%{$query}%" ])
+          ->orWhereRaw("LOWER(oportunidad.rotulo) LIKE ? ", ["%{$query}%" ])
+          ->orWhereRaw("LOWER(oportunidad.codigo) LIKE ? ", ["%{$query}%" ]);
+      });
+    }
 }

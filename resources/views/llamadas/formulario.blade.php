@@ -5,8 +5,11 @@
     <div class="col-md-6">
       <div class="form-label-group">  
                
-     <input  class="form-control autocomplete" value="{{ old('empresa_id', $caller->empresa_id ) }}"
-               data-value=" {{ old( 'empresa_id', $caller->empresa_id )}}"
+     <input  class="form-control autocomplete" 
+               @if (!empty($caller->empresa_id))
+                  data-value=" {{ old( 'empresa_id', $caller->empresa()->rotulo() )}}"
+                  value=" {{ $caller->empresa_id }}"
+               @endif
                data-ajax="/empresas/autocomplete"
                 name="empresa_id"  >
           <label for="cliente_id">Empresa</label>

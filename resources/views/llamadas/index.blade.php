@@ -40,10 +40,10 @@
       @foreach ($listado as $llamada)
         <tr>
           <td>{{ $llamada->id }}</td>
-          <td><div>{{ $llamada->empresa()->rotulo() }}</div></td>
+          <td><div>{{ isset($llamada->empresa_id) ? $llamada->empresa()->rotulo() : ''  }}</div></td>
           <td>{{ $llamada->rotulo }}</td>
           <td>{{ $llamada->uri }}</td>
-          <td>{{ $llamada->numero }}</td>
+          <td>{{ $llamada->number }}</td>
           <td class="text-center py-1">
               <div class="dropdown">
                 <span class="bx bx-dots-vertical-rounded font-medium-3 dropdown-toggle nav-hide-arrow cursor-pointer" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="menu">

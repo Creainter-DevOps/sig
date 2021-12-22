@@ -8,6 +8,8 @@ use App\Oportunidad;
 use App\Licitacion;
 use App\Contacto;
 use App\Cotizacion;
+use App\Proyecto;
+
 class CotizacionController extends Controller {
 
   protected $viewBag = [];
@@ -26,7 +28,7 @@ class CotizacionController extends Controller {
     if(!empty($search)) {
       $listado = Cotizacion::search($search)->paginate(15)->appends(request()->query());
     } else {
-      $listado = Cotizacion::orderBy('id', 'desc')->paginate(15)->appends(request()->query());
+      $listado = Cotizacion::visible()->orderBy('id', 'desc')->paginate(15)->appends(request()->query());
     }
     return view('cotizacion.index', ['listado' => $listado]);
   }
@@ -85,5 +87,15 @@ class CotizacionController extends Controller {
   public function observacion(Request $request, Cotizacion $cotizacion ) {
     $cotizacion->log('texto',$request->input('texto'));
     return back();
-  } 
+  }
+  public function proyecto(Request $request, Cotizacion $cotizacion) {
+    $proyecto = new Proyecto;
+    $proyecto->cotizacion_id = $cotizacion->id;
+    $proyecto->empresa_id = $cotizacion->empresa_id;
+    $proyecto->nombre = $cotizacion->oportunidad()->rotulo();
+    $proyecto->tipo = 'LICITACION';
+    $proyecto->nomenclatura = $cotizacion->oportunidad()->licitacion()->nomenclatura;
+    $proyecto->save();
+    return redirect()->route( 'proyectos.show', [ 'proyecto' => $proyecto->id ]);
+  }
 }

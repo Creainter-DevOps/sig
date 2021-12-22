@@ -17,8 +17,8 @@
             class="users-avatar-shadow rounded-circle" height="64" width="64">
         </a>
         <div class="media-body pt-25">
-          <h4 class="media-heading">{{ $proyecto->nombre }}</h4>
-          <span>{{ $proyecto->nomenclatura }}</span>
+          <h4 class="media-heading">{{ $caller->rotulo }}</h4>
+          <span>{{ $caller->number}}</span>
         </div>
       </div>
     </div>
@@ -29,96 +29,15 @@
     </div>
   </div>
   <div class="row">
-    @if (!empty($proyecto->cliente_id))
+    @if (!empty($caller->empresa_id))
       <div class="col-sm-6">
         <div class="card">
           <div class="card-body">
-            @include('clientes.table')
+            @include('empresas.table', ['empresa' => $caller->empresa() ] )
           </div>
         </div>
       </div>
       @endif
-      @if(!empty($proyecto->oportunidad()->licitacion_id))
-    <div class="col-6 col-md-6">
-      <div class="card">
-        <div class="card-content">
-          <div class="card-body">
-            @include('licitacion.table', ['licitacion' => $proyecto->oportunidad()->licitacion()])
-          </div>
-        </div>
-      </div>
-    </div>
-    @endif
-    @if (!empty($proyecto->cotizacion_id))
-      <div class="col-sm-6">
-        <div class="card">
-          <div class="card-body">
-            @include('oportunidad.table', ['oportunidad' => $proyecto->oportunidad()])
-          </div>
-        </div>
-      </div>
-      <div class="col-sm-6">
-        <div class="card">
-          <div class="card-body">
-            @include('cotizacion.table', ['cotizacion' => $proyecto->cotizacion()])
-          </div>
-        </div>
-      </div>
-    @endif
-    <div class="col-6 col-md-6">
-      <div class="card">
-        <div class="card-content">
-          <div class="card-body">
-            @include('proyectos.table', compact('proyecto'))
-          </div>
-        </div>
-      </div>
-    </div>
-    @if (!empty($proyecto->contacto_id))
-      <div class="col-sm-6">
-        <div class="card">
-          <div class="card-body">
-            @include('contactos.table')
-          </div>
-        </div>
-      </div>
-      @endif
-    <div class="col-12">
-    <div class="row">
-    <div class="col-sm-6">
-        <div class="card">
-          <div class="card-body">
-            @include('proyectos.entregables')
-          </div>
-        </div>
-      </div>
-    <div class="col-sm-6">
-        <div class="card">
-          <div class="card-body">
-            @include('proyectos.pagos')
-          </div>
-        </div>
-      </div>
-    <div class="col-6">
-        <div class="card">
-          <div class="card-body">
-            @include('proyectos.cartas')
-          </div>
-        </div>
-      </div>
-    <div class="col-6">
-        <div class="card">
-          <div class="card-body">
-            @include('proyectos.actas')
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-12">
-      @include('actividad.create', ['into' => ['proyecto_id' => $proyecto->id]])
-    </div>
-    </div>
-    </div>
   </div>
   <!-- users view card data ends -->
 

@@ -27,8 +27,7 @@ class LicitacionController extends Controller {
   public function index(Request $request ) {
     if (!empty( $request->input("search") )){
       $query = strtolower($request->input("search")); 
-      $list = Oportunidad::search($query)->take(20)->get();
-      //dd($list);
+      $list = Licitacion::search($query)->take(20)->get();
       return view('licitacion.index', compact("list"));
     } 
     $participaciones_por_vencer = Oportunidad::listado_participanes_por_vencer();
