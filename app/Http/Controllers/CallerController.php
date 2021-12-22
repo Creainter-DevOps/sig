@@ -23,12 +23,12 @@ class CallerController extends Controller
         ];
     }
 
-    public function index()
+    public function index(Request $request )
     {
       $search = $request->input('search');
-      if(empty( $search ) ){
-        $list = Caller::search($search)->paginate(15)->appends($re )
-      }
+      /*if(empty( $search ) ){
+        $list = Caller::search($search)->paginate(15)->appends($request->input('query'));
+      }*/
       $list = Caller::paginate(15);
       return view('llamadas.index',[ 'listado' =>  $list ] );  
     }

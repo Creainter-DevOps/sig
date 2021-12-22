@@ -49,8 +49,8 @@
                 <span class="bx bx-dots-vertical-rounded font-medium-3 dropdown-toggle nav-hide-arrow cursor-pointer" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="menu">
                 </span>
                 <div class="dropdown-menu dropdown-menu-right" x-placement="top-end" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(19px, -7px, 0px);">
-                  <a class="dropdown-item" href="/proyectos/{{ $llamada->id }}/"><i class="bx bx-show-alt mr-1"></i> Ver mas</a>
-                  <a class="dropdown-item" href="/proyectos/{{ $llamada->id }}/editar"><i class="bx bx-edit-alt mr-1"></i> Editar</a>
+                  <a class="dropdown-item" href="/llamadas/{{ $llamada->id }}/"><i class="bx bx-show-alt mr-1"></i> Ver mas</a>
+                  <a class="dropdown-item" href="/llamadas/{{ $llamada->id }}/editar"><i class="bx bx-edit-alt mr-1"></i> Editar</a>
                   <a class="dropdown-item" data-confirm-remove="/proyectos/{{ $llamada->id }}" href="#" > <i class="bx bx-trash mr-1"></i> Eliminar</a> 
                 </div>
               </div>

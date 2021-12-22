@@ -4,7 +4,7 @@
   <div class="col-md-6 col-12">
     <div class="form-label-group container-autocomplete" >
       <input type="text" class="form-control autocomplete" name="oportunidad_id" value="{{ old('cotizacion_id', $cotizacion->oportunidad_id) }}" required
-         data-ajax="/oportunidad/autocomplete?directas"
+         data-ajax="/oportunidades/autocomplete?directas"
          data-register="{{  route('oportunidades.create')}}"
         @if( !empty($cotizacion->oportunidad_id ))
          data-value="{{ old ( 'oportunidad', null != $cotizacion->oportunidad() ?  $cotizacion->oportunidad()->rotulo() : '' ) }}"
