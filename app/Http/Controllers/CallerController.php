@@ -22,8 +22,13 @@ class CallerController extends Controller
           ["link" => "/callers", "name" => "Llamadas" ]
         ];
     }
+
     public function index()
     {
+      $search = $request->input('search');
+      if(empty( $search ) ){
+        $list = Caller::search($search)->paginate(15)->appends($re )
+      }
       $list = Caller::paginate(15);
       return view('llamadas.index',[ 'listado' =>  $list ] );  
     }
@@ -33,9 +38,9 @@ class CallerController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Caller $caller)
     {
-        //
+         return view('llamadas.create',compact('caller'));
     }
 
     /**
@@ -44,9 +49,11 @@ class CallerController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request , Caller $caller )
     {
-        //
+      $caller->fill( $request->all() );
+      $caller->save();
+      return response()->json([ 'status' => true , 'redirect' => '/llamadas']); 
     }
 
     /**
@@ -55,9 +62,10 @@ class CallerController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show( Caller $caller )
     {
-        //
+      return view('llamadas.show', compact('caller'));
+
     }
 
     /**
@@ -66,9 +74,9 @@ class CallerController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Caller $caller )
     {
-        //
+       return view('llamadas.edit', compact('caller') );
     }
 
     /**
@@ -78,9 +86,10 @@ class CallerController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request,Caller $caller )
     {
-        //
+       $caller->update($request->all());
+       return response()->json([ 'status' => true ]); 
     }
 
     /**
@@ -89,8 +98,10 @@ class CallerController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy( Caller $caller )
     {
-        //
+       $caller->eliminado = true;
+       $caller->save();
+       return response()->json([ 'status' => true ]);
     }
 }

@@ -17,5 +17,13 @@ class Caller extends Model
 
     public function empresa(){
       return  $this->belongsTo('App\Empresa', 'empresa_id')->first();
-    }   
+    } 
+    public function search( $term ){
+      $term = strtolower(trim($term));
+      return static::where(function ($query) use  ($term){
+        $query->whereRaw("rotulo like ?", ["%{$term}%"])
+          ->orWhereRaw("uri like ?" , ["%{$term}%"])
+          ->orWhereRaw("number like ?", ["%{$term}%"]) ;
+      });
+    }  
 }

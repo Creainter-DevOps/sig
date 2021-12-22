@@ -10,11 +10,11 @@
   <div class="card">
     <div class="card-content">
       <div class="card-header">
-        <h5 class="card-title"> Nuevo Proyecto  </h5>
+        <h5 class="card-title"> Nuevo </h5>
       </div>
       <div class="card-body">
-          <form action="{{ route('proyectos.store') }}" autocomplete="nope"  method="POST" class="form-horizontal " id="form-data" >
-              @include('proyectos.formulario')
+          <form action="{{ route('llamadas.store') }}" autocomplete="nope"  method="POST" class="form-horizontal " id="form-data" >
+              @include('llamadas.formulario')
           </form>
       </div>
     </div>
