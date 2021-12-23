@@ -21,10 +21,6 @@ class Callerid extends Model
       return $this->belongsTo('App\Empresa', 'empresa_id')->first();
     } 
     
-    /*public function rotulo(){
-      return $this->rotulo; 
-    }*/
-
     public static function search( $term ){
       $term = strtolower(trim($term));
       return static::where(function ($query) use  ($term){

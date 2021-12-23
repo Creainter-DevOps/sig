@@ -84,8 +84,12 @@ class OportunidadController extends Controller {
       unset($data['value']);
       unset($data['_update']);
     }
+    
     $oportunidad->update($data);
-    return response()->json([ 'status' =>  true]);
+    $oportunidad->cliente_id = $request->input('cliente_id');
+    $oportunidad->save();
+    //dd($oportunidad);
+    return response()->json([ 'status' =>  true , 'redirect' => '/oportunidades' ]);
   }
 
     /**
