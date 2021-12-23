@@ -26,6 +26,18 @@
            <label>Fecha (*) </label>
         </div>
     </div>
+    <div class="col-md-6  col-12">
+      <div class="form-label-group">
+          <fieldset class="form-label-group position-relative has-icon-left">
+            <input type="time" name="hora" class="form-control pickadate"
+               placeholder="Hora" value="{{ old ( 'hora', $actividad->hora ?? '' ) }}" >
+              <div class="form-control-position">
+                 <i class='bx bx-calendar'></i>
+              </div>
+            </fieldset>
+           <label>Hora </label>
+        </div>
+    </div>
       <div class="col-md-6  col-12">
         <div class="form-label-group container-autocomplete ">
             <input type="text" class="form-control autocomplete" name="contacto_id" data-register="/contactos/fast" data-ajax="/contactos/autocomplete"

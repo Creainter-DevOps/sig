@@ -147,7 +147,8 @@ Route::get('licitaciones/aprobadas','LicitacionController@listAprobadas');
 Route::resource('licitaciones', 'LicitacionController')->parameters([
   'licitaciones' => 'licitacion'
 ]);
-Route::get('licitaciones/{licitacion}/detalles','LicitacionController@detalles');
+
+Route::get('licitaciones/{licitacion}/detalles','LicitacionController@show');
 Route::get('licitaciones/{licitacion}/aprobar','LicitacionController@aprobar');
 Route::get('licitaciones/{licitacion}/revisar','LicitacionController@revisar');
 Route::get('licitaciones/{licitacion}/interes/{empresa}','LicitacionController@interes');
@@ -156,6 +157,7 @@ Route::get('licitaciones/{licitacion}/archivar','LicitacionController@archivar')
 Route::post('licitaciones/{licitacion}/observacion','LicitacionController@observacion');
 Route::get('licitaciones/{licitacion}/participar/{cotizacion}','LicitacionController@registrarParticipacion');
 Route::get('licitaciones/{licitacion}/propuesta/{cotizacion}','LicitacionController@registrarPropuesta');
+
 
 //Application Routes
 Route::get('/app-email','ApplicationController@emailApplication');

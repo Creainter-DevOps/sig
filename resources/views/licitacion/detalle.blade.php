@@ -161,6 +161,7 @@
         <div class="card-body">
           {{ $e->descripcion }}
           @if(!empty($e->cotizacion))
+            <div data-editable="/cotizaciones/{{ $e->cotizacion->id }}?_update=monto">{{ Helper::money($e->cotizacion->monto) }}</div><br />
             <div class="text-center mb-1">
               <span class="{{ $e->cotizacion->estado()['class'] }}">{{ $e->cotizacion->estado()['message'] }}</span>
             </div>

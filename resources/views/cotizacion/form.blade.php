@@ -25,37 +25,46 @@
     </div>
   <div class="col-md-6 col-12">
     <div class="form-label-group">
-      <input type="text" id="decripcion" class="form-control" name="descripcion" value ="{{ old ( 'descripcion',  $cotizacion->descripcion ) }}" placeholder="Descripcion" required >
-      <label for="decripcion">Descripcion</label>
+      <input type="text" class="form-control" name="rotulo" value ="{{ old ( 'rotulo',  $cotizacion->rotulo ) }}" placeholder="Rótulo" required >
+      <label for="rotulo">Rótulo</label>
   </div>
   </div>
-
   <div class="col-md-6 col-12">
+  </div>
+  <div class="col-md-12 col-12">
+  <div class="row">
+  <div class="col-4">
     <div class="form-label-group">
       <input type="text" id="plazo-instalacion" class="form-control" name="plazo_instalacion" value="{{ old ( 'plazo_instalacion', $cotizacion->plazo_instalacion ) }}" placeholder="Plazo Instalacion" required  >
       <label for="plazo-instalacion">Plazo Instalacion</label>
     </div>
   </div>
 
-  <div class="col-md-6 col-12">
+  <div class="col-4">
     <div class="form-label-group">
       <input type="text" class="form-control" name="plazo_servicio" value="{{ old ('plazo_servicio',  $cotizacion->plazo_servicio ) }}" placeholder="Plazo de Servicio"    >
       <label for="plazo-servicio">Plazo Servicio</label>
     </div>
   </div>
-  <div class="col-md-6 col-12">
+  <div class="col-4">
     <div class="form-label-group">
       <input type="text" class="form-control" name="plazo_garantia" value="{{ old ('plazo_garantia', $cotizacion->plazo_garantia )}}" placeholder="Plazo de Garantia" required   >
       <label for="plazo-garantia">Plazo de Garantia</label>
     </div>
   </div>
-  <div class="col-md-6 col-12">
+  </div>
+  </div>
+  <div class="col-md-12 col-12">
+  <div class="row">
+  <div class="col-12">
     <div class="form-label-group">
-      <input type="number" id="monto-base" class="form-control" name="monto" value="{{ old ('monto', $cotizacion->monto )}}"  placeholder="Monto Base" >
+      <input type="number" class="form-control" name="monto" value="{{ old ('monto', $cotizacion->monto )}}"  placeholder="Monto Total" >
       <label for="monto-neto">Monto Total</label>
     </div>
   </div>
-  <div class="col-md-6  col-12">
+  </div>
+  </div>
+  <div class="col-6">
     <input type="hidden" >
     <div class="form-label-group">
       <fieldset class="form-label-group position-relative has-icon-left">
@@ -67,7 +76,7 @@
        <label>Fecha</label>
     </div>
   </div>
-  <div class="col-md-6 col-12">
+  <div class="col-6">
     <div class="form-label-group">
     <fieldset class="form-group position-relative has-icon-left">
         <input type="text" id="validez" name="validez" class="form-control pickadata" placeholder="Validez" value="{{ old('validez', isset($cotizacion->validez) ?  Helper::fecha($cotizacion->validez) : '' )  }}"  >

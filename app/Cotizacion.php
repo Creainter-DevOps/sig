@@ -39,7 +39,7 @@ class Cotizacion extends Model
      * @var array
      */
     protected $fillable = [
-        'id','empresa_id','fecha','monto','monto_propuesto','duracion_meses','rotulo','oportunidad_id','interes_el','interes_por','participacion_el','participacion_por','propuesta_el','propuesta_por',
+        'id','empresa_id','fecha','monto','duracion_meses','rotulo','oportunidad_id','interes_el','interes_por','participacion_el','participacion_por','propuesta_el','propuesta_por',
     ];
 
     /**
@@ -82,10 +82,10 @@ class Cotizacion extends Model
       if(!empty($this->rotulo)) {
         return $this->rotulo;
       }
-//      $rp  = trim($this->rotulo);
-//      if(empty($rp)) {
+      $rp  = '';
+      if(!empty($this->oportunidad_id)) {
         $rp = $this->oportunidad()->nomenclatura;
-//      }
+      }
       return substr($rp, 0, 20);
     }
     public function registrar_participacion() {

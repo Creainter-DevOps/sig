@@ -29,7 +29,8 @@ class Oportunidad extends Model
      * @var array
      */
     protected $fillable = [
-      'codigo','licitacion_id','tenant_id','aprobado_por','aprobado_el','rechazado_por','rechazado_el','motivo','monto_base','duracion_dias','instalacion_dias','garantia_dias','estado','fecha_participacion','fecha_propuesta','empresa_id','cliente_id','contacto_id','rotulo', 'revisado_el','revisado_por'
+      'codigo','licitacion_id','tenant_id','aprobado_por','aprobado_el','rechazado_por','rechazado_el','motivo','monto_base','duracion_dias',
+      'instalacion_dias','garantia_dias','estado','fecha_participacion','fecha_propuesta','empresa_id','contacto_id','rotulo', 'revisado_el','revisado_por'
     ];
 
     /**

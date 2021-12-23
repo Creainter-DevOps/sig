@@ -2,9 +2,6 @@
 {{-- page title --}}
 @section('title','Users View')
 {{-- page styles --}}
-@section('page-styles')
-<link rel="stylesheet" type="text/css" href="{{asset('css/pages/page-users.css')}}">
-@endsection
 @section('content')
 <!-- users view start -->
 <section class="users-view">

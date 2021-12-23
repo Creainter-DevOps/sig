@@ -4,15 +4,15 @@
 @csrf
 <div class="form-body">
   <div class="row">
-    <div class="col-md-12  col-12">
+    <div class="col-md-12 col-12">
       <div class="form-label-group">
           <input type="text" class="form-control autocomplete"
-             data-ajax="/clientes/autocomplete" name="cliente_id" autocomplete="nope"  >
-             @if (!empty($oportunidad->cliente_id))
-                 value="{{ $oportunidad->cliente_id }}"
-                 data-value="{{ $oportunidad->cliente()->empresa()->razon_social }}"
+             data-ajax="/empresas/autocomplete" name="empresa_id" autocomplete="nope"  >
+             @if (!empty($oportunidad->empresa_id))
+                 value="{{ $oportunidad->empresa_id }}"
+                 data-value="{{ $oportunidad->empresa()->razon_social }}"
              @endif
-          <label for="cliente_id">Cliente</label>
+          <label for="empresa_id">Empresa</label>
       </div>
     </div>
     <div class="col-md-12  col-12">

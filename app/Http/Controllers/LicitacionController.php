@@ -74,7 +74,7 @@ class LicitacionController extends Controller {
   public function calendario(){
     return view('licitacion.calendar');
   }
-  public function detalles(Request $request, Licitacion $licitacion) {
+  public function show(Request $request, Licitacion $licitacion) {
     $oportunidad = $licitacion->oportunidad();
     return view('licitacion.detalle', compact('licitacion','oportunidad'));
   }

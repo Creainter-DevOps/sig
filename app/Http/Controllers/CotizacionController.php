@@ -33,7 +33,7 @@ class CotizacionController extends Controller {
     return view('cotizacion.index', ['listado' => $listado]);
   }
 
-  public function show(Request $resquest, Cotizacion $cotizacion){
+  public function show(Request $resquest, Cotizacion $cotizacion) {
     $cotizacion->codigo = '';
     $breadcrumbs[] = [ 'name' => "Detalle Cotizacion" ];
     $cliente  = isset( $cotizacion->cliente_id ) ? $cotizacion->cliente() : null;
@@ -45,6 +45,8 @@ class CotizacionController extends Controller {
   public function create(Request $request) {
     $cotizacion = new Cotizacion;
     $cotizacion->monto = 0;
+    $cotizacion->nomenclatura = '';
+    $cotizacion->rotulo = '';
     if(!empty($_GET['oportunidad_id'])) {
       $cotizacion->oportunidad_id = $_GET['oportunidad_id'];
     }
@@ -54,7 +56,11 @@ class CotizacionController extends Controller {
   public function store(Request $request){
     $cotizacion = Cotizacion::create($request->all());
     //    $cotizacion->log("creado", null );
-    return response()->json(['status' => true , 'refresh' => true ]);
+    if($request->ajax()) {
+      return response()->json(['status' => true , 'refresh' => true ]);
+    } else {
+      return redirect()->route('cotizaciones.show', [ 'cotizacion' => $cotizacion->id ]);
+    }
     return back();
     return response()->json([
         'status' => true,
@@ -66,12 +72,15 @@ class CotizacionController extends Controller {
     return view($request->ajax() ? 'cotizacion.fast_edit' : 'cotizacion.edit', compact('cotizacion'));    
   }
 
-  public function update( Request  $request  , Cotizacion $cotizacion){
-    $cotizacion->update($request->all());    
+  public function update( Request  $request, Cotizacion $cotizacion) {
+    $data = $request->all();
+    if(!empty($data['_update'])) {
+      $data[$data['_update']] = $data['value'];
+      unset($data['value']);
+      unset($data['_update']);
+    }
+    $cotizacion->update($data);
     return response()->json(['status' => true , 'refresh' => true ]);
-    return response()->json([ 
-        'status' => true , 
-        'redirect' => '/cotizaciones']);
   }
   public  function destroy( Cotizacion $cotizacion ){
     $cotizacion->eliminado = true;
