@@ -13,6 +13,7 @@ return [
   "Clientes" => "Clientes",
   "Empresas" => "Empresas",
   "Proyectos" => "Proyectos",
+  "Callerid" => "Callerid",
   "Nuevas" => "Nuevas",
   "Archivadas" => "Archivadas",
   "Chat" => "Chat",
