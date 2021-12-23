@@ -20,7 +20,7 @@ class Callerid extends Model
     public function empresa(){
       return $this->belongsTo('App\Empresa', 'empresa_id')->first();
     } 
-    
+/*  
     public static function search( $term ){
       $term = strtolower(trim($term));
       return static::where(function ($query) use  ($term){
@@ -29,4 +29,22 @@ class Callerid extends Model
           ->orWhereRaw("number like ?", ["%{$term}%"]) ;
       });
     }  
+*/  
+
+    public static function search($term) {
+      $term = strtolower(trim($term));
+      return static::join('osce.empresa', 'osce.empresa.id', '=', 'osce.callerid.empresa_id')
+      ->where(function($query) use($term) {
+          $query->WhereRaw("LOWER(osce.empresa.razon_social) LIKE ?",["%{$term}%"])
+            //->orWhereRaw("LOWER(osce.empresa.seudonimo) LIKE ?",["%{$term}%"])
+            ->orWhereRaw("LOWER(osce.callerid.uri) LIKE ?",["%{$term}%"])
+            ->orWhereRaw("LOWER(osce.callerid.number) LIKE ?",["%{$term}%"])
+            ->orWhereRaw("LOWER(osce.callerid.rotulo) LIKE ?",["%{$term}%"])
+          ;
+      });
+  }
+
+
+
+
 }
