@@ -22,10 +22,9 @@
       <div class="card-header d-flex justify-content-between">
         <h4 class="card-title">Callerids</h4>
 
-        <form action="callerids" method="POST" name="">
-          {{csrf_field()}}
+        <form class="form" style="width:100%"  action="/callerids" method="GET" name="">
         <div class="col-4 d-flex justify-content-between">
-        <select class="form-control" >
+        <select class="form-control" name="paginate">
           <option value="2" >2</option>
           <option value="10">10</option>
           <option value="15">15</option>

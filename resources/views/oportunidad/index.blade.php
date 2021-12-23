@@ -40,7 +40,7 @@
       @foreach ($listado as $oportunidad)
         <tr>
           <td><div>{{ $oportunidad->codigo }}</div></td>
-          <td>{{ (!empty($oportunidad->cliente()) ? $oportunidad->cliente()->empresa()->rotulo() : '') }}</td>
+          <td>{{ $oportunidad->institucion() }}</td>
           <td>{{ $oportunidad->rotulo() }}</td>
           <td>{{ !empty($oportunidad->proyecto()) ? $oportunidad->proyecto()->codigo : '' }}</td>
           <td>{{ Helper::fecha($oportunidad->created_on) }}</td>

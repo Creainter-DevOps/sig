@@ -17,7 +17,7 @@
       <div class="form-label-group ">
           <input type="text" class="form-control autocomplete" value="{{ $cotizacion->empresa_id }}"
           @if (!empty($cotizacion->empresa_id))
-             data-value="{{ $cotizacion->empresa()->razon_social  }}" 
+             data-value="{{ $cotizacion->empresa()->razon_social }}" 
           @endif
              data-ajax="/empresas/autocomplete?propias" name="empresa_id">
           <label for="">Empresa</label>
@@ -35,20 +35,20 @@
   <div class="row">
   <div class="col-4">
     <div class="form-label-group">
-      <input type="text" id="plazo-instalacion" class="form-control" name="plazo_instalacion" value="{{ old ( 'plazo_instalacion', $cotizacion->plazo_instalacion ) }}" placeholder="Plazo Instalacion" required  >
+      <input type="text" id="plazo-instalacion" class="form-control" name="plazo_instalacion" value="{{ old ( 'plazo_instalacion', $cotizacion->plazo_instalacion ) }}" placeholder="Plazo Instalacion">
       <label for="plazo-instalacion">Plazo Instalacion</label>
     </div>
   </div>
 
   <div class="col-4">
     <div class="form-label-group">
-      <input type="text" class="form-control" name="plazo_servicio" value="{{ old ('plazo_servicio',  $cotizacion->plazo_servicio ) }}" placeholder="Plazo de Servicio"    >
+      <input type="text" class="form-control" name="plazo_servicio" value="{{ old ('plazo_servicio',  $cotizacion->plazo_servicio ) }}" placeholder="Plazo de Servicio">
       <label for="plazo-servicio">Plazo Servicio</label>
     </div>
   </div>
   <div class="col-4">
     <div class="form-label-group">
-      <input type="text" class="form-control" name="plazo_garantia" value="{{ old ('plazo_garantia', $cotizacion->plazo_garantia )}}" placeholder="Plazo de Garantia" required   >
+      <input type="text" class="form-control" name="plazo_garantia" value="{{ old ('plazo_garantia', $cotizacion->plazo_garantia )}}" placeholder="Plazo de Garantia">
       <label for="plazo-garantia">Plazo de Garantia</label>
     </div>
   </div>
@@ -79,7 +79,7 @@
   <div class="col-6">
     <div class="form-label-group">
     <fieldset class="form-group position-relative has-icon-left">
-        <input type="text" id="validez" name="validez" class="form-control pickadata" placeholder="Validez" value="{{ old('validez', isset($cotizacion->validez) ?  Helper::fecha($cotizacion->validez) : '' )  }}"  >
+        <input type="date" id="validez" name="validez" class="form-control pickadata" placeholder="Validez" value="{{ old('validez', isset($cotizacion->validez) ?  Helper::fecha($cotizacion->validez) : '' )  }}"  >
             <div class="form-control-position">
              <i class='bx bx-calendar'></i>
           </div>

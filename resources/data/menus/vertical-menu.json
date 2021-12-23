@@ -47,22 +47,40 @@
       "navheader": "Apps"
     },
     {
+      "url": "actividades/kanban",
+      "name": "Actividades",
+      "i18n": "Actividades",
+      "icon": "check-alt"
+    },
+    {
+      "url": "proyectos",
+      "name": "Proyectos",
+      "i18n": "Proyectos",
+      "icon": "desktop"
+    },
+    {
       "url": "oportunidades",
       "name": "Oportunidades",
       "i18n": "Clientes",
       "icon": "bulb"
     },
     {
-      "url": "empresas",
-      "name": "Empresas",
-      "i18n": "Empresas",
-      "icon": "diagram"
+      "url": "cotizaciones",
+      "name": "Cotizaciones",
+      "i18n": "Cotizaciones",
+      "icon": "morph-doc"
     },
     {
       "url": "clientes",
       "name": "Clientes",
       "i18n": "Clientes",
       "icon": "building"
+    },
+    {
+      "url": "empresas",
+      "name": "Empresas",
+      "i18n": "Empresas",
+      "icon": "diagram"
     },
     {
       "url": "callerids",
@@ -75,18 +93,6 @@
       "name": "Contactos",
       "i18n": "Contactosl",
       "icon": "users"
-    },
-    {
-      "url": "cotizaciones",
-      "name": "Cotizaciones",
-      "i18n": "Cotizaciones",
-      "icon": "morph-doc"
-    },
-    {
-      "url": "proyectos",
-      "name": "Proyectos",
-      "i18n": "Proyectos",
-      "icon": "desktop"
     },
     {
       "url": "actividades",

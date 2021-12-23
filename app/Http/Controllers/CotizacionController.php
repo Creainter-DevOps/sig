@@ -26,7 +26,7 @@ class CotizacionController extends Controller {
   public function index(Request $request) {
     $search = $request->input('search');
     if(!empty($search)) {
-      $listado = Cotizacion::search($search)->paginate(15)->appends(request()->query());
+      $listado = Cotizacion::search($search)->selectRaw('cotizacion.*')->paginate(15)->appends(request()->input('query'));
     } else {
       $listado = Cotizacion::visible()->orderBy('id', 'desc')->paginate(15)->appends(request()->query());
     }

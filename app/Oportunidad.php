@@ -70,7 +70,10 @@ class Oportunidad extends Model
       if(!empty($empr->seudonimo)) {
         return $empr->seudonimo;
       }
-      return $empr->razon_social;
+      if(!empty($empr->razon_social)) {
+        return $empr->razon_social;
+      }
+      return '--';
     }
     public function licitacion() {
       return $this->belongsTo('App\Licitacion', 'licitacion_id')->first();

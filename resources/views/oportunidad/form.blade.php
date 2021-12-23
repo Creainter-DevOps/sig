@@ -8,7 +8,7 @@
          value="{{ old('empresa_id', @$cliente->empresa_id) }}"
          placeholder="Buscar Empresa"
          required
-         @if(@$cliente)
+         @if ( @$cliente)
             data-value="{{ @$cliente->empresa()->razon_social }}"
          @endif
          class="form-control autocomplete"

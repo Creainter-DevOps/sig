@@ -79,6 +79,7 @@ function actualizar_timeline() {
       $.each(data, function(y, n) {
         let box = $('<li>').addClass('timeline-items timeline-icon-success active timeline-item');
         box.attr('data-tipo', n.tipo);
+
         if(n.tipo == 'LLAMADA') {
           box.css({'background': '#5a8dee'});
         } else if(n.tipo == 'REUNION') {
@@ -90,7 +91,7 @@ function actualizar_timeline() {
         }
         box.append($('<div>').addClass('timeline-time').text(n.fecha + ' ' + n.hora));
         box.append($('<div>').addClass('timeline-content').text(n.texto));
-        if(n.realizado) {
+        if(n.estado == 3) {
           ll.append(box);
         } else {
           llc.append(box);

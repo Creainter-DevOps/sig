@@ -9,13 +9,13 @@
 @endsection
 
 @section('content')
-    <div class="row">
+    <!--<div class="row">
         <div class="offset-12 col-md-1" style="margin-bottom: 10px;text-align:right;">
           <a class="btn btn-default" href="/proyectos/crear" style="color: #fff; background-color: #007bff; border-color: #007bff;">
               Nuevo
           </a>
         </div>
-    </div>
+    </div>-->
 <div class="row" id="basic-table">
   <div class="col-12">
     <div class="card">
@@ -44,7 +44,7 @@
           <td>{{ $proyecto->cotizacion_id }}</td>
           <td><div>{{ $proyecto->codigo }}</div></td>
           <td>{{ isset($proyecto->empresa_id) ?   $proyecto->empresa()->rotulo() : ''  }}</td>
-          <td>{{ isset($proyecto->cliente_id) ?  $proyecto->cliente()->empresa()->rotulo() : '' }}</td>
+          <td>{{ $proyecto->oportunidad()->institucion() }}</td>
           <td>{{ $proyecto->rotulo }}</td>
           <td>{{ Helper::fecha( $proyecto->fecha_desde) }}</td>
           <td>{{ Helper::fecha( $proyecto->fecha_hasta) }}</td>

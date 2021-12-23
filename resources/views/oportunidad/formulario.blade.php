@@ -4,10 +4,10 @@
     <div class="col-6">
       <div class="form-label-group">
           <input type="text" class="form-control autocomplete"
-             data-ajax="/empresas/autocomplete" name="empresa_id" autocomplete="nope"  >
+             data-ajax="/empresas/autocomplete" name="empresa_id" autocomplete="nope"  
              @if (!empty($oportunidad->empresa_id))
                  value="{{ $oportunidad->empresa_id }}"
-                 data-value="{{ $oportunidad->empresa()->razon_social }}"
+                 data-value="{{ $oportunidad->empresa()->razon_social }}">
              @endif
           <label for="empresa_id">Empresa</label>
       </div>

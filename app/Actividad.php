@@ -115,9 +115,11 @@ class Actividad extends Model
     public static function kanban() {
       return DB::select("
         SELECT id, tipo, fecha, fecha_limite, texto, created_by, asignado_id, supervisado_por, estado, importancia,color, tiempo_estimado, vinculado, link
-        FROM osce.actividad
+        FROM osce.actividad A
         WHERE tipo <> 'log' AND (" . Auth::user()->id . " = ANY(asignado_id))
         -- OR " . Auth::user()->id . " = ANY(supervisado_por))
+        AND fecha <= NOW()::date + INTERVAL '3' DAY
+        AND ((A.estado = 3 AND fecha >= NOW()::date) OR A.estado IN (1,2))
         ORDER BY id DESC");
     }
 

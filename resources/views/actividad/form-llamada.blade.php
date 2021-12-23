@@ -16,11 +16,12 @@
     <div class="col-md-6  col-12">
         <div class="form-label-group">
         <input type="hidden">
-          <select class="form-control" name="realizado" data-value="{{ $actividad->realizado ? '1' : '0' }}">
-            <option value="1">SI</option>
-            <option value="0" selected>NO</option>
+          <select class="form-control" name="estado" data-value="{{ $actividad->estado }}">
+            <option value="3">Terminado</option>
+            <option value="2">En Proceso</option>
+            <option value="1" selected>Programar</option>
           </select>
-          <label for="">¿Realizado? (*) </label>
+          <label for="">Estado (*) </label>
         </div>
     </div>
     <div class="col-md-6  col-12">

@@ -42,17 +42,20 @@ class ClienteController extends Controller
      */
     public function store(Request $request , Cliente $cliente )
     {
-      $count = count( Cliente::where( 'empresa_id', $cliente->id )->get());
-      if( $count > 0 ){
-        return response()->json(['status' => false ,
-          'message' => 'La empresa ya fue registrada como cliente' ] );
-      }else{
-         $cliente->fill( $request->all() );
-         $cliente->save();
-         return response()->json(['status' => true , 'redirect' => '/clientes' ] );
+      $empresa_id = $request->input('empresa_id');
+      $cc = Cliente::where('empresa_id', $empresa_id)->get();
+      if(count($cc) > 0) {
+        $cliente = $cc->first();
+      } else {
+        $cliente->fill($request->all());
+        $cliente->save();
       }
-      
-         
+      if($request->ajax() || true) {
+        return response()->json(['status' => true ,
+          'message' => 'La empresa ya fue registrada como cliente', 'redirect' => '/clientes/' . $cliente->id ]);
+      } else {
+        return back();
+      }
     }
 
     /**

@@ -39,7 +39,8 @@ class Cotizacion extends Model
      * @var array
      */
     protected $fillable = [
-        'id','empresa_id','fecha','monto','duracion_meses','rotulo','oportunidad_id','interes_el','interes_por','participacion_el','participacion_por','propuesta_el','propuesta_por',
+      'id','empresa_id','fecha','monto','duracion_meses','rotulo','oportunidad_id','interes_el','interes_por','participacion_el','participacion_por','propuesta_el','propuesta_por',
+      'plazo_servicio','plazo_garantia','plazo_instalacion','validez',
     ];
 
     /**
@@ -65,7 +66,7 @@ class Cotizacion extends Model
       return $this->belongsTo('App\Proyecto', 'id','cotizacion_id')->first();
     }
     public function codigo() {
-      return $this->oportunidad()->codigo . '-' . $this->numero;
+      return $this->oportunidad()->codigo . '-' . $this->numero . ': ' . substr($this->rotulo(), 0, 20);
     }
     public function monto() {
       if(in_array(Auth::user()->id, [1,3,15])) {
@@ -222,7 +223,8 @@ class Cotizacion extends Model
     public static function search($query) {
       $query = strtolower($query);
       return static::join('osce.oportunidad', 'oportunidad.id','cotizacion.oportunidad_id')
-        ->leftJoin('osce.empresa','empresa.id', 'oportunidad.empresa_id')
+        ->leftJoin('osce.empresa','empresa.id','oportunidad.empresa_id')
+        ->leftJoin('osce.cliente', 'cliente.id','oportunidad.cliente_id')
         ->leftJoin('osce.licitacion','licitacion.id','oportunidad.licitacion_id')
         ->where(function($r) use($query) {
           $r->orWhereRaw("LOWER(empresa.razon_social) LIKE ? ", ["%{$query}%" ])

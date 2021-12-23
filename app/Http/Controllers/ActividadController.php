@@ -93,7 +93,7 @@ class ActividadController extends Controller
           'status' => $n->estado,
           'is_linked' => $n->vinculado,
           'link' => $n->link,
-          'completed' => $n->realizado,
+          'completed' => ($n->estado == 3),
         ];
       }, $data);
       return response()->json(['status' => true , 'data' => $data]);

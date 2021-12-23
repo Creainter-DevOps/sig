@@ -7,11 +7,12 @@
     <div class="col-md-6  col-12">
         <div class="form-label-group">
         <input type="hidden">
-          <select class="form-control" name="realizado">
-            <option value="SI">SI</option>
-            <option value="NO" selected>NO</option>
+          <select class="form-control" name="estado">
+            <option value="3">Terminado</option>
+            <option value="2">En Proceso</option>
+            <option value="1" selected>Programar</option>
           </select>
-          <label for="">¿Realizado? (*) </label>
+          <label for="">Estado (*) </label>
         </div>
     </div>
     <div class="col-md-6  col-12">

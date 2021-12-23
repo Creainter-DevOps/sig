@@ -2,6 +2,7 @@
 <div class="form-body">
   <div class="row">
     <div class="col-6">
+      @if(empty($proyecto->cotizacion_id))
       <div class="form-label-group">
           <input type="text" class="form-control autocomplete" value="{{ $proyecto->cotizacion_id }}"
              @if(!empty($proyecto->cotizacion_id))
@@ -10,57 +11,19 @@
              data-ajax="/cotizaciones/autocomplete" name="cotizacion_id">
           <label for="cliente_id">Cotización</label>
       </div>
-    </div>
-
-    <div class="col-md-6">
-      <div class="form-label-group">
-          @if (empty($proyecto->empresa_id))
-          <input type="text" class="form-control autocomplete"
-             data-ajax="/empresas/autocomplete" name="empresa_id" >
-          <label for="cliente_id">Empresa</label>
-          @else
-          <input type="text" class="form-control autocomplete" value="{{ $proyecto->empresa_id }}"
-             data-value="{{ $proyecto->empresa()->razon_social  }}"
-             data-ajax="/empresas/autocomplete" name="empresa_id">
-          <label for="cliente_id">Empresa</label>
-          @endif
-      </div>
-    </div>
-    <div class="col-md-6  col-12">
-      <div class="form-label-group">
-          @if (empty($proyecto->cliente_id))
-          <input type="text" class="form-control autocomplete"
-             data-ajax="/clientes/autocomplete" name="cliente_id">
-          <label for="cliente_id">Cliente</label>
-          @else
-          <input type="text" class="form-control autocomplete" value="{{ $proyecto->cliente_id }}"
-             data-value="{{ $proyecto->cliente()->empresa()->razon_social }}"
-             data-ajax="/clientes/autocomplete" name="cliente_id">
-          <label for="cliente_id">Cliente</label>
-          @endif
-      </div>
+      @else
+        {{ $proyecto->cotizacion()->codigo()  }}
+      @endif
     </div>
     <div class="col-md-6 col-12">
-      <div class="form-label-group container-autocomplete" >
-        <input type="text" class="form-control autocomplete" name="oportunidad_id" id="oportunidad_id" value="{{ old('cotizacion_id', $proyecto->oportunidad_id) }}"
-           data-ajax="/oportunidades/autocomplete"
-            data-register="/oportunidades/crear"
-          @if( !empty($proyecto->oportunidad_id ))
-           data-value="{{ old ( 'oportunidad', $proyecto->oportunidad()->rotulo() ) }}"
-          @endif
-        >
-        <label for="oportunidad_id"> Oportunidad </label>
+      <div class="form-label-group">
+        <input type="text" id="decripcion" class="form-control" name="rotulo"  value ="{{ old ( 'rotulo',  $proyecto->rotulo )}}" placeholder="Rótulo" required>
+        <label for="decripcion">Rótulo</label>
       </div>
     </div>
     <div class="col-md-6 col-12">
       <div class="form-label-group">
-        <input type="text" id="decripcion" class="form-control" name="nombre"  value ="{{ old ( 'nombre',  $proyecto->nombre )}}" placeholder="Nombre" required>
-        <label for="decripcion">Nombre </label>
-      </div>
-    </div>
-    <div class="col-md-6 col-12">
-      <div class="form-label-group">
-        <input type="text" id="decripcion" class="form-control" name="nomenclatura" value ="{{old('nomenclatura', $proyecto->nomenclatura)}}" placeholder="Nomenclatura" required >
+        <input type="text" id="decripcion" class="form-control" name="nomenclatura" value ="{{old('nomenclatura', $proyecto->nomenclatura)}}" placeholder="Nomenclatura">
         <label for="Nomenclatura">Nomenclatura </label>
       </div>
     </div>

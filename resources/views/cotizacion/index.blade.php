@@ -28,7 +28,6 @@
           <table class="table table-sm mb-0"  style="width:100%">
             <thead>
               <tr>
-                  <th>Código</th>
                   <th>Cliente</th>
                   <th>Oportunidad</th>
                   <th>M.Total</th>
@@ -40,8 +39,7 @@
               <tbody id="table-body" >
                 @foreach ( $listado as $cotizacion )
                 <tr>
-                  <td>{{ $cotizacion->numero }}</td>
-                  <td class="pr-0"> {{ null !==  $cotizacion->oportunidad()->cliente() ? $cotizacion->oportunidad()->cliente()->rotulo() : ''  }} </td>
+                  <td class="pr-0"> {{ $cotizacion->oportunidad()->institucion() }} </td>
                   <td class="pr-0"> {{ !empty($cotizacion->oportunidad()) ? $cotizacion->oportunidad()->rotulo() : '' }} </td>
                   <td class="text-success" align="left" >{{ $cotizacion->monto() }}</td>
                   <td class="">{{ Helper::fecha( $cotizacion->fecha ) }}</td>

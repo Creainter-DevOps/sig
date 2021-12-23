@@ -27,11 +27,14 @@ class CalleridController extends Controller
     public function index(Request $request )
     {
       $search = $request->input('search');
-//      $paginate = $request->input('paginate');
+      $paginate = 15;
+      if( !empty($request->input('paginate'))){
+        $paginate = $request->input('paginate');
+      }
       if(!empty($search)){
-        $this->viewBag['listado'] = Callerid::search($search)->paginate(15)->appends($request->input('query'));
+        $this->viewBag['listado'] = Callerid::search($search)->paginate($paginate)->appends($request->input('query'));
       }else{
-        $this->viewBag['listado'] = Callerid::paginate(15);
+        $this->viewBag['listado'] = Callerid::paginate( $paginate );
       }
       return view('callerid.index', $this->viewBag );  
     }

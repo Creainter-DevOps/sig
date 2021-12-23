@@ -29,19 +29,18 @@
     </div>
   </div>
   <div class="row">
+      <div class="col-sm-6">
+        <div class="card">
+          <div class="card-body">
+            @include('empresas.table', ['empresa' => $oportunidad->empresa()])
+          </div>
+        </div>
+      </div>
     @if (!empty($oportunidad->cliente_id))
       <div class="col-sm-6">
         <div class="card">
           <div class="card-body">
             @include('clientes.table', ['cliente' => $oportunidad->cliente()])
-          </div>
-        </div>
-      </div>
-      @else
-      <div class="col-sm-6">
-        <div class="card">
-          <div class="card-body">
-            @include('empresas.table', ['empresa' => $oportunidad->licitacion()->empresa()])
           </div>
         </div>
       </div>

@@ -8,24 +8,32 @@
   <tr>
       <th>Código</th>
       <td>{{ $cotizacion->codigo() }}</td>
-      <th>Fecha</th>
-      <td style="width:200px">{{ $cotizacion->fecha }}</td>
-  </tr>
-  <tr>
-      <th>Oportunidad</th>
-      <td>{{   isset($cotizacion->oportunidad_id) ? $cotizacion->oportunidad()->rotulo() : " "   }}</td>
       <th>Empresa</th>
-      <td>{{ $cotizacion->empresa()->seudonimo }}</td>
+      <td style="width:200px">{{ $cotizacion->empresa()->seudonimo }}</td>
   </tr>
   <tr>
+    <th>Oportunidad</th>
+    <td>{{   isset($cotizacion->oportunidad_id) ? $cotizacion->oportunidad()->rotulo() : " "   }}</td>
     <th>Monto</th>
     <td>{{ $cotizacion->monto() }} </td>
-    <th>Validez</th>
-    <td> {{Helper::fecha( $cotizacion->validez )}} </td>
   </tr>
+  <tr>
+    <th>Emitida</th>
+    <td>{{ Helper::fecha($cotizacion->fecha) }}</td>
+    <th>Instalación</th>
+    <td>{{ $cotizacion->plazo_instalacion }} </td>
+  </tr>
+  <tr>
+    <th>Servicio</th>
+    <td>{{ $cotizacion->plazo_servicio }}</td>
+    <th>Garantía</th>
+    <td>{{ $cotizacion->plazo_garantia }}</td>
+  </tr>
+@if(empty($cotizacion->oportunidad()->licitacion_id))
   <tr>
     <th>Directorio:</th>
     <td colspan="3"><a href="#" onclick="window.location.href='odir:{!! addslashes(Auth::user()->dir_sharepoint . $cotizacion->folder()) !!}';">{{ $cotizacion->folder() }}</a></td>
   </tr>
+@endif
 </tbody>
 </table>
