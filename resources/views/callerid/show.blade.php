@@ -39,6 +39,18 @@
       </div>
       @endif
   </div>
+
+
+  <div class="card">
+    <div class="card-content">
+      <div class="card-body">
+        @include('callerid.table', ['callerid' => $caller->id ])
+      </div>
+    </div>
+  </div>
+
+
+
   <!-- users view card data ends -->
 
   <!-- users view card details start -->
