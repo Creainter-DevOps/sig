@@ -21,6 +21,9 @@
     <div class="card">
       <div class="card-header d-flex justify-content-between">
         <h4 class="card-title">Callerids</h4>
+
+        <form action="callerids" method="POST" name="">
+          {{csrf_field()}}
         <div class="col-4 d-flex justify-content-between">
         <select class="form-control" >
           <option value="2" >2</option>
@@ -31,6 +34,9 @@
         </select>
         <button class="btn btn-primary" type="submit"> Enviar </button>
        </div>
+        </form>
+        
+
       </div>
       <div class="card-content">
         <div class="card-body">
