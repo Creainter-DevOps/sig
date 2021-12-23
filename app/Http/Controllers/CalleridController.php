@@ -67,7 +67,7 @@ class CalleridController extends Controller
     public function show(  $id )
     {
       $caller = Callerid::find( $id );
-      return view('llamadas.show', compact('caller'));
+      return view('callerid.show', compact('caller'));
     }
 
     /**
