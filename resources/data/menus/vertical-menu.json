@@ -65,9 +65,9 @@
       "icon": "building"
     },
     {
-      "url": "callerid",
-      "name": "Callerid",
-      "i18n": "Callerid",
+      "url": "callerids",
+      "name": "Callerids",
+      "i18n": "Callerids",
       "icon": "phone"
     },
     {
