@@ -62,9 +62,9 @@
       </div>
       </div>
       <div class="card-footer"> 
-        {{ $listado->links() }}
+        {{ $this->viewBag->links() }}
       </div>   
-      <div class="form-group" style="margin-left:20px;">Mostrando {{ count($listado) }} de {{ $listado->total() }} registros</div>
+      <div class="form-group" style="margin-left:20px;">Mostrando {{ count($this->viewBag) }} de {{ $this->viewBag->total() }} registros</div>
       </div>
     </div>
   </div>
