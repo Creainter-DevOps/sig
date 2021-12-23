@@ -62,6 +62,16 @@ class Oportunidad extends Model
     public function folder() {
       return '\\OPORTUNIDADES\\' . $this->codigo . '\\';
     }
+    public function institucion() {
+      if(!empty($this->cliente_id)) {
+        return $this->cliente()->rotulo();
+      }
+      $empr = $this->empresa();
+      if(!empty($empr->seudonimo)) {
+        return $empr->seudonimo;
+      }
+      return $empr->razon_social;
+    }
     public function licitacion() {
       return $this->belongsTo('App\Licitacion', 'licitacion_id')->first();
     }

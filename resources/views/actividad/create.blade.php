@@ -88,8 +88,7 @@ function actualizar_timeline() {
         } else if(n.tipo == 'VISITA') {
           box.css({'background': '#03cedd'});
         }
-
-        box.append($('<div>').addClass('timeline-time').text(n.created_on));
+        box.append($('<div>').addClass('timeline-time').text(n.fecha + ' ' + n.hora));
         box.append($('<div>').addClass('timeline-content').text(n.texto));
         if(n.realizado) {
           ll.append(box);

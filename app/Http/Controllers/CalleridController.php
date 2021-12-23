@@ -27,6 +27,7 @@ class CalleridController extends Controller
     public function index(Request $request )
     {
       $search = $request->input('search');
+//      $paginate = $request->input('paginate');
       if(!empty($search)){
         $this->viewBag['listado'] = Callerid::search($search)->paginate(15)->appends($request->input('query'));
       }else{

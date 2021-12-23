@@ -19,8 +19,18 @@
 <div class="row" id="basic-table">
   <div class="col-12">
     <div class="card">
-      <div class="card-header">
+      <div class="card-header d-flex justify-content-between">
         <h4 class="card-title">Callerids</h4>
+        <div class="col-4 d-flex justify-content-between">
+        <select class="form-control" >
+          <option value="2" >2</option>
+          <option value="10">10</option>
+          <option value="15">15</option>
+          <option value="20">20</option>
+          <option value="25">25</option>
+        </select>
+        <button class="btn btn-primary" type="submit"> Enviar </button>
+       </div>
       </div>
       <div class="card-content">
         <div class="card-body">
@@ -62,9 +72,9 @@
       </div>
       </div>
       <div class="card-footer"> 
-        {{ $this->viewBag->links() }}
+        {{ $listado->links() }}
       </div>   
-      <div class="form-group" style="margin-left:20px;">Mostrando {{ count($this->viewBag) }} de {{ $this->viewBag->total() }} registros</div>
+      <div class="form-group" style="margin-left:20px;">Mostrando {{ count($listado) }} de {{ $listado->total() }} registros</div>
       </div>
     </div>
   </div>
