@@ -21,8 +21,12 @@
   <tr>
       <th>Seudonimo</th>
       <td>{{ $cliente->empresa()->seudonimo }}</td>
+      <th>Alias</th>
+      <td>{{ $cliente->nomenclatura }}</td>
+  </tr>
+  <tr>
       <th>Dirección</th>
-      <td>{{ $cliente->empresa()->direccion }}</td>
+      <td colspan="3">{{ $cliente->empresa()->direccion }}</td>
   </tr>
   @else
   <tr> 
@@ -31,3 +35,8 @@
   @endif
 </tbody>
 </table>
+@if(!empty($contactos))
+<div>
+@include('clientes.contactos', compact('cliente'))
+</div>
+@endif

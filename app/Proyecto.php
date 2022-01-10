@@ -19,8 +19,9 @@ class Proyecto extends Model
 {
   use Notifiable,HasApiTokens,HasRoles;
 
-    protected $connection = 'interno';
-    protected $table = 'osce.proyecto';
+  protected $connection = 'interno';
+  protected $table = 'osce.proyecto';
+  private $metas = null;
     const UPDATED_AT = null;
     const CREATED_AT = null;
     /**
@@ -30,7 +31,7 @@ class Proyecto extends Model
      */
     protected $fillable = [
       'tenant_id','cliente_id','contacto_id','oportunidad_id','cotizacion_id','nombre','codigo','nomenclatura','rotulo',
-      'dias_servicio', 'estado', 'dias_garantia','dias_instalacion','tipo' ,'fecha_desde','fecha_hasta', 'eliminado', 'empresa_id'
+      'dias_servicio', 'estado', 'dias_garantia','dias_instalacion','tipo' ,'fecha_desde','fecha_hasta', 'eliminado', 'empresa_id','color'
     ];
 
     /**
@@ -49,7 +50,7 @@ class Proyecto extends Model
      */
     protected $casts = [
     ];
-
+    
     public function rotulo() {
       if(!empty($this->nombre)) {
         return $this->nombre;
@@ -97,7 +98,7 @@ class Proyecto extends Model
     public static  function search( $term ) {
       $term = strtolower(trim($term));
       return static::where( function ($query) use($term){
-        $query->whereRaw("LOWER(nombre) LIKE ? ", [ "%{$term}%"])
+        $query->whereRaw("LOWER(rotulo) LIKE ? ", [ "%{$term}%"])
           ->orWhereRaw("LOWER(codigo) LIKE ? ", ["%{$term}%"])
           ->orWhereRaw("LOWER(nomenclatura) LIKE ?", ["%{$term}%"]);
       }); 
@@ -108,14 +109,40 @@ class Proyecto extends Model
     public function pagos() {
       return $this->hasMany('App\Pago','proyecto_id')->orderBy('numero', 'ASC')->get();
     }
+    public function gastos() {
+      return $this->hasMany('App\Gasto','proyecto_id')->orderBy('fecha', 'ASC')->get();
+    }
     public function timeline() {
       return $this->hasMany('App\Actividad','proyecto_id')->orderBy('id', 'DESC' )->get(); 
     }
     public function cartas(){
-      return $this->hasMany('App\Carta','proyecto_id')->orderBy('id','DESC')->get();
+      return $this->hasMany('App\Carta','proyecto_id')->orderBy('numero','ASC')->get();
     }
     public function actas(){
-      return $this->hasMany('App\Acta','proyecto_id')->orderBy('id','DESC')->get();
+      return $this->hasMany('App\Acta','proyecto_id')->orderBy('orden','ASC')->get();
     }
-
+    public function estadoArray() {
+      return static::selectEstados()[$this->estado];
+    }
+    static function selectEstados() {
+      return [
+        'precontrato'        => array('name' => 'PRECONTRATO', 'color' => '#c3c3c3'),
+        'contrato'           => array('name' => 'CONTRATO', 'color' => '#666565'),
+        'instalacion_inicio' => array('name' => 'INICIO DE INSTALACIÓN', 'color' => '#6cc529'),
+        'instalacion_fin'    => array('name' => 'FIN DE INSTALACIÓN', 'color' => '#c77e10'),
+        'servicio_inicio'    => array('name' => 'INICIO DE SERVICIO', 'color' => '#2f71eb'),
+        'servicio_fin'       => array('name' => 'FIN DE SERVICIO', 'color' => '#193976'),
+        'garantia_inicio'    => array('name' => 'INICIO DE GARANTÍA', 'color' => '#e78467'),
+        'garantia_fin'       => array('name' => 'FIN DE GARANTÍA', 'color' => '#b14728'),
+        'cancelado'          => array('name' => 'CANCELADO', 'color' => '#ed5252'),
+        'concluido'          => array('name' => 'CONCLUIDO', 'color' => '#005803'),
+      ];
+    }
+    public function meta() {
+      if($this->metas === null) {
+        return $this->metas = collect(DB::select("SELECT * FROM osce.obtener_detalle_proyecto(" . $this->id . ", NULL);"))->first();
+      } else {
+        return $this->metas;
+      }
+    }
 }

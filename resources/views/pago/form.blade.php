@@ -54,6 +54,16 @@
         <label for="plazo-servicio">Monto</label>
       </div>
     </div>
+    <div class="col-md-6 col-12">
+      <div class="form-label-group">
+        <select name="moneda_id" data-value="{{ old('moneda_id', @$pago->moneda_id) }}" required class="form-control">
+          @foreach (App\Pago::selectMonedas() as $k => $v)
+          <option value="{{ $k }}">{{ $v }}</option>
+          @endforeach
+        </select>
+        <label>Moneda</label>
+      </div>
+    </div>
     <div class="col-md-6  col-12">
       <div class="form-label-group" >
          <input type="text" class="form-control" placeholder="Descripción" value="{{ old ( 'descripcion', $pago->descripcion ) }}" name="descripcion">

@@ -24,12 +24,6 @@
       </div>
     </div>
   <div class="col-md-6 col-12">
-    <div class="form-label-group">
-      <input type="text" class="form-control" name="rotulo" value ="{{ old ( 'rotulo',  $cotizacion->rotulo ) }}" placeholder="Rótulo" required >
-      <label for="rotulo">Rótulo</label>
-  </div>
-  </div>
-  <div class="col-md-6 col-12">
   </div>
   <div class="col-md-12 col-12">
   <div class="row">
@@ -56,10 +50,26 @@
   </div>
   <div class="col-md-12 col-12">
   <div class="row">
-  <div class="col-12">
+  <div class="col-md-6 col-12">
     <div class="form-label-group">
-      <input type="number" class="form-control" name="monto" value="{{ old ('monto', $cotizacion->monto )}}"  placeholder="Monto Total" >
+      <input type="text" class="form-control" name="rotulo" value ="{{ old ( 'rotulo',  $cotizacion->rotulo ) }}" placeholder="Rótulo" required >
+      <label for="rotulo">Rótulo</label>
+  </div>
+  </div>
+  <div class="col-6">
+    <div class="form-label-group">
+      <input type="number" class="form-control" name="monto" value="{{ old ('monto', $cotizacion->monto )}}"  placeholder="Monto Total" min="0" max="99999999" step="0.01">
       <label for="monto-neto">Monto Total</label>
+    </div>
+  </div>
+  <div class="col-6">
+    <div class="form-label-group">
+    <select name="moneda_id" data-value="{{ $cotizacion->moneda_id }}" class="form-control">
+      @foreach (App\Pago::selectMonedas() as $k => $v)
+      <option value="{{ $k }}">{{ $v }}</option>
+      @endforeach
+    </select>
+      <label for="monto-neto">Moneda</label>
     </div>
   </div>
   </div>
@@ -67,8 +77,9 @@
   <div class="col-6">
     <input type="hidden" >
     <div class="form-label-group">
+    <input type="hidden">
       <fieldset class="form-label-group position-relative has-icon-left">
-        <input type="date" id="fecha" name="fecha" class="form-control pickadate" placeholder="Fecha" value="{{ old ( 'fecha', isset($cotizacion->fecha) ? Helper::fecha( $cotizacion->fecha): '' ) }}"  >
+        <input type="date" id="fecha" name="fecha" class="form-control pickadate" placeholder="Fecha" value="{{ old ( 'fecha', $cotizacion->fecha ) }}"  >
           <div class="form-control-position">
              <i class='bx bx-calendar'></i>
           </div>
@@ -78,8 +89,9 @@
   </div>
   <div class="col-6">
     <div class="form-label-group">
+    <input type="hidden">
     <fieldset class="form-group position-relative has-icon-left">
-        <input type="date" id="validez" name="validez" class="form-control pickadata" placeholder="Validez" value="{{ old('validez', isset($cotizacion->validez) ?  Helper::fecha($cotizacion->validez) : '' )  }}"  >
+        <input type="date" id="validez" name="validez" class="form-control pickadata" placeholder="Validez" value="{{ old('validez', $cotizacion->validez) }}"  >
             <div class="form-control-position">
              <i class='bx bx-calendar'></i>
           </div>

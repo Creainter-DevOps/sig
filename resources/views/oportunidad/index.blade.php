@@ -11,8 +11,8 @@
 @section('content')
     <div class="row">
         <div class="offset-12 col-md-1" style="margin-bottom: 10px;text-align:right;">
-          <a class="btn btn-default" href="/oportunidades/crear" style="color: #fff; background-color: #007bff; border-color: #007bff;">
-              Nuevo
+          <a class="btn btn-default" href="/cotizaciones/crear" style="color: #fff; background-color: #007bff; border-color: #007bff;">
+              Nuevo Cotización
           </a>
         </div>
     </div>
@@ -32,6 +32,7 @@
           <th>Cliente</th>
           <th>Rótulo</th>
           <th>Proyecto</th>
+          <th>Estado</th>
           <th>Fecha Inicio</th>
           <th></th>
         </tr>
@@ -42,7 +43,12 @@
           <td><div>{{ $oportunidad->codigo }}</div></td>
           <td>{{ $oportunidad->institucion() }}</td>
           <td>{{ $oportunidad->rotulo() }}</td>
-          <td>{{ !empty($oportunidad->proyecto()) ? $oportunidad->proyecto()->codigo : '' }}</td>
+          @if(!empty($oportunidad->proyecto()->id))
+            <td><a href="{{ route('proyectos.show', ['proyecto' => $oportunidad->proyecto()->id ]) }}">{{ $oportunidad->proyecto()->codigo }}</a></td>
+          @else
+            <td></td>
+          @endif
+          <td><div style="background-color:{{ $oportunidad->estadoArray()['color'] }};font-size: 11px;padding: 2px;border-radius: 3px;color: #fff;text-align: center;">{{ $oportunidad->estadoArray()['name'] }}</div></td>
           <td>{{ Helper::fecha($oportunidad->created_on) }}</td>
           <td class="text-center py-1">
               <div class="dropdown">

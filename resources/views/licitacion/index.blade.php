@@ -57,7 +57,11 @@ tr.block_details>td>div {
           <td>{{ $licitacion->tipo_proceso }}</td>
           <td>{{ $licitacion->tipo_objeto }}</td>
           <td>{{ $licitacion->rotulo }}</td>
-          <td>{{ Helper::fecha( $licitacion->fecha_participacion_hasta ) }}</td>
+@if(!empty($licitacion->oportunidad()->aprobado_el))
+          <td>{{ Helper::fecha( $licitacion->oportunidad()->aprobado_el ) }}</td>
+          @else
+            <td></td>
+@endif
            <td>
             @if ( !empty( $licitacion->fecha_participacion ))
               <span class="badge  badge-light-success"> Participando :</br> {{ Helper::fecha($licitacion->fecha_participacion,true ) }}</span>

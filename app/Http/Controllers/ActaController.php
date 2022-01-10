@@ -78,7 +78,14 @@ class ActaController extends Controller
      */
     public function update(Request $request, Acta $acta )
     {
-      $acta->update($request->all());
+      $data = $request->all();
+    if(!empty($data['_update'])) {
+      $data[$data['_update']] = $data['value'];
+      unset($data['value']);
+      unset($data['_update']);
+    }
+
+      $acta->update($data);
       return response()->json( [ 'status' => true, 'refresh' => true ]);
     }
 

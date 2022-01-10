@@ -55,6 +55,9 @@ class Cliente extends Model {
      public function cotizaciones(){
        return $this->hasMany('App\Cotizacion', 'cliente_id', 'id');  
      }
+    public function contactos() {
+        return $this->hasMany('App\Contacto')->get();
+    }
     public function getContactos() {
         return $this->hasMany('App\Contacto')->get();
     }

@@ -29,7 +29,7 @@ class Pago extends Model
      * @var array
      */
     protected $fillable = [
-      'proyecto_id','numero','fecha','descripcion','monto','movimiento_id','descripcion','moneda_id','estado_id'
+      'proyecto_id','numero','fecha','descripcion','monto','movimiento_id','descripcion','moneda_id','estado_id','contenido',
     ];
 
     /**
@@ -54,7 +54,7 @@ class Pago extends Model
       } else {
         $m = 1;
       }
-      return Helper::money($m, 1);
+      return Helper::money($m, $this->moneda_id);
     }
     public function folder() {
       return $this->proyecto()->folder() . 'PAGOS\\PAGO ' . str_pad($this->numero, 3, '0', STR_PAD_LEFT) . '\\';
@@ -93,12 +93,22 @@ class Pago extends Model
     }
      public function estado() {
       return static::fillEstados()[$this->estado_id];
-    }
+     }
+
     static function fillEstados() {
       return [
         1 => 'Pendiente',
-        2 => 'Progreso',
-        3 => 'Listo',
+        2 => 'Emitida',
+        3 => 'Depositado',
+      ];
+    }
+    public function monedaArray() {
+      return static::selectMonedas()[$this->moneda_id];
+    }
+    static function selectMonedas() {
+      return [
+        1 => 'Soles',
+        2 => 'Dolares',
       ];
     }
 }

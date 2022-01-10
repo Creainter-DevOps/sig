@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Actividad;
 use Auth;
+use App\Helpers\Helper;
+
 class ActividadController extends Controller
 {
     /**
@@ -59,11 +61,20 @@ class ActividadController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request,Actividad $actividad)
+    public function store(Request $request, Actividad $actividad)
     {
-      $actividad->fill($request->all());
-      $actividad->asignado_id = '{ ' . $request->input('asignado_id') .  '}';
+      $data = $request->all();
+      if(!empty($data['fecha_desde'])) {
+        $data['fecha'] = date('Y-m-d', strtotime($data['fecha_desde']));
+        $data['hora']  = date('H:i:s', strtotime($data['fecha_desde']));
+        unset($data['fecha_desde']);
+      }
+      $actividad->fill($data);
+      if(!empty($data['asignado_id'])) {
+        $actividad->asignado_id = '{ ' . $data['asignado_id'] .  '}';
+      }
       $actividad->save();
+      exec("/usr/bin/php /var/www/html/interno.creainter.com.pe/util/seace/lanzar_llamadas.php");
       return response()->json(['status' => true , 'refresh' => true , 'redirect' => '/actividades' ]);
     }
 
@@ -78,27 +89,6 @@ class ActividadController extends Controller
        //
     }
 
-    public function kanban()
-    {
-      return view('actividad.kanban');
-    }
-
-    public function kanban_data() {
-      $data = Actividad::kanban();
-      $data = array_map(function($n) {
-        return [
-          'id' => $n->id,
-          'title' => $n->texto,
-          'dueDate' => $n->fecha_limite,
-          'status' => $n->estado,
-          'is_linked' => $n->vinculado,
-          'link' => $n->link,
-          'completed' => ($n->estado == 3),
-        ];
-      }, $data);
-      return response()->json(['status' => true , 'data' => $data]);
-    }
-
     /**
      * Show the form for editing the specified resource.
      *
@@ -107,7 +97,8 @@ class ActividadController extends Controller
      */
     public function edit(Request $request, Actividad $actividad)
     {
-        return view($request->ajax() ? 'actividad.fast_edit' : 'actividad.edit', compact('actividad'));
+      $tipo = $actividad->tipo;
+      return view($request->ajax() ? 'actividad.fast' : 'actividad.add', compact('tipo','actividad'));
     }
 
     /**
@@ -125,8 +116,21 @@ class ActividadController extends Controller
         unset($data['value']);
         unset($data['_update']);
       }
+      if(!empty($data['fecha_desde'])) {
+        $data['fecha'] = date('Y-m-d', strtotime($data['fecha_desde']));
+        $data['hora']  = date('H:i:s', strtotime($data['fecha_desde']));
+        unset($data['fecha_desde']);
+      }
+      if(!empty($data['asignado_id'])) {
+        $data['asignado_id'] = '{' . trim(trim($data['asignado_id'], '{'), '}') . '}';
+      }
       $actividad->update($data);
-      return response()->json(['status' => true , 'data' => $data ]);
+      if($request->ajax()) {
+        return response()->json(['status' => true , 'refresh' => true , 'redirect' => '/actividades', 'data' => $data]);
+        return response()->json(['status' => true , 'data' => $data ]);
+      } else {
+        return response()->json(['status' => true , 'data' => $data ]);
+      }
     }
 
 
@@ -154,6 +158,45 @@ class ActividadController extends Controller
     public function timeline(Request $request) {
       $data = $request->all();
       $timeline = Actividad::timeline($data);
+      $timeline = array_map(function($n) {
+        $n['contenido'] = !empty($n['contenido']) ? $n['contenido'] : '';
+        return $n;
+      }, $timeline->toArray());
       return response()->json($timeline);
+    }
+    public function kanban()
+    {
+      return view('actividad.kanban');
+    }
+
+    public function kanban_data() {
+      $data = Actividad::kanban();
+      $data = array_map(function($n) {
+        return [
+          'id' => $n->id,
+          'title' => $n->texto,
+          'fecha'    => Helper::fecha($n->fecha),
+          'dueDate' => Helper::fecha($n->fecha_limite),
+          'status' => $n->estado,
+          'is_linked' => $n->vinculado,
+          'link' => $n->link,
+          'completed' => ($n->estado == 3),
+        ];
+      }, $data);
+      return response()->json(['status' => true , 'data' => $data]);
+    }
+    public function calendario() {
+      return view('actividad.calendario');
+    }
+    public function calendario_proyectos(Request $request) {
+      $ls = Actividad::calendario_proyectos();
+      return response()->json(['status' => true , 'data' => $ls]);
+    }
+    public function calendario_data(Request $request) {
+      $desde = $request->input('from');
+      $hasta = $request->input('to');
+      $user  = $request->input('user_id');
+      $data = Actividad::calendario($user, $desde, $hasta);
+      return response()->json(['status' => true , 'data' => $data]);
     }
 }

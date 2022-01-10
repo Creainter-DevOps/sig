@@ -47,6 +47,12 @@
       "navheader": "Apps"
     },
     {
+      "url": "actividades/calendario",
+      "name": "Actividades",
+      "i18n": "Actividades",
+      "icon": "check-alt"
+    },
+    {
       "url": "actividades/kanban",
       "name": "Actividades",
       "i18n": "Actividades",
@@ -63,12 +69,6 @@
       "name": "Oportunidades",
       "i18n": "Clientes",
       "icon": "bulb"
-    },
-    {
-      "url": "cotizaciones",
-      "name": "Cotizaciones",
-      "i18n": "Cotizaciones",
-      "icon": "morph-doc"
     },
     {
       "url": "clientes",

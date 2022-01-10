@@ -59,7 +59,7 @@
     <div class="col-md-6  col-12">
       <div class="form-label-group">
         <input type="hidden" >
-        <select class="form-control" name="importancia" data-value="{ old('importancia', $actividad->importancia ?? '' )}"  >
+        <select class="form-control" name="importancia" data-value="{{ old('importancia', $actividad->importancia ?? '' ) }}"  >
           @foreach( $actividad::fillImportancia() as $k => $v )
             <option value="{{ $k }}" >{{ $v }}</option>
           @endforeach
@@ -80,13 +80,13 @@
       </div>
     <div class="col-md-6  col-12">
         <div class="form-label-group container-autocomplete">
-            <input type="text" class="form-control autocomplete" name="callerid_id" data-ajax="/callerids/autocomplete"
-                value="{{ old('callerid_id', $actividad->callerid_id ?? '' ) }}"
-                @if (!empty($actividad->callerid_id))
-                  data-value="{{ old( 'callerid_id', $actividad->callerid()->rotulo() )}}"
-                @endif
-                name="callerid_id">
-           <label for="callerid_id">callerid</label>
+            <input type="hidden">
+            <select name="callerid_id" data-value="{{ $actividad->callerid_id }}" class="form-control">
+              @foreach(App\Callerid::all() as $e)
+              <option value="{{ $e->id }}">{{ $e->rotulo }}</option>
+              @endforeach
+            </select>
+           <label for="callerid_id">Linea</label>
         </div>
       </div>
     <div class="col-md-12 col-12">

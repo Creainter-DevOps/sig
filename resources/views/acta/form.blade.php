@@ -15,8 +15,8 @@
     </div>
     <div class="col-md-6  col-12">
       <div class="form-label-group" >
-         <input type="text" class="form-control" placeholder="Dirección" value="{{ old ( 'direccion', $acta->direccion ) }}" name="direccion">
-         <label for="">Direccion</label>
+         <input type="date" class="form-control" placeholder="Fecha" value="{{ old ( 'fecha', $acta->fecha ) }}" name="fecha">
+         <label for="">Fecha</label>
       </div>
     </div>
     <div class="col-md-6 col-12">
@@ -32,10 +32,15 @@
     </div>
     <div class="col-md-6  col-12">
       <div class="form-label-group" >
-         <input type="text" class="form-control" placeholder="Descripcion" value="{{ old ( 'texto', $acta->texto) }}" name="texto">
-         <label for="">Descripcion</label>
+         <input type="text" class="form-control" placeholder="Descripcion" value="{{ old ( 'rotulo', $acta->rotulo) }}" name="rotulo">
+         <label for="">Asunto</label>
       </div>
     </div>
+@if(!empty($acta->id))
+    <div class="col-12">
+      <div data-editable="/actas/{{ $acta->id }}?_update=contenido" data-ishtml="true">{!! $acta->contenido !!}</div>
+    </div>
+@endif
     <div class="col-12 d-flex justify-content-end">
       <button type="submit" class="btn btn-primary mr-1 mb-1">Guardar </button>
       <button type="reset" class="btn btn-light-secondary mr-1 mb-1">Limpiar </button>

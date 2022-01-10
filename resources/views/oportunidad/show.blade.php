@@ -29,6 +29,30 @@
     </div>
   </div>
   <div class="row">
+@if(!empty($oportunidad) && !empty($oportunidad->cliente_id))
+    <div class="col-12">
+      <div style="text-align: center;background: #6ea1ff;margin-bottom: 5px;color: #ffff;">EL CLIENTE</div>
+      <div class="row">
+      <div class="col-sm-6">
+        <div class="card">
+          <div class="card-body">
+            @include('clientes.table', ['cliente' => $oportunidad->cliente()])
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6">
+        <div class="card">
+          <div class="card-body">
+            @include('clientes.contactos', ['cliente' => $oportunidad->cliente()])
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+@endif
+    <div class="col-12">
+      <div style="text-align: center;background: #ffb16e;margin-bottom: 5px;color: #ffff;">LA OPORTUNIDAD</div>
+      <div class="row">
       <div class="col-sm-6">
         <div class="card">
           <div class="card-body">
@@ -77,43 +101,13 @@
           </div>
         </div>
     </div>
-    @if(!empty($oportunidad->candidato_id))
-    <div class="col-6 col-md-6">
-      <div class="card">
-        <div class="card-content">
-          <div class="card-body">
-            <table class="table table-borderless">
-              <tbody>
-                <tr>
-                  <td>Licitación:</td>
-                  <td>{!! $oportunidad->oportunidad()->rotulo() !!}</td>
-                </tr>
-                <tr>
-                  <td>Nomenclatura:</td>
-                  <td>{{   null !== $oportunidad->oportunidad() ? $oportunidad->oportunidad()->licitacion()->nomenclatura : '' }}</td>
-                </tr>
-                <tr>
-                  <td>Adjuntos:</td>
-                  <td>
-                  <ul>
-                  @foreach($oportunidad->oportunidad()->licitacion()->adjuntos() as $a)
-                    <li>
-                      <a target="_blank" href="http://prodapp.seace.gob.pe/SeaceWeb-PRO/SdescargarArchivoAlfresco?fileCode={{ $a->codigoAlfresco }}">
-                        {{ $a->tipoDocumento }}
-                      </a>
-                    </li>
-                  @endforeach
-                  </ul>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-    @endif
   </div>
+</div>
+<div class="row">
+  <div class="col-12">
+    @include('actividad.create', ['into' => ['oportunidad_id' => $oportunidad->id]])
+  </div>
+</div>
   <!-- users view card data ends -->
 
   <!-- users view card details start -->

@@ -25,7 +25,7 @@
           </div>
           <div class="col-md-6 col-12">
             <div class="form-label-group" >
-              <input type="mail" class="form-control"  name="correo"  placeholder="Correo" >
+              <input type="email" class="form-control"  name="correo"  placeholder="Correo" >
               <label for="">Correo(*)</label>
             </div>
           </div>
@@ -33,6 +33,12 @@
             <div class="form-label-group">
               <input type="text" id="celular" class="form-control" name="celular" placeholder="Celular" required>
               <label for="plazo-servicio">Celular</label>
+            </div>
+          </div>
+          <div class="col-md-12 col-12">
+            <div class="form-label-group">
+              <input type="text" class="form-control" name="area" placeholder="Área de trabajo" required>
+              <label>Área</label>
             </div>
           </div>
           <div class="col-12 d-flex justify-content-end">

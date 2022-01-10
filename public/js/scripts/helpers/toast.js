@@ -44,12 +44,14 @@ ToastBasic.fire( {
     });
 }
 
-
+function redirect_to(url){
+  window.location = url;
+}
 
 function toastError (message = 'Error... Algo sucedio', timer = 3000 ){
   ToastBasic.fire({
     timer : timer,
-    icon: error,
+    icon: 'error',
     title : message
   });
 }

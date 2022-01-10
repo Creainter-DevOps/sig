@@ -59,6 +59,7 @@ class CalleridController extends Controller
     {
       $caller->fill( $request->all() );
       $caller->save();
+      //Actividad::log('creado');
       return response()->json([ 'status' => true , 'redirect' => '/llamadas']); 
     }
 
@@ -97,6 +98,7 @@ class CalleridController extends Controller
     {
        $caller = Callerid::find($id);
        $caller->update($request->all());
+       //Actividad::log('actulizado');
        return response()->json([ 'status' => true , 'redirect' => '/llamadas' ]); 
     }
 
@@ -115,7 +117,7 @@ class CalleridController extends Controller
 
     public function autocomplete(Request $request ){
       $term =  $request->input('query');
-      $data = Callerid::search($term)->selectRaw(" id, rotulo as value ")->get();
+      $data = Callerid::search($term)->selectRaw("callerid.id, rotulo as value ")->get();
       return response()->json($data);
     }
 }

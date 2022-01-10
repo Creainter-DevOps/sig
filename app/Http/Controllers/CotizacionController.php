@@ -59,7 +59,7 @@ class CotizacionController extends Controller {
     if($request->ajax()) {
       return response()->json(['status' => true , 'refresh' => true ]);
     } else {
-      return redirect()->route('cotizaciones.show', [ 'cotizacion' => $cotizacion->id ]);
+      return redirect()->route('oportunidades.show', [ 'oportunidad' => $cotizacion->oportunidad_id ]);
     }
     return back();
     return response()->json([
@@ -72,7 +72,10 @@ class CotizacionController extends Controller {
     return view($request->ajax() ? 'cotizacion.fast_edit' : 'cotizacion.edit', compact('cotizacion'));    
   }
 
-  public function update( Request  $request, Cotizacion $cotizacion) {
+  public function update(Request $request, Cotizacion $cotizacion) {
+    if($cotizacion->oportunidad()->estado == 3) {
+      return response()->json(['status' => false , 'message' => 'Oportunidad cerrada']);
+    }
     $data = $request->all();
     if(!empty($data['_update'])) {
       $data[$data['_update']] = $data['value'];
@@ -82,10 +85,11 @@ class CotizacionController extends Controller {
     $cotizacion->update($data);
     return response()->json(['status' => true , 'refresh' => true ]);
   }
-  public  function destroy( Cotizacion $cotizacion ){
-    $cotizacion->eliminado = true;
-    $cotizacion->save();
-    $cotizacion->log("eliminado",null);
+  public function destroy(Cotizacion $cotizacion) {
+    if($cotizacion->oportunidad()->estado == 3) {
+      return response()->json(['status' => false , 'message' => 'Oportunidad cerrada']);
+    }
+    $cotizacion->delete();
     return response()->json(['status'=> true , 'refresh' => true ]);
   }
   public function autocomplete(Request $request ){

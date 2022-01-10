@@ -90,6 +90,12 @@ class PagoController extends Controller
     public function update(Request $request, Pago $pago)
     {
       $data = $request->all();
+    if(!empty($data['_update'])) {
+      $data[$data['_update']] = $data['value'];
+      unset($data['value']);
+      unset($data['_update']);
+    }
+
       $pago->update($data);
       return response()->json(['status' => true , 'refresh' => true ]);
     }
@@ -100,9 +106,10 @@ class PagoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Pago $pago)
     {
-        //
+      $pago->delete();
+      return response()->json(['status' => true , 'refresh' => true ]);
     }
 
     public function autocomplete(Request  $request  ) {

@@ -34,12 +34,16 @@ Route::get('permissions/autocomplete_modulo', 'PermissionController@autocomplete
 Route::get('/dashboard-ecommerce','DashboardController@dashboardEcommerce');
 Route::get('/dashboard-analytics','DashboardController@dashboardAnalytics');
 
+Route::get('/contable','ContableController@index');
 
 Route::get('entregables/autocomplete', 'EntregableController@autocomplete');
 Route::resource('entregables', 'EntregableController');
 
 Route::get('pagos/autocomplete', 'PagoController@autocomplete');
 Route::resource('pagos', 'PagoController');
+
+Route::get('gastos/autocomplete', 'GastoController@autocomplete');
+Route::resource('gastos', 'GastoController');
 
 //Route::resource('proyectos', 'ProyectoController');
 Route::get('proyectos/autocomplete', 'ProyectoController@autocomplete'); 
@@ -74,9 +78,15 @@ Route::get('/kanban/actividades', 'KanbanController@actividades');
 
 
 Route::post('actividades/timeline', 'ActividadController@timeline');
-Route::get('actividades/autocomplete', 'ActividadController@autocomplete'); 
+Route::get('actividades/autocomplete', 'ActividadController@autocomplete');
+
 Route::get('actividades/kanban', 'ActividadController@kanban');
 Route::get('actividades/kanban/json', 'ActividadController@kanban_data');
+
+Route::get('actividades/calendario','ActividadController@calendario');
+Route::get('actividades/calendario/json', 'ActividadController@calendario_data');
+Route::get('actividades/calendario/proyectos/json', 'ActividadController@calendario_proyectos');
+
 Route::post('actividades/{actividad}/observacion', 'ActividadController@observacion'); 
 Route::resource('actividades', 'ActividadController')->parameters([
     'actividades' => 'actividad'
@@ -132,6 +142,7 @@ Route::resource('actas', 'ActaController')->parameters([
 
 Route::get('oportunidades/convertir/proyecto/{cotizacion}','OportunidadController@proyecto')->name( 'oportunidad.proyecto' );
 Route::get('oportunidades/autocomplete', 'OportunidadController@autocomplete');
+Route::get('oportunidades/{oportunidad}/cerrar', 'OportunidadController@cerrar')->name('oportunidades.cerrar');
 Route::resource('oportunidades', 'OportunidadController')->parameters([
   'oportunidades' => 'oportunidad'
 ]);
@@ -149,6 +160,7 @@ Route::resource('licitaciones', 'LicitacionController')->parameters([
 ]);
 
 Route::get('licitaciones/{licitacion}/detalles','LicitacionController@show');
+Route::get('licitaciones/{licitacion}/actualizar','LicitacionController@actualizar')->name('licitacion.actualizar');
 Route::get('licitaciones/{licitacion}/aprobar','LicitacionController@aprobar');
 Route::get('licitaciones/{licitacion}/revisar','LicitacionController@revisar');
 Route::get('licitaciones/{licitacion}/interes/{empresa}','LicitacionController@interes');

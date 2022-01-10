@@ -15,10 +15,11 @@
           <label for="empresa_id">Empresa</label>
       </div>
     </div>
-    <div class="col-md-12  col-12">
-      <div class="form-label-group">
+    <div class="col-12">
+      <div class="form-label-group container-autocomplete">
           <input type="text" class="form-control autocomplete" name="contacto_id" 
                data-ajax="/contactos/autocomplete" autocomplete="nope"
+              data-register="/contactos/fast"
               @if (!empty($oportunidad->contacto_id))
               value="{{ old('contacto_id', $oportunidad->contacto_id ) }}"
               data-value=" {{ old( 'contacto_id', $oportunidad->contacto()->nombres )}}"

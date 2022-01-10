@@ -35,7 +35,10 @@
 <td style="width: 75px;text-align: center;">
          @if(!empty($cotizacion->proyecto()->id))
          <a href="{{ route( 'proyectos.show', [ 'proyecto' => $cotizacion->proyecto()->id ] ) }}"><i class="bx bx-share"></i></a>
-          @endif
+         @else
+         <a href="{{  route('cotizaciones.proyecto', ['cotizacion' => $cotizacion->id] ) }} " ><i class="bx bx-folder"></i></a>
+         @endif
+
          <a href="javascript:void(0)" data-popup="{{ route( 'cotizaciones.edit', [ 'cotizacion' => $cotizacion->id ] ) }}"><i class="bx bx-edit-alt"></i></a>
          <a href="javascript:void(0)" data-confirm-remove="{{ route('cotizaciones.destroy', [ 'cotizacion' => $cotizacion->id ])}}"><i class="bx bx-trash"></i></a>
       </td>

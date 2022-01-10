@@ -64,6 +64,12 @@ class OportunidadController extends Controller {
      $proyecto->save();
      return redirect()->route( 'proyecto.edit', [ 'proyecto' => $proyecto->id ]);
   }
+  public function cerrar(Request $request, Oportunidad $oportunidad) {
+    $oportunidad->conclusion_el = DB::raw('now()');
+    $oportunidad->conclusion_por = Auth::user()->id;
+    $oportunidad->save();
+    return redirect()->route('licitaciones.show', ['licitacion' => $oportunidad->licitacion_id]);
+  }
 
     /**
      * Show the form for editing the specified resource.
@@ -78,6 +84,9 @@ class OportunidadController extends Controller {
   }
   public function update(Request $request, Oportunidad $oportunidad )
   {
+    if($oportunidad->estado == 3) {
+      return response()->json([ 'status' =>  false , 'message' => 'Oportunidad Cerrada' ]);
+    }
     $data = $request->all();
     if(!empty($data['_update'])) {
       $data[$data['_update']] = $data['value'];

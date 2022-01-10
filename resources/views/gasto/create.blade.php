@@ -1,6 +1,6 @@
 @extends('layouts.contentLayoutMaster')
 {{-- page title --}}
-@section('title', 'Detalle contacto' )
+@section('title', $operacion ?? 'Nuevo gasto' )
 {{-- vendor style --}}
 @section('vendor-styles')
 <link rel="stylesheet" type="text/css" href="{{asset('vendors/css/vendors.min.css')}} ">
@@ -18,11 +18,9 @@ tr.block_header {
 tr.block_details {
   display:none;
 }
-
 tr.block_details > td {
   padding: 5px;
 }
-
 tr.block_details > td > div {
   background: #f2f4f4;
   border-radius: 2px;
@@ -30,33 +28,28 @@ tr.block_details > td > div {
   margin: 5px 10px;
   color: #000;
 }
-
 .btns_actions {
   color: #fff;
   text-align: right;
 }
-
 </style>
 <link rel="stylesheet" type="text/css" href="{{asset('css/themes/layout.css')}}" >
 @endsection
 
 @section('content')
 <div class="col-12">
-  <div class="card">
-    <div class="card-content">
-      <div class="card-header">
-      </div> 
-      <div class="card-body">
-        @include('clientes.table')
-        <br />
-        @include('contactos.table') 
+      <div class="card">
+        <div class="card-content">
+          <div class="card-header">
+          </div> 
+          <div class="card-body">
+            <form class="form" action="{{ route('gastos.store')}}" method="post" id="form-data" >
+              @include('gasto.form')
+            </form>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-</div>  
-<div class="col-6">
-  @include('contactos.timeline')
-</div>
+    </div>  
 @endsection
 
 {{-- vendor scripts --}}
@@ -73,7 +66,3 @@ tr.block_details > td > div {
 <script src="{{asset('js/scripts/helpers/toast.js')}}"></script>
 @endsection
 {{-- page scripts --}}
-
-@section('page-scripts')
-<script src="{{asset('js/scripts/contacto/save.js')}}"></script>
-@endsection

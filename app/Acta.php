@@ -16,13 +16,13 @@ class Acta extends Model
      * @var array
      */
     protected $fillable = [
-      'direccion' ,'orden','proyecto_id','nomenclatura','texto','estado_id', 'created_by','eliminado'
+      'orden','proyecto_id','rotulo','estado_id', 'created_by','eliminado','fecha','contenido',
     ];
     public function proyecto() {
       return $this->belongsTo('App\Proyecto','proyecto_id')->first();
     }
     public function folder() {
-      return  $this->proyecto()->folder(). 'CARTAS\\CARTA ' . str_pad($this->orden , 3, '0', STR_PAD_LEFT) .  '\\'; 
+      return  $this->proyecto()->folder(). 'ACTAS\\ACTA ' . str_pad($this->orden , 3, '0', STR_PAD_LEFT) .  '\\'; 
     }
 
     public  function orden($proyecto_id){
@@ -35,7 +35,9 @@ class Acta extends Model
     /*public function nomenclatura(){
       $this->nomenclatura = 'C' . date('Y-m') . str_pad( $this->orden, 4,'0', STR_PAD_LEFT);
     }*/
-
+    public function estado() {
+      return static::fillEstados()[$this->estado_id];
+    }
      static function fillEstados() {
       return [
         1 => 'Pendiente',

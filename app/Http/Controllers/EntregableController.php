@@ -94,9 +94,10 @@ class EntregableController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Entregable $entregable)
     {
-        //
+      $entregable->delete();
+      return response()->json(['status' => true , 'refresh' => true ]);
     }
 
     public function autocomplete(Request  $request  ) {

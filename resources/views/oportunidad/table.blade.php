@@ -33,5 +33,15 @@
       <th>Propuesta</th>
       <td>{{ Helper::fecha($oportunidad->fecha_propuesta, true) }} </td>
     </tr>
+    <tr>
+      <th>Estado</th>
+      <td colspan="3">
+         <select class="form-control select-data" data-editable="/oportunidades/{{ $oportunidad->id }}?_update=estado" data-value="{{ $oportunidad->estado }}">
+@foreach(App\Oportunidad::selectEstados() as $k => $n)
+          <option value="{{ $k }}" style="color:#fff;background-color: {{ $n['color'] }};">{{ $n['name'] }}</option>
+@endforeach
+         </select>
+      </td>
+    </tr>
 </tbody>
 </table>

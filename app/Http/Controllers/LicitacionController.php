@@ -27,7 +27,7 @@ class LicitacionController extends Controller {
   public function index(Request $request ) {
     if (!empty( $request->input("search") )){
       $query = strtolower($request->input("search")); 
-      $list = Licitacion::search($query)->take(20)->get();
+      $list = Licitacion::search($query)->take(100)->orderBy('fecha_participacion_hasta', 'DESC')->get();
       return view('licitacion.index', compact("list"));
     } 
     $participaciones_por_vencer = Oportunidad::listado_participanes_por_vencer();
@@ -88,16 +88,31 @@ class LicitacionController extends Controller {
         }
       }
       return back();
+  }
+  public function actualizar(Request $request, Licitacion $licitacion) {
+    exec("/usr/bin/php /var/www/html/interno.creainter.com.pe/util/seace/actualizar_id.php " . $licitacion->id);
+    if(!$request->ajax()) {
+      return redirect('/licitaciones/' . $licitacion->id . '/detalles');
+    } else {
+      return response()->json([
+        'status'  => 'success',
+        'message' => 'Se ha realizado la actualización con éxito.',
+      ]);
     }
+  }
 public function aprobar(Request $request, Licitacion $licitacion)
 {
   $oportunidad = $licitacion->oportunidad();
   $oportunidad->aprobar();
+  if(!$request->ajax()) {
+    return redirect('/licitaciones/' . $licitacion->id . '/detalles');
+  } else {
       return response()->json([
         'status'  => 'success',
         'message' => 'Se ha realizado registro con éxito.',
         'data' => $oportunidad
       ]);
+  }
 }
 public function revisar(Request $request, Licitacion $licitacion)
 {

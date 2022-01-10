@@ -12,9 +12,9 @@
     </tr>
     <tr class="text-center">
       <th>Orden</th>
+      <th>Fecha</th>
       <th>Nomenclatura</th>
-      <th>Direccion</th>
-      <th>Descripcion</th>
+      <th>Asunto</th>
       <th>Folder</th>
       <th></th>
     </tr>
@@ -27,10 +27,10 @@
   @else
   @foreach($proyecto->cartas() as $c)
     <tr>
-      <td class="text-center">{{ $c->orden }}</td>
+      <td class="text-center">{{ $c->numero }}</td>
+      <td class="text-center">{{ Helper::fecha($c->fecha) }}</td>
       <td class="text-center">{{ $c->nomenclatura }}</td>
-      <td>{{ $c->direccion }}</td>
-      <td class="text-center">{{$c->texto }}</td>
+      <td>{{ $c->rotulo }}</td>
       <td class="text-center"><a href="#" onclick="window.location.href='odir:{!! addslashes(Auth::user()->dir_sharepoint . $c->folder()) !!}';">Folder</a></td>
       <td style="width: 55px;text-align: center;">
          <a href="javascript:void(0)" data-popup="{{ route( 'cartas.edit', [ 'carta' => $c->id ] ) }}"><i class="bx bx-edit-alt"></i></a>

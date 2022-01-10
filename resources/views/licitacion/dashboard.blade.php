@@ -409,7 +409,7 @@ var $primary = '#5A8DEE',
                     <div style="font-size:11px;">{{ Helper::fecha($v->licitacion()->buenapro_fecha, true) }}</div>
                   </td>
                   <td class="text-center" style="width:120px;">
-                    <span>{{ substr(strtoupper($v->estado),0,1) }}</span>
+                    <span>{{ $v->render_estado() }}</span>
                   </td>
                   <td class="text-center" style="width:20px;">
                     <a href="/licitaciones/{{ $v->licitacion_id }}/detalles">

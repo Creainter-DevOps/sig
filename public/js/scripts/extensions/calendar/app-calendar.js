@@ -36,15 +36,19 @@
     calendars: CalendarList,
     theme: themeConfig,
     template: {
-      milestone: function (model) {
-        return '<span class="bx bx-flag align-middle"></span> <span style="background-color: ' + model.bgColor + '">' + model.title + '</span>';
-      },
+//      milestone: function (model) {
+//        return '<span class="bx bx-flag align-middle"></span> <span style="background-color: ' + model.bgColor + '">' + model.title + '</span>';
+//      },
       allday: function (schedule) {
         return getTimeTemplate(schedule, true);
       },
       time: function (schedule) {
         return getTimeTemplate(schedule, false);
       }
+    },
+    week: {
+      hourStart: 6,
+      hourEnd: 21
     }
   });
 
@@ -56,16 +60,52 @@
     },
     'beforeCreateSchedule': function (e) {
       // new schedule create and save
+      console.log('NEW', e);
+      Fetchx({
+        url: '/actividades',
+        type: 'POST',
+        headers : {
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+        },
+        dataType: 'json',
+        data: {
+          tipo: 'NOTA',
+          proyecto_id: e.calendarId,
+          texto: e.title,
+          todo_dia: e.isAllDay ? 1 : 0,
+          contenido: e.location,
+          fecha_desde: moment(e.start.toDate()).format('YYYY-MM-DD HH:mm:ss'),
+          fecha_hasta: moment(e.end.toDate()).format('YYYY-MM-DD HH:mm:ss'),
+        },
+        success: function() {
+          console.log('GUARDADO');
+        }
+      });
       saveNewSchedule(e);
     },
     'beforeUpdateSchedule': function (e) {
-      // schedule update
+      var schedule = e.schedule;
+      var changes = e.changes;
       e.schedule.start = e.start;
       e.schedule.end = e.end;
       cal.updateSchedule(e.schedule.id, e.schedule.calendarId, e.schedule);
+      Fetchx({
+        url: '/actividades/' + e.schedule.id + '/',
+        type: 'PUT',
+        headers : {
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+        },
+        dataType: 'json',
+        data: {
+          fecha_desde: moment(e.start.toDate()).format('YYYY-MM-DD HH:mm:ss'),
+          fecha_hasta: moment(e.end.toDate()).format('YYYY-MM-DD HH:mm:ss'),
+        },
+        success: function() {
+          console.log('GUARDADO');
+        }
+      });
     },
     'beforeDeleteSchedule': function (e) {
-      // schedule delete
       console.log('beforeDeleteSchedule', e);
       cal.deleteSchedule(e.schedule.id, e.schedule.calendarId);
     },
@@ -158,12 +198,21 @@
 
         target.querySelector('input').checked = !options.month.workweek;
         break;
+
+        case 'toggle-user':
+        console.log('toggle-user', target);
+        options.user_id   = $(target).attr('data-id');
+        options.user_name = $(target).attr('data-name');
+        viewName = cal.getViewName();
+      //  target.querySelector('input').checked = true;
+        break;
       default:
         break;
     }
     cal.setOptions(options, true);
     cal.changeView(viewName, true);
 
+    setDropdownUsername();
     setDropdownCalendarType();
     setRenderRangeText();
     setSchedules();
@@ -285,6 +334,15 @@
     });
   }
   // calendar type set on dropdown button
+  function setDropdownUsername() {
+    var calendarTypeName = document.getElementById('userTypeName');
+    var calendarTypeIcon = document.getElementById('userTypeIcon');
+    var options = cal.getOptions();
+    var type = cal.getViewName();
+    var iconClassName;
+    iconClassName = 'bx bx-calendar-alt mr-25';
+    calendarTypeName.innerHTML = options.user_name ?? 'Yo';
+  }
   function setDropdownCalendarType() {
     var calendarTypeName = document.getElementById('calendarTypeName');
     var calendarTypeIcon = document.getElementById('calendarTypeIcon');
@@ -331,10 +389,22 @@
   }
   // Randome Generated schedule
   function setSchedules() {
+    console.log('setSchedules', cal.getViewName(), cal.getDateRangeStart(), cal.getDateRangeEnd());
     cal.clear();
-    generateSchedule(cal.getViewName(), cal.getDateRangeStart(), cal.getDateRangeEnd());
-    cal.createSchedules(ScheduleList);
-    refreshScheduleVisibility();
+
+    Fetchx({
+      url: '/actividades/calendario/json?from=' + moment(cal.getDateRangeStart().getTime()).format('YYYY-MM-DD') + '&to=' + moment(cal.getDateRangeEnd().getTime()).format('YYYY-MM-DD') + '&user_id=' + (cal.getOptions().user_id ?? 0),
+      dataType: 'JSON',
+      success: function(res) {
+        cleanSchedules();
+        res.data.forEach(function(x) {
+          buildSchedule(x);
+        });
+        cal.createSchedules(ScheduleList);
+        refreshScheduleVisibility();
+      }
+    });
+  //  generateSchedule(cal.getViewName(), cal.getDateRangeStart(), cal.getDateRangeEnd());
   }
   // Events initialize
   function setEventListener() {
@@ -352,6 +422,7 @@
     cal.render();
   }, 50);
   window.cal = cal;
+  //setDropdownUsername();
   setDropdownCalendarType();
   setRenderRangeText();
   setSchedules();
@@ -359,7 +430,7 @@
 })(window, tui.Calendar);
 
 // set sidebar calendar list
-(function () {
+window.renderCalendarioLateral = function() {
   var calendarList = document.getElementById('calendarList');
   var html = [];
   CalendarList.forEach(function (calendar) {
@@ -371,7 +442,8 @@
     );
   });
   calendarList.innerHTML = html.join('\n');
-})();
+};
+
 
 $(document).ready(function () {
 

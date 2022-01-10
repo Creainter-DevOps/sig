@@ -26,7 +26,9 @@
     </div>
   </div>
   <div class="row">
-    @if (!empty($proyecto->cliente_id))
+    <div class="col-12">
+      <div style="text-align: center;background: #6ea1ff;margin-bottom: 5px;color: #ffff;">EL CLIENTE</div>
+      <div class="row">
       <div class="col-sm-6">
         <div class="card">
           <div class="card-body">
@@ -34,19 +36,18 @@
           </div>
         </div>
       </div>
-      @endif
-      @if(!empty($proyecto->oportunidad()->licitacion_id))
-    <div class="col-6 col-md-6">
-      <div class="card">
-        <div class="card-content">
+      <div class="col-sm-6">
+        <div class="card">
           <div class="card-body">
-            @include('licitacion.table', ['licitacion' => $proyecto->oportunidad()->licitacion()])
+            @include('clientes.contactos')
           </div>
         </div>
       </div>
+      </div>
     </div>
-    @endif
-    @if (!empty($proyecto->cotizacion_id))
+    <div class="col-12">
+      <div style="text-align: center;background: #ffb16e;margin-bottom: 5px;color: #ffff;">LA OPORTUNIDAD</div>
+      <div class="row">
       <div class="col-sm-6">
         <div class="card">
           <div class="card-body">
@@ -54,6 +55,15 @@
           </div>
         </div>
       </div>
+      @if(!empty($proyecto->oportunidad()->licitacion_id))
+      <div class="col-sm-6">
+        <div class="card">
+          <div class="card-body">
+            @include('licitacion.table', ['licitacion' => $proyecto->oportunidad()->licitacion()])
+          </div>
+        </div>
+      </div>
+      @endif
       <div class="col-sm-6">
         <div class="card">
           <div class="card-body">
@@ -61,8 +71,98 @@
           </div>
         </div>
       </div>
-    @endif
-    <div class="col-6 col-md-6">
+      </div>
+    </div>
+    <div class="col-12">
+      <div style="text-align: center;background: #43e16c;margin-bottom: 5px;color: #ffff;">EL PROYECTO</div>
+<div class="row">
+    <div class="col-xl-2 col-md-4 col-sm-6">
+      <div class="card text-center">
+        <div class="card-content">
+          <div class="card-body">
+            <div class="badge-circle badge-circle-lg badge-circle-light-info mx-auto my-0">
+              <i class="bx bx-edit-alt font-medium-5"></i>
+            </div>
+            <p class="text-muted mb-0 line-ellipsis">Estado</p>
+            <h4 class="mb-0">{{ $proyecto->estadoArray()['name'] }}</h4>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-sm-6">
+      <div class="card text-center">
+        <div class="card-content">
+          <div class="card-body">
+            <div class="badge-circle badge-circle-lg badge-circle-light-warning mx-auto my-0">
+              <i class="bx bx-file font-medium-5"></i>
+            </div>
+            <p class="text-muted mb-0 line-ellipsis">Entregables</p>
+            <h2 class="mb-0">{{ $proyecto->meta()->entregables_efectuados }} / {{ $proyecto->meta()->entregables_totales }}</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-sm-6">
+      <div class="card text-center">
+        <div class="card-content">
+          <div class="card-body">
+            <div class="badge-circle badge-circle-lg badge-circle-light-success mx-auto my-0">
+              <i class="bx bx-purchase-tag font-medium-5"></i>
+            </div>
+            <p class="text-muted mb-0 line-ellipsis">Duración</p>
+            <h3 class="mb-0">{{ $proyecto->meta()->porcentaje_dias }}%</h3>
+            <h6 class="mb-0">{{ $proyecto->meta()->duracion_avance }}/{{ $proyecto->meta()->duracion_dias }}</h6>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-sm-6">
+      <div class="card text-center">
+        <div class="card-content">
+          <div class="card-body">
+            <div class="badge-circle badge-circle-lg badge-circle-light-primary mx-auto my-0">
+              <i class="bx bx-money font-medium-5"></i>
+            </div>
+            <p class="text-muted mb-0 line-ellipsis">Pagos</p>
+            <h3 class="mb-0">{{ $proyecto->meta()->porcentaje_monto }}%</h3>
+            <h6 class="mb-0">Pend. {{ Helper::money($proyecto->meta()->pago_pendiente, 1) }}</h6>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-sm-6">
+      <div class="card text-center">
+        <div class="card-content">
+          <div class="card-body">
+            <div class="badge-circle badge-circle-lg badge-circle-light-danger mx-auto my-0">
+              <i class="bx bx-shopping-bag font-medium-5"></i>
+            </div>
+            <p class="text-muted mb-0 line-ellipsis">Gasto</p>
+            <h3 class="mb-0">{{ Helper::money($proyecto->meta()->gasto_efectuado, 1) }}</h3>
+            <h6 class="mb-0">Pend. {{ Helper::money($proyecto->meta()->gasto_pendiente, 1) }}</h6>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-sm-6">
+      <div class="card text-center">
+        <div class="card-content">
+          <div class="card-body">
+            <div class="badge-circle badge-circle-lg badge-circle-light-primary mx-auto my-0">
+              <i class="bx bx-money font-medium-5"></i>
+            </div>
+            <p class="text-muted mb-0 line-ellipsis">Rendición</p>
+            <h3 class="mb-0">{{ Helper::money($proyecto->meta()->liquido_efectuado) }}</h3>
+            <h6 class="mb-0">Pend. {{ Helper::money($proyecto->meta()->liquido_total, 1) }}</h6>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+      <div class="row">
+      <div class="col-6 col-md-6">
       <div class="card">
         <div class="card-content">
           <div class="card-body">
@@ -71,17 +171,6 @@
         </div>
       </div>
     </div>
-    @if (!empty($proyecto->contacto_id))
-      <div class="col-sm-6">
-        <div class="card">
-          <div class="card-body">
-            @include('contactos.table')
-          </div>
-        </div>
-      </div>
-      @endif
-    <div class="col-12">
-    <div class="row">
     <div class="col-sm-6">
         <div class="card">
           <div class="card-body">
@@ -89,10 +178,21 @@
           </div>
         </div>
       </div>
+    </div>
+    </div>
+    <div class="col-12">
+    <div class="row">
     <div class="col-sm-6">
         <div class="card">
           <div class="card-body">
             @include('proyectos.pagos')
+          </div>
+        </div>
+      </div>
+    <div class="col-6">
+        <div class="card">
+          <div class="card-body">
+            @include('proyectos.gastos')
           </div>
         </div>
       </div>

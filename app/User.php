@@ -56,7 +56,9 @@ class User extends Authenticatable
       $term = strtolower(trim($term));
       return  static::where( function ($query ) use( $term ) {
         $query->WhereRaw('LOWER(usuario) LIKE ?', ["%{$term}%"]);
-      });
+      })->where('habilitado', true);
     }
-
+    static function habilitados() {
+      return static::where('habilitado', true)->orderBy('usuario','ASC')->get();
+    }
 }

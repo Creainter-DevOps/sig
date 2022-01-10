@@ -1,3 +1,4 @@
+<div class="limit-scroll">
 <table class="table table-sm mb-0 table-bordered table-vcenter"  style="width:100%">
 <thead>
   <tr>
@@ -48,8 +49,12 @@
                 </tr>
                 <tr>
                   <td style="width:200px;">Fecha de Actualización:</td>
-                  <td>{{ Helper::fecha($licitacion->updated_on, true) }}</td>
+                  <td>
+                    {{ Helper::fecha($licitacion->updated_on, true) }}
+                    <a href="{{ route('licitacion.actualizar', ['licitacion' => $licitacion->id]) }}">[Actualizar]</a>
+                  </td>
                 </tr>
 
               </tbody>
             </table>
+</div>

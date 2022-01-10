@@ -97,12 +97,15 @@ class Oportunidad extends Model
       return 0;
     }
     public static function list() {
-      return Oportunidad::whereRaw('oportunidad.codigo IS NOT NULL')->orderBy('created_on', 'desc');
+      return Oportunidad::whereNull('oportunidad.licitacion_id')
+        ->orderBy('estado', 'asc')
+        ->orderBy('created_on', 'desc');
     }
     public static function search($query) {
       $query = strtolower($query);
       return Oportunidad::leftJoin('osce.licitacion', 'oportunidad.licitacion_id','licitacion.id')
         ->leftJoin('osce.empresa', 'empresa.id','licitacion.empresa_id')
+//        ->whereNull('oportunidad.licitacion_id')
         ->where(function($r) use($query) {
           $r->WhereRaw("LOWER(licitacion.rotulo) LIKE ? ", ["%{$query}%" ])
           ->orWhereRaw("LOWER(empresa.razon_social) LIKE ? ", ["%{$query}%" ])
@@ -264,6 +267,8 @@ ORDER BY L.fecha_buena_hasta ASC, O.id ASC");
       $this->update([
         'aprobado_el'  => DB::raw('now'),
         'aprobado_por' => Auth::user()->id,
+        'rechazado_el' => null,
+        'rechazado_por' => null,
       ]);
       $this->log('aprobar', null);
     }
@@ -470,7 +475,7 @@ ORDER BY L.fecha_buena_hasta ASC, O.id ASC");
             'timeout' => false,
             'status' => false,
             'class' => 'badge badge-light-warning',
-            'message' => 'REQUIERE',
+            'message' => 'REQ PROPUESTA',
           ];
         } else {
           return [
@@ -510,7 +515,7 @@ ORDER BY L.fecha_buena_hasta ASC, O.id ASC");
             'timeout' => false,
             'status' => false,
             'class' => 'badge badge-light-warning',
-            'message' => 'REQUIERE',
+            'message' => 'NO PARTICIPA',
           ];
         }
       } else {
@@ -537,5 +542,36 @@ ORDER BY L.fecha_buena_hasta ASC, O.id ASC");
     }
     static function estadistica_barra_cantidades() {
       return DB::select("SELECT fecha eje_x, cantidad eje_y, tipo collection FROM osce.estadistica_rapida_oportunidades(7, 1)");
+    }
+    public function render_estado() {
+      if($this->estado == 1) {
+        return 'Espera';
+      } elseif($this->estado == 2) {
+        return 'Pendiente';
+      } elseif($this->estado == 3) {
+        $pro = $this->proyecto();
+        if(!empty($pro->id)) {
+          return 'PROYECTO';
+
+        } elseif(!empty($this->conclusion_el)) {
+          return 'Perdido';
+
+        } else {
+          return '[Revisar]';
+        }
+        return 'Cerrado';
+      } else {
+        return '--';
+      }
+    }
+    public function estadoArray() {
+      return static::selectEstados()[$this->estado];
+    }
+    static function selectEstados() {
+      return [
+        1 => array('name' => 'ESPERA', 'color' => '#f3f3f3'),
+        2 => array('name' => 'ABIERTA', 'color' => '#2dc72d'),
+        3 => array('name' => 'CERRADA', 'color' => '#2c2c2c'),
+      ];
     }
 }

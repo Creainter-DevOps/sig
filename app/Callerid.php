@@ -5,7 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 
 use App\Empresa;
-
+use App\Actividad;
 class Callerid extends Model
 {
      
@@ -21,7 +21,6 @@ class Callerid extends Model
       return $this->belongsTo('App\Empresa', 'empresa_id')->first();
     } 
 
-
     public static function search($term) {
       $term = strtolower(trim($term));
       return static::join('osce.empresa', 'osce.empresa.id', '=', 'osce.callerid.empresa_id')
@@ -33,9 +32,13 @@ class Callerid extends Model
             ->orWhereRaw("LOWER(osce.callerid.rotulo) LIKE ?",["%{$term}%"])
           ;
       });
-  }
-
-
-
+    }
+    public function log( $evento = null, $texto = '' ){
+      Actividad::create([
+        'tipo'   => 'log',
+        'evento' => $evento,
+        'texto'  => $texto 
+      ]);
+    } 
 
 }

@@ -213,7 +213,21 @@ function FetchxConfirm(params) {
         }
     });
 };
-
+$(".limit-scroll").each(function() {
+  var box = this;
+  $(box).addClass('limit-scroll-collapse');
+  $(box).on('click', '.limit-scroll-expand', function(e) {
+    e.stopPropagation();
+    $(box).addClass('limit-scroll-collapse');
+    $(box).find('.limit-scroll-expand').remove();
+  });
+  $(box).on('click', function() {
+    if($(box).find('.limit-scroll-expand').length == 0) {
+      $(box).removeClass('limit-scroll-collapse');
+      $(box).append($('<div>').addClass('limit-scroll-expand'));
+    }
+  });
+});
 $("i.bxs-save").on( 'click', function () {
   var element = $(this);
   let url = element.attr("data-url");
@@ -550,11 +564,13 @@ function form_select_fill(field, data) {
 }
 function render_select_default() {
     $("select[data-value]").each(function () {
-        if ($(this).attr("data-value") != "") {
+      var vvv = $(this).attr("data-value");
+      $(this).removeAttr('data-value');
+        if (vvv != "") {
             if (typeof $(this).attr("data-ajax") !== "undefined") {
-                $(this).val($(this).attr("data-value"));
+                $(this).val(vvv);
             } else {
-                $(this).val($(this).attr("data-value")).change();
+                $(this).val(vvv).change();
             }
         }
     });
@@ -846,17 +862,26 @@ function render_editable() {
       }
       focus = true;
       if(this.tagName == 'INPUT') {
-        document.execCommand('selectAll',false,null);
+        if($(this).attr('type') == 'text') {
+          document.execCommand('selectAll',false,null);
+        }
       }
     });
     var stt = null;
     var is_div = this.tagName == 'DIV';
+    var is_html = typeof $(this).attr('data-ishtml') !== 'undefined';
+    var selected = is_html ? box.html() : (is_div ? box.text() : box.val());
+    var stf = null;
     box.on((is_div ? 'input' : 'change'), function() {
       if(stt !== null) {
         clearTimeout(stt);
       }
+      if(stf !== null) {
+        box.removeClass('saved');
+        clearTimeout(stf);
+      }
       stt = setTimeout(function() {
-        var tt = is_div ? box.text() : box.val();
+        var tt = is_html ? box.html() : (is_div ? box.text() : box.val());
           Fetchx({
             url: xhr,
             headers : {
@@ -865,13 +890,43 @@ function render_editable() {
             dataType: 'json',
             type: 'PUT',
             data: { value: tt },
+            complete: function() {
+              box.addClass('saved');
+              stf = setTimeout(function() {
+                box.removeClass('saved');
+              }, 1000);
+            },
             success: function(data) {
               if(data.status) {
-                if(is_div) {
+                if(is_html) {
+                  box.html(data.value);
+
+                } else if(is_div) {
                   box.text(data.value);
                 }
+                selected = tt;
                 toastSuccess()
+              } else {
+                if(is_html) {
+                  box.html(selected);
+
+                } else if(is_div) {
+                  box.text(selected);
+                } else {
+                  box.val(selected);
+                }
+                toastError(data.message);
               }
+            },
+            error: function() {
+              if(is_html) {
+                  box.html(selected);
+                } else if(is_div) {
+                  box.text(selected);
+                } else {
+                  box.val(selected);
+                }
+              toastError('Error');
             }
           });
       }, 1500);

@@ -219,12 +219,37 @@
 
 [data-editable-view] {
   position: relative;
+  border: 0;
   border-bottom: 1px solid #c3c3c3;
   border-bottom-style: dashed;
   background: #f9f9f9;
   padding: 5px 20px;
-  white-space: nowrap;
+  color: #000000;
 }
+[data-editable-view][type='color'] {
+  padding: 0!important;
+}
+[data-editable-view][data-ishtml] {
+  margin-bottom: 10px;
+  border: 1px solid #5a8dee;
+  background: #fff;
+  min-height: 70px;
+  border-radius: 4px;
+  overflow: auto;
+}
+[data-editable-view].saved:before {
+  content: 'Enviado';
+  position: absolute;
+  top: -20px;
+  height: 20px;
+  background: #03b300;
+  right: 0;
+  font-size: 12px;
+  padding: 2px 10px;
+  border-radius: 5px 5px 0 0;
+  color: #fff;
+}
+
 [data-editable-view]:after {
   content: '';
 
@@ -240,3 +265,37 @@
 .block_space .form-label-group {
   margin-bottom: 5px!important;
 }
+
+.limit-scroll {
+  position: relative;
+  min-height: 100px;
+}
+.limit-scroll .limit-scroll-expand {
+  margin-top: 5px;
+  height: 17px;
+  background: #cdcdcd;
+  border-radius: 5px;
+  font-size: 11px;
+  text-align: center;
+  color: #959595;
+  line-height: 17px;
+  cursor: pointer;
+}
+.limit-scroll .limit-scroll-expand:before {
+  content: 'Colapsar';
+}
+.limit-scroll.limit-scroll-collapse {
+  max-height: 240px;
+  overflow: hidden;
+}
+.limit-scroll.limit-scroll-collapse:before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: linear-gradient(0deg, rgb(171 171 171) 0%, transparent 100%);
+  cursor: pointer;
+}
+

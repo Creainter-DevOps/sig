@@ -78,7 +78,14 @@ class CartaController extends Controller
      */
     public function update(Request $request, Carta $carta )
     {
-      $carta->update($request->all());
+      $data = $request->all();
+    if(!empty($data['_update'])) {
+      $data[$data['_update']] = $data['value'];
+      unset($data['value']);
+      unset($data['_update']);
+    }
+
+      $carta->update($data);
       return response()->json( [ 'status' => true, 'refresh' => true ]);
     }
 
@@ -90,7 +97,7 @@ class CartaController extends Controller
      */
     public function destroy( Carta $carta )
     {
-       $carta->eliminado = true; 
+      $carta->eliminado = true; 
       return response()->json( [ 'status' => true, 'refresh' => true ]);
     }
     

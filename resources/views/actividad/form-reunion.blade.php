@@ -7,7 +7,7 @@
     <div class="col-md-6  col-12">
         <div class="form-label-group">
         <input type="hidden">
-          <select class="form-control" name="estado">
+          <select class="form-control" name="estado" data-value="{{ $actividad->estado }}">
             <option value="3">Terminado</option>
             <option value="2">En Proceso</option>
             <option value="1" selected>Programar</option>
@@ -40,7 +40,7 @@
         </div>
     </div>
       <div class="col-md-6  col-12">
-        <div class="form-label-group container-autocomplete ">
+        <div class="form-label-group container-autocomplete">
             <input type="text" class="form-control autocomplete" name="contacto_id" data-register="/contactos/fast" data-ajax="/contactos/autocomplete"
                 value="{{ old('contacto_id', $actividad->contacto_id ?? '' ) }}"
                 @if (!empty($actividad->contacto_id))
@@ -53,7 +53,7 @@
     <div class="col-md-6  col-12">
       <div class="form-label-group">
         <input type="hidden" >
-        <select class="form-control" name="importancia" data-value="{ old('importancia', $actividad->importancia ?? '' )}"  >
+        <select class="form-control" name="importancia" data-value="{{ old('importancia', $actividad->importancia ?? '') }}"  >
           @foreach( $actividad::fillImportancia() as $k => $v )
             <option value="{{ $k }}" >{{ $v }}</option>
           @endforeach
@@ -64,8 +64,8 @@
     <div class="col-md-6  col-12">
       <div class="form-label-group">
             <input type="text" class="form-control  autocomplete" placeholder="Asignado(*)" data-ajax="/usuarios/autocomplete"
-             value="{{ old ( 'asignado_id', $actividad->asignado_id  ?? '' ) }}"  id="orden"
-             name="asignado_id" required data-value="{!!  isset($actividad->asignado_id) ? $actividad->usuario() : '' !!}" >
+             value="{{ old ( 'asignado_id', $actividad->asignado_id  ?? '' ) }}"
+             name="asignado_id" required data-value="{!!  (!empty($actividad->asignado_id) ? $actividad->usuario() : '') !!}" >
           <label for="">Asignado (*) </label>
       </div>
     </div>

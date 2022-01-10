@@ -46,8 +46,7 @@
           <td>{{ isset($proyecto->empresa_id) ?   $proyecto->empresa()->rotulo() : ''  }}</td>
           <td>{{ $proyecto->oportunidad()->institucion() }}</td>
           <td>{{ $proyecto->rotulo }}</td>
-          <td>{{ Helper::fecha( $proyecto->fecha_desde) }}</td>
-          <td>{{ Helper::fecha( $proyecto->fecha_hasta) }}</td>
+          <td><div style="background-color:{{ $proyecto->estadoArray()['color'] }};font-size: 11px;padding: 2px;border-radius: 3px;color: #fff;text-align: center;">{{ $proyecto->estadoArray()['name'] }}</div></td>
           <td class="text-center py-1">
               <div class="dropdown">
                 <span class="bx bx-dots-vertical-rounded font-medium-3 dropdown-toggle nav-hide-arrow cursor-pointer" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="menu">

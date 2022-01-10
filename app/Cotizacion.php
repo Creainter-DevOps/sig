@@ -40,7 +40,7 @@ class Cotizacion extends Model
      */
     protected $fillable = [
       'id','empresa_id','fecha','monto','duracion_meses','rotulo','oportunidad_id','interes_el','interes_por','participacion_el','participacion_por','propuesta_el','propuesta_por',
-      'plazo_servicio','plazo_garantia','plazo_instalacion','validez',
+      'plazo_servicio','plazo_garantia','plazo_instalacion','validez','moneda_id',
     ];
 
     /**
@@ -74,10 +74,10 @@ class Cotizacion extends Model
       } else {
         $m = 1;
       }
-      return Helper::money($m, 1);
+      return Helper::money($m, $this->moneda_id);
     }
     public function folder() {
-      return '\\OPORTUNIDADES\\' . $this->oportunidad()->codigo . '\\COTIZACIONES\\' . str_pad($this->numero, 3, '0', STR_PAD_LEFT) . '\\';
+      return '\\OPORTUNIDADES\\' . $this->oportunidad()->codigo . '\\COTIZACION-' . str_pad($this->numero, 2, '0', STR_PAD_LEFT) . '\\';
     }
     public function rotulo() {
       if(!empty($this->rotulo)) {
@@ -108,7 +108,7 @@ class Cotizacion extends Model
       }
     }
     public function migrateProyecto() {
-      return DB::select('SELECT osce.fn_migrar_cotizacion_a_proyecto(' . $this->id . ') id;')[0]->id;
+      return DB::select('SELECT osce.fn_migrar_cotizacion_a_proyecto(' . $this->id . ', ' . Auth::user()->id . ') id;')[0]->id;
     }
     public function timeline() {
       return $this->hasMany('App\Actividad','cotizacion_id')->orderBy('id', 'desc')->get();

@@ -91,8 +91,13 @@ class ProyectoController extends Controller {
      */
     public function update(Request $request, Proyecto $proyecto )
     {
-      // Session::flash('message_success', 'Se ha realizado la modificación con éxito.');
-      $proyecto->update($request->all());
+      $data = $request->all();
+      if(!empty($data['_update'])) {
+        $data[$data['_update']] = $data['value'];
+        unset($data['value']);
+        unset($data['_update']);
+      }
+      $proyecto->update($data);
       $proyecto->log("editado");
       return response()->json(['status'=> "success" , 'redirect' => "/proyectos" ]);
     }

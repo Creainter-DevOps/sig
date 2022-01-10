@@ -18,6 +18,10 @@
 .kanban-item[data-is_linked=true] {
   border-right: 5px solid #8fa4b9;
 }
+.kanban-container .kanban-board .kanban-drag {
+  max-height: 750px;
+  overflow: auto;
+}
 </style>
 @endsection
 
@@ -25,15 +29,6 @@
 <!-- Basic Kanban App -->
 <div class="kanban-overlay"></div>
 <section id="kanban-wrapper">
-  <div class="row">
-    <div class="col-12">
-      <button type="button" class="btn btn-primary mb-1" id="add-kanban">
-        <i class='bx bx-add-to-queue mr-50'></i> Add New Board
-      </button>
-      <div id="kanban-app"></div>
-    </div>
-  </div>
-
   <!-- User new mail right area -->
   <div class="kanban-sidebar">
     <div class="card shadow-none quill-wrapper">
@@ -142,7 +137,7 @@
 @section('page-scripts')
 <script>
 $(document).ready(function() {
-  var jsKan = null;
+  window.jsKan = null;
   var data = [];
   Fetchx({
     url: '/actividades/kanban/json',
@@ -191,6 +186,31 @@ $(document).ready(function() {
   };
   var addBoards = function() {
     jsKan.addBoards(getBoards());
+    for(var index in data) {
+      var it = jsKan.findElement(data[index].id);
+      console.log('item', data[index].id, it, '11');
+
+      var board_item_dueDate =
+          '<div class="kanban-due-date d-flex align-items-center mr-50">' +
+          '<i class="bx bx-time-five font-size-small mr-25"></i>' +
+          '<span class="font-size-small">' +
+          $(it).attr("data-fecha") + ' - ' + $(it).attr("data-dueDate") + 
+          "</span>" +
+          "</div>";
+
+      $(it).append(
+          '<div class="kanban-footer d-flex justify-content-between mt-1">' +
+          '<div class="kanban-footer-left d-flex">' + board_item_dueDate + 
+          "</div>" +
+          '<div class="kanban-footer-right">' +
+          '<div class="kanban-users">' +
+          '<ul class="list-unstyled users-list m-0 d-flex align-items-center">' +
+          "</ul>" +
+          "</div>" +
+          "</div>" +
+          "</div>"
+        );
+    }
   };
   jsKan = new jKanban({
     element: "#kanban-wrapper", // selector of the kanban container
@@ -259,7 +279,7 @@ $(document).ready(function() {
         headers: {
           'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
         },
-        data: { _update: 'estado', value: (zone == '_todo' ? 0 : (zone == '_working' ? 1 : 2)) },
+        data: { _update: 'estado', value: (zone == '_todo' ? 1 : (zone == '_working' ? 2 : 3)) },
         success: function(xhr) {
           console.log('XHR', xhr);
         }

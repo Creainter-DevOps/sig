@@ -37,7 +37,8 @@
 <div>Seguir</div>
 @else
 @if(!empty($oportunidad->rechazado_el))
-  Rechazado el {{ Helper::fecha($oportunidad->rechazado_el, true) }}
+  <div class="text-center">Rechazado el {{ Helper::fecha($oportunidad->rechazado_el, true) }}<br />
+  <a href="/licitaciones/{{ $licitacion->id }}/aprobar" class="btn btn-sm btn-success mr-25">Volver a Aprobar</a></div>
 @elseif(!empty($oportunidad->archivado_el))
   Archivado el {{ Helper::fecha($oportunidad->archivado_el, true) }}
 @elseif(empty($oportunidad->revisado_el))
@@ -51,9 +52,31 @@
 @endif
     </div>
   </div>
-  <!-- users view media object ends -->
-  <!-- users view card data start -->
   <div class="row">
+@if(!empty($oportunidad) && !empty($oportunidad->cliente_id))
+    <div class="col-12">
+      <div style="text-align: center;background: #6ea1ff;margin-bottom: 5px;color: #ffff;">EL CLIENTE</div>
+      <div class="row">
+      <div class="col-sm-6">
+        <div class="card">
+          <div class="card-body">
+            @include('clientes.table', ['cliente' => $oportunidad->cliente()])
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6">
+        <div class="card">
+          <div class="card-body">
+            @include('clientes.contactos', ['cliente' => $oportunidad->cliente()])
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+@endif
+    <div class="col-12">
+      <div style="text-align: center;background: #ffb16e;margin-bottom: 5px;color: #ffff;">LA OPORTUNIDAD</div>
+      <div class="row">
   <div class="col-6">
     <div class="card">
       <div class="card-content">
@@ -113,14 +136,8 @@
                   </td>
                 </tr>
                 <tr>
-                  <td>Estado </td>
-                  <td>
-                    <select class="form-control select-data" data-editable="/oportunidades/{{ $oportunidad->id }}?_update=estado" data-value="{{ $oportunidad->estado }}">
-                      <option value="PENDIENTE">Pendiente</option>
-                      <option value="PERDIDO">Perdido</option>
-                      <option value="GANADO">Ganado</option>
-                    </select> 
-                   </td>  
+                  <td>Estado</td>
+                  <td><h3>{{ $oportunidad->render_estado() }}</h3></td>
                 </tr>
 @endif
               </tbody>
@@ -143,9 +160,14 @@
   </div>
   </div>
   </div>
-
-
-
+</div>
+@if(!empty($licitacion->buenapro_fecha) && empty($oportunidad->conclusion_el))
+<h5>Resultado de la Licitación</h5>
+<div class="text-center">
+  <a class="btn btn-danger" style="color:#fff;" href="{{  route('oportunidades.cerrar', ['oportunidad' => $oportunidad->id] ) }}">Se perdió</a>
+</div>
+@endif
+  
 
 
 @if(!empty($oportunidad))
@@ -165,9 +187,9 @@
             <div class="text-center mb-1">
               <span class="{{ $e->cotizacion->estado()['class'] }}">{{ $e->cotizacion->estado()['message'] }}</span>
             </div>
-             @if( $e->cotizacion->estado()['message'] == "ENVIADO" )
+             @if($e->cotizacion->estado()['message'] == "ENVIADO" && !empty($licitacion->buenapro_fecha) && empty($oportunidad->conclusion_el))
                 <div  class="text-center mb-1">
-                  <a class="btn btn-light-success" href="{{  route('cotizaciones.proyecto', ['cotizacion' => $e->cotizacion->id] ) }} " >Pasar proyecto</a>
+                  <a class="btn btn-light-success" href="{{  route('cotizaciones.proyecto', ['cotizacion' => $e->cotizacion->id] ) }}" >Pasar proyecto</a>
                 </div>
              @endif
           @endif
@@ -203,83 +225,11 @@
 
 
 <div class="row">
-<div class="col-6 col-sm-6">
-    <!-- Timeline Widget Starts -->
-    <div class="timline-card">
-      <div class="card ">
-        <div class="card-header">
-          <h4 class="card-title">
-            Historico
-          </h4>
-        </div>
-        <div class="card-content">
-          <div class="card-body">
-            <button type="button" class="btn btn-outline-success" data-toggle="modal" data-target="#inlineForm">
-              <i class="bx bx-plus"></i>Add
-            </button>
-              <div class="modal fade text-left" id="inlineForm" tabindex="-1" role="dialog"
-                aria-labelledby="myModalLabel33" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <h4 class="modal-title" id="myModalLabel33">Historico</h4>
-                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <i class="bx bx-x"></i>
-                      </button>
-                    </div>
-                    <form action="/licitaciones/{{ $licitacion->id }}/observacion" method="post">
-                      {{ csrf_field() }}
-                      <div class="modal-body">
-                        <div class="form-group">
-                          <label>Observación:</label>
-                          <textarea name="texto" placeholder="Ingresa un texto" class="form-control" rows="3"></textarea>
-                        </div>
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-light-secondary" data-dismiss="modal">
-                          <i class="bx bx-x d-block d-sm-none"></i>
-                          <span class="d-none d-sm-block">Cancelar</span>
-                        </button>
-                        <button type="submit" class="btn btn-primary ml-1">
-                          <i class="bx bx-check d-block d-sm-none"></i>
-                          <span class="d-none d-sm-block">Guardar</span>
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-                </div>
-              </div>
-<!--login form Modal -->
-
-            <ul class="widget-timeline">
-              @foreach($oportunidad->timeline() as $c)
-              <li class="timeline-items timeline-icon-success active">
-                <div class="timeline-time">{{ Helper::fecha($c->created_on, true) }}</div>
-                  @if(in_array($c->evento, ['texto']))
-                    <h6 class="timeline-title">{{ $c->creado() }}, registró una observación:</h6>
-                    <div class="timeline-content"><div>{!! nl2br($c->texto) !!}</div></div>
-                  @elseif(in_array($c->evento, ['duracion_dias','instalacion_dias','garantia_dias']))
-                    <h6 class="timeline-title">El usuario {{ $c->creado() }} indica:</h6>
-                    <div class="timeline-content"><div>{{ strtoupper($c->evento) }}: {!! $c->texto !!} días</div></div>
-                  @elseif(in_array($c->evento, ['monto_base']))
-                    <h6 class="timeline-title">{{ $c->creado() }} ha definido un monto:</h6>
-                    <div class="timeline-content"><div>Monto Base: {{ Helper::money($c->texto) }} soles</div></div>
-                  @elseif(in_array($c->evento, ['accion','rotulo']))
-                    <h6 class="timeline-title">{{ $c->creado() }}:</h6>
-                    <div class="timeline-content"><div>{{ $c->texto }}</div></div>
-                  @else
-                    <h6 class="timeline-title">{{ $c->creado() }}:</h6>
-                    <div class="badge badge-light-secondary mr-1 mb-1">{{ $c->evento }} {{ $c->texto }}</div>
-                  @endif
-              </li>
-              @endforeach
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Timeline Widget Ends -->
-</div>
+@if(!empty($oportunidad))
+  <div class="col-12">
+    @include('actividad.create', ['into' => ['oportunidad_id' => $oportunidad->id]])
+  </div>
+@endif
 <!--<div class="col-6 col-sm-6">
       <div class="card ">
         <div class="card-header">

@@ -59,9 +59,9 @@ function generateTime(schedule, renderStart, renderEnd) {
   if (schedule.isAllday) {
     schedule.category = 'allday';
   } else if (chance.bool({ likelihood: 30 })) {
-    schedule.category = SCHEDULE_CATEGORY[chance.integer({ min: 0, max: 1 })];
+ //   schedule.category = SCHEDULE_CATEGORY[chance.integer({ min: 0, max: 1 })];
     if (schedule.category === SCHEDULE_CATEGORY[1]) {
-      schedule.dueDateClass = 'morning';
+//      schedule.dueDateClass = 'morning';
     }
   } else {
     schedule.category = 'time';
@@ -99,6 +99,56 @@ function generateNames() {
     names.push(chance.name({ nationality: 'en' }));
   }
   return names;
+}
+function buildSchedule(x) {
+  var schedule = new ScheduleInfo();
+  schedule.id = x.id;
+  schedule.calendarId = String(x.proyecto_id);
+  schedule.title = x.texto;
+  schedule.body = x.descripcion;
+  schedule.isReadOnly = x.vinculado;
+
+  schedule.isAllday = x.todo_dia;
+  if (schedule.isAllday) {
+    schedule.category = 'allday';
+  } else {
+    schedule.category = 'time';
+  }
+  schedule.start = moment(x.preparada_desde).toDate();
+  schedule.end   = moment(x.preparada_hasta).toDate();
+//generateTime(schedule, moment(x.fecha).toDate(), moment(x.fecha).toDate());
+
+  schedule.isPrivate = false;//chance.bool({ likelihood: 10 });
+  schedule.location = 'Oficina Creainter SAC';
+  schedule.attendees = ['Diego Anccas'];//chance.bool({ likelihood: 70 }) ? generateNames() : [];
+//  schedule.recurrenceRule = chance.bool({ likelihood: 20 }) ? 'repeated events' : '';
+
+  schedule.color = calendar.color;
+  schedule.bgColor = x.color;
+  schedule.dragBgColor = calendar.dragBgColor;
+  schedule.borderColor = calendar.borderColor;
+
+/*  if (schedule.category === 'milestone' && false) {
+    schedule.color = schedule.bgColor;
+    schedule.bgColor = 'transparent';
+    schedule.dragBgColor = 'transparent';
+    schedule.borderColor = 'transparent';
+  }
+
+  schedule.raw.memo = chance.sentence();
+  schedule.raw.creator.name = chance.name();
+  schedule.raw.creator.avatar = chance.avatar();
+  schedule.raw.creator.company = chance.company();
+  schedule.raw.creator.email = chance.email();
+  schedule.raw.creator.phone = chance.phone();
+  if (chance.bool({ likelihood: 20 }) && false) {
+    var travelTime = chance.minute();
+    schedule.goingDuration = travelTime;
+    schedule.comingDuration = travelTime;
+  }
+  */
+
+  ScheduleList.push(schedule);
 }
 // generate randome schedule
 function generateRandomSchedule(calendar, renderStart, renderEnd) {
@@ -145,6 +195,9 @@ function generateRandomSchedule(calendar, renderStart, renderEnd) {
   ScheduleList.push(schedule);
 }
 // random schedule created
+function cleanSchedules() {
+  ScheduleList = [];
+}
 function generateSchedule(viewName, renderStart, renderEnd) {
   ScheduleList = [];
   CalendarList.forEach(function (calendar) {
