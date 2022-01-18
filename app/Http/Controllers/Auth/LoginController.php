@@ -43,7 +43,8 @@ class LoginController extends Controller
     {
 //        $this->middleware('guest')->except('logout');
     }
-    public function login()
+
+    /*public function login()
     {
         $credenciales = $this->validate(request(),[
                             'username'=>'required|string',
@@ -57,7 +58,7 @@ class LoginController extends Controller
         return back()
         ->withErrors(['username'=>'Datos de acceso invalidos!'])
         ->withInput(request(['username']));
-    }
+    }*/
 
 protected function validateLogin(Request $request){
     $this->validate($request, [
@@ -79,7 +80,10 @@ public function username()
 {
     return 'new_username';//or new email name if you changed
 }
-    public function loginPTV(Request $request)
+public function login(Request $request) {
+  return view('auth.login');
+}
+    public function login_check(Request $request)
     {
         $usuario = $request->input('username');
         $clave   = $request->input('password');

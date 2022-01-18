@@ -33,9 +33,12 @@ class Helper
 }
   public static function fecha($x = null, $h = null) {
     $formato = 'd/m/Y';
-    return !empty($x) ? date($formato, strtotime($x)) . (is_null($h) ? '' : ' ' . static::hora($x)) : 'SIN FECHA';
+    return !empty($x) ? date($formato, strtotime($x)) . (is_null($h) ? '' : ' ' . static::hora($x, $h)) : 'SIN FECHA';
   }
   public static function hora($x = null, $formato = 'h:i A') {
+    if($formato === true) {
+      $formato = 'h:i A';
+    }
     return !empty($x) ? date($formato, strtotime($x)) : 'SIN FECHA';
   }
     public static function applClasses()

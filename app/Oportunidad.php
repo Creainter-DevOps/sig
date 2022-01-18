@@ -187,6 +187,32 @@ ORDER BY O.rechazado_el DESC
 LIMIT 50");
       return static::hydrate($rp);
     }
+    static function requiere_atencion() {
+      $rp = DB::select("
+SELECT x.*
+FROM (
+SELECT O.*,
+  (SELECT COUNT(*) FROM osce.cotizacion WHERE oportunidad_id = O.id AND interes_el IS NOT NULL) cantidad_interes,
+  (SELECT COUNT(*) FROM osce.cotizacion WHERE oportunidad_id = O.id AND participacion_el IS NOT NULL) cantidad_participadas
+FROM osce.oportunidad O
+WHERE O.aprobado_el >= NOW() - INTERVAL '80' DAY AND O.rechazado_el IS NULL AND O.archivado_el IS NULL)x
+JOIN osce.licitacion L ON L.id = x.licitacion_id AND L.eliminado IS NULL
+AND L.fecha_participacion_hasta - INTERVAL '1' HOUR <= NOW()
+AND L.fecha_participacion_hasta + INTERVAL '12' HOUR >= NOW()
+UNION
+SELECT x.*
+FROM (
+SELECT O.*,
+  (SELECT COUNT(*) FROM osce.cotizacion WHERE oportunidad_id = O.id AND participacion_el IS NOT NULL) cantidad_participadas,
+  (SELECT COUNT(*) FROM osce.cotizacion WHERE oportunidad_id = O.id AND propuesta_el IS NOT NULL) cantidad_propuestas
+FROM osce.oportunidad O
+WHERE O.aprobado_el >= NOW() - INTERVAL '80' DAY AND O.rechazado_el IS NULL AND O.archivado_el IS NULL AND O.fecha_participacion IS NOT NULL)x
+JOIN osce.licitacion L ON L.id = x.licitacion_id AND L.eliminado IS NULL
+AND L.fecha_participacion_hasta - INTERVAL '1' HOUR <= NOW()
+AND L.fecha_participacion_hasta + INTERVAL '12' HOUR >= NOW()
+");
+      return static::hydrate($rp); 
+    }
    static function listado_participanes_por_vencer() {
 /*      $rp = DB::select("
 SELECT x.*

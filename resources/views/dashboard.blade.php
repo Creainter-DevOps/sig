@@ -89,70 +89,39 @@
           </div>
         </div>
       </div>
-      <div class="col-xl-3 col-md-12 col-sm-12">
-        <div class="row">
-          <!-- Conversion Chart Starts-->
-          <div class="col-xl-12 col-md-6 col-12">
-            <div class="card">
-              <div class="card-header d-flex justify-content-between pb-xl-0 pt-xl-1">
-                <div class="conversion-title">
-                  <h4 class="card-title">Conversion</h4>
-                  <p>60%
-                    <i class="bx bx-trending-up text-success font-size-small align-middle mr-25"></i>
-                  </p>
-                </div>
-                <div class="conversion-rate">
-                  <h2>89k</h2>
-                </div>
-              </div>
-              <div class="card-content">
-                <div class="card-body text-center">
-                  <div id="bar-negative-chart"></div>
-                </div>
-              </div>
-            </div>
+      <div class="col-xl-3 col-md-12 col-sm-12 dashboard-latest-update">
+          <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center pb-50">
+            <h4 class="card-title">Atención en Licitaciones</h4>
           </div>
-          <div class="col-xl-12 col-md-6 col-12">
-            <div class="row">
-              <div class="col-12">
-                <div class="card">
-                  <div class="card-body d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center">
-                      <div class="avatar bg-rgba-primary m-0 p-25 mr-75 mr-xl-2">
+          <div class="card-content">
+            <div class="card-body p-0 pb-1">
+              <ul class="list-group list-group-flush">
+@foreach(App\Oportunidad::requiere_atencion() as $o)
+                <li
+                  class="list-group-item list-group-item-action border-0 d-flex align-items-center justify-content-between">
+                  <div class="list-left d-flex">
+                    <div class="list-icon mr-1">
+                      <div class="avatar bg-rgba-primary m-0">
                         <div class="avatar-content">
-                          <i class="bx bx-user text-primary font-medium-2"></i>
+                          <i class="bx bxs-zap text-primary font-size-base"></i>
                         </div>
                       </div>
-                      <div class="total-amount">
-                        <h5 class="mb-0">$38,566</h5>
-                        <small class="text-muted">Conversion</small>
-                      </div>
                     </div>
-                    <div id="primary-line-chart"></div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-12">
-                <div class="card">
-                  <div class="card-body d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center">
-                      <div class="avatar bg-rgba-warning m-0 p-25 mr-75 mr-xl-2">
-                        <div class="avatar-content">
-                          <i class="bx bx-dollar text-warning font-medium-2"></i>
-                        </div>
-                      </div>
-                      <div class="total-amount">
-                        <h5 class="mb-0">$53,659</h5>
-                        <small class="text-muted">Income</small>
-                      </div>
+                    <div class="list-content">
+                      <span class="list-title">{{ $o->codigo }}</span>
+                      <small class="text-muted d-block">{{ substr($o->licitacion()->rotulo(),0, 20) }}</small>
                     </div>
-                    <div id="warning-line-chart"></div>
                   </div>
-                </div>
-              </div>
+                  <span class="{{ $o->estado()['class'] }}">{{ $o->estado()['message'] }}</span>
+                </li>
+@endforeach
+              </ul>
             </div>
           </div>
         </div>
+
+
       </div>
     </div>
     <div class="row">

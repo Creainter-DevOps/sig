@@ -138,6 +138,10 @@ function actualizar_timeline() {
           box.append($('<div>').addClass('timeline-actions')
             .append($('<a>').attr('href', 'javascript:void(0)').attr('data-popup', '/actividades/' + n.id + '/editar').text('Ver más'))
           );
+        } else if(n.tipo == 'log') {
+          box.append($('<div>').addClass('timeline-time').text(n.created_on));
+          box.append($('<div>').addClass('timeline-content').css({'font-size': '10px'}).html('<div>LOG: ' + n.texto + '</div>'));
+
         }
         if(n.estado == 3) {
           ll.append(box);

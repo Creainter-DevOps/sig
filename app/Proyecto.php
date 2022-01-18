@@ -107,10 +107,16 @@ class Proyecto extends Model
       return $this->hasMany('App\Entregable','proyecto_id')->orderBy('numero', 'ASC')->get();
     }
     public function pagos() {
-      return $this->hasMany('App\Pago','proyecto_id')->orderBy('numero', 'ASC')->get();
+      if(in_array(Auth::user()->id, [1,3])) {
+        return $this->hasMany('App\Pago','proyecto_id')->orderBy('numero', 'ASC')->get();
+      }
+      return [];
     }
     public function gastos() {
-      return $this->hasMany('App\Gasto','proyecto_id')->orderBy('fecha', 'ASC')->get();
+      if(in_array(Auth::user()->id, [1,3])) {
+        return $this->hasMany('App\Gasto','proyecto_id')->orderBy('fecha', 'ASC')->get();
+      }
+      return [];
     }
     public function timeline() {
       return $this->hasMany('App\Actividad','proyecto_id')->orderBy('id', 'DESC' )->get(); 

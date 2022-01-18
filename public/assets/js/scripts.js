@@ -673,7 +673,7 @@ function render_dom_popup() {
         console.log("POPUP", form, box);
         box.on("click", function () {
             console.log("CLICK", box, form);
-            var cache = box.attr("data-popup-cache") || true;
+            var cache = box.attr("data-popup-cache") || "false";
             cache = cache === "false" ? false : true;
             if ($(".modal[data-url='" + form + "']").length && cache) {
                 var modal = $(".modal[data-url='" + form + "']");

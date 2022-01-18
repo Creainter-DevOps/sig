@@ -12,12 +12,12 @@ use App\Http\Controllers\LanguageController;
  */
 
 
-Route::view('/', 'auth.login');
-Route::view('identificacion', 'auth.login');
-Route::post('identificacion', 'Auth\LoginController@loginPTV')->name('login');
+Route::get('/', 'Auth\LoginController@index');
+Route::get('identificacion', 'Auth\LoginController@login');
+Route::post('identificacion', 'Auth\LoginController@login_check')->name('login');
 Route::get('logout', 'Auth\LoginController@logout')->name('logout');
 
-Route::match(['get', 'post'], '/dashboard', 'DashboardController@index')->name('dashboard');
+Route::match(['get', 'post'], '/', 'DashboardController@index')->name('dashboard');
 
 /* Permissions */
 Route::any('permissions', 'PermissionController@index');

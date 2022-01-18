@@ -8,14 +8,6 @@
 <link rel="stylesheet" type="text/css" href="{{asset('vendors/css/tables/datatable/responsive.bootstrap.min.css')}}">
 @endsection
 {{-- page styles --}}
-@section('page-styles')
-<link rel="stylesheet" type="text/css" href="{{asset('css/pages/page-users.css')}}">
-<style>
-.tachado {
-  text-decoration: line-through;
-}
-</style>
-@endsection
 @section('content')
 <!-- users view start -->
 <section class="users-view">
@@ -161,7 +153,7 @@
   </div>
   </div>
 </div>
-@if(!empty($licitacion->buenapro_fecha) && empty($oportunidad->conclusion_el))
+@if(!empty($licitacion->buenapro_fecha) && !empty($oportunidad->id) && empty($oportunidad->conclusion_el))
 <h5>Resultado de la Licitación</h5>
 <div class="text-center">
   <a class="btn btn-danger" style="color:#fff;" href="{{  route('oportunidades.cerrar', ['oportunidad' => $oportunidad->id] ) }}">Se perdió</a>

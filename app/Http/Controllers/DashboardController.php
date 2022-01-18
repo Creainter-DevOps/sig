@@ -7,7 +7,10 @@ use App\Cliente;
 
 class DashboardController extends Controller
 {
-    public function index(Request $request)
+  public function __construct() {
+    $this->middleware('auth');
+  }
+  public function index(Request $request)
     {
       $cliente = new Cliente;
       return view('dashboard', compact('cliente'));

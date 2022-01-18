@@ -112,6 +112,15 @@ class Actividad extends Model
       }, $users);
       return !empty($users[0]) ? $users[0] : '' ;
     }
+    public function asignados() {
+      $users = DB::select("SELECT U.id, U.usuario FROM osce.actividad  A
+                          JOIN public.usuario U on U.id = ANY(A.asignado_id)
+                          where A.id = {$this->id}");
+      $users = array_map( function($user)  {
+        return $user->usuario;
+      }, $users);
+      return implode(', ', $users);
+    }
     public static function kanban() {
       return DB::select("
         SELECT id, tipo, fecha, fecha_limite, texto, created_by, asignado_id, supervisado_por, estado, importancia,color, tiempo_estimado, vinculado, link
@@ -169,13 +178,13 @@ class Actividad extends Model
         return Actividad::where('proyecto_id', '=', $into['proyecto_id'])
           ->selectRaw('actividad.*, contacto.nombres contacto_nombres')
           ->leftJoin('osce.contacto','contacto.id','actividad.contacto_id')
-          ->orderBy('fecha', 'DESC')->get();
+          ->orderBy('fecha', 'DESC')->orderBy('id','DESC')->get();
 
       } else if(!empty($into['oportunidad_id'])) {
         return Actividad::where('oportunidad_id', '=', $into['oportunidad_id'])
           ->selectRaw('actividad.*, contacto.nombres contacto_nombres')
           ->leftJoin('osce.contacto','contacto.id','actividad.contacto_id')
-          ->orderBy('fecha', 'DESC')->get();
+          ->orderBy('fecha', 'DESC')->orderBy('id','DESC')->get();
       }
 
       return [];
@@ -196,5 +205,14 @@ class Actividad extends Model
         SELECT P.id, P.codigo, P.color
         FROM osce.proyecto P
         ORDER BY P.fecha_desde DESC;");
+    }
+
+    /* Sip */
+    public function voip_cdr() {
+      $json = json_decode($this->resultado, true);
+      return !empty($json) ? $json : [];
+    }
+    public function voip_dir() {
+      return 'https://storage.cloud.google.com/creainter-voip/' . date('Y/m/d', strtotime($this->fecha_comienzo)) . '/';
     }
 }

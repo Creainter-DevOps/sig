@@ -70,6 +70,26 @@
          <label for="">Descripción</label>
       </div>
     </div>
+@if(!empty($pago->id))
+    <div class="col-md-6 col-12">
+      <div class="form-label-group">
+        <input type="number" class="form-control" name="monto_detraccion" value="{{ old ('monto_detraccion', $pago->monto_detraccion )  }}" placeholder="Monto Detraccion" min="0" max="100000" step="0.01" required>
+        <label for="plazo-servicio">Monto Detracción</label>
+      </div>
+    </div>
+    <div class="col-md-6 col-12">
+      <div class="form-label-group">
+        <input type="number" class="form-control" name="monto_penalidad" value="{{ old ('monto_penalidad', $pago->monto_penalidad )  }}" placeholder="Monto Penalidad" min="0" max="100000" step="0.01" required>
+        <label for="plazo-servicio">Monto Penalidad</label>
+      </div>
+    </div>
+    <div class="col-md-6 col-12">
+      <div class="form-label-group">
+        <input type="number" class="form-control" name="monto_depositado" value="{{ old ('monto_depositado', $pago->monto_depositado )  }}" placeholder="Monto Depositado" min="0" max="100000" step="0.01" required>
+        <label for="plazo-servicio">Monto Depositado</label>
+      </div>
+    </div>
+@endif
     <div class="col-12 d-flex justify-content-end">
       <button type="submit" class="btn btn-primary mr-1 mb-1">Guardar </button>
       <button type="reset" class="btn btn-light-secondary mr-1 mb-1">Limpiar </button>

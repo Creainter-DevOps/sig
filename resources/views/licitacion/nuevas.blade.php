@@ -53,7 +53,7 @@ tr.block_details>td>div {
       <tbody class="block" data-licitacion-id="{{ $oportunidad->licitacion()->id }}" data-oportunidad-id="{{ $oportunidad->id }}">
         <tr class="block_header">
           <td>{{ $oportunidad->licitacion()->empresa()->rotulo() }}</td>
-          <td>{{ $oportunidad->licitacion()->tipo_proceso }} <br /> {{ $oportunidad->licitacion()->monto }}</td>
+          <td style="width:200px;">{{ $oportunidad->licitacion()->tipo_proceso }} <br /> {{ Helper::money($oportunidad->licitacion()->monto) }}</td>
           <td>{{ $oportunidad->licitacion()->tipo_objeto }}</td>
           <td>{{ $oportunidad->licitacion()->rotulo }}</td>
           <td>{{ Helper::fecha($oportunidad->licitacion()->fecha_participacion_hasta) }}<br /><span class="{{ $oportunidad->estado()['class'] }}">{{ $oportunidad->estado()['message'] }}</span></td>

@@ -33,6 +33,8 @@ class ActividadController extends Controller
     public function create(Request $request)
     { 
       $proyecto_id = $request->input('proyecto_id');
+      $oportunidad_id = $request->input('oportunidad_id');
+
       $tipo        = $request->input('tipo');
 
       $actividad = new Actividad;
@@ -44,10 +46,15 @@ class ActividadController extends Controller
       if(!empty($proyecto_id)) {
         $actividad->proyecto_id = $proyecto_id;
       }
-
+      if(!empty($oportunidad_id)) {
+        $actividad->oportunidad_id = $oportunidad_id;
+      }
       if($tipo == 'LLAMADA') {
         $actividad->direccion = 'SALIDA';
         $actividad->tiempo_estimado = '00:05:00';
+      } elseif($tipo == 'NOTA') {
+        $actividad->estado = 3;
+        $actividad->hora = date('H:i:s');
       }
       if(!empty($proyecto_id)) {
         $actividad->proyecto_id = $proyecto_id;
