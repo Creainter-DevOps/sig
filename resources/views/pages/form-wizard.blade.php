@@ -978,7 +978,6 @@
             </span>
           </h3>
           <!-- step 4 end-->
-          <!-- step 4 content -->
           <fieldset class="pt-0">
             <h6 class="py-50">Enter your Payment Details</h6>
             <div class="row">

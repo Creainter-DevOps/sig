@@ -86,4 +86,44 @@ JOIN osce.oportunidad O ON O.id = PP.oportunidad_id
 WHERE P.fecha <= NOW() + INTERVAL '10' DAY AND P.estado_id IN (1,2)
 ORDER BY P.fecha ASC");
     }
+    static function facturas_por_cobrar() {
+      return DB::select("
+SELECT PP.rotulo, P.*
+FROM osce.pago P
+JOIN osce.proyecto PP ON PP.id = P.proyecto_id
+WHERE P.estado_id IN (1,2) AND P.fecha <= NOW()::date");
+    }
+    static function licitaciones_semanal() {
+      $rp = DB::select("
+SELECT O.*, L.nomenclatura, E.razon_social, L.rotulo, L.fecha_propuesta_hasta,
+(
+	SELECT string_agg(E1.seudonimo, ', ')
+	FROM osce.cotizacion C
+	JOIN osce.empresa E1 ON E1.id = C.empresa_id
+	WHERE C.oportunidad_id = O.id AND C.interes_el IS NOT NULL
+) empresas_interes,
+(
+	SELECT string_agg(E1.seudonimo, ', ')
+	FROM osce.cotizacion C
+	JOIN osce.empresa E1 ON E1.id = C.empresa_id
+	WHERE C.oportunidad_id = O.id AND C.participacion_el IS NOT NULL
+) empresas_participantes,
+(
+	SELECT string_agg(E1.seudonimo, ', ')
+	FROM osce.cotizacion C
+	JOIN osce.empresa E1 ON E1.id = C.empresa_id
+	WHERE C.oportunidad_id = O.id AND C.propuesta_el IS NOT NULL
+) empresas_propuestas,
+U1.usuario rechazado_por,
+U2.usuario archivado_por
+FROM osce.oportunidad O
+JOIN osce.licitacion L ON L.id = O.licitacion_id AND L.fecha_propuesta_hasta >= date_trunc('week', NOW())::timestamp without time zone
+	AND L.fecha_propuesta_hasta <= (date_trunc('week', NOW())+ '7 days'::interval)::timestamp without time zone
+JOIN osce.empresa E ON E.id = L.empresa_id
+LEFT JOIN public.usuario U1 ON U1.id = O.rechazado_por
+LEFT JOIN public.usuario U2 ON U2.id = O.archivado_por
+WHERE O.aprobado_el IS NOT NULL
+ORDER BY L.fecha_propuesta_hasta ASC");
+      return Oportunidad::hydrate($rp);
+    }
 }

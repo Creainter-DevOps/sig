@@ -1,4 +1,3 @@
-
 function deleteItem(url){
   fetch(url).
     then( response => response.json() ).
@@ -12,29 +11,45 @@ function deleteItem(url){
     })
 }
 
-document.querySelector(".form-data").addEventListener('submit', (e) => {
+var forms =  document.querySelectorAll(".form-data")
+forms.forEach((element) =>{   
+  element.addEventListener('submit', (e) => {
+  console.log('event', e);
   e.preventDefault();
   let form = e.target;
-  let action = form.action
+  let action = form.action;
+  let md = form.getAttribute('method');
   let formData = new FormData(form);
   
   fetch( action, {
     headers : {
-      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
-                      .getAttribute("content")
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
     },
-    method: "post",
+    method: md,
     body:formData
   }).then(response => response.json())
   .then(data => {
-    if(data.status){
+    if(data.status && typeof data.redirect != 'undefined'){
+      toastSuccessResponse(data.redirect);
+      form.reset();
+    } else if(data.refresh){
+      location.reload()
+    } else if( data.status){
       toastSuccess();
-      window.location =  data.redirect;
-    }else {
+      form.reset();
+      if(typeof actionResponse === "function" ){
+        actionResponse(data.object);
+      }
+    } else {
       toastInfo(data.message);
     }
   }) 
-}) 
+  })
+})  
+
+function requestForm(evm , actionResponse = 'actionResponse' ){
+  
+}
 
 /*document.querySelector(".btnDelete").addEventListener( 'click', (e) => {
   e.preventDefault();

@@ -29,7 +29,7 @@ class Licitacion extends Model
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'email', 'password','buenapro_revision',
     ];
 
     /**
@@ -52,8 +52,49 @@ class Licitacion extends Model
     public function rotulo() {
       return $this->rotulo;
     }
+    public function aprobar() {
+      DB::select('SELECT osce.fn_licitacion_accion_aprobar(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ')');
+    }
+    public function rechazar() {
+      DB::select('SELECT osce.fn_licitacion_accion_rechazar(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ')');
+    }
     public function oportunidad() {
-      return Oportunidad::where('licitacion_id',$this->id)->where('tenant_id', Auth::user()->tenant_id)->first();
+      return $this->belongsTo('App\Oportunidad', 'id', 'licitacion_id')->first();
+      $oportunidad = Oportunidad::where('licitacion_id',$this->id)
+                     ->where('tenant_id', Auth::user()->tenant_id)->first();
+      if(empty( $oportunidad )) {
+        $data['tenant_id'] = Auth::user()->tenant_id;
+        $data['aprobado_el'] = DB::raw('now');
+        $data['aprobado_por'] = Auth::user()->id; 
+        $data['licitacion_id'] = $this->id;
+        $data['empresa_id'] = $this->empresa_id;
+        $data['rotulo'] = $this->rotulo;    
+        $oportunidad =  Oportunidad::create($data)->fresh();
+      }
+      return $oportunidad;
+    }
+    public function items() {
+      return $this->hasMany('App\LicitacionItem','licitacion_id')
+        ->orderBy('item', 'desc')->get();
+    }
+    public function ganadora() {
+      $items = $this->items();
+      if(count($items) == 0) {
+        return '';
+      } else {
+        $r = [];
+        foreach($items as $i) {
+          if($i->resultado == 'Desierto') {
+            $r[] = 'DESIERTO';
+          } else {
+            if(!empty($i->empresa()->id)) {
+              $r[] = $i->empresa()->razon_social;
+            }
+          }
+        }
+        return implode('/', $r);
+      }
+      return '0';
     }
     public function empresa() {
       return $this->belongsTo('App\Empresa', 'empresa_id')->first();
@@ -70,6 +111,26 @@ class Licitacion extends Model
         return $datos->listaDocumentos;
       }
       return [];
+    }
+
+    
+   public  static function listado_nuevas() {
+      /*$rp = DB::select("
+            SELECT O.*
+            FROM osce.oportunidad O
+            left  JOIN osce.licitacion L ON L.id = O.licitacion_id AND L.eliminado IS NULL
+            WHERE O.archivado_el IS NULL AND O.rechazado_el IS NULL AND O.aprobado_el IS NULL
+            ORDER BY L.fecha_participacion_hasta ASC 
+            Limit 500
+            ");*/
+      $rp = DB::select("
+            SELECT L.*
+            FROM osce.licitacion L
+            LEFT JOIN osce.oportunidad O ON L.id = O.licitacion_id AND L.eliminado IS NULL
+            WHERE L.buenapro_fecha IS NULL AND O.licitacion_id IS NULL AND L.created_on >= NOW() - INTERVAL '30' DAY AND L.procedimiento_id IS NOT NULL AND L.fecha_participacion_hasta >= NOW()
+            ORDER BY L.id DESC
+            LIMIT 100");
+      return static::hydrate($rp);
     }
     public function cronograma() {
       $datos = json_decode($this->datos);
@@ -112,6 +173,7 @@ class Licitacion extends Model
           ->orWhereRaw("LOWER(licitacion.descripcion) LIKE ? ", ["%{$query}%" ])
           ->orWhereRaw("LOWER(licitacion.nomenclatura) LIKE ? ", ["%{$query}%" ])
           ->orWhereRaw("licitacion.procedimiento_id::text LIKE ? ", ["%{$query}%" ])
+          ->orWhereRaw("licitacion.expediente_id::text LIKE ? ", ["%{$query}%" ])
           ->orWhereRaw("LOWER(licitacion.descripcion) LIKE ? ", ["%{$query}%" ])
           ->orWhereRaw("LOWER(empresa.razon_social) LIKE ? ", ["%{$query}%" ])
           ->orWhereRaw("LOWER(oportunidad.rotulo) LIKE ? ", ["%{$query}%" ])

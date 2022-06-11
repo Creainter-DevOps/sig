@@ -1,11 +1,15 @@
 @extends('layouts.contentLayoutMaster')
 {{-- page title --}}
 
-@section('title','Detalle Cotizacion')
+@section('title','Detalle Licitacion')
 @section('vendor-styles')
 <link rel="stylesheet" type="text/css" href="{{asset('vendors/css/tables/datatable/datatables.min.css')}}">
 <link rel="stylesheet" type="text/css" href="{{asset('vendors/css/tables/datatable/extensions/dataTables.checkboxes.css')}}">
 <link rel="stylesheet" type="text/css" href="{{asset('vendors/css/tables/datatable/responsive.bootstrap.min.css')}}">
+<link rel="stylesheet" type="text/css" href="{{asset('vendors/css/extensions/dragula.min.css')}}">
+<link rel="stylesheet" type="text/css" href="{{asset('vendors/css/extensions/swiper.min.css')}}">
+<link rel="stylesheet" type="text/css" href="{{asset('css/pages/widgets.css')}}">
+
 @endsection
 {{-- page styles --}}
 @section('content')
@@ -26,19 +30,29 @@
     </div>
     <div class="col-12 col-sm-5 px-0 d-flex justify-content-end align-items-center px-1 mb-2">
 @if(empty($oportunidad))
-<div>Seguir</div>
+<!--<div>Seguir</div>-->
+<a class="btn btn-success"href="/licitaciones/{{ $licitacion->id }}/aprobar">Aprobar</a>  
 @else
 @if(!empty($oportunidad->rechazado_el))
-  <div class="text-center">Rechazado el {{ Helper::fecha($oportunidad->rechazado_el, true) }}<br />
-  <a href="/licitaciones/{{ $licitacion->id }}/aprobar" class="btn btn-sm btn-success mr-25">Volver a Aprobar</a></div>
+  <input type="text" data-editable="/oportunidades/{{  $oportunidad->id }}?_update=motivo" placeholder="¿Por qué motivo?" style="margin-right: 10px;" value="{{ $oportunidad->motivo }}">
+  <div class="text-center">Rechazado el {{ Helper::fecha($oportunidad->rechazado_el, true) }}</div>
 @elseif(!empty($oportunidad->archivado_el))
-  Archivado el {{ Helper::fecha($oportunidad->archivado_el, true) }}
+  <input type="text" data-editable="/oportunidades/{{  $oportunidad->id }}?_update=motivo" placeholder="¿Por qué motivo?" style="margin-right: 10px;" value="{{ $oportunidad->motivo }}">
+  <div class="text-center">Archivado el {{ Helper::fecha($oportunidad->archivado_el, true) }}</div>
+  <a class="btn btn-primary" href="/licitaciones/{{$oportunidad->licitacion_id}}/documento" ><i class="bx bxs-file-pdf"></i></a>
+@elseif(empty($oportunidad->aprobado_el))
+  <input type="text" data-editable="/oportunidades/{{  $oportunidad->id }}?_update=motivo" placeholder="¿Por qué motivo?" style="margin-right: 10px;" value="{{ $oportunidad->motivo }}">
+  <a href="/licitaciones/{{ $licitacion->id }}/aprobar" class="btn btn-sm btn-success mr-25">Aprobar</a>
+  <a href="/licitaciones/{{ $licitacion->id }}/rechazar" class="btn btn-sm btn-danger mr-25">Rechazar</a>
 @elseif(empty($oportunidad->revisado_el))
+  <input type="text" data-editable="/oportunidades/{{  $oportunidad->id }}?_update=motivo" placeholder="¿Por qué motivo?" style="margin-right: 10px;" value="{{ $oportunidad->motivo }}">
   <a href="/licitaciones/{{ $licitacion->id }}/revisar" class="btn btn-sm btn-success mr-25">Revisar</a>
   <a href="/licitaciones/{{ $licitacion->id }}/rechazar" class="btn btn-sm btn-danger mr-25">Rechazar</a>
 @elseif($oportunidad->estado == 'PENDIENTE')
+  <input type="text" data-editable="/oportunidades/{{  $oportunidad->id }}?_update=motivo" placeholder="¿Por qué motivo?" style="margin-right: 10px;" value="{{ $oportunidad->motivo }}">
   <a href="/licitaciones/{{ $licitacion->id }}/rechazar" class="btn btn-sm btn-danger mr-25">Rechazar</a>
 @else
+  <input type="text" data-editable="/oportunidades/{{  $oportunidad->id }}?_update=motivo" placeholder="¿Por qué motivo?" style="margin-right: 10px;" value="{{ $oportunidad->motivo }}">
   <a href="/licitaciones/{{ $licitacion->id }}/archivar" class="btn btn-sm btn-danger">Archivar</a>
 @endif
 @endif
@@ -100,7 +114,7 @@
   <div class="card">
     <div class="card-content">
       <div class="card-body">
-            <table class="table table-borderless">
+            <table class="table table-borderless table-sm">
               <tbody>
                   @if(!empty($oportunidad))
                 <tr>
@@ -139,6 +153,18 @@
   </div>
   </div>
   <div class="col-6">
+  <div class="card">
+    <div class="card-content">
+      <div class="card-body">
+@if(!empty($oportunidad->id))
+        <label>Apuntes</label>
+        <div data-ishtml data-editable="/oportunidades/{{  $oportunidad->id }}?_update=observacion">{!! $oportunidad->observacion !!}</div>
+@endif
+      </div>
+    </div>
+  </div>
+  </div>
+  <div class="col-6">
 @if(!empty($oportunidad) && !empty($oportunidad->proyecto()))
   <div class="card">
     <div class="card-content">
@@ -156,11 +182,26 @@
 @if(!empty($licitacion->buenapro_fecha) && !empty($oportunidad->id) && empty($oportunidad->conclusion_el))
 <h5>Resultado de la Licitación</h5>
 <div class="text-center">
+  <input type="text" data-editable="/oportunidades/{{  $oportunidad->id }}?_update=motivo" placeholder="¿Por el precio?" style="margin-right: 10px;" value="{{ $oportunidad->motivo }}">
   <a class="btn btn-danger" style="color:#fff;" href="{{  route('oportunidades.cerrar', ['oportunidad' => $oportunidad->id] ) }}">Se perdió</a>
 </div>
 @endif
   
+<style>
+.certificado_button {
 
+}
+.certificado_button:hover + .certificado_body {
+  display: block;
+}
+.certificado_body {
+  position: fixed;
+  width: 800px;
+  height: 600px;background: white;z-index: 9999999999999;top: 29px;left: 50%;
+  margin-left: -400px;padding: 10px 20px;border: 1px solid #727272;
+  display: none;
+}
+</style>
 
 @if(!empty($oportunidad))
 <h5>Cotizaciones</h5>
@@ -179,48 +220,55 @@
             <div class="text-center mb-1">
               <span class="{{ $e->cotizacion->estado()['class'] }}">{{ $e->cotizacion->estado()['message'] }}</span>
             </div>
-             @if($e->cotizacion->estado()['message'] == "ENVIADO" && !empty($licitacion->buenapro_fecha) && empty($oportunidad->conclusion_el))
-                <div  class="text-center mb-1">
-                  <a class="btn btn-light-success" href="{{  route('cotizaciones.proyecto', ['cotizacion' => $e->cotizacion->id] ) }}" >Pasar proyecto</a>
-                </div>
-             @endif
+            @if( $e->cotizacion)
+              <div class="text-center">
+                <a class="btn btn-sm btn-success" href="/expediente/{{ $e->cotizacion->id }}/paso01">Documentos</a>
+              </div>
+            @endif  
           @endif
-@if(empty($oportunidad->revisado_el))
-  <div>Debe marcar como <b>REVISADO</b></div>
-@elseif(!empty($oportunidad->rechazado_el) || !empty($oportunidad->archivado_el))
-  <div>No disponible acciones</div>
-@elseif(empty($e->cotizacion) && strtotime($licitacion->fecha_participacion_hasta) > time())
-  <div class="text-center">
-    <a class="btn btn-sm btn-success" href="/licitaciones/{{ $licitacion->id }}/interes/{{ $e->id }}">Interés</a>
+          @if(empty($oportunidad->revisado_el))
+            <div>Debe marcar como <b>REVISADO</b></div>
+          @elseif(!empty($oportunidad->rechazado_el) || !empty($oportunidad->archivado_el))
+            <div>No disponible acciones</div>
+          @elseif(empty($e->cotizacion) && strtotime($licitacion->fecha_participacion_hasta) > time())
+            <div class="text-center">
+              <a class="btn btn-sm btn-success" href="/licitaciones/{{ $licitacion->id }}/interes/{{ $e->id }}">Interés</a>
+            </div>
+          @elseif(empty($e->cotizacion) && strtotime($licitacion->fecha_participacion_hasta) <= time())
+            <div>Fuera de plazo</div>
+          @else
+            <div class="d-flex justify-content-end">
+            @if(!$e->cotizacion->estado()['timeout'])
+              @if(empty($e->cotizacion->participacion_el))
+                <a href="/licitaciones/{{ $licitacion->id }}/participar/{{ $e->cotizacion->id }}" class="btn btn-sm btn-info mr-25">Registrar Participación</a>
+              @elseif(empty($e->cotizacion->propuesta_el))
+                <a href="/licitaciones/{{ $licitacion->id }}/propuesta/{{ $e->cotizacion->id }}" class="btn btn-sm btn-dark">Enviar Propuesta</a>
+              @endif
+            @endif
+            </div>
+            @endif
+            @if(!empty($e->cotizacion->seace_participacion_log))
+              <div style="font-size: 11px;background: #29237e;margin-top: 4px;border-radius: 4px;padding: 5px;color: #fff;max-height: 160px;overflow: auto;">{!! nl2br($e->cotizacion->seace_participacion_log) !!}</div>
+              @if(!empty($e->cotizacion->seace_participacion_fecha))
+                <div style="text-align: center;margin-top: 5px;">
+                  <div class="btn btn-sm btn-primary certificado_button">Constancia de Registro</div>
+                  <div class="certificado_body">{!! $e->cotizacion->seace_participacion_html !!}</div>
+                  <div>{{ Helper::fecha($e->cotizacion->seace_participacion_fecha, true) }}</div>
+                </div>
+              @endif
+            @endif
+      </div>
   </div>
-@elseif(empty($e->cotizacion) && strtotime($licitacion->fecha_participacion_hasta) <= time())
-  <div>Fuera de plazo</div>
-@else
-  <div class="d-flex justify-content-end">
-  @if(!$e->cotizacion->estado()['timeout'])
-    @if(empty($e->cotizacion->participacion_el))
-      <a href="/licitaciones/{{ $licitacion->id }}/participar/{{ $e->cotizacion->id }}" class="btn btn-sm btn-info mr-25">Registrar Participación</a>
-    @elseif(empty($e->cotizacion->propuesta_el))
-      <a href="/licitaciones/{{ $licitacion->id }}/propuesta/{{ $e->cotizacion->id }}" class="btn btn-sm btn-dark">Enviar Propuesta</a>
-    @endif
-  @endif
-  </div>
-@endif
-</div>
-</div>
 </div>
 </div>
 @endforeach
 </div>
-
-
-
-
+</div>
 <div class="row">
 @if(!empty($oportunidad))
   <div class="col-12">
-    @include('actividad.create', ['into' => ['oportunidad_id' => $oportunidad->id]])
-  </div>
+    @include('actividad.create', ['into' => [ 'licitacion_id'=> $oportunidad->licitacion_id ,   'oportunidad_id' => $oportunidad->id]])
+</div>
 @endif
 <!--<div class="col-6 col-sm-6">
       <div class="card ">
@@ -281,9 +329,13 @@
 <script src="{{asset('vendors/js/tables/datatable/datatables.checkboxes.min.js')}}"></script>
 <script src="{{asset('vendors/js/tables/datatable/dataTables.responsive.min.js')}}"></script>
 <script src="{{asset('vendors/js/tables/datatable/responsive.bootstrap.min.js')}}"></script>  
+<script src="{{asset('vendors/js/extensions/dragula.min.js')}}"></script>
+<script src="{{asset('vendors/js/extensions/swiper.min.js')}}"></script>
+
 @endsection
 
 {{-- page scripts --}}
 @section('page-scripts')
 <script src="{{asset('js/scripts/pages/page-users.js')}}"></script>
+<script src="{{asset('js/scripts/cards/widgets.js')}}"></script>
 @endsection

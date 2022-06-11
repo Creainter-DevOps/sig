@@ -32,7 +32,7 @@ class Chartjs {
     $this->mprocess();
     return $this->quick->toFile($path);
   }
-  static function line($listado, $labels) {
+  static function line($listado, $labels, $type = 'line') {
     $listado = array_map(function($n) { return (array) $n; }, $listado);
     $estadisticas = array();
     $_est = array();
@@ -64,7 +64,7 @@ class Chartjs {
     }, $labels);
     $labels = array_values($labels);
     return array(
-      'type'     => 'line',
+      'type'     => $type,
       'data'     => [
         'labels'   => $tiempos,
         'datasets' => $labels,

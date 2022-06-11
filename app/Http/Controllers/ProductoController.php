@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
+use App\Producto;
 class ProductoController extends Controller
 {
     /**
@@ -13,7 +13,8 @@ class ProductoController extends Controller
      */
     public function index()
     {
-        //
+      $listado = Producto::get();
+      return view( 'productos.index', compact('listado'));
     }
 
     /**
@@ -21,9 +22,9 @@ class ProductoController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Producto $producto)
     {
-        //
+        return view('productos.create', compact('producto'));
     }
 
     /**
@@ -32,9 +33,12 @@ class ProductoController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store( Request $request, Producto $producto )
     {
-        //
+      $producto->fill($request->all());
+      $producto->parametros = '{' . $request->input('parametros') . '}';
+      $producto->save();
+      return response()->json([ 'status' => true, 'redirect' => '/productos' ]);
     }
 
     /**
@@ -45,7 +49,8 @@ class ProductoController extends Controller
      */
     public function show($id)
     {
-        //
+      $producto = Producto::find($id);
+      return view('productos.show',compact('producto')); 
     }
 
     /**
@@ -56,7 +61,8 @@ class ProductoController extends Controller
      */
     public function edit($id)
     {
-        //
+      $producto = Producto::find($id);
+      return view('productos.edit',compact('producto')); 
     }
 
     /**
@@ -68,7 +74,10 @@ class ProductoController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+       $producto = Producto::find($id);
+       $request->parametros  = '{' . $request->input('parametros') . '}' ;
+       $producto->update($request->all());
+       return response()->json([ 'status' => true, 'redirect'  => '/productos' ]); 
     }
 
     /**
@@ -80,5 +89,11 @@ class ProductoController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function autocomplete(Request $request ){
+      $query = $request->input('query');
+      $list = Producto::search( $query )->selectRaw("producto.id, producto.nombre  as value , producto.precio_unidad " )->get();
+     return response()->json($list); 
     }
 }

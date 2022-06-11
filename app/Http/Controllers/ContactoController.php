@@ -35,14 +35,22 @@ class ContactoController extends Controller {
      return view( 'contactos.show'  , compact('contacto', 'cliente','breadcrumbs'));
   }
   
-  public function create() {
+  public function create(Request $request, Contacto $contacto) {
     $this->viewBag['contacto'] = new Contacto(); 
     $this->viewBag['breadcrumbs'][]  = [ 'name' => "Nuevo Contacto" ];
+    if($request->ajax()) {
+      return view( 'contactos.fast', [ 'contacto' => $contacto ]);
+    }
     return view('contactos.add', $this->viewBag );
   }
   
   public function store(Request $request,Contacto  $contacto ) {
-    $contacto->fill($request->all());
+    $data = $request->all();
+    if(!empty($data['empresa_id'])) {
+      $cliente = Cliente::porEmpresaForce($data['empresa_id']);
+      $data['cliente_id'] = $cliente->id;
+    }
+    $contacto->fill($data);
     $contacto->save();
     $contacto->log( 'creado');
     return response()->json([ 

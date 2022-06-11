@@ -10,12 +10,37 @@
 ==========================================================================================*/
 (function(window, document, $) {
 	'use strict';
-
   // Basic Select2 select
 	$(".select2").select2({
     // the following code is used to disable x-scrollbar when click in select input and
     // take 100% width in responsive also
+    tags:true,
     dropdownAutoWidth: true,
+    createTag: function (params) {
+    var term = $.trim(params.term);
+
+    if (term === '') {
+      return null;
+    }
+    let formData = new Formdata();
+    formData.append( 'nombre', term );
+    formData.append( 'tipo', 1 );
+    fetch('/empresatags empresa',{
+      method : 'post', 
+      body: formData  
+    }).then( response => response.json() ) 
+      .then ( data => {
+         if(data.success){
+           return {
+             id: term,
+             text: term,
+             newTag: true // add additional parameters
+           }
+         }
+         return null;
+      })
+    })  
+   },
     width: '100%'
   });
 
@@ -37,7 +62,6 @@
 
       return $icon;
   }
-
 
   // Limiting the number of selections
   $(".max-length").select2({

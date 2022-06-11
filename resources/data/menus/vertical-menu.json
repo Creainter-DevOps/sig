@@ -77,6 +77,18 @@
       "icon": "building"
     },
     {
+      "url": "proveedores",
+      "name": "Proveedores",
+      "i18n": "Proveedores",
+      "icon": "box"
+    },
+    {
+      "url": "productos",
+      "name": "Productos",
+      "i18n": "Productos",
+      "icon": "box"
+    },
+    {
       "url": "empresas",
       "name": "Empresas",
       "i18n": "Empresas",

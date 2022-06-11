@@ -39,8 +39,8 @@ class Cotizacion extends Model
      * @var array
      */
     protected $fillable = [
-      'id','empresa_id','fecha','monto','duracion_meses','rotulo','oportunidad_id','interes_el','interes_por','participacion_el','participacion_por','propuesta_el','propuesta_por',
-      'plazo_servicio','plazo_garantia','plazo_instalacion','validez','moneda_id',
+      'id','empresa_id','fecha','monto','duracion_meses','oportunidad_id','interes_el','interes_por','participacion_el','participacion_por','propuesta_el','propuesta_por',
+      'plazo_servicio','plazo_garantia','plazo_instalacion','validez','moneda_id','observacion','terminos','seace_participacion_log','seace_participacion_fecha','seace_participacion_html','documento_id'
     ];
 
     /**
@@ -60,29 +60,44 @@ class Cotizacion extends Model
     protected $casts = [
         'email_verified_at' => 'datetime',
       ];
-
-
+    
     public function proyecto() {
       return $this->belongsTo('App\Proyecto', 'id','cotizacion_id')->first();
     }
+    public function documento(){
+      return $this->hasMany( 'App\Documento', 'id', 'documento_id')->first();
+    }
+    public function nomenclatura() {
+      return $this->oportunidad()->codigo . '-' . $this->numero;
+    }
     public function codigo() {
-      return $this->oportunidad()->codigo . '-' . $this->numero . ': ' . substr($this->rotulo(), 0, 20);
+      return $this->oportunidad()->codigo . '-' . $this->numero . ': ' . substr($this->oportunidad()->rotulo(), 0, 20);
+    }
+    public function items() {
+      return $this->hasMany('App\CotizacionDetalle','cotizacion_id')
+        ->where('eliminado',false)
+        ->orderBy('id', 'desc')->get();
     }
     public function monto() {
-      if(in_array(Auth::user()->id, [1,3,15])) {
+      if(in_array(Auth::user()->id, [12,3,15])) {
         $m = $this->monto;
       } else {
         $m = 1;
       }
       return Helper::money($m, $this->moneda_id);
     }
-    public function folder() {
+    public function log($tipo, $texto) {
+      DB::select('SELECT osce.fn_cotizacion_actividad(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ", '" . $tipo . "', :texto)", [
+        'texto' => $texto,
+      ]);
+    }
+    public function folder($unix = false) {
+      if($unix) {
+        return 'OPORTUNIDADES/' . $this->oportunidad()->codigo . '/COTIZACION-' . str_pad($this->numero, 2, '0', STR_PAD_LEFT) . '/';
+      }
       return '\\OPORTUNIDADES\\' . $this->oportunidad()->codigo . '\\COTIZACION-' . str_pad($this->numero, 2, '0', STR_PAD_LEFT) . '\\';
     }
     public function rotulo() {
-      if(!empty($this->rotulo)) {
-        return $this->rotulo;
-      }
       $rp  = '';
       if(!empty($this->oportunidad_id)) {
         $rp = $this->oportunidad()->nomenclatura;
@@ -90,22 +105,22 @@ class Cotizacion extends Model
       return substr($rp, 0, 20);
     }
     public function registrar_participacion() {
-      DB::select('UPDATE osce.cotizacion SET participacion_el = NOW(), participacion_por = ' . Auth::user()->id . ' WHERE id = ' . $this->id);
-      $this->oportunidad()->log('accion', 'Ha registrado su PARTICIPACIÓN en el SEACE con la empresa ' . $this->empresa()->razon_social);
-      if(empty($this->oportunidad()->fecha_participacion)) {
-        $this->oportunidad()->update([
-          'fecha_participacion' => 'NOW()',
-        ]);
-      }
+      DB::select('SELECT osce.fn_cotizacion_accion_participar(' . Auth::user()->tenant_id . ', ' . $this->id . ', ' . Auth::user()->id . ');');
+#      if(empty($this->oportunidad()->fecha_participacion)) {
+#        $this->oportunidad()->update([
+#          'fecha_participacion' => 'NOW()',
+#        ]);
+#      }
     }
     public function registrar_propuesta() {
-      DB::select('UPDATE osce.cotizacion SET propuesta_el = NOW(), propuesta_por = ' . Auth::user()->id . ' WHERE id = ' . $this->id);
-      $this->oportunidad()->log('accion', 'Ha enviado su PROPUESTA en el SEACE con la empresa ' . $this->empresa()->razon_social);
-      if(empty($this->oportunidad()->fecha_propuesta)) {
-        $this->oportunidad()->update([
-          'fecha_propuesta' => 'NOW()',
-        ]);
-      }
+      DB::select('SELECT osce.fn_cotizacion_accion_propuesta(' . Auth::user()->tenant_id . ', ' . $this->id . ', ' . Auth::user()->id . ');');
+#      DB::select('UPDATE osce.cotizacion SET propuesta_el = NOW(), propuesta_por = ' . Auth::user()->id . ' WHERE id = ' . $this->id);
+#      $this->oportunidad()->log('accion', 'Ha enviado su PROPUESTA en el SEACE con la empresa ' . $this->empresa()->razon_social);
+#      if(empty($this->oportunidad()->fecha_propuesta)) {
+#        $this->oportunidad()->update([
+#          'fecha_propuesta' => 'NOW()',
+#        ]);
+#      }
     }
     public function migrateProyecto() {
       return DB::select('SELECT osce.fn_migrar_cotizacion_a_proyecto(' . $this->id . ', ' . Auth::user()->id . ') id;')[0]->id;
@@ -236,5 +251,11 @@ class Cotizacion extends Model
           ->orWhereRaw("licitacion.procedimiento_id::text LIKE ? ", ["%{$query}%" ])
           ->orWhereRaw("LOWER(licitacion.descripcion) LIKE ? ", ["%{$query}%" ]);
       });
+    }
+    public function json_load() {
+      return Helper::json_load('expediente_' . $this->id . '.json');
+    }
+    public function json_save($x) {
+      return Helper::json_save('expediente_' . $this->id . '.json', $x);
     }
 }

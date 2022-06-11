@@ -50,7 +50,7 @@
     </div>
     <div class="col-md-6 col-12">
       <div class="form-label-group">
-        <input type="number" class="form-control" name="monto" value="{{ old ('monto', $pago->monto )  }}" placeholder="Monto" min="1" max="100000" step="0.01" required>
+        <input type="number" class="form-control" name="monto" value="{{ old ('monto', $pago->monto )  }}" placeholder="Monto" min="1" max="10000000" step="0.01" required>
         <label for="plazo-servicio">Monto</label>
       </div>
     </div>

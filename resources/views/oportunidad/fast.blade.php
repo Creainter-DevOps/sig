@@ -19,7 +19,7 @@
       <div class="form-label-group container-autocomplete">
           <input type="text" class="form-control autocomplete" name="contacto_id" 
                data-ajax="/contactos/autocomplete" autocomplete="nope"
-              data-register="/contactos/fast"
+              data-register="/contactos/crear"
               @if (!empty($oportunidad->contacto_id))
               value="{{ old('contacto_id', $oportunidad->contacto_id ) }}"
               data-value=" {{ old( 'contacto_id', $oportunidad->contacto()->nombres )}}"

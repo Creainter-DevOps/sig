@@ -3,7 +3,7 @@
     <div class="col-6">
         <div class="form-group">
             <label>RUC </label>
-            <input type="number" min="0" max="99999999999" name="ruc" id="ruc" value="{{ old('ruc', @$empresa->ruc) }}" placeholder="RUC" required class="form-control">
+            <input type="text" name="ruc" id="ruc" value="{{ old('ruc', @$empresa->ruc) }}" placeholder="RUC" required class="form-control">
             @if ($errors->has('ruc'))
             <div class="invalid-feedback">{{ $errors->first('ruc') }}</div>
             @endif

@@ -1,0 +1,229 @@
+@extends('layouts.pdf')
+@section('content')
+  <table class="w-100">
+    <tr>
+      <td>
+        <b>RUC: 20602497519</b><br />
+        AV. 13 DE ENERO NRO. 1629 (OF. 2 PISO) LIMA - LIMA - SAN JUAN DE LURIGANCHO<br />
+        Lima - Perú<br />
+        Teléfono: 01 633-6883 (Anexo 103)<br />
+        Web: www.creainter.com.pe<br>
+      </td>
+      <td style="width:250px;">
+        <div style="text-align:center;font-size:18px;padding:5px;border:2px solid #ff9354;margin-bottom:10px;">
+          <h1 style="text-align:center;font-size:25px;margin-top:3px;margin-bottom:2px;">COTIZACIÓN</h1>
+          <?= $cotizacion->nomenclatura() ?>
+        </div>
+        <table class="w-100">
+          <tr>
+            <th>FECHA</th>
+            <td><?= Helper::fecha($cotizacion->fecha) ?></td>
+          </tr>
+          <tr>
+            <th>VENCIMIENTO</th>
+            <td><?= Helper::fecha($cotizacion->validez) ?></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <th style="background:#ff9354;color:#ffffff;">CLIENTE</th>
+      <td></td>
+    </tr>
+    <tr>
+      <td>
+        <b>{{  $cotizacion->oportunidad()->empresa()->razon_social }}</b><br/>
+        RUC: {{ $cotizacion->oportunidad()->empresa()->ruc }} <br />
+        {{ $cotizacion->oportunidad()->empresa()->direccion }}.<br />
+      </td>
+      <td></td>
+    </tr>
+  </table><br />
+
+  <table class="w-100">
+    <thead>
+      <tr style="background:#ff9354;color:#ffffff;">
+        <th>DESCRIPCIÓN</th>
+        <th style="width:120px;">PRECIO UNIT.</th>
+        <th style="width:80px;">CANTIDAD</th>
+        <th style="width:80px;">TOTAL</th>
+      </tr>
+    </thead>
+    <tbody>
+     @if(!empty($cotizacion->oportunidad()->licitacion_id))
+      <tr>
+        <td>
+          <b>{{ $cotizacion->oportunidad()->licitacion()->nomenclatura }}</b><br />
+          {{ strtoupper($cotizacion->oportunidad()->licitacion()->rotulo) }}<br />
+          @if(!empty($cotizacion->oportunidad()->licitacion()->descripcion))
+            {{ strtoupper($cotizacion->oportunidad()->licitacion()->descripcion) }}<br />
+          @endif
+        </td>
+      </tr>
+      @endif
+      @if(count($cotizacion->items()) == 0)
+        <tr>
+          <td>
+            @if(empty($cotizacion->oportunidad()->licitacion_id))
+              {{ $cotizacion->oportunidad()->rotulo }}<br />
+            @endif
+            @if(!empty($cotizacion->plazo_instalacion) || !empty($cotizacion->plazo_servicio) || !empty($cotizacion->plazo_garantia))
+            @if(!empty($cotizacion->plazo_instalacion))
+            <!-- INSTALACION -->
+            <b>PLAZO DE ENTREGA:</b> {{ $cotizacion->plazo_instalacion }}<br />
+            @endif
+            @if(!empty($cotizacion->plazo_servicio))
+            <!-- SERVICIO -->
+            <!--<b>EJECUCIÓN:</b> {{ $cotizacion->plazo_servicio }}<br />-->
+            <!--<b>DURACIÓN DE SERVICIO:</b> {{ $cotizacion->plazo_servicio }}<br />-->
+            <b>PLAZO DE SERVICIO:</b> {{ $cotizacion->plazo_servicio }}<br/>
+            @endif
+            @if(!empty($cotizacion->plazo_garantia))
+            <b>GARANTÍA:</b> {{ $cotizacion->plazo_garantia }}<br />
+            @endif
+            @if(!empty($cotizacion->observacion))
+                <b>OBS.:</b>
+                {!! nl2br($cotizacion->observacion) !!}<br />
+            @endif
+            @else
+              MONTO SUMA ALZADA
+            @endif
+          </td>
+          <td class="texto-centrado">{{ Helper::money($cotizacion->monto, $cotizacion->moneda_id) }}</td>
+          <td class="texto-centrado">1</td>
+          <td class="texto-centrado">{{ Helper::money($cotizacion->monto, $cotizacion->moneda_id) }}</td>
+        </tr>
+      @else
+        @foreach($cotizacion->items() as $k => $p)
+      <tr>
+        <td>
+          <b>ITEM {{ $k + 1 }}:</b> {{ $p->productor()->nombre }}: {{ $p->productor()->descripcion }}<br />
+          @if(!empty($p->productor()->marca))
+            <b>MARCA/FABRICANTE:</b> {{ $p->productor()->marca }}<br />
+          @endif
+          @if(!empty($p->productor()->modelo))
+            <b>MODELO/SERIE:</b> {{ $p->productor()->modelo }}<br />
+          @endif
+        </td>
+        <td class="texto-centrado">{{  $p->monto / $p->cantidad }}</td>
+        <td class="texto-centrado">{{  $p->cantidad }}</td>
+        <td class="texto-centrado">{{ Helper::money( $p->monto) }}</td>
+                  
+      </tr>
+      </tr>
+          <td>
+            @if(empty($cotizacion->oportunidad()->licitacion_id))
+              {{ $cotizacion->oportunidad()->rotulo }}<br />
+            @endif
+            @if(!empty($cotizacion->plazo_instalacion) || !empty($cotizacion->plazo_servicio) || !empty($cotizacion->plazo_garantia))
+            @if(!empty($cotizacion->plazo_instalacion))
+            <!-- INSTALACION -->
+            <b>PLAZO DE ENTREGA:</b> {{ $cotizacion->plazo_instalacion }}<br />
+            @endif
+            @if(!empty($cotizacion->plazo_servicio))
+            <b>PLAZO DE SERVICIO:</b> {{ $cotizacion->plazo_servicio }}<br/>
+            @endif
+            @if(!empty($cotizacion->plazo_garantia))
+            <b>GARANTÍA:</b> {{ $cotizacion->plazo_garantia }}<br />
+            @endif
+            @if(!empty($cotizacion->observacion))
+                <b>OBS.:</b>
+                {!! nl2br($cotizacion->observacion) !!}<br />
+            @endif
+          @endif
+        </tr>
+        @endforeach
+        @endif
+    </tbody>
+  </table><br />
+  <table>
+    <tr>
+      <td style="width:450px;">
+        <!--<table>
+          <thead>
+            <tr style="background:#ff9354;color:#ffffff;"  >
+              <th> Descripcion </th>
+              <th> Precio Trimestral S/. </th>
+              <th> Precio Total S/. </th>
+             </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Prestación principal - <br/>Primer pago</td>
+              <td class="texto-centrado" > -  </td>
+              <td class="texto-centrado" ><?= Helper::money(80000)?> </td>
+            </tr>
+            <tr>
+              <td>Prestación accesoria : <br/>Pagos trimestrales fijos</td>
+              <td class="texto-centrado" ><?= Helper::money(8499.990)?> </td>
+              <td class="texto-centrado" ><?= Helper::money(102000)?>  </td>
+            </tr>
+              <td colspan="2" class="texto-centrado" > </td>
+              <td colspan="2" class="texto-centrado" ><?= Helper::money(182000)?>  </td>
+          </tbody>
+        </table>--> 
+
+            @if(false && (!empty($cotizacion->plazo_instalacion) || !empty($cotizacion->plazo_servicio) || !empty($cotizacion->plazo_garantia)))
+            @if(!empty($cotizacion->plazo_instalacion))
+            <!-- INSTALACION -->
+            <b>PLAZO DE ENTREGA:</b> {{ $cotizacion->plazo_instalacion }}<br />
+            @endif
+            @if(!empty($cotizacion->plazo_servicio))
+            <!-- SERVICIO -->
+            <b>EJECUCIÓN:</b> {{ $cotizacion->plazo_servicio }}<br />
+            @endif
+            @if(!empty($cotizacion->plazo_garantia))
+            <b>GARANTÍA:</b> {{ $cotizacion->plazo_garantia }}<br />
+            @endif
+            @endif
+
+      </td>
+      <td>
+        <table>
+          <tr>
+            <th style="background:#ff9354;color:#ffffff;width:100px;">SubTotal</th>
+            <td style="width:100px;text-align:right;"><?= Helper::money($cotizacion->monto / 1.18, $cotizacion->moneda_id) ?></td>
+          </tr>
+          <tr>
+            <th style="background:#ff9354;color:#ffffff;">I.G.V.</th>
+            <td style="width:100px;text-align:right;"><?= Helper::money($cotizacion->monto * 0.18/ 1.18 , $cotizacion->moneda_id) ?></td>
+          </tr>
+          <tr>
+            <th style="background:#ff9354;color:#ffffff;">Total</th>
+            <td style="width:100px;text-align:right;"><?= Helper::money($cotizacion->monto, $cotizacion->moneda_id) ?></td>
+          </tr>
+        </table>
+
+      </td>
+    </tr>
+  </table>
+  <br />
+  <table class="w-100">
+    <tr>
+      <th style="background:#ff9354;color:#ffffff;">TÉRMINOS Y CONDICIONES</th>
+    </tr>
+    <tr>
+      <td>
+        @if(!empty($cotizacion->terminos))
+          {!! nl2br($cotizacion->terminos) !!}
+        @else
+          El precio de la oferta en SOLES incluye todos los tributos, seguros, transporte, inspecciones, pruebas y, de ser el caso, los costos laborales conforme a la legislación vigente, así como cualquier otro concepto que pueda tener incidencia sobre el costo del servicio a contratar.
+        @endif
+      </td>
+    </tr>
+  </table>
+  <table style="margin: 0 auto;" >
+   <tr>
+    <td style="text-align:center;">
+    <img height="80" src="https://interno.creainter.com.pe/temp/firma_l.jpeg"/>
+    </td>
+   </tr> 
+   <tfoot>
+      <tr style="border-top: 1px solid black;">
+      <td style="text-align:center">
+      <hr style="color: black; background-color: black;"  />
+        Lizbeth Marcos Pacheco <br/> Area Comercial </td>
+      </tr>
+  </tfoot> 
+  </table>  
+@endsection

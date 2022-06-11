@@ -4,7 +4,12 @@
     <div class="row">
         <div class="offset-12 col-md-1" style="margin-bottom: 10px;text-align:right;">
             <a class="btn btn-default" href="/empresas/crear" style="color: #fff; background-color: #007bff; border-color: #007bff;">
-                    Nuevo
+                Nuevo
+             </a>
+        </div>
+          <div class="offset-12 col-md-1" style="margin-bottom: 10px;text-align:right;">
+            <a class="btn btn-default" href="/empresas/tags" style="color: #fff; background-color: #007bff; border-color: #007bff;">
+                    Tags
              </a>
         </div>
     </div>
@@ -25,6 +30,7 @@
                         <th>RUC</th>
                         <th>Razon social</th>
                         <th>Seudonimo</th>
+                        <th>Tipo</th>
                         <th>Telefono</th>
                         <th>Web</th>
                         <th width="5%">Opciones</th>
@@ -35,6 +41,7 @@
                                 <td>{{ $empresa->ruc }}</td>
                                 <td>{{ $empresa->razon_social }}</td>
                                 <td>{{ $empresa->seudonimo }}</td>
+                                <td>{{ $empresa->privada == true ? 'Privada' : 'Pública' }}</td>
                                 <td>{{ $empresa->telefono }}</td>
                                 <td>{{ $empresa->web }}</td>
                                 <td>

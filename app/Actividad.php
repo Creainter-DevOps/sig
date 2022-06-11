@@ -45,6 +45,7 @@ class Actividad extends Model
      *
      * @var array
      */
+
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
@@ -59,7 +60,18 @@ class Actividad extends Model
     public function oportunidad(){
       return $this->belongsTo('App\Oportunidad', 'oportunidad_id', 'id')->first();  
     }
-
+    public function crear() {
+      $ff = DB::select("SELECT * FROM osce.fn_oportunidad_actividad(:in_tenant_id, :in_oportunidad_id, :in_usuario_id, :in_actividad_tipo, :i_message)", [
+        'in_tenant_id'      => Auth::user()->tenant_id,
+        'in_oportunidad_id' => $this->oportunidad_id,
+        'in_usuario_id'     => Auth::user()->id,
+        'in_actividad_tipo' => $this->tipo,
+        'i_message'         => $this->texto,
+      ]);
+      $actividad = static::where('id', $ff[0]->actividad_id)->first();
+      $actividad->fill($this->toArray());
+      $actividad->save();
+    }
     public function creado() {
       $rp = $this->belongsTo('App\User', 'created_by')->first();
       if(!empty($rp)) {
@@ -176,18 +188,66 @@ class Actividad extends Model
     public static function timeline($into) {
       if(!empty($into['proyecto_id'])) {
         return Actividad::where('proyecto_id', '=', $into['proyecto_id'])
-          ->selectRaw('actividad.*, contacto.nombres contacto_nombres')
+          ->selectRaw('actividad.*, contacto.nombres contacto_nombres, public.usuario.usuario')
           ->leftJoin('osce.contacto','contacto.id','actividad.contacto_id')
-          ->orderBy('fecha', 'DESC')->orderBy('id','DESC')->get();
+          ->leftJoin('public.usuario','usuario.id','actividad.created_by')
+          ->orderBy('fecha', 'DESC')->orderBy('id','DESC')->get()->toArray();
 
-      } else if(!empty($into['oportunidad_id'])) {
-        return Actividad::where('oportunidad_id', '=', $into['oportunidad_id'])
-          ->selectRaw('actividad.*, contacto.nombres contacto_nombres')
-          ->leftJoin('osce.contacto','contacto.id','actividad.contacto_id')
-          ->orderBy('fecha', 'DESC')->orderBy('id','DESC')->get();
+     }
+     else if(!empty($into['licitacion_id'])) {
+        $result =  DB::select(
+            'SELECT
+              A.id,A.estado, A.importancia,T.tipo tipo, T.tiempo_estimado tiempo_maximo, A.tiempo_estimado tiempo_calculado, A.fecha, A.hora, U1.usuario,
+              A.texto descripcion, A.created_on fecha_creacion
+            FROM osce.actividad A
+              JOIN osce.actividad_tipo T ON T.id = A.tipo_id
+            LEFT JOIN public.usuario U1 ON U1.id = A.created_by
+            WHERE A.licitacion_id = '. $into['licitacion_id'] . '
+            ORDER BY A.fecha DESC, A.hora DESC, A.id DESC; '
+          );
+     }
+     else if(!empty($into['oportunidad_id'])) {
+       $result =  DB::select(
+            'SELECT
+              A.id,A.estado, A.importancia,T.tipo tipo, T.tiempo_estimado tiempo_maximo, A.tiempo_estimado tiempo_calculado, A.fecha, A.hora, U1.usuario,
+              A.texto descripcion, A.created_on fecha_creacion
+            FROM osce.actividad A
+              JOIN osce.actividad_tipo T ON T.id = A.tipo_id
+            LEFT JOIN public.usuario U1 ON U1.id = A.created_by
+            WHERE A.oportunidad_id = '. $into['oportunidad_id'] . '
+            ORDER BY A.fecha DESC, A.hora DESC, A.id DESC; '
+          );
+
+     } else {
+       $result = [];
+     }
+      $result = array_map(function ($value) {
+        return (array)$value;
+      }, (array) $result);
+      return $result;
+    }
+
+    public static function por_fecha_usuario($fecha, $usuario) {
+      $where = [];
+      if(!empty($fecha)) {
+        $where[] = "A.fecha = '" . $fecha . "'";
       }
-
-      return [];
+      if(!empty($usuario)) {
+        $where[] = 'A.created_by = ' . (int) $usuario;
+      }
+      $where = !empty($where) ? ' AND ' . implode(' AND ', $where) : '';
+      $query = 'SELECT
+              A.id,A.estado, A.importancia,T.tipo tipo, T.tiempo_estimado tiempo_maximo, A.tiempo_estimado tiempo_calculado, A.fecha, A.hora, U1.usuario,
+              A.texto descripcion, A.created_on fecha_creacion
+            FROM osce.actividad A
+              JOIN osce.actividad_tipo T ON T.id = A.tipo_id
+            LEFT JOIN public.usuario U1 ON U1.id = A.created_by
+            WHERE A.tenant_id = :tenant ' . $where . '
+            ORDER BY A.fecha DESC, A.hora DESC, A.id DESC
+            LIMIT 100';
+      return DB::select($query, [
+         'tenant' => Auth::user()->tenant_id
+      ]);
     }
     public static function calendario($user_id, $desde, $hasta) {
       $user_id = !empty($user_id) ? $user_id : Auth::user()->id; 
@@ -198,7 +258,7 @@ class Actividad extends Model
         LEFT JOIN osce.proyecto P ON P.id = A.proyecto_id
         LEFT JOIN osce.oportunidad O ON O.id = A.oportunidad_id
         LEFT JOIN osce.licitacion L ON L.id = O.licitacion_id
-        ORDER BY A.fecha ASC, A.hora ASC;");
+        ORDER BY A.fecha ASC, A.hora ASC");
     }
     public static function calendario_proyectos() {
       return DB::select("

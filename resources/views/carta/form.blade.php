@@ -32,6 +32,12 @@
     </div>
     <div class="col-md-6  col-12">
       <div class="form-label-group" >
+         <input type="text" class="form-control" placeholder="Nomenclatura" value="{{ old ( 'nomenclatura', $carta->nomenclatura) }}" name="nomenclatura">
+         <label for="">Nomenclatura</label>
+      </div>
+    </div>
+    <div class="col-md-6  col-12">
+      <div class="form-label-group" >
          <input type="text" class="form-control" placeholder="Asunto" value="{{ old ( 'rotulo', $carta->rotulo) }}" name="rotulo">
          <label for="">Asunto</label>
       </div>

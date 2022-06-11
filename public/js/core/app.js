@@ -762,6 +762,138 @@
           $bookmarkIcon = "",
           a = 0
 
+        // getting json data from file for search results
+        $.getJSON("../../../app-assets/data/" + $filename + ".json", function (
+          data
+        ) {
+          for (var i = 0; i < data.listItems.length; i++) {
+            // if current is bookmark then give class to star icon
+            if (bookmark === true) {
+              activeClass = "" // resetting active bookmark class
+              var arrList = $("ul.nav.navbar-nav.bookmark-icons li"),
+                $arrList = ""
+              // Loop to check if current seach value match with the bookmarks already there in navbar
+              for (var j = 0; j < arrList.length; j++) {
+                if (
+                  data.listItems[i].name ===
+                  arrList[j].firstChild.dataset.originalTitle
+                ) {
+                  activeClass = " warning"
+                  break
+                } else {
+                  activeClass = ""
+                }
+              }
+              $bookmarkIcon =
+                '<span class="float-right bookmark-icon bx bx-star' +
+                activeClass +
+                '"></span>'
+            }
+            // Search list item start with entered letters and create list
+            if (
+              data.listItems[i].name.toLowerCase().indexOf(value) == 0 &&
+              a < 10 || !(data.listItems[i].name.toLowerCase().indexOf(value) == 0) &&
+              data.listItems[i].name.toLowerCase().indexOf(value) > -1 &&
+              a < 10
+            ) {
+              if (a === 0) {
+                $activeItemClass = "current_item"
+              } else {
+                $activeItemClass = ""
+              }
+              $startList +=
+                '<li class="auto-suggestion d-flex align-items-center justify-content-between cursor-pointer ' +
+                $activeItemClass +
+                '">' +
+                '<a class="d-flex align-items-center justify-content-between w-100" href=' +
+                data.listItems[i].url +
+                ">" +
+                '<div class="d-flex justify-content-start">' +
+                '<span class="mr-75 ' +
+                data.listItems[i].icon +
+                '" data-icon="' +
+                data.listItems[i].icon +
+                '"></span>' +
+                "<span>" +
+                data.listItems[i].name +
+                "</span>" +
+                "</div>" +
+                $bookmarkIcon +
+                "</a>" +
+                "</li>"
+              a++
+            }
+          }
+          for (var i = 0; i < data.listItems.length; i++) {
+            if (bookmark === true) {
+              activeClass = "" // resetting active bookmark class
+              var arrList = $("ul.nav.navbar-nav.bookmark-icons li"),
+                $arrList = ""
+              // Loop to check if current seach value match with the bookmarks already there in navbar
+              for (var j = 0; j < arrList.length; j++) {
+                if (
+                  data.listItems[i].name ===
+                  arrList[j].firstChild.dataset.originalTitle
+                ) {
+                  activeClass = " warning"
+                } else {
+                  activeClass = ""
+                }
+              }
+              $bookmarkIcon =
+                '<span class="float-right bookmark-icon bx bx-star' +
+                activeClass +
+                '"></span>'
+            }
+            // Search list item not start with letters and create list
+            if (
+              !(data.listItems[i].name.toLowerCase().indexOf(value) == 0) &&
+              data.listItems[i].name.toLowerCase().indexOf(value) > -1 &&
+              a < 10
+            ) {
+              if (a === 0) {
+                $activeItemClass = "current_item"
+              } else {
+                $activeItemClass = ""
+              }
+              $otherList +=
+                '<li class="auto-suggestion d-flex align-items-center justify-content-between cursor-pointer ' +
+                $activeItemClass +
+                '">' +
+                '<a class="d-flex align-items-center justify-content-between w-100" href=' +
+                data.listItems[i].url +
+                ">" +
+                '<div class="d-flex justify-content-start">' +
+                '<span class="mr-75 ' +
+                data.listItems[i].icon +
+                '" data-icon="' +
+                data.listItems[i].icon +
+                '"></span>' +
+                "<span>" +
+                data.listItems[i].name +
+                "</span>" +
+                "</div>" +
+                $bookmarkIcon +
+                "</a>" +
+                "</li>"
+              a++
+            }
+          }
+          if ($startList == "" && $otherList == "") {
+            $otherList =
+              '<li class="auto-suggestion d-flex align-items-center justify-content-between cursor-pointer">' +
+              '<a class="d-flex align-items-center justify-content-between w-100">' +
+              '<div class="d-flex justify-content-start">' +
+              '<span class="mr-75 bx bx-error-circle"></span>' +
+              "<span>No results found.</span>" +
+              "</div>" +
+              "</a>" +
+              "</li>"
+          }
+
+          $htmlList = $startList.concat($otherList) // merging start with and other list
+          $("ul.search-list").html($htmlList) // Appending list to <ul>
+        })
       } else {
         if (bookmark === true) {
           var arrList = $("ul.nav.navbar-nav.bookmark-icons li"),

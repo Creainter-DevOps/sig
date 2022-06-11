@@ -42,37 +42,39 @@ tr.block_details>td>div {
     <table class="table table-dark mb-0" style="width:100%">
       <thead>
         <tr>
-          <th>Institución</th>
-          <th>Proceso</th>
-          <th>Objeto</th>
+          <th style="width:300px;">Institución</th>
+          <th colspan="2">Proceso</th>
           <th>Rótulo</th>
-          <th>Participación</th>
-          <th>Estado</th>
+          <th style="width:100px;">Participación</th>
+          <th style="width:250px;">Estado</th>
         </tr>
       </thead>
       @foreach ($list as $licitacion )
       <tbody class="block" data-licitacion-id="{{ $licitacion->id }}" data-oportunidad-id="{{ $licitacion->id }}">
         <tr class="block_header">
-          <td>{{ $licitacion->entidad }}</td>
-          <td>{{ $licitacion->tipo_proceso }}</td>
+          <td>{{ $licitacion->empresa()->rotulo() }}</td>
+          <td style="width:200px;">{{ $licitacion->tipo_proceso }} <br /> {{ Helper::money($licitacion->monto) }}</td>
           <td>{{ $licitacion->tipo_objeto }}</td>
           <td>{{ $licitacion->rotulo }}</td>
-@if(!empty($licitacion->oportunidad()->aprobado_el))
-          <td>{{ Helper::fecha( $licitacion->oportunidad()->aprobado_el ) }}</td>
+          @if(!empty($licitacion->oportunidad()->aprobado_el))
+            <td>{{ Helper::fecha( $licitacion->oportunidad()->aprobado_el ) }}</td>
           @else
             <td></td>
+          @endif
+           <td style="text-align:center;">
+             <span class="{{ $licitacion->estado()['class'] }}">{{ $licitacion->estado()['message'] }}</span>
+@if(!empty($licitacion->oportunidad()->archivado_el))
+  <div style="color:#ff7878;">Archivado el {{ Helper::fecha($licitacion->oportunidad()->archivado_el) }}</div>
+@elseif(!empty($licitacion->oportunidad()->rechazado_el))
+  <div style="color:#ff7878;">Rechazado el {{ Helper::fecha($licitacion->oportunidad()->rechazado_el) }}</div>
 @endif
-           <td>
-            @if ( !empty( $licitacion->fecha_participacion ))
-              <span class="badge  badge-light-success"> Participando :</br> {{ Helper::fecha($licitacion->fecha_participacion,true ) }}</span>
-            @elseif ( !empty($licitacion->rechazado_el ))
-              <span class="badge  badge-light-danger">Rechazado : </br> {{  Helper::fecha($licitacion->rechazado_el, true ) }}</span>
-            @elseif ( !empty($licitacion->archivado_el ))
-              <span class="badge  badge-light-info">Archivado : </br> {{ Helper::fecha( $licitacion->archivado_el, true ) }}</span>
-            @else
-              <span class="{{ $licitacion->estado()['class'] }}">{{ $licitacion->estado()['message'] }}</span>
-            @endif
-            </td>
+
+@if(!$licitacion->estado()['timeout'])
+  @if(!empty($licitacion->oportunidad()->archivado_el) || !empty($licitacion->oportunidad()->rechazado_el))
+    <a href="/licitaciones/{{ $licitacion->id }}/aprobar" class="btn btn-sm btn-success mr-25">Volver a Aprobar</a>
+  @endif
+@endif
+           </td>
         </tr>
         <tr class="block_details">
           <td colspan="7"><div>
@@ -123,14 +125,16 @@ tr.block_details>td>div {
 <script>
 $(document).on('click', '.block .btn-success', function(e) {
   e.stopPropagation();
-  var id = $(this).closest('tbody').attr('data-candidato-id');
+  e.preventDefault();
+  var id = $(this).closest('tbody').attr('data-licitacion-id');
   $(this).closest('tbody').remove();
   $.ajax({ url: '/licitaciones/' + id + '/aprobar'});
   console.log('Aprobar', id);
 });
 $(document).on('click', '.block .btn-danger', function(e) {
   e.stopPropagation();
-  var id = $(this).closest('tbody').attr('data-candidato-id');
+  e.preventDefault();
+  var id = $(this).closest('tbody').attr('data-licitacionn-id');
   $(this).closest('tbody').remove();
   $.ajax({ url: '/licitaciones/' + id + '/rechazar'});
   console.log('Eliminar', id);

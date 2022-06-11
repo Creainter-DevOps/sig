@@ -85,7 +85,7 @@
   border: none;
   border-radius: 50%;
   background: #FFFFFF;
-  border: 5px solid #5A8DEE;
+  border: 5px solid #fd541b;
 }
 
 .noUi-handle:after,
@@ -96,7 +96,7 @@
 /* for noUi square circle filled */
 
 .circle-filled .noUi-handle {
-  background: #5A8DEE;
+  background: #fd541b;
   border-radius: 50%;
 }
 
@@ -108,7 +108,7 @@
 /* for noUi square and it's sizes */
 
 .square .noUi-handle {
-  background: #5A8DEE;
+  background: #fd541b;
   border-radius: 3px;
 }
 
@@ -175,7 +175,7 @@
 /* default connect color */
 
 .noUi-connect {
-  background: #5A8DEE;
+  background: #fd541b;
   box-shadow: none;
 }
 
@@ -195,7 +195,7 @@
 }
 
 .noUi-vertical.square .noUi-handle {
-  background: #5A8DEE;
+  background: #fd541b;
   border-radius: 3px;
 }
 

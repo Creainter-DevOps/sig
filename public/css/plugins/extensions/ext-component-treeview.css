@@ -8,7 +8,7 @@
 
 .bootstraptreeview .list-group .list-group-item.node-colourful-treeview.node-selected .badge {
   background-color: #e2ecff;
-  color: #5A8DEE;
+  color: #fd541b;
 }
 
 .bootstraptreeview .list-group .list-group-item.node-node-override-treeview:last-child .badge,
@@ -26,7 +26,7 @@
   /* Comman badge style inside treeview */
   margin-left: 0.8rem;
   background-color: #e2ecff;
-  color: #5A8DEE;
+  color: #fd541b;
 }
 
 .bootstraptreeview .list-group .list-group-item .icon {

@@ -11,16 +11,16 @@ class DashboardController extends Controller
     $this->middleware('auth');
   }
   public function index(Request $request)
-    {
-      $cliente = new Cliente;
-      return view('dashboard', compact('cliente'));
-    }
+  {
+    $cliente = new Cliente;
+    return view('dashboard', compact('cliente'));
+  }
     //ecommerce
-    public function dashboardEcommerce(){
-        return view('pages.dashboard-ecommerce');
-    }
+  public function dashboardEcommerce(){
+    return view('pages.dashboard-ecommerce');
+  }
     // analystic
-    public function dashboardAnalytics(){
-        return view('pages.dashboard-analytics');
-    }
+  public function dashboardAnalytics(){
+    return view('pages.dashboard-analytics');
+  }
 }

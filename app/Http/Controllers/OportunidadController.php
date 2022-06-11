@@ -84,19 +84,23 @@ class OportunidadController extends Controller {
   }
   public function update(Request $request, Oportunidad $oportunidad )
   {
-    if($oportunidad->estado == 3) {
-      return response()->json([ 'status' =>  false , 'message' => 'Oportunidad Cerrada' ]);
-    }
     $data = $request->all();
+    if($oportunidad->estado == 3) {
+      if(!empty($data['_update'])) {
+        if(!empty($oportunidad->{$data['_update']})) {
+          return response()->json([ 'status' =>  false , 'message' => 'Oportunidad Cerrada' ]);
+        }
+      }
+    }
     if(!empty($data['_update'])) {
       $data[$data['_update']] = $data['value'];
       unset($data['value']);
       unset($data['_update']);
     }
     
-    $oportunidad->update($data);
-    $oportunidad->cliente_id = $request->input('cliente_id');
-    $oportunidad->save();
+    $oportunidad->updateData($data);
+#    $oportunidad->cliente_id = $request->input('cliente_id');
+#    $oportunidad->save();
     //dd($oportunidad);
     return response()->json([ 'status' =>  true , 'redirect' => '/oportunidades' ]);
   }
@@ -110,18 +114,26 @@ class OportunidadController extends Controller {
      */
     public function destroy(Oportunidad $oportunidad )
     {
-      $oportunidad->eliminado = true;
+      $oportunidad->eliminado = date('Y-m-d h:i:sa');
       $oportunidad->save();
       $oportunidad->log('eliminado');
       return response()->json(['status'=> true , 'refresh' => true  ]);
     }
-     public function autocomplete(Request $request) {
-       $query = $request->input('query');
-       $data = Oportunidad::search($query)
-         ->select(DB::raw("COALESCE(oportunidad.rotulo, licitacion.rotulo, licitacion.descripcion, licitacion.nomenclatura) as value"),'oportunidad.id');
-       if(isset($_GET['directas'])) {
-         $data->whereRaw('osce.oportunidad.licitacion_id IS NULL');
-       }
-       return Response()->json($data->get());
+   public function autocomplete(Request $request) {
+     $query = $request->input('query');
+     $data = Oportunidad::search($query)
+       ->select(DB::raw("COALESCE(oportunidad.rotulo, licitacion.rotulo, licitacion.descripcion, licitacion.nomenclatura) as value"),'oportunidad.id');
+     if(isset($_GET['directas'])) {
+       $data->whereRaw('osce.oportunidad.licitacion_id IS NULL');
      }
+     return Response()->json($data->get());
+   }
+   public function search_autocomplete(Request $request ){
+     $query = $request->input('query');
+
+     $data = Oportunidad::search($query)->select(DB::raw("oportunidad.codigo as value"),'oportunidad.id');
+
+     return Response()->json( $data->get() );
+   
+   }
 }

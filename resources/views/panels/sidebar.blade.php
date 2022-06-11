@@ -6,15 +6,8 @@
       <li class="nav-item mr-auto">
           <a class="navbar-brand" href="{{asset('/')}}">
           <div class="brand-logo">
-            <img src="{{asset('images/logo/logo.png')}}" class="logo" alt="">
+            <img src="{{asset('images/logo/logo-dark.png')}}" class="logo" alt="">
           </div>
-          <h2 class="brand-text mb-0">
-            @if(!empty($configData['templateTitle']) && isset($configData['templateTitle']))
-            {{$configData['templateTitle']}}
-            @else
-            Frest
-            @endif
-          </h2>
           </a>
       </li>
           <li class="nav-item nav-toggle">

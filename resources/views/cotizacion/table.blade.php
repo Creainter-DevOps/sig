@@ -1,7 +1,10 @@
 <table class="table table-sm mb-0 table-bordered table-vcenter"  style="width:100%">
 <thead>
   <tr>
-    <th colspan="5" class="table-head"><a  href="{{ route('cotizaciones.show', ['cotizacion' => $cotizacion->id ]) }}" target="_blank" >Cotización</a></th>
+    <th colspan="5" class="table-head">
+      <a href="{{ route('cotizaciones.show', ['cotizacion' => $cotizacion->id ]) }}">Cotización</a> - 
+      <a  href="{{ route('cotizacion.exportar', ['cotizacion' => $cotizacion->id ]) }}" target="_blank">Exportar</a>
+    </th>
   </tr>
 </thead>
 <tbody>

@@ -61,7 +61,7 @@
 }
 
 .email-application .content-area-wrapper .sidebar .email-app-sidebar .email-app-menu .form-group-compose .compose-btn {
-  box-shadow: 0 2px 4px 0 rgba(90, 141, 238, 0.6);
+  box-shadow: 0 2px 4px 0 rgba(253, 84, 27, 0.6);
   font-weight: 500;
 }
 
@@ -84,14 +84,14 @@
 }
 
 .email-application .content-area-wrapper .sidebar .email-app-sidebar .email-app-menu .list-group .list-group-item.active {
-  color: #5A8DEE;
+  color: #fd541b;
 }
 
 .email-application .content-area-wrapper .sidebar .email-app-sidebar .email-app-menu .list-group .list-group-item.active::before {
   content: "";
   width: 2px;
   height: 30px;
-  background-color: #5A8DEE;
+  background-color: #fd541b;
   position: absolute;
   left: -26px;
 }
@@ -117,7 +117,7 @@
 }
 
 .email-application .content-area-wrapper .sidebar .compose-new-mail-sidebar .card-footer .btn-send {
-  box-shadow: 0 2px 4px 0 rgba(90, 141, 238, 0.6);
+  box-shadow: 0 2px 4px 0 rgba(253, 84, 27, 0.6);
 }
 
 .email-application .content-area-wrapper .sidebar .compose-new-mail-sidebar .close-icon {
@@ -25476,7 +25476,7 @@
 }
 
 .email-application .content-area-wrapper .quill-wrapper .snow-container .send-btn {
-  box-shadow: 0 2px 4px 0 rgba(90, 141, 238, 0.6);
+  box-shadow: 0 2px 4px 0 rgba(253, 84, 27, 0.6);
   font-weight: 500;
   padding: 0.2rem 1rem;
 }

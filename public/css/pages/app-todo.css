@@ -39,7 +39,7 @@
 }
 
 .todo-application .content-area-wrapper .sidebar .todo-sidebar .todo-app-menu .add-task .add-task-btn {
-  box-shadow: 0 2px 4px 0 rgba(90, 141, 238, 0.4);
+  box-shadow: 0 2px 4px 0 rgba(253, 84, 27, 0.4);
 }
 
 .todo-application .content-area-wrapper .sidebar .todo-sidebar .todo-app-menu .sidebar-menu-list {
@@ -62,7 +62,7 @@
 }
 
 .todo-application .content-area-wrapper .sidebar .todo-sidebar .todo-app-menu .sidebar-menu-list .list-group .list-group-item.active {
-  color: #5A8DEE;
+  color: #fd541b;
 }
 
 .todo-application .content-area-wrapper .sidebar .todo-sidebar .todo-app-menu .sidebar-menu-list .list-group .list-group-item.active::before {
@@ -70,7 +70,7 @@
   position: absolute;
   width: 2px;
   height: 30px;
-  background-color: #5A8DEE;
+  background-color: #fd541b;
   left: -23px;
 }
 
@@ -191,7 +191,7 @@
 
 .todo-application .content-area-wrapper .todo-new-task-sidebar .select2-assign-label + .select2-container .select2-selection__rendered .select2-selection__choice[title=Frontend] {
   background-color: #E2ECFF !important;
-  color: #5A8DEE !important;
+  color: #fd541b !important;
 }
 
 .todo-application .content-area-wrapper .todo-new-task-sidebar .select2-assign-label + .select2-container .select2-selection__rendered .select2-selection__choice[title=Backend] {
@@ -231,7 +231,7 @@
 }
 
 .todo-application .content-area-wrapper .todo-new-task-sidebar .snow-container .comment-btn {
-  box-shadow: 0 2px 4px 0 rgba(90, 141, 238, 0.6);
+  box-shadow: 0 2px 4px 0 rgba(253, 84, 27, 0.6);
 }
 
 .todo-application .content-area-wrapper .todo-new-task-sidebar .ql-editor {

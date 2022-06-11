@@ -6,13 +6,13 @@
 .ct-series-a .ct-line,
 .ct-series-a .ct-bar,
 .ct-series-a .ct-slice-donut {
-  stroke: #5A8DEE;
+  stroke: #fd541b;
 }
 
 .ct-series-a .ct-slice-pie,
 .ct-series-a .ct-slice-donut-solid,
 .ct-series-a .ct-area {
-  fill: #5A8DEE;
+  fill: #fd541b;
 }
 
 .ct-series-b .ct-point,
@@ -84,13 +84,13 @@
 .ct-series-g .ct-line,
 .ct-series-g .ct-bar,
 .ct-series-g .ct-slice-donut {
-  stroke: #5A8DEE;
+  stroke: #fd541b;
 }
 
 .ct-series-g .ct-slice-pie,
 .ct-series-g .ct-slice-donut-solid,
 .ct-series-g .ct-area {
-  fill: #5A8DEE;
+  fill: #fd541b;
 }
 
 .ct-series-h .ct-point,
@@ -162,13 +162,13 @@
 .ct-series-m .ct-line,
 .ct-series-m .ct-bar,
 .ct-series-m .ct-slice-donut {
-  stroke: #5A8DEE;
+  stroke: #fd541b;
 }
 
 .ct-series-m .ct-slice-pie,
 .ct-series-m .ct-slice-donut-solid,
 .ct-series-m .ct-area {
-  fill: #5A8DEE;
+  fill: #fd541b;
 }
 
 .ct-series-n .ct-point,

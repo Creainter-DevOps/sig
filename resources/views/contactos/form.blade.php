@@ -5,14 +5,11 @@
 ></input>
     <div class="col-md-6 col-12">
       <div class="form-label-group">
-          @if (!empty($contacto->cliente_id ))
           <input type="text" id="cliente_id" data-ajax="/clientes/autocomplete"
           value="{{ old ('cliente', $contacto->cliente_id) }}" class="form-control autocomplete" name="cliente_id"
+@if(!empty($contacto->cliente_id))
           data-value="{{ old( 'cliente',$contacto->cliente()->empresa()->razon_social ) }}"  placeholder="Empresa">
-          @else
-             <input type="text" id="cliente_id" autofocus data-ajax="/clientes/autocomplete"  class="form-control autocomplete" name="cliente_id"
-            placeholder="Empresa">
-          @endif
+@endif
         <label for="">Empresa</label>
       </div>
     </div>

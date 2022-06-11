@@ -28,28 +28,28 @@
     <table class="table table-sm mb-0" style="width:100%">
       <thead>
         <tr>
-          <th style="width:150px;">Código</th>
+<!--          <th style="width:150px;">Código</th> -->
           <th>Cliente</th>
           <th>Rótulo</th>
-          <th>Proyecto</th>
-          <th>Estado</th>
-          <th>Fecha Inicio</th>
+          <th>Aprobado el</th>
+          <th>Enviado el</th>
+          <th>Costos</th>
           <th></th>
         </tr>
       </thead>
       <tbody>
       @foreach ($listado as $oportunidad)
         <tr>
-          <td><div>{{ $oportunidad->codigo }}</div></td>
-          <td>{{ $oportunidad->institucion() }}</td>
-          <td>{{ $oportunidad->rotulo() }}</td>
-          @if(!empty($oportunidad->proyecto()->id))
-            <td><a href="{{ route('proyectos.show', ['proyecto' => $oportunidad->proyecto()->id ]) }}">{{ $oportunidad->proyecto()->codigo }}</a></td>
+<!--          <td><div>{{ $oportunidad->codigo }}</div></td>-->
+          <td style="width: 200px;">{{ $oportunidad->institucion() }}</td>
+          @if($oportunidad->automatica)
+          <td><i class="ficon bx bx-cloud" style="color:#00c506;"></i> {{ $oportunidad->rotulo() }}</td>
           @else
-            <td></td>
+          <td>{{ $oportunidad->rotulo() }}</td>
           @endif
-          <td><div style="background-color:{{ $oportunidad->estadoArray()['color'] }};font-size: 11px;padding: 2px;border-radius: 3px;color: #fff;text-align: center;">{{ $oportunidad->estadoArray()['name'] }}</div></td>
-          <td>{{ Helper::fecha($oportunidad->created_on) }}</td>
+          <td style="width:100px;" title="{{ Helper::fecha($oportunidad->fecha_participacion, true) }}">{{ Helper::tiempo_transcurrido($oportunidad->fecha_participacion) }}</td>
+          <td style="width:100px;" title="{{ Helper::fecha($oportunidad->fecha_propuesta, true) }}">{{ Helper::tiempo_transcurrido($oportunidad->fecha_propuesta) }}</td>
+          <td style="width:100px;">{{ Helper::money($oportunidad->precios()->promedio, $oportunidad->precios()->moneda_id) }}</td>
           <td class="text-center py-1">
               <div class="dropdown">
                 <span class="bx bx-dots-vertical-rounded font-medium-3 dropdown-toggle nav-hide-arrow cursor-pointer" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="menu">

@@ -3,7 +3,8 @@
 @section('title','Users View')
 {{-- page styles --}}
 @section('page-styles')
-<link rel="stylesheet" type="text/css" href="{{asset('css/pages/page-users.css')}}">
+<link rel="stylesheet" type="text/css" href="{{asset('css/pages/page-users.css') }}">
+<link rel="stylesheet" type="text/css" href="{{asset('css/pages/app-invoice.css') }}">
 @endsection
 @section('content')
 <!-- users view start -->
@@ -17,8 +18,12 @@
             class="users-avatar-shadow rounded-circle" height="64" width="64">
         </a>
         <div class="media-body pt-25">
-          <h4 class="media-heading">{{  isset( $oportunidad->nombre) ? $oportunidad->nombre : $oportunidad->que_es  }}</h4>
+          @if (isset( $oportunidad->nombre) && isset( $oportunidad->que_es) )
+            <h4 class="media-heading">{{ $oportunidad->codigo }}</h4>
+          @else
+          <h4 class="media-heading">{{  isset( $oportunidad->codigo) ? $oportunidad->codigo : $oportunidad->que_es  }}</h4>
           <span>{{ $oportunidad->nomenclatura }}</span>
+          @endif
         </div>
       </div>
     </div>
@@ -105,84 +110,45 @@
 </div>
 <div class="row">
   <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+    <table class="table table-sm mb-0 table-bordered table-vcenter">
+      <thead>
+        <tr>
+          <td>Fecha</td>
+          <td>Desde</td>
+          <td>Asunto</td>
+        </tr>
+      </thead>
+      <tbody>
+@foreach(App\Correo::relacionados($oportunidad->correo_id) as $r)
+        <tr>
+          <td>{{ $r->fecha }}</td>
+          <td>{{ $r->correo_desde }}</td>
+          <td>{{ $r->asunto }}</td>
+        </tr>
+@endforeach
+      </tbody>
+    </table>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-12">
     @include('actividad.create', ['into' => ['oportunidad_id' => $oportunidad->id]])
   </div>
 </div>
   <!-- users view card data ends -->
 
-  <!-- users view card details start -->
-<!--<div class="card">
-    <div class="card-content">
-      <div class="card-body">
-        <div class="col-12">
-          <table class="table table-borderless">
-            <tbody>
-              <tr>
-                <td>Username:</td>
-                <td class="users-view-username">dean3004</td>
-              </tr>
-              <tr>
-                <td>Name:</td>
-                <td class="users-view-name">Dean Stanley</td>
-              </tr>
-              <tr>
-                <td>E-mail:</td>
-                <td class="users-view-email">deanstanley@gmail.com</td>
-              </tr>
-              <tr>
-                <td>Comapny:</td>
-                <td>XYZ Corp. Ltd.</td>
-              </tr>
-
-            </tbody>
-          </table>
-          <h5 class="mb-1"><i class="bx bx-link"></i> Social Links</h5>
-          <table class="table table-borderless">
-            <tbody>
-              <tr>
-                <td>Twitter:</td>
-                <td><a href="#">https://www.twitter.com/</a></td>
-              </tr>
-              <tr>
-                <td>Facebook:</td>
-                <td><a href="#">https://www.facebook.com/</a></td>
-              </tr>
-              <tr>
-                <td>Instagram:</td>
-                <td><a href="#">https://www.instagram.com/</a></td>
-              </tr>
-            </tbody>
-          </table>
-          <h5 class="mb-1"><i class="bx bx-info-circle"></i> Personal Info</h5>
-          <table class="table table-borderless mb-0">
-            <tbody>
-              <tr>
-                <td>Birthday:</td>
-                <td>03/04/1990</td>
-              </tr>
-              <tr>
-                <td>Country:</td>
-                <td>USA</td>
-              </tr>
-              <tr>
-                <td>Languages:</td>
-                <td>English</td>
-              </tr>
-              <tr>
-                <td>Contact:</td>
-                <td>+(305) 254 24668</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-
-</section>-->
-<!-- users view ends -->
 @endsection
-{{-- page scripts --}}
-@section('page-scripts')
-<script src="{{asset('js/scripts/pages/page-users.js')}}"></script>
+@section('modals')
+  @include('oportunidad.modalCotizacionDetalle')
+@endsection
+@section('vendor-scripts')
+  <script src="{{ asset('vendors/js/forms/repeater/jquery.repeater.min.js') }}"></script>
+  <script src="{{ asset('js/scripts/pages/app-invoice.js') }}"></script>
+  <script src="{{ asset('js/scripts/cotizacion/detalle.js') }}"></script>
+@endsection
+@section ('page-scripts')
 @endsection

@@ -6,9 +6,11 @@ use Illuminate\Http\Request;
 use App\Cliente;
 use App\Contacto;
 use App\Empresa;
+use App\Etiqueta;
 use App\Persona;
 use App\Ubigeo;
 use App\Actividad;
+use App\EmpresaEtiqueta;
 use Auth;
 
 class EmpresaController extends Controller {
@@ -25,19 +27,19 @@ class EmpresaController extends Controller {
     }
     public function index(Request $request)
     {
-          $search = $request->input('search');
-          if(!empty($search)) {
-              $this->viewBag['listado'] = Empresa::search($search)->paginate(15)->appends(request()->query());
-          } else {
-              $this->viewBag['listado'] = Empresa::orderBy('created_on', 'desc')->paginate(15)->appends(request()->query());
-          }
-          return view('empresas.index', $this->viewBag );
+      $search = $request->input('search');
+      if(!empty($search)) {
+        $this->viewBag['listado'] = Empresa::search($search)->paginate(15)->appends(request()->query());
+      } else {
+          $this->viewBag['listado'] = Empresa::orderBy('created_on', 'desc')->paginate(15)->appends(request()->query());
+      }
+      return view('empresas.index', $this->viewBag);
     }
     public function create(Request $request, Empresa $empresa )
     {
-        $this->viewBag['breadcrumbs'][]  = [ 'name' => 'Nueva Empresa' ];
-        $this->viewBab['empresa'] = $empresa;
-        return view( $request->ajax() ? 'empresas.fast' : 'empresas.create ', $this->viewBag )  ;
+      $this->viewBag['breadcrumbs'][]  = [ 'name' => 'Nueva Empresa' ];
+      $this->viewBab['empresa'] = $empresa;
+      return view( $request->ajax() ? 'empresas.fast' : 'empresas.create ', $this->viewBag )  ;
     }
 
     /**
@@ -166,12 +168,36 @@ class EmpresaController extends Controller {
      public function autocomplete(Request $request) {
        $query = $request->input('query');
        $data = Empresa::search($query)
-         ->select("osce.empresa.razon_social as value",'osce.empresa.id');
+         ->selectRaw('(CASE WHEN osce.cliente.id IS NULL THEN osce.empresa.razon_social ELSE CONCAT(\'=> \', COALESCE(osce.cliente.nomenclatura, osce.empresa.razon_social)) END) as value, osce.empresa.id');
        if(isset($_GET['propias'])) {
-         $data->whereRaw('tenant_id = ' . Auth::user()->tenant_id);
+         $data->whereRaw('osce.empresa.tenant_id = ' . Auth::user()->tenant_id);
        }
        return Response()->json($data->get());
      }
+
+     public function tags(){
+       $empresas = Empresa::where('tenant_id', Auth::user()->tenant_id)->get();  
+       $empresa_etiquetas = Etiqueta::empresas();
+       return view('empresas.tags', compact( 'empresas', 'empresa_etiquetas' ));
+     }
+
+     public function tags_empresa(Empresa $empresa ){
+       $etiquetas = EmpresaEtiqueta::with('etiqueta','empresa')->where('empresa_id',$empresa['id'])->get();   
+       return view('empresas.tag_empresa', compact('empresa','etiquetas' ));
+     }
+     public function tagCreate( Request $request, Etiqueta $etiqueta, Empresa $empresa ) {
+       $etiqueta->fill( $request->except([ 'empresa_id','tipo']));
+       $etiqueta->save();
+       EmpresaEtiqueta::create([ 'tenant_id' => Auth::user()->tenant_id, 'empresa_id' => $request->input('empresa_id'), 'etiqueta_id' => $etiqueta->id , 'tipo' => $request->input('tipo') ]);
+       return response()->json([ 'success'=> true , 'id' => $etiqueta->id ]);
+     }
+     
+     public function tagDelete(Request $request ){
+       $etiqueta = EmpresaEtiqueta::where('empresa_id',$request->input('empresa_id') )->where( 'etiqueta_id', $request->input('etiqueta_id') )->delete();  
+      //$etiqueta->delete(); 
+      return response()->json([ 'success'=> true  ]);
+     }
+
      public function observacion(Request $request, Empresa $empresa ) {
        $empresa->log('texto',$request->input('texto'));
        return back();

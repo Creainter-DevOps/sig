@@ -31,7 +31,6 @@
     <script src="{{asset('assets/js/scripts.js')}}"></script>
     <!-- END: Theme JS-->
 @if(Auth::user() && !empty(Auth::user()->sip_user))
-
 <script type="text/javascript" src="https://platform.rastreaperu.com/js/libos1t0-1.0.js"></script>
 <script type="text/javascript" src="{{asset('assets/js/voip.js')}}"></script>
 <script src="https://sig.creainter.com.pe:4001/socket.io/socket.io.js"></script><script>
@@ -78,6 +77,6 @@ function sip_finalize() {
 }
 </script>
 @endif
-    <!-- BEGIN: Page JS-->
-    @yield('page-scripts')
-    <!-- END: Page JS-->
+<!-- BEGIN: Page JS-->
+@yield('page-scripts')
+<!-- END: Page JS-->

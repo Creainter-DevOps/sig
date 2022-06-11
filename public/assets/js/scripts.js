@@ -352,6 +352,9 @@ function render_autocomplete() {
                                                     "data-value",
                                                     response.data.value
                                                 );
+                                                console.log('caja', box);
+                                                /*if(typeof  data.precio != 'undefined') {
+                                                }*/
                                                 boxId.change();
                                                 modal.modal("hide");
                                                 if (typeof boxId.attr("data-autocomplete-finish") !== "undefined") {
@@ -485,6 +488,24 @@ function render_autocomplete() {
         box.on("typeahead:selected", function (ev, item) {
             console.log("Se escoge el item:", item);
             modificacion_permitida = true;
+            if(typeof detalle !== 'undefined' && detalle && typeof item.precio_unidad !== 'undefined') {
+              var tr = boxId.closest('tr');
+              console.log(tr.children);  
+              var index = $("#productos tr").index(tr);
+              //  .val( item.precio_unidad );
+              console.log(index);
+              var precio = document.querySelector(`#productos tr:nth-child(${ index + 1 } )  .precio`)
+              var cantidad = document.querySelector(`#productos tr:nth-child(${ index + 1 } )  .cantidad`)
+              precio.value = item.precio_unidad;
+              cantidad.value = cantidad.value > 0 ? cantidad.value : 1; 
+              detalle[index].producto_id = item.id;
+              console.log( precio.value );
+              var event = new Event('keyup');
+              precio.dispatchEvent(event);
+              cantidad.dispatchEvent(event);
+              detalle[index].monto = item.precio_unidad;
+              console.log(detalle);
+            }
             console.log("typeahead:selected");
             boxId.attr("value", item.id);
             boxId.val(item.id);
@@ -502,17 +523,14 @@ function render_autocomplete() {
             }
             boxId.change();
             if (typeof boxId.attr("data-autocomplete-finish") !== "undefined") {
-                if (
-                    typeof window[boxId.attr("data-autocomplete-finish")] !==
-                    "undefined"
-                ) {
+                if ( typeof window[boxId.attr("data-autocomplete-finish")] !== "undefined") {
                     window[boxId.attr("data-autocomplete-finish")].call(
                         boxId[0],
                         item
                     );
                 } else {
                     console.log(
-                        "FunciÃ³n no existe:" +
+                        "Funcion no existe:" +
                         boxId.attr("data-autocomplete-finish")
                     );
                 }
@@ -700,15 +718,22 @@ function render_dom_popup() {
                             return Fetchx({
                                 url: formulario.attr("action"),
                                 type: "POST",
-                                data: formulario.serialize(),
+                                processData: false,
+                                contentType: false,
+                                data: new FormData( formulario[0] ),
                                 success: function (response) {
                                     if (typeof response.status === 'undefined') {
                                         return;
                                     }
                                     console.log("response", response.status);
+                                    
                                     if (response.status === true) {
                                         modificacion_permitida = true;
                                         modal.modal("hide");
+                                        if (typeof response.eval !== "undefined" && response.eval) {
+                                          eval(response.eval)
+                                        }
+
                                         if (typeof response.refresh !== "undefined" && response.refresh) {
                                             location.reload();
                                         }
@@ -1107,4 +1132,3 @@ function operarMilisegundos(t1, t2, op) {
         }
     });
 })();
-

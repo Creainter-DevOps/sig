@@ -2,9 +2,188 @@
 namespace App\Helpers;
 use Config;
 use Illuminate\Support\Str;
+use PhpOffice\PhpWord; 
+use App\Helpers\NumeroALetras;
 
 class Helper
 {
+
+  public static function parallel_command($cmd, $data = null) {
+    $stdout = static::json_path('pid_' . uniqid() . '.log');
+    if(is_array($cmd)) {
+      $cmd = '(' . implode('; ', $cmd) . ')';
+    }
+    $command =  $cmd . ' >> ' . $stdout . ' 2>&1 & echo $!; ';
+    $pid = exec($command, $output);
+
+    static::json_save('process_' . $pid, [
+      'pid'          => $pid,
+      'finished'     => false,
+      'percent'      => 0,
+      'start_time'   => time(),
+      'command'      => $cmd,
+      'data'         => $data,
+      'last_query'   => null,
+      'count_query'  => 0,
+      'stdout'       => $stdout,
+    ]);
+    return $pid;
+  }
+
+  public static function parallel_terminate($pid) {
+    $work = static::json_load('process_' . $pid);
+    exec('kill -9 ' . $pid);
+    $work['killed'] = time();
+    static::json_save('process_' . $pid, $work);
+    static::json_delete('process_' . $pid);
+    return true;
+  }
+
+  public static function parallel_terminate_pool($pid_pool) {
+    foreach($pid_pool as $p) {
+      static::parallel_terminate($p);
+    }
+    return true;
+  }
+  public static function parallel_finished($pid) {
+    $s = static::parallel_status($pid);
+    return !empty($s) ? $s['finished'] : true;
+  }
+  public static function parallel_finished_pool($pid_pool) {
+    if(!is_array($pid_pool)) {
+      return static::parallel_finished($pid_pool);
+    }
+    foreach($pid_pool as $p) {
+      $s = static::parallel_status($p);
+      if($s === false) {
+        continue;
+      }
+      if(!$s['finished']) {
+        return false;
+      }
+    }
+    return true;
+  }
+  public static function parallel_status($pid, $internal = false) {
+    if(!is_numeric($pid))
+      return false;
+    if(!static::json_has('process_' . $pid)) {
+      /* En caso se solicite un pid no reconocido */
+      return false;
+    }
+    $work = static::json_load('process_' . $pid);
+    if(file_exists('/proc/' . $pid)) {
+      if($internal) {
+        $work['last_query'] = time();
+        $work['count_query']++;
+      }
+      $work['percent'] = 10 * (time() - $work['start_time']);
+    } else {
+      $work['percent']  = 100;
+      $work['end_time'] = time();
+      $work['finished'] = true;
+      static::json_delete('process_' . $pid);
+    }
+    static::json_save('process_' . $pid, $work);
+    return $work;
+  }
+  public static function parallel_status_pool($pid_pool) {
+    if(!is_array($pid_pool)) {
+      return static::parallel_status($pid_pool);
+    }
+    foreach($pid_pool as $p) {
+      $status = static::parallel_status($p);
+      if($status === false) {
+        continue;
+      }
+      if(!$status['finished']) {
+        return $status;
+      }
+    }
+    return true;
+  }
+  public static function parallel_log($pid) {
+    $proc = static::parallel_status($pid, true);
+    if(!$proc) {
+      return false;
+    }
+    if($proc['finished']) {
+      return false;
+    }
+    $cmd = '/usr/bin/tail -n10 ' . $proc['stdout'];
+    return shell_exec($cmd);
+  }
+  public static function parallel_log_pool($pid_pool) {
+    if(!is_array($pid_pool)) {
+      return static::parallel_log($pid_pool);
+    }
+    foreach($pid_pool as $p) {
+      if(($d = static::parallel_log($p['pid'])) === false) {
+        continue;
+      }
+      return $d;
+    }
+    return null;
+  }
+  public static function json_path($x, $path = null) {
+    return ($path ?? '/tmp/') . $x;
+  }
+  public static function json_has($x, $path = null) {
+    return file_exists(static::json_path($x, $path));
+  }
+  public static function json_load($x, $path = null) {
+    if(!static::json_has($x, $path)) {
+      return [];
+    }
+    return json_decode(file_get_contents(static::json_path($x, $path)), true);
+  }
+  public static function json_save($x, $data, $path = null) {
+    return file_put_contents(static::json_path($x, $path), json_encode($data));
+  }
+  public static function json_delete($x, $path = null) {
+    @unlink(static::json_path($x, $path));
+    return true;
+  }
+  public static function metadata($file) {
+    $out = shell_exec("/usr/bin/exiftool " . $file);
+    $out = explode("\n", $out);
+    $out = array_filter($out, function($n) {
+      return !empty($n);
+    });
+    $out = array_map(function($n) {
+      $l = explode(':', $n, 2);
+      $l = array_map('trim', $l);
+      return $l;
+    }, $out);
+    $_out = [];
+    foreach($out as $v) {
+      if(isset($v[1])) {
+        $_out[$v[0]] = $v[1];
+      }
+    }
+    if(empty($_out['Pages'])) {
+      if(!empty($_out['Page Count'])) {
+        $_out['Pages'] = $_out['Page Count'];
+      }
+    }
+    return $_out;
+  }
+  public static function pdf($theme, $input, $type = 'landscape', $output = 'exportado.pdf')
+  {
+    if($type == 'L') {
+      $type = 'landscape';
+    } elseif($type == 'P') {
+      $type = 'portrait';
+    }
+    $pdf = \PDF::loadView($theme, $input);
+    $pdf->setPaper('A4', $type);
+    $pdf->getDomPDF()->set_option("enable_php", true);
+    return $pdf->stream($output);
+  }
+  public static function dinero_a_texto($n, $moneda_id) {
+    $n = number_format($n, 2, '.', '');
+    return NumeroALetras::convertir($n, static::moneda($moneda_id), 'centimos', true);
+  }
   public static function money($data, $moneda_id = 1) {
     $dd = number_format($data, 2, ".", " ");
     $dd = str_replace('.00','', $dd);
@@ -13,7 +192,93 @@ class Helper
     }
     return $dd . ' USD';
   }
-  public static function es_pasado($date, &$class = '')
+
+  public static function moneda($moneda_id = null ) {
+
+    $monedas= [
+      1 => 'SOLES',
+      2 => 'DOLARES'
+    ];
+
+    if( $moneda_id != null ){
+      return $monedas[$moneda_id];  
+    } else{
+      return $monedas;
+    } 
+  }  
+
+  public static function docx_fill_template($input, $data, $output) {
+    $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($input);
+    if(!empty($data['EMPRESA.IMAGEN_HEADER'])) {
+      $templateProcessor->setImageValue('EMPRESA.IMAGEN_HEADER',
+        [
+          'path' => config('constants.ruta_storage') .  $data['EMPRESA.IMAGEN_HEADER'],
+          'height' => 50
+        ]
+      );
+      unset($data['logo_head']);
+    }
+    if(!empty($data['logo_central'])) {
+      $templateProcessor->setImageValue('LogoCentral',config('constants.ruta_storage').  $data['logo_central']  );
+      unset($data['logo_central']);
+    }
+    $templateProcessor->setValues($data);
+    return $templateProcessor->saveAs($output);
+  }
+  public static function file_name($filename) {
+    $info = pathinfo($filename);
+    return $info['basename'];
+  }
+  public static function replace_extension($filename, $new_extension, $append = '') {
+    $info = pathinfo($filename);
+    if($info['dirname'] == '.') {
+      return $info['filename'] . $append . '.' . $new_extension;
+    }
+    return $info['dirname'] . '/' . $info['filename'] . $append . '.' . $new_extension;
+  }
+  public static function mkdir_p($path) {
+    if(file_exists($path)) {
+      return $path;
+    }
+    $path = static::normalizePath($path);
+    if(substr($path, -1) != '/') {
+      $path = dirname($path) . '/';
+    }
+    mkdir($path, 0755, true);
+    return $path;
+  }
+  public static function normalizePath($path) {
+    $parts = array();// Array to build a new path from the good parts
+    $path = str_replace('\\', '/', $path);// Replace backslashes with forwardslashes
+    $path = preg_replace('/\/+/', '/', $path);// Combine multiple slashes into a single slash
+    $segments = explode('/', $path);// Collect path segments
+    $test = '';// Initialize testing variable
+    foreach($segments as $segment)
+    {
+        if($segment != '.')
+        {
+            $test = array_pop($parts);
+            if(is_null($test))
+                $parts[] = $segment;
+            else if($segment == '..')
+            {
+                if($test == '..')
+                    $parts[] = $test;
+
+                if($test == '..' || $test == '')
+                    $parts[] = $segment;
+            }
+            else
+            {
+                $parts[] = $test;
+                $parts[] = $segment;
+            }
+        }
+    }
+    return implode('/', $parts);
+}
+
+public static function es_pasado($date, &$class = '')
 {
   @list($day, $month, $year) = explode('/', $date);
   $unix = strtotime(implode('-', [$year, $month, $day]));
@@ -31,10 +296,84 @@ class Helper
   }
   return $rp;
 }
-  public static function fecha($x = null, $h = null) {
+public static function fecha($x = null, $h = null) {
     $formato = 'd/m/Y';
     return !empty($x) ? date($formato, strtotime($x)) . (is_null($h) ? '' : ' ' . static::hora($x, $h)) : 'SIN FECHA';
+ }
+public static function fecha_letras($unix = null) {
+  $unix = empty($unix) ? time() : (is_numeric($unix) ? $unix : strtotime($unix));
+  $meses = array("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
+  return date("d", $unix) . ' de ' . $meses[ date("n", $unix) - 1 ] . ' del ' . date("Y", $unix);
+}
+public static function subir_documento( $archivo, $name ){
+  return  move_uploaded_file($archivo["tmp_name"], $name); 
+}
+ public static function tiempo_transcurrido($fecha = 'now') {
+  global $DIAS, $MESES;
+  if(empty($fecha)) {
+    return '';
   }
+  $fecha = !empty($fecha) ? (is_numeric($fecha) ? $fecha : strtotime($fecha)) : time();
+  $ahora = time();
+  if(empty($fecha)) {
+      return NULl;
+  }
+  $MINUTO = 60;
+  $HORA   = $MINUTO * 60;
+  $DIA    = $HORA * 24;
+  $MES    = $DIA * 30;
+  $ANHO   = $MES * 12;
+
+  $diferencia = $fecha - $ahora == 0 ? 1 : $fecha - $ahora;
+  $signo      = $diferencia > 0;
+  $prefijo    = $signo ? 'En ' : 'Hace ';
+  $sufijo     = '';
+  $diferencia = $signo ? $diferencia : $diferencia * -1;
+
+  if($diferencia <= $MINUTO * 1) {
+    $txt = 'instantes';
+ // } elseif($diferencia <= $MINUTO * 9) {
+//    $txt = 'breve momentos';
+  } elseif($diferencia <= $HORA - 5 * $MINUTO) {
+    $txt = round($diferencia/$MINUTO) . ' minutos';
+  } elseif($diferencia <= $HORA + 5 * $MINUTO) {
+    $txt = 'una hora';
+  } elseif($diferencia <= $HORA * 4) {
+    $txt = round($diferencia/$HORA) . ' horas';
+  } elseif($diferencia <= $HORA * 12) {
+    $prefijo = '';
+    $txt     = 'Hoy, ' . date('h:i a', $fecha);
+  } elseif($diferencia <= $DIA + 6 * $HORA) {
+    $prefijo = '';
+    $sufijo  = ', ' . date('h:i a', $fecha);
+    $txt     = $signo ? 'Mañana' : 'Ayer';
+  } elseif($diferencia <= $DIA * 4) {
+    $txt     = round($diferencia/$DIA) . ' días';
+  } elseif($diferencia <= $DIA * 6) {
+    $prefijo = $signo ? '' : '';
+#    $sufijo  = $signo ? ''      : ' pasado';
+#    $txt     = $DIAS[date('w', $fecha)];
+    $txt     = date('d/m/Y');
+  } elseif($diferencia <= $DIA * 8) {
+    $txt     = 'una semana';
+  } elseif($diferencia <= $MES - 5 * $DIA) {
+    $prefijo = $signo ? 'El próximo ' : 'El pasado ';
+    $sufijo  = '';
+    $txt     = $DIAS[date('w', $fecha)] . ' ' . date('d', $fecha);
+  } elseif($diferencia <= $MES + 5 * $DIA) {
+    $txt = 'un mes';
+  } elseif($diferencia <= $ANHO - 2 * $MES) {
+    $txt = round($diferencia/$MES) . ' meses';
+  } elseif($diferencia <= $ANHO + 2 * $MES) {
+    $txt = 'un año';
+  } else {
+    $prefijo = '';
+    $sufijo  = '';
+    $txt     = ucfirst($DIAS[date('w', $fecha)]) . ' ' . date('d', $fecha) . ' de ' . $MESES[date('n', $fecha)-1] . ' del ' . date('Y', $fecha);
+  }
+  return $prefijo . $txt . $sufijo;
+}
+
   public static function hora($x = null, $formato = 'h:i A') {
     if($formato === true) {
       $formato = 'h:i A';
@@ -191,4 +530,8 @@ class Helper
             }
         }
     }
+    public static function fileTemp($extencion = 'pdf'){
+       return config('constants.ruta_temporal') . uniqid() . "." . $extencion;   
+    }
 }
+

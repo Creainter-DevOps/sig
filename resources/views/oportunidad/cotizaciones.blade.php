@@ -12,11 +12,11 @@
               <tr class="text-center">
                   <th>Empresa</th>
                   <th>Número</th>
+                  <th>Items</th>
                   <th>Monto</th>
-                  <th>Emitida</th>
-                  <th>Validez</th>
+                  <th style="width:80px;">Emitida</th>
                   <th>Folder</th>
-                  <th></th>
+                  <th style="width:140px"></th>
                 </tr>
               </thead>
               <tbody>
@@ -28,19 +28,23 @@
               @endif
                   <td>{{ $cotizacion->empresa()->seudonimo }}</td>
                   <td class="text-center">{{ $cotizacion->numero }}</td>
+                  <td class="text-center">{{ count($cotizacion->items()) }}</td>
                   <td class="text-center">{{ $cotizacion->monto() }}</td>
-                  <td class="">{{ Helper::fecha( $cotizacion->fecha ) }}</td>
-                  <td class="">{{ Helper::fecha( $cotizacion->validez ) }}</td>
+                  <td class="">{{ Helper::fecha( $cotizacion->fecha) }}</td>
                   <td class="text-center"><a href="#" onclick="window.location.href='odir:{!! addslashes(Auth::user()->dir_sharepoint . $cotizacion->folder()) !!}';">Folder</a></td>
 <td style="width: 75px;text-align: center;">
          @if(!empty($cotizacion->proyecto()->id))
-         <a href="{{ route( 'proyectos.show', [ 'proyecto' => $cotizacion->proyecto()->id ] ) }}"><i class="bx bx-share"></i></a>
+         <a href="{{ route( 'proyectos.show', [ 'proyecto' => $cotizacion->proyecto()->id ] ) }}" title="Ver el Proyecto"><i class="bx bx-share"></i></a>
          @else
-         <a href="{{  route('cotizaciones.proyecto', ['cotizacion' => $cotizacion->id] ) }} " ><i class="bx bx-folder"></i></a>
+         <a href="{{ route('cotizaciones.proyecto', ['cotizacion' => $cotizacion->id] ) }} " title="Convertir a Proyecto"><i class="bx bx-folder"></i></a>
          @endif
-
-         <a href="javascript:void(0)" data-popup="{{ route( 'cotizaciones.edit', [ 'cotizacion' => $cotizacion->id ] ) }}"><i class="bx bx-edit-alt"></i></a>
-         <a href="javascript:void(0)" data-confirm-remove="{{ route('cotizaciones.destroy', [ 'cotizacion' => $cotizacion->id ])}}"><i class="bx bx-trash"></i></a>
+            <a href="{{ route('cotizacion.enviar',[ 'cotizacion'=> $cotizacion->id ])}}" title="Enviar propuesta" > <i class="bx bxs-up-arrow-square" ></i></a> 
+         <a class="verDetalle" onclick="verDetalle(this)" data-target="#modalCotizacionDetalle"  data-id= "{{ $cotizacion->id }}"  href="javascript:void(0)" data-size="modal-lg"
+data-toggle="modal" >
+<i class="bx bxs-detail" title="detalle"></i></a> 
+         <a href="{{ route( 'cotizacion.exportar', [ 'cotizacion' => $cotizacion->id ] ) }}" target="_blank" title="Exportar"><i class="bx bx-printer"></i></a>
+         <a href="javascript:void(0)" data-popup="{{ route( 'cotizaciones.edit', [ 'cotizacion' => $cotizacion->id ] ) }}" title="Editar"><i class="bx bx-edit-alt"></i></a>
+         <a href="javascript:void(0)" data-confirm-remove="{{ route('cotizaciones.destroy',['cotizacion' => $cotizacion->id ])}}" title="Eliminar"><i class="bx bx-trash"></i></a>
       </td>
               </tr> 
               @endforeach 

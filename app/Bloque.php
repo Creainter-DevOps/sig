@@ -10,6 +10,7 @@ class Bloque extends Model
 {
     protected $connection = 'interno';
     protected $table = 'osce.bloque';
+
     const UPDATED_AT = null;
     const CREATED_AT = null;
 

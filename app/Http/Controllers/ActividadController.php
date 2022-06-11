@@ -166,9 +166,11 @@ class ActividadController extends Controller
       $data = $request->all();
       $timeline = Actividad::timeline($data);
       $timeline = array_map(function($n) {
-        $n['contenido'] = !empty($n['contenido']) ? $n['contenido'] : '';
+        $n['contenido'] = (!empty($n['contenido']) ? $n['contenido'] : '');
+        $n['texto']     = $n['tipo'];
+        $n['tiempo']    = $n['fecha'] . ' ' . $n['hora']; 
         return $n;
-      }, $timeline->toArray());
+      }, $timeline);
       return response()->json($timeline);
     }
     public function kanban()
@@ -205,5 +207,16 @@ class ActividadController extends Controller
       $user  = $request->input('user_id');
       $data = Actividad::calendario($user, $desde, $hasta);
       return response()->json(['status' => true , 'data' => $data]);
+    }
+    public function listado_ajax(Request $request) {
+      $data = Actividad::por_fecha_usuario($request->fecha, $request->usuario_id);
+      if(!empty($data)) {
+        $data = array_map(function($n) {
+//            $n->momento = Helper::tiempo_transcurrido($n->fecha . ' ' . $n->hora);
+            $n->momento = Helper::fecha($n->fecha . ' ' . $n->hora, true);
+            return $n;
+        }, $data);
+      }
+      return response()->json($data);
     }
 }

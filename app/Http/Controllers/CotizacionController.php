@@ -8,7 +8,9 @@ use App\Oportunidad;
 use App\Licitacion;
 use App\Contacto;
 use App\Cotizacion;
+use App\CotizacionDetalle;
 use App\Proyecto;
+use App\Helpers\Helper;
 
 class CotizacionController extends Controller {
 
@@ -41,7 +43,13 @@ class CotizacionController extends Controller {
     $contacto = isset($cotizacion->contacto_id) ? $cotizacion->contacto() : null; 
     return view ('cotizacion.show', compact('cotizacion', 'listado', 'breadcrumbs', 'cliente', 'timeline','contacto' )); 
   }
-
+  public function enviar(Cotizacion $cotizacion, Request $request){
+    $cotizacion->registrar_propuesta();
+    if($request->ajax()) {
+      return response()->json(['status' => true , 'refresh' => true ]);
+    }
+    return redirect()->route('oportunidades.show', [ 'oportunidad' => $cotizacion->oportunidad_id ]);
+  }
   public function create(Request $request) {
     $cotizacion = new Cotizacion;
     $cotizacion->monto = 0;
@@ -74,7 +82,7 @@ class CotizacionController extends Controller {
 
   public function update(Request $request, Cotizacion $cotizacion) {
     if($cotizacion->oportunidad()->estado == 3) {
-      return response()->json(['status' => false , 'message' => 'Oportunidad cerrada']);
+//      return response()->json(['status' => false , 'message' => 'Oportunidad cerrada']);
     }
     $data = $request->all();
     if(!empty($data['_update'])) {
@@ -105,4 +113,38 @@ class CotizacionController extends Controller {
     $id = $cotizacion->migrateProyecto();
     return redirect()->route( 'proyectos.show', [ 'proyecto' => $id ]);
   }
+  public function exportar(Request $request, Cotizacion $cotizacion) {
+    return Helper::pdf('cotizacion.pdf', compact('cotizacion'), 'P', $cotizacion->nomenclatura() . '.pdf');
+  }
+
+  public function detalle( $id ){
+    $cotizacion = Cotizacion::find($id);
+    $detalle = CotizacionDetalle::with('producto')
+                                  ->where('eliminado',false)   
+                                  ->where('cotizacion_id', $id )->get(); 
+    return response()->json( [ 'cotizacion' =>  $cotizacion, 'detalle' => $detalle ]);
+  }
+  public function detalleSave( Request $request , $id){
+    $oportunidad = $request->all();
+    $cotizacion = Cotizacion::find($id);
+    $cotizacion->monto = $oportunidad['cotizacion']['monto']; 
+    $cotizacion->save();
+    
+    $detalle = $oportunidad['detalle']; 
+    foreach($detalle as $key =>  $producto) {
+      if ( !empty( $producto['id'] )){
+        $cot = CotizacionDetalle::find($producto['id']);
+        $cot->update($producto);
+      } else {
+        $prod = [
+          'producto_id'=> $producto['producto_id'] ,
+          'monto'      => $producto['monto'] ,
+          'cantidad'   => $producto['cantidad'] ,
+          'cotizacion_id'=> $producto['cotizacion_id'],
+        ];
+        CotizacionDetalle::create($prod);
+      }
+    }
+    return response()->json( [ 'status' => true ]);
+  } 
 }

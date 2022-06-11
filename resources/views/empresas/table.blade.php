@@ -3,6 +3,7 @@
     <th colspan="4" class="table-head">Empresa</th>
   </tr>
 <tbody>
+  @if ($empresa != null)
   <tr>
       <th>Ruc</th>
       <td>{{ $empresa->ruc }}</td>
@@ -15,5 +16,11 @@
       <th>Dirección</th>
       <td>{{ $empresa->direccion }}</td>
   </tr>
+  @else
+
+  <tr>
+      <td colspan="4">Sin informacion de empresa </td>
+  </tr>
+  @endif
 </tbody>
 </table>

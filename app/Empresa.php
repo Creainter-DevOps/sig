@@ -14,13 +14,14 @@ class Empresa extends Model
     const UPDATED_AT = null;
     const CREATED_AT = null;
     protected $fillable = [
-        'id', 'ruc', 'razon_social', 'seudonimo', 'direccion', 'referencia', 'telefono', 'correo_electronico', 'web', 'aniversario', 'sector_id', 'categoria_id', 'es_agente_retencion','ubigeo_id'
+        'id', 'ruc', 'razon_social', 'seudonimo', 'direccion', 'referencia','representante_nombres', 'telefono', 'correo_electronico', 'web', 'aniversario', 'sector_id', 'categoria_id', 'es_agente_retencion','ubigeo_id','privada','logo_head','logo_central','sunarp_registro'
     ];
     protected $hidden = [
         'password', 'remember_token',
     ];
     protected $casts = [
-        'email_verified_at' => 'datetime',
+      'email_verified_at' => 'datetime',
+      'privada' => 'boolean',
       ];
 
     public function __construct(array $data = array())
@@ -75,10 +76,10 @@ class Empresa extends Model
 
     public static function search($term){
       $term = strtolower(trim($term));
-        return static::where(function($query) use($term) {
-            $query->WhereRaw("LOWER(razon_social) LIKE ?",["%{$term}%"])
-              ->orWhereRaw("LOWER(seudonimo) LIKE ?",["%{$term}%"])
+        return static::leftJoin('osce.cliente', 'osce.cliente.empresa_id', 'osce.empresa.id')->where(function($query) use($term) {
+            $query->WhereRaw("LOWER(osce.empresa.razon_social) LIKE ?",["%{$term}%"])
+              ->orWhereRaw("LOWER(osce.empresa.seudonimo) LIKE ?",["%{$term}%"])
             ;
-        });
+        })->select('osce.empresa.*')->orderBy('osce.cliente.id', 'ASC');
     } 
 }

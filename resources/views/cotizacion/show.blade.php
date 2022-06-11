@@ -95,6 +95,7 @@ tr.block_details > td > div {
     @include('cotizacion.timeline') 
 </div>
 </div>
+
 @endsection
 
 {{-- vendor scripts --}}

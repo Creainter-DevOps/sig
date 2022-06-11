@@ -50,7 +50,70 @@ tr.block_details>td>div {
         </tr>
       </thead>
       @foreach ($list as $oportunidad)
-      <tbody class="block" data-licitacion-id="{{ $oportunidad->licitacion()->id }}" data-oportunidad-id="{{ $oportunidad->id }}">
+      <tbody class="block" data-licitacion-id="{{ $oportunidad->id }}" data-oportunidad-id="{{ $oportunidad->id }}">
+        <tr class="block_header">
+          <td>
+            <div style="font-size: 11px;color: #64aafb;">{{ Helper::fecha($oportunidad->created_on, true) }}</div>
+            {{ $oportunidad->empresa()->rotulo() }}
+          </td>
+          <td style="width:200px;">{{ $oportunidad->tipo_proceso }} <br /> {{ Helper::money($oportunidad->monto) }}</td>
+          <td>{{ $oportunidad->tipo_objeto }}</td>
+          <td>{{ $oportunidad->rotulo }}</td>
+          <td>{{ Helper::fecha($oportunidad->fecha_participacion_hasta) }}<br /><span class="{{ $oportunidad->estado()['class'] }}">{{ $oportunidad->estado()['message'] }}</span></td>
+          <td style="vertical-align: top;">
+            <a href="javascript:void(0);" class="btn btn-sm btn-success shadow mr-1 mb-1">Aprobar</a>
+            <a href="javascript:void(0);" class="btn btn-sm btn-danger glow mr-1 mb-1">Rechazar</a>
+          </td>
+        </tr>
+        <tr class="block_details">
+          <td colspan="7"><div>
+            <table class="table table-borderless">
+              <tbody>
+                <tr>
+                  <td>Nomenclatura:</td>
+                  <td><a href="/licitaciones/{{ $oportunidad->id }}/detalles">{{ $oportunidad->nomenclatura }}</a></td>
+                </tr>
+                <tr>
+                  <td>Registrado:</td>
+                  <td>{{ Helper::fecha($oportunidad->created_on) }}</td>
+                </tr>
+                <tr>
+                  <td>Descripción:</td>
+                  <td>{{ $oportunidad->descripcion }}</td>
+                </tr>
+                <tr>
+                  <td>Participación:</td>
+                  <td>{{ $oportunidad->participacion() }}</td>
+                </tr>
+                <tr>
+                  <td>Propuesta:</td>
+                  <td>{{ $oportunidad->propuesta() }}</td>
+                </tr>
+                <tr>
+                  <td>Adjuntos:</td>
+                  <td>
+<ul>
+            @foreach ($oportunidad->adjuntos() as $a)
+              <li><a target="_blank" href="http://prodapp.seace.gob.pe/SeaceWeb-PRO/SdescargarArchivoAlfresco?fileCode={{ $a->codigoAlfresco }}">{{ $a->tipoDocumento }}</a></li>
+            @endforeach
+          </ul>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Estado:</td>
+                  <td><span class="{{ $oportunidad->estado()['class'] }}">{{ $oportunidad->estado()['message'] }}</span></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="btns_actions">
+              <a href="javascript:void(0);" class="btn btn-success shadow mr-1 mb-1">Aprobar</a>
+              <a href="javascript:void(0);" class="btn btn-danger glow mr-1 mb-1">Rechazar</a>
+            </div>
+          </div></td>
+        </tr>
+        </tbody>
+ {{--
+      <!--<tbody class="block" data-licitacion-id="{{ $oportunidad->licitacion()->id }}" data-oportunidad-id="{{ $oportunidad->id }}">
         <tr class="block_header">
           <td>{{ $oportunidad->licitacion()->empresa()->rotulo() }}</td>
           <td style="width:200px;">{{ $oportunidad->licitacion()->tipo_proceso }} <br /> {{ Helper::money($oportunidad->licitacion()->monto) }}</td>
@@ -108,7 +171,8 @@ tr.block_details>td>div {
             </div>
           </div></td>
         </tr>
-        </tbody>
+        </tbody>-->
+ --}}
         @endforeach
     </table>
   </div>

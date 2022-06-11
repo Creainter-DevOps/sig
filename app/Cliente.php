@@ -18,8 +18,8 @@ class Cliente extends Model {
 
   protected $connection = 'interno';
   protected $table = 'osce.cliente';
-    const UPDATED_AT = null;
-    const CREATED_AT = null;
+  const UPDATED_AT = null;
+  const CREATED_AT = null;
     /**
      * The attributes that are mass assignable.
      *
@@ -79,6 +79,22 @@ class Cliente extends Model {
   }
     public function ultima_comunicacion() {
       return '';
+    }
+    public static function porEmpresa($empresa_id) {
+      return static::where([
+        ['empresa_id', '=', $empresa_id],
+        ['tenant_id', '=', Auth::user()->tenant_id],
+      ])->first();
+    }
+    public static function porEmpresaForce($empresa_id) {
+      $cliente = static::porEmpresa($empresa_id);
+      if(!empty($cliente) && !empty($cliente->id)) {
+        return $cliente;
+      }
+      return Cliente::create([
+        'empresa_id' => $empresa_id,
+        'tenant_id'  => Auth::user()->tenant_id,
+      ]);
     }
     public static function search($term) {
         $term = strtolower(trim($term));

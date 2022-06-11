@@ -29,17 +29,16 @@ function toastInfo(message ='' , timer = 2000 ){
       title : message,
     });
 }
-function toastSuccessResponse(redirect = null, message = "Operacion Realizada correctamente",  timer = 500){ 
+function toastSuccessResponse(redirect = null, message = "Operacion Realizada correctamente",  timer = 1000){ 
 ToastBasic.fire( {
       timer: timer,
       icon : 'success',
       title : message,
       didClose :(event) => {
-       if(redirect){
+       if(redirect != null ){
          redirect_to(redirect);
          return
        }
-       redirect_to();
       }
     });
 }

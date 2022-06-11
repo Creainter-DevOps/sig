@@ -1,11 +1,11 @@
 @csrf
 <div class="form-body">
   <div class="row">
-  <div class="col-md-6 col-12">
+  <div class="col-md-12 col-12">
     <div class="form-label-group container-autocomplete" >
       <input type="text" class="form-control autocomplete" name="oportunidad_id" value="{{ old('cotizacion_id', $cotizacion->oportunidad_id) }}" required
          data-ajax="/oportunidades/autocomplete?directas"
-         data-register="{{  route('oportunidades.create')}}"
+       
         @if( !empty($cotizacion->oportunidad_id ))
          data-value="{{ old ( 'oportunidad', null != $cotizacion->oportunidad() ?  $cotizacion->oportunidad()->rotulo() : '' ) }}"
         @endif
@@ -13,9 +13,9 @@
       <label for="oportunidad_id">Oportunidad</label>
     </div>
   </div>
-    <div class="col-md-6  col-12">
+    <div class="col-md-12  col-12">
       <div class="form-label-group ">
-          <input type="text" class="form-control autocomplete" value="{{ $cotizacion->empresa_id }}"
+          <input type="text" class="form-control autocomplete" value="{{ $cotizacion->empresa_id }}" required
           @if (!empty($cotizacion->empresa_id))
              data-value="{{ $cotizacion->empresa()->razon_social }}" 
           @endif
@@ -23,8 +23,6 @@
           <label for="">Empresa</label>
       </div>
     </div>
-  <div class="col-md-6 col-12">
-  </div>
   <div class="col-md-12 col-12">
   <div class="row">
   <div class="col-4">
@@ -50,12 +48,6 @@
   </div>
   <div class="col-md-12 col-12">
   <div class="row">
-  <div class="col-md-6 col-12">
-    <div class="form-label-group">
-      <input type="text" class="form-control" name="rotulo" value ="{{ old ( 'rotulo',  $cotizacion->rotulo ) }}" placeholder="Rótulo" required >
-      <label for="rotulo">Rótulo</label>
-  </div>
-  </div>
   <div class="col-6">
     <div class="form-label-group">
       <input type="number" class="form-control" name="monto" value="{{ old ('monto', $cotizacion->monto )}}"  placeholder="Monto Total" min="0" max="99999999" step="0.01">
@@ -103,6 +95,12 @@
     <div class="form-label-group">
         <textarea type="text"  name="observacion" class="form-control"  placeholder="Observaciones" rows="5" >{{ old('observacion', $cotizacion->observacion) }}</textarea>
        <label>Observaciones</label>
+    </div>
+  </div>
+ <div class="col-md-6 col-12">
+    <div class="form-label-group">
+        <textarea type="text"  name="terminos" class="form-control"  placeholder="Terminos" rows="5" >{{ old('terminos', $cotizacion->terminos) }}</textarea>
+       <label>Terminos y Condiciones</label>
     </div>
   </div>
   <div class="col-12 d-flex justify-content-end">

@@ -82,12 +82,12 @@
 
 .wizard .steps ul li.current a {
   /* current step */
-  color: #5A8DEE;
+  color: #fd541b;
   cursor: default;
 }
 
 .wizard .steps ul li.current::before {
-  background-color: #5A8DEE;
+  background-color: #fd541b;
 }
 
 .wizard .steps ul li.current:after {

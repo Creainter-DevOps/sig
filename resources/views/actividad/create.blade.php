@@ -31,7 +31,7 @@
       <div class="card">
         <div class="card-body">
           <h4 class="card-title">Realizadas</h4>
-          <ul class="widget-timeline" id="timeline"></ul>
+          <ul class="widget-timeline" id="timeline" style="overflow: auto;"></ul>
         </div>
       </div>
     </div>
@@ -40,10 +40,11 @@
 @section('page-styles')
 <style>
 .timeline-item {
+    font-family: "IBM Plex Sans", Helvetica, Arial, serif !important;
   background: #f3f3f3;
   border: 1px solid #e5e5e5;
   color: #000;
-  padding: 0!important;
+  padding: 5px;
   margin: 0;
   border-radius: 3px;
   margin-bottom: 5px;
@@ -68,12 +69,25 @@
   margin-right: 5px;
   font-size: 11px;
 }
+.timeline-user{
+position: absolute;
+ color:#636364 ;
+ /* float: right; */
+ font-size: 12px;
+ right: 5px;
+ /* top: 21px; */
+ bottom: 0;
+}
 </style>
 @endsection
 
 @section('page-scripts')
+  <script src="{{ asset('js/scripts/pages/app-invoice.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+<script type="module" src="{{asset('vendors/js/calendar/moment.js')}}"></script>
 <script>
 function actualizar_timeline() {
+  moment.locale('es');
   var ll = $('#timeline');
   var llc = $('#timeline-cron');
   Fetchx({
@@ -90,7 +104,8 @@ function actualizar_timeline() {
       $.each(data, function(y, n) {
         let box = $('<li>').addClass('timeline-items timeline-icon-success active timeline-item');
         box.attr('data-tipo', n.tipo);
-
+        
+        box.css({'padding': '5px'});
         if(n.importancia == 1) {
           box.css({'border-left': '5px solid #5a8dee'});
         } else if(n.importancia == 2) {
@@ -115,21 +130,25 @@ function actualizar_timeline() {
             .append($('<a>').attr('href', 'javascript:void(0)').attr('data-popup', '/actividades/' + n.id + '/editar').text('Ver más'))
           );
 
-        } else if(n.tipo == 'ACTIVIDAD') {
-          box.append($('<div>').addClass('timeline-time').text(n.fecha + ' ' + n.hora));
+        } else if(n.tipo.indexOf('LICITACION') > -1 || n.tipo.indexOf('OPORTUNIDAD') > -1 || true) {
+          /*box.append($('<div>').addClass('timeline-time').text(n.fecha + ' ' + n.hora));
           box.append($('<div>').addClass('timeline-content').html('<div>ACTIVIDAD : ' + n.texto + '</div>'));
           box.find('.timeline-content>div').append('<div style="max-width: 450px;max-height: 100px;overflow: hidden;">' + n.contenido + '</div>');
           box.append($('<div>').addClass('timeline-actions')
             .append($('<a>').attr('href', 'javascript:void(0)').attr('data-popup', '/actividades/' + n.id + '/editar').text('Vér más'))
-          );
+          );*/
+          var html = `<div class="timeline-time">${ moment( n.fecha + ' ' + n.hora ).fromNow() + ` ( ${moment( n.tiempo).format('DD/MM/YYYY hh:MM:ss a') } ) `}</div>
+                      <h6 class="timeline-title">${n.texto}</h6>
+                      <p class="timeline-text">${ n.descripcion}</p>
+                      <p class="timeline-user" ><i style="font-size:inherit;" class="bx bxs-user"></i> ${n.usuario } </p>`;
+          box.append(html);
 
-        } else if(n.tipo == 'NOTA') {
-          box.append($('<div>').addClass('timeline-time').text(n.fecha + ' ' + n.hora));
-          box.append($('<div>').addClass('timeline-content').html('<div>NOTA : ' + n.texto + '</div>'));
-          box.find('.timeline-content>div').append('<div style="max-width: 450px;max-height: 100px;overflow: hidden;">' + n.contenido + '</div>');
-          box.append($('<div>').addClass('timeline-actions')
-            .append($('<a>').attr('href', 'javascript:void(0)').attr('data-popup', '/actividades/' + n.id + '/editar').text('Ver más'))
-          );
+        } else if(n.tipo == 'NOTA' || n.tipo == 'ACTIVIDAD') {
+          var html = `<div class="timeline-time">${ moment( n.fecha + ' ' + n.hora ).fromNow() + ` ( ${moment( n.tiempo).format('DD/MM/YYYY hh:MM a') } ) `}</div>
+                      <h6 class="timeline-title">${n.texto}</h6>
+                      <p class="timeline-text">${ n.descripcion}</p>
+                      <p class="timeline-user" ><i style="font-size:inherit;" class="bx bxs-user"></i> ${n.usuario } </p>`;
+          box.append(html);
 
         } else if(n.tipo == 'VISITA') {
           box.append($('<div>').addClass('timeline-time').text(n.fecha + ' ' + n.hora));

@@ -74,6 +74,9 @@ data-open="click" data-menu="vertical-menu-modern" data-col="2-columns">
     @include('panels.footer')
   <!-- END: Footer-->
 
+    <!-- Start: Modals-->
+    @yield('modals')
+    <!-- END: Modals-->
   @include('panels.scripts')
 </body>
 <!-- END: Body-->

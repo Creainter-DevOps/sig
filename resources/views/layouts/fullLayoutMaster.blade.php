@@ -52,10 +52,12 @@ License: You must have a valid license purchased only from themeforest(the above
       </div>
     </div>
     <!-- END: Content-->
-
+    {{-- modals -- }}
+    <!-- Start: Modals-->
+    @yield('modals')
+    <!-- END: Modals-->
     {{-- scripts --}}
     @include('panels.scripts')
-
   </body>
   <!-- END: Body-->
 </html>

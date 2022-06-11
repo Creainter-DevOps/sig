@@ -31,12 +31,12 @@ body.semi-dark-layout .main-menu-content .navigation-main .nav-item a:after {
 }
 
 body.semi-dark-layout .main-menu-content .navigation-main .nav-item .menu-content .active .menu-item {
-  color: #5A8DEE !important;
+  color: #fd541b !important;
 }
 
 body.semi-dark-layout .main-menu-content .navigation-main .active .menu-title,
 body.semi-dark-layout .main-menu-content .navigation-main .active i {
-  color: #5A8DEE;
+  color: #fd541b;
 }
 
 body.semi-dark-layout .main-menu-content .navigation-main .sidebar-group-active {

@@ -97,7 +97,7 @@
           <div class="card-content">
             <div class="card-body p-0 pb-1">
               <ul class="list-group list-group-flush">
-@foreach(App\Oportunidad::requiere_atencion() as $o)
+                @foreach(App\Oportunidad::requiere_atencion() as $o)
                 <li
                   class="list-group-item list-group-item-action border-0 d-flex align-items-center justify-content-between">
                   <div class="list-left d-flex">
@@ -109,13 +109,13 @@
                       </div>
                     </div>
                     <div class="list-content">
-                      <span class="list-title">{{ $o->codigo }}</span>
-                      <small class="text-muted d-block">{{ substr($o->licitacion()->rotulo(),0, 20) }}</small>
+                      <span class="list-title"><a href="/licitaciones/{{ $o->licitacion_id }}/detalles">{{ $o->codigo }}</a></span>
+                      <small class="text-muted d-block">{{ strtoupper(substr($o->licitacion()->rotulo(),0, 17)) }}</small>
                     </div>
                   </div>
                   <span class="{{ $o->estado()['class'] }}">{{ $o->estado()['message'] }}</span>
                 </li>
-@endforeach
+               @endforeach
               </ul>
             </div>
           </div>
