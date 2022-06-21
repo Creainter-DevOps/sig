@@ -1,6 +1,6 @@
 @extends('layouts.contentLayoutMaster')
 {{-- page Title --}}
-@section('title','Widgets')
+@section('title','Expediente')
 {{-- vendor scripts --}}
 @section('vendor-styles')
 <link rel="stylesheet" type="text/css" href="{{asset('vendors/css/charts/apexcharts.css')}}">
@@ -115,7 +115,7 @@ border: solid 1px #ccc;
   .doc {
     width: 100%;
     height: 100% ;
-    min-height: 750px;
+    max-height: 750px;
   }
 
   #ContainerOne .StackedList {
@@ -222,14 +222,14 @@ position: absolute;
   background: #fbf4ff;
 }
 .draggable-source--is-dragging {
-    background: #ffffff!important;
-    border: 1px dashed #00cd07!important;
-    border-width: 2px!important;
+    background: #ffffff !important;
+    border: 1px dashed #00cd07 !important;
+    border-width: 2px !important;
 }
 .draggable-source--is-dragging > * {
   display: none;
 }
-[data-tools] {
+[data-tools] , [data-remove] {
     cursor: pointer;
     display: inline-block;
     padding: 5px 20px;
@@ -239,6 +239,7 @@ position: absolute;
     text-align: center;
     border-radius: 5px;
 }
+
 .contentPoint {
   position:relative;
 }

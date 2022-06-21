@@ -1,6 +1,6 @@
 @extends('layouts.contentLayoutMaster')
 {{-- page title --}}
-@section('title','Invoice List')
+@section('title','Editar Oportunidad')
 {{-- vendor style --}}
 @section('vendor-styles')
 <link rel="stylesheet" type="text/css" href="{{asset('vendors/css/vendors.min.css')}} ">
@@ -14,24 +14,22 @@
 @section('content')
 <div class="row" id="basic-table">
   <div class="col-12">
-<div class="card">
+      <div class="card">
         <div class="card-header">
-          <h4 class="card-title">Formulario</h4>
+          <!--<h4 class="card-title">Formulario</h4>-->
         </div>
         <div class="card-content">
           <div class="card-body">
             <form class="form form-horizontal"   action=" {{ route('oportunidades.update', ['oportunidad' => $oportunidad->id ]) }}" method="POST" id="form-data" >
                {!! method_field('PUT') !!}
               <div class="form-body">
-              
-                  @include('oportunidad.formulario')
+                @include('oportunidad.formulario')
               </div>
             </form>
           </div>
-        </div>
+         </div>
       </div>
-  </div>
-  <div>
+   </div>
 </div>
 @endsection
 

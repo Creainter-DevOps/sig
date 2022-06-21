@@ -17,7 +17,7 @@
           <div class="card disable-rounded-right mb-0 p-2 h-100 d-flex justify-content-center">
             <div class="card-header pb-1">
               <div class="card-title">
-                <h4 class="text-center mb-2">Welcome Back</h4>
+                <h4 class="text-center mb-2">Bienvenido</h4>
               </div>
             </div>
             <div class="card-content">
@@ -26,7 +26,7 @@
                 <form method="POST" action="{{ route('login') }}">
                   @csrf
                   <div class="form-group mb-50">
-                    <label class="text-bold-600" for="username">Username</label>
+                    <label class="text-bold-600" for="username">Usuario</label>
                     <input id="username" type="text" class="form-control @error('username') is-invalid @enderror" name="username" value="{{ old('username') }}"  autocomplete="username" autofocus placeholder="Username">
                     @error('username')
                       <span class="invalid-feedback" role="alert">
@@ -35,7 +35,7 @@
                     @enderror
                   </div>
                   <div class="form-group">
-                    <label class="text-bold-600" for="password">Password</label>
+                    <label class="text-bold-600" for="password">Clave</label>
                     <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password"  autocomplete="current-password" placeholder="Password">
                     @error('password')
                       <span class="invalid-feedback" role="alert">

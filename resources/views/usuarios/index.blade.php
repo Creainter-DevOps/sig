@@ -10,28 +10,6 @@
 {{-- page style --}}
 @section('page-styles')
 <link rel="stylesheet" type="text/css" href="{{asset('css/pages/app-invoice.css')}}">
-<style>
-tr.block_header {
-  cursor: pointer;
-}
-tr.block_details {
-  display:none;
-}
-tr.block_details>td {
-  padding: 5px;
-}
-tr.block_details>td>div {
-  background: #f2f4f4;
-  border-radius: 2px;
-  padding: 5px;
-  margin: 5px 10px;
-  color: #000;
-}
-.btns_actions {
-  color: #fff;
-  text-align: right;
-}
-</style>
 @endsection
 
 @section('content')
@@ -49,10 +27,10 @@ tr.block_details>td>div {
     <table class="table table-sm mb-0" style="width:100%">
       <thead>
         <tr>
-          <th>Id</th>
-          <th>RUC</th>
-          <th>Razon social</th>
-          <th>Seudonimo</th>
+          <th>Usuario</th>
+          <th>Nombres</th>
+          <th>U.Sesion</th>
+          <th></th>
           <th>Telefono</th>
           <th>Web</th>
           <th width="5%">Opciones</th>

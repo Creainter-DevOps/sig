@@ -26,6 +26,7 @@ class OportunidadController extends Controller {
       ["link" => "/proyectos", "name" => "Oportunidades" ]
     ];
   }
+
   public function index(Request $request)
   {
       $search = $request->input('search');
@@ -39,6 +40,7 @@ class OportunidadController extends Controller {
 
       return view('oportunidad.index', $this->viewBag );
   }
+
   public function create(Request $request)
   {
     $oportunidad = new Oportunidad;
@@ -91,8 +93,11 @@ class OportunidadController extends Controller {
      */
   public function edit(Oportunidad $oportunidad)
   {
-      return view('oportunidad.edit', compact('oportunidad'));
+    $this->viewBag['breadcrumbs'][] = ['name' => 'Editar oportunidad' ];
+    $this->viewBag['oportunidad'] =  $oportunidad;
+    return view('oportunidad.edit', $this->viewBag);
   }
+
   public function update(Request $request, Oportunidad $oportunidad )
   {
     $data = $request->all();

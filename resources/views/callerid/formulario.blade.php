@@ -27,7 +27,7 @@
       <div class="form-label-group">  
           <input class="form-control"     value="{{ old('number', $caller->number ) }}"
                data-value=" {{ old( 'number', $caller->number )}}" name="number">
-          <label for="cliente_id">Number</label>
+          <label for="cliente_id">Numero</label>
       </div>
     </div>
 

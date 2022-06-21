@@ -31,6 +31,7 @@ class Producto extends Model
         'UND' => 'UND',
       ];
    }
+
    public static function fillTipo(){
      return [
         'S' => 'Servicio',

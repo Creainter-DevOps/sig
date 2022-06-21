@@ -16,12 +16,12 @@
 @section('content')
 <!-- table Transactions start -->
 <div class="row">
-        <div class="offset-12 col-md-1" style="margin-bottom: 10px;">
-          <a class="btn btn-primary" href="/contactos/crear">
-              Nuevo
-          </a>
-        </div>
-  </div>
+    <div class="offset-12 col-md-1" style="margin-bottom: 10px;">
+      <a class="btn btn-primary" href="/contactos/crear">
+       + Nuevo
+      </a>
+    </div>
+</div>
 <!-- table Transactions end -->
 
 <!-- table success start -->

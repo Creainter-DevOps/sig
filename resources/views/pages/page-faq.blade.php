@@ -18,7 +18,7 @@
       <div class="card faq-bg bg-transparent box-shadow-0 p-1 p-md-5">
         <div class="card-content">
           <div class="card-body p-0">
-            <h1 class="faq-title text-center mb-3">Hello, how can we help?</h1>
+            <h1 class="faq-title text-center mb-3">Hola, en que puedo ayudarte ?</h1>
             <form>
               <fieldset class="faq-search-width form-group position-relative w-50 mx-auto">
                 <input type="text" class="form-control round form-control-lg shadow pl-2"
@@ -28,8 +28,7 @@
                     class="bx bx-search"></i></button>
               </fieldset>
             </form>
-            <p class="card-text text-center mt-3 font-medium-1 text-muted">
-              or choose a category to quickly find the help you need</p>
+            <p class="card-text text-center mt-3 font-medium-1 text-muted">o elija una categoria para que encuentre la ayuda que necesita rapidamente</p>
           </div>
         </div>
       </div>
@@ -50,23 +49,23 @@
             <div class="swiper-wrapper">
               <div class="swiper-slide rounded swiper-shadow" id="getting-text"> <i
                   class="bx bx-flag mb-1 font-large-1"></i>
-                <div class="cent-text1">Getting Started</div>
+                <div class="cent-text1">Comenzando</div>
               </div>
               <div class="swiper-slide rounded swiper-shadow" id="pricing-text"> <i
                   class="bx bx-dollar-circle mb-1 font-large-1"></i>
-                <div class="cent-text1">Pricing & Plans</div>
+                <div class="cent-text1">Precios y planes</div>
               </div>
               <div class="swiper-slide rounded swiper-shadow" id="sales-text"> <i
                   class="bx bx-shopping-bag mb-1 font-large-1"></i>
-                <div class="cent-text1">Sales Question</div>
+                <div class="cent-text1">Ventas</div>
               </div>
               <div class="swiper-slide rounded swiper-shadow" id="usage-text"> <i
                   class="bx bx-book-open mb-1 font-large-1"></i>
-                <div class="cent-text1">Usage Guides</div>
+                <div class="cent-text1">Guia de uso</div>
               </div>
               <div class="swiper-slide rounded swiper-shadow" id="general-text"> <i
                   class="bx bx-info-circle mb-1 font-large-1"></i>
-                <div class="cent-text1">General Guide</div>
+                <div class="cent-text1">Guia General</div>
               </div>
             </div>
             <!-- Add Arrows -->
@@ -76,7 +75,7 @@
           <div class="main-wrapper-content">
             <div class="wrapper-content" data-faq="getting-text">
               <div class="text-center p-md-4 p-sm-1 py-1 p-0">
-                <h1 class="faq-title">Getting Started</h1>
+                <h1 class="faq-title">Comenzando</h1>
                 <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Nam reprehenderit alias voluptas aspernatur
                   maiores
                   quis molestiae totam deserunt exercitationem ipsam officiis nisi, labore magni, commodi quaerat quia
@@ -98,18 +97,13 @@
                       <div class="card-content">
                         <div class="card-body">
                           Cheesecake cotton candy bonbon muffin cupcake tiramisu croissant. Tootsie roll sweet candy
-                          bear
-                          claw chupa chups lollipop toffee. Macaroon donut liquorice powder candy carrot cake macaroon
+                          bear claw chupa chups lollipop toffee. Macaroon donut liquorice powder candy carrot cake macaroon
                           fruitcake. Cookie toffee lollipop cotton candy ice cream dragée soufflé.
                           Cake tiramisu lollipop wafer pie soufflé dessert tart. Biscuit ice cream pie apple pie topping
                           oat cake dessert. Soufflé icing caramels. Chocolate cake icing ice cream macaroon pie
-                          cheesecake
-                          liquorice apple pie. <br> <br> Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-                          Voluptates
-                          alias
-                          architecto ullam? Ratione, vitae, amet corrupti non unde praesentium laborum incidunt fugit
-                          vel illo
-                          debitis
+                          cheesecake liquorice apple pie. <br> <br> Lorem, ipsum dolor sit amet consectetur adipisicing elit.
+                          Voluptates alias architecto ullam? Ratione, vitae, amet corrupti non unde praesentium laborum incidunt fugit
+                          vel illo debitis
                           dicta illum fugiat, at consequatur! Voluptatum sunt dolorem at deleniti dolor quis a nam
                           facilis.
                         </div>

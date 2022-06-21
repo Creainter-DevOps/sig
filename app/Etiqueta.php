@@ -58,14 +58,13 @@ class Etiqueta extends Model {
         LIMIT 20");
       return static::hydrate($rp);
     }
+
     public static function empresas() {
-      $rp = DB::select("
-        SELECT EM.seudonimo empresa, E.nombre, EP.tipo
-        FROM osce.etiqueta E
-        JOIN osce.empresa_etiqueta EP ON EP.etiqueta_id = E.id 
-        JOIN osce.empresa EM ON EM.id = EP.empresa_id AND EM.tenant_id = " . Auth::user()->tenant_id . "
-        ");
-      return Etiqueta::hydrate($rp);
+
+      return Etiqueta::selectRaw("empresa.seudonimo,etiqueta.nombre,empresa_etiqueta.tipo")
+      ->leftJoin('osce.empresa_etiqueta','empresa_etiqueta.etiqueta_id','etiqueta.id') 
+      ->leftJoin('osce.empresa', 'empresa.id', 'empresa_etiqueta.empresa_id')
+      ->where('empresa.tenant_id', Auth::user()->tenant_id );
     }
     public function ultima_comunicacion() {
       return '';

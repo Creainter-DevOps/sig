@@ -13,9 +13,24 @@ class UsuarioController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    
+    
+    protected $viewBag; 
+
+    public function __construct()
+    {
+      $this->middleware('auth');
+      $this->viewBag['pageConfigs'] = ['pageHeader' => true ];
+      $this->viewBag['breadcrumbs'] = [
+        ["link" => "/dashboard", "name" => "Home" ],
+        ["link" => "/proyectos", "name" => "Clientes" ]
+      ];
+    }
+
     public function index()
     {
-        //
+      return view('usuarios.index',$this->viewBag );     
     }
 
     /**

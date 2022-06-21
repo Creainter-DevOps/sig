@@ -131,6 +131,9 @@ class Helper
   public static function json_has($x, $path = null) {
     return file_exists(static::json_path($x, $path));
   }
+  public static function json_timeout($x, $time, $path = null) {
+    return filemtime(static::json_path($x, $path)) <= (time() - ($time * 1));
+  }
   public static function json_load($x, $path = null) {
     if(!static::json_has($x, $path)) {
       return [];

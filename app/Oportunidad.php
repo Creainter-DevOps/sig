@@ -9,7 +9,7 @@ use Laravel\Passport\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Model;
 use App\Helpers\Helper;
-use Illuminate\Support\Facades\DB;
+use App\Facades\DB;
 use App\Empresa;
 use App\Cotizacion;
 use App\Actividad;
@@ -248,7 +248,7 @@ LIMIT 50");
       return static::hydrate($rp);
     }
     static function requiere_atencion() {
-      $rp = DB::select("
+      $rp = DB::cache(60 * 60, "
 SELECT x.*
 FROM (
 SELECT O.*,
@@ -274,7 +274,7 @@ AND L.fecha_participacion_hasta + INTERVAL '12' HOUR >= NOW()
       return static::hydrate($rp); 
     }
    static function listado_participanes_por_vencer() {
-     $rp = DB::select("
+     $rp = DB::cache(20, "
        SELECT x.*,
          L.fecha_participacion_hasta,
          CONCAT(
@@ -305,7 +305,7 @@ ORDER BY L.fecha_participacion_hasta ASC, id DESC");
       return static::hydrate($rp);
    }
     static function listado_propuestas_por_vencer() {
-      $rp = DB::select("
+      $rp = DB::cache(20, "
         SELECT x.*,
           L.fecha_propuesta_hasta,
          CONCAT(
@@ -327,13 +327,13 @@ WHERE O.aprobado_el >= NOW() - INTERVAL '80' DAY AND O.rechazado_el IS NULL AND 
 JOIN osce.licitacion L ON L.id = x.licitacion_id AND L.eliminado IS NULL
 AND
   ((L.fecha_propuesta_desde - INTERVAL '2' DAY <= NOW() AND L.fecha_propuesta_hasta + INTERVAL '2' DAY >= NOW())
-  OR (L.fecha_propuesta_hasta - INTERVAL '48' DAY <= NOW() AND L.fecha_propuesta_hasta + INTERVAL '35' DAY >= NOW()))
+  OR (L.fecha_propuesta_hasta - INTERVAL '10' DAY <= NOW() AND L.fecha_propuesta_hasta + INTERVAL '10' DAY >= NOW()))
 -- WHERE x.cantidad_propuestas = 0 OR x.cantidad_propuestas <> x.cantidad_participadas
 ORDER BY L.fecha_propuesta_hasta ASC, id DESC");
       return static::hydrate($rp);
     }
     static function listado_propuestas_buenas_pro() {
-      $rp = DB::select("
+      $rp = DB::cache(20, "
     SELECT
       O.*,
       CONCAT(
@@ -663,10 +663,10 @@ ORDER BY L.buenapro_fecha ASC, L.fecha_buena_hasta ASC, O.id ASC");
         LIMIT 20", ['q' => $q, 'referencia' => $referencia_id]);
     }
     static function estadistica_barra_cantidades() {
-      return DB::select("SELECT fecha eje_x, cantidad eje_y, tipo collection FROM osce.estadistica_rapida_oportunidades(7, 1)");
+      return DB::cache(60 * 60 * 1, "SELECT fecha eje_x, cantidad eje_y, tipo collection FROM osce.estadistica_rapida_oportunidades(7, 1)");
     }
     static function estadistica_cantidad_mensual() {
-      return DB::select("
+      return DB::cache(60 * 60 * 2, "
         SELECT
         	date_trunc('month', O.fecha_participacion)::date eje_x,
           count(*) eje_y,

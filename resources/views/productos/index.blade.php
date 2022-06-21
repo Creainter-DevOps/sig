@@ -15,9 +15,7 @@
 @section('content')
     <div class="row">
         <div class="offset-12 col-md-1" style="margin-bottom: 10px;">
-                <a class="btn btn-primary" href="/productos/crear">
-                     + Nuevo
-                </a>
+          <a class="btn btn-primary" href="/productos/crear"> + Nuevo</a>
         </div>
     </div>
 <div  class="row" id="basic-table">
@@ -54,7 +52,7 @@
                 <div class="dropdown-menu dropdown-menu-right">
                   <a class="dropdown-item" href="{{ route( 'productos.show', [ 'producto' => $producto->id ] ) }}"><i class="bx bx-show-alt mr-1"></i> Ver más</a>
                   <a class="dropdown-item" href="{{ route( 'productos.edit', [ 'producto' => $producto->id ] ) }}"><i class="bx bx-edit-alt mr-1"></i> Editar</a>
-                  <a class="dropdown-item" onclick="eliminar(event)" href="{{ route('productos.destroy', [ 'producto' => $producto->id ] ) }}"><i class="bx bx-trash mr-1"></i> Eliminar</a>
+                  <a class="dropdown-item" data-confirm-remove="productos/{{ $producto->id }}"><i class="bx bx-trash mr-1"></i> Eliminar</a>
                 </div>
               </div>
             </td>

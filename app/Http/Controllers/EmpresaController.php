@@ -179,7 +179,8 @@ class EmpresaController extends Controller {
 
      public function tags(){
        $empresas = Empresa::where('tenant_id', Auth::user()->tenant_id)-> get();  
-       $empresa_etiquetas = Etiqueta::empresas();
+       $empresa_etiquetas = Etiqueta::empresas()->paginate(15);
+       //dd( $empresa_etiquetas );
        $this->viewBag['breadcrumbs'][] = [ 'name'=> 'Etiquetas' ]; 
        $this->viewBag['etiquetas'] = $empresa_etiquetas;
        $this->viewBag['empresas'] = $empresas;

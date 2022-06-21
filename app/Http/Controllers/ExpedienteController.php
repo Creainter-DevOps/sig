@@ -685,6 +685,18 @@ class ExpedienteController extends Controller
         'status' => true ,
       ]);
     }
+
+    public function eliminarFirmas( Request $request, Cotizacion $cotizacion ){
+
+      $workspace = $cotizacion->json_load();
+      $cid = $request->get('cid');
+      
+      unset( $workspace['paso03'][$cid]['estampados'] );   
+
+      $cotizacion->json_save($workspace);
+      return response()->json(['status' => true ]);
+    }
+
     private function formatoCard($x) {
       $default = [
         'documento' => null,

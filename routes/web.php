@@ -174,15 +174,19 @@ Route::post('expediente/{cotizacion}/paso03','ExpedienteController@paso03_store'
 Route::get('expediente/{cotizacion}/paso04','ExpedienteController@paso04');
 
 Route::post('expediente/{cotizacion}/paso04','ExpedienteController@paso04_store')->name('expediente.paso04');
+
 Route::post('expediente/{cotizacion}/agregarDocumento/{documento}', 'ExpedienteController@agregarDocumento');
 
 Route::get('expediente/{cotizacion}/visualizar', 'ExpedienteController@visualizar_documento');
 
 Route::post('expediente/{cotizacion}/estampar', 'ExpedienteController@estamparDocumento');
 
+Route::post('expediente/{cotizacion}/eliminarFirmas', 'ExpedienteController@eliminarFirmas');
+
 Route::post('expediente/{cotizacion}/parallelStatus','ExpedienteController@parallelStatus');
 
 Route::post('expediente/{cotizacion}/archivo/actualizar','ExpedienteController@actualizar_archivo');
+
 Route::get('expediente/{cotizacion}/generarImagen','ExpedienteController@generarImagen');
 
 Route::post('expediente/{cotizacion}/custom','ExpedienteController@custom_store')->name('expediente.custom');

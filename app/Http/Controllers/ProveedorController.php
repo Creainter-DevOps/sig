@@ -159,7 +159,7 @@ class ProveedorController extends Controller
     
     public function autocomplete(Request $request) {
       $query = strtolower($request->input('query'));
-      $data = Proveedor:: search($query)
+      $data = Proveedor::search($query)
               ->selectRaw("osce.proveedor.id, osce.empresa.razon_social as value")
               ->get();
       return response()->json($data);

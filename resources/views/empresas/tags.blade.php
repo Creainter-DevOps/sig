@@ -2,9 +2,6 @@
 @section('title','Etiquetas')
 @section('content')
     <div class="row">
-      <!--<div class="offset-12 " style="margin-bottom: 10px;text-align:right;">
-            <a class="btn btn-primary " href="/empresas/tags/nuevo" style="margin-right:5px;" > Nuevo </a>
-        </div>-->
         <div class="col-12" style="margin-bottom:10px;" >
         @foreach ($empresas as $empresa )
         <a class="btn btn-secondary" href="/empresas/<?= $empresa->id ?>/tags" style="margin-right:5px;" >
@@ -36,7 +33,7 @@
                     <tbody>
                         @foreach ($etiquetas  as $etiqueta)
                             <tr>
-                                <td>{{ $etiqueta->empresa  }}</td>
+                                <td>{{ $etiqueta->seudonimo }}</td>
                                 <td>{{ $etiqueta->nombre  }}</td>
                                 <td>{{ $etiqueta->tipo }}</td>
                                 <td>
@@ -54,8 +51,11 @@
             </div>
           </div>
           <div class="card-footer d-flex">
+          {{ $etiquetas->links() }}
           </div>
-          <div class="form-group" style="margin-left:20px;"></div>
+          <div class="form-group" style="margin-left:20px;">
+            Mostrando {{ count($etiquetas) }} de {{ $etiquetas->total() }} registros
+          </div>
         </div>
     </div>
 @endsection

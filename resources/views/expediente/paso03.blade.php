@@ -108,9 +108,36 @@
 <script>
 var current_tool = null;
 const cotizacion_id = {{$cotizacion->id}};
+
 $(document).on('click', '[data-tools]', function() {
   current_tool = $(this).attr('data-tools');
   $('.contentPoint').addClass('activePoint');
+
+});
+
+$(document).on('click', '[data-remove]', function(e) {
+  current_tool = $(this).attr('data-tools');
+  //$('.contentPoint').addClass('activePoint');
+  let url = '/expediente/{{$cotizacion->id}}/eliminarFirmas';
+  var cid = e.target.parentNode.parentNode.parentNode.querySelector('.imagePoint').dataset.cid;
+  console.log(cid);
+
+  let formdata = new FormData();
+
+  formdata.append('cid', cid );
+
+   fetch( url , {
+      method: 'post',
+      headers: {
+        "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      },
+      body : formdata
+   })
+   .then( response => response.json() )
+   .then( data => {
+      console.log(data)
+   });
+
 });
 
 $(document).on('mousemove', '.contentPoint', function(e) {
@@ -141,6 +168,7 @@ $(document).on('click', '.contentPoint', function(e) {
 
   let url = '/expediente/{{$cotizacion->id}}/estampar';
   let formdata = new FormData();
+  
   formdata.append('cid', cid);
   formdata.append('tool', current_tool);
   formdata.append('page', page);
@@ -185,12 +213,7 @@ buscador.addEventListener('keyup', (e) => {
   }
 })
 
-/*function visualizar(cid) {
-  console.log('visualizar', cid);
-  let box = $("<a>").attr('data-popup', '/expediente/{{$cotizacion->id }}/visualizar?cid=' + cid);
-  $('body').prepend(box);
-  box.click();
-}*/
+
 
 function eliminarCid(cid) {
   let url = '/expediente/{{$cotizacion->id}}/eliminarDocumento';
@@ -401,7 +424,6 @@ realizar_busqueda('');
       }
       render_dom_popup();
       })   
-    
   }
  
 </script>

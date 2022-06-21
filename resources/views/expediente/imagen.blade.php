@@ -40,6 +40,6 @@
   <div style="padding-bottom: 8px;">
     <div data-tools="firma">Firma</div>
     <div data-tools="visado">Visado</div>
-    <div >Descargar</div>
+    <div data-remove="" data-cid="">Limpiar</div>
   </div>
   </div>

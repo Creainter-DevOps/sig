@@ -1,9 +1,9 @@
 @extends('layouts.contentLayoutMaster')
-@section('title', 'Proveedor - Productos') 
+@section('title', 'Productos') 
 @section('content')
 <!-- Button trigger modal -->
 <div class="row d-flex justify-content-between "  >
-  <h4 class="title">Proveedor : {{ $proveedor->empresa()->razon_social }}</h4>
+<!--  <h4 class="title">Proveedor : {{ $proveedor->empresa()->razon_social }}</h4>-->
   <button type="button" data-id="0" data-productoid="0"  class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">
    Agregar producto 
   </button>
@@ -81,7 +81,7 @@
     </div>
   </div>
 </div>
-<h4 class="text-primary">Productos</h4>
+<!--<h4 class="text-primary">Productos</h4>-->
 <div class="row">
   <div class="card card-body">
     <div class="table-responsive">

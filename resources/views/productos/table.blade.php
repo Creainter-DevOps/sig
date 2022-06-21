@@ -7,7 +7,7 @@
       <th>Nombre</th>
       <td>{{ $producto->nombre }}</td>
       <th>Tipo</th>
-      <td>{{ $producto->Tipo }}</td>
+      <td>{{ App\Producto::fillTipo()[ $producto->tipo ] }}</td>
   </tr>
   <tr>
       <th>Precio</th>
