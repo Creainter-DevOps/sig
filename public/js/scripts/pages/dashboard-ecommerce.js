@@ -27,7 +27,7 @@ $(window).on("load", function () {
       type: "radialBar",
     },
     colors: [$primary, $danger, $warning],
-    series: [75, 80, 85],
+    series: [20, 80, 10],
     plotOptions: {
       radialBar: {
         offsetY: -10,
@@ -61,7 +61,7 @@ $(window).on("load", function () {
     stroke: {
       lineCap: "round",
     },
-    labels: ['Target', 'Mart', 'Ebay']
+    labels: ['Target', 'Marte', 'Ebay']
   };
 
   var multiradialChart = new ApexCharts(

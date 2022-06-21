@@ -36,18 +36,18 @@ tr.block_details>td>div {
 
 @section('content')
     <div class="row">
-        <div class="offset-12 col-md-1" style="margin-bottom: 10px;text-align:right;">
-                <a class="btn btn-default" href="/proveedores/crear" style="color: #fff; background-color: #007bff; border-color: #007bff;">
-                    Nuevo
+        <div class="offset-12 col-md-1" style="margin-bottom: 10px;">
+                <a class="btn btn-primary" href="/proveedores/crear">
+                     + Nuevo
                 </a>
         </div>
     </div>
 <div class="row" id="basic-table">
   <div class="col-12">
     <div class="card">
-      <div class="card-header">
+      <!--<div class="card-header">
         <h4 class="card-title">Proveedores </h4>
-      </div>
+      </div>-->
       <div class="card-content">
         <div class="card-body">
   <div class="table-responsive">

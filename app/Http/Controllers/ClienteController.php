@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Cliente;
 use App\Empresa;
 use Auth;
+
 class ClienteController extends Controller
 {
     /**
@@ -13,6 +14,19 @@ class ClienteController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    
+    protected $viewBag; 
+
+    public function __construct()
+    {
+      $this->middleware('auth');
+      $this->viewBag['pageConfigs'] = ['pageHeader' => true ];
+      $this->viewBag['breadcrumbs'] = [
+        ["link" => "/dashboard", "name" => "Home" ],
+        ["link" => "/proyectos", "name" => "Clientes" ]
+      ];
+    }
+  
     public function index(Request $request )
     {
          $search = $request->input('search');
@@ -21,7 +35,8 @@ class ClienteController extends Controller
         } else {
             $listado = Cliente::where('eliminado',false )->orderBy('created_on', 'desc')->paginate(15)->appends(request()->query());
         }
-        return view('clientes.index', ['listado' => $listado]); 
+        $this->viewBag['listado'] = $listado; 
+        return view('clientes.index', $this->viewBag ); 
     }
 
     /**
@@ -31,7 +46,10 @@ class ClienteController extends Controller
      */
     public function create( Request $request, Cliente $cliente)
     {
-       return view(  $request->ajax() ?  'clientes.fast'  : 'clientes.create' , compact('cliente'));
+       $this->viewBag['breadcrumbs'][] = ['name' => 'Nuevo Cliente'];
+       $this->viewBag['cliente'] = $cliente;
+       return view( $request->ajax() ? 'clientes.fast' : 'clientes.create', $this->viewBag );
+
     }
 
     /**
@@ -40,6 +58,7 @@ class ClienteController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+
     public function store(Request $request , Cliente $cliente )
     {
       $empresa_id = $request->input('empresa_id');
@@ -50,6 +69,7 @@ class ClienteController extends Controller
         $cliente->fill($request->all());
         $cliente->save();
       }
+
       if($request->ajax() || true) {
         return response()->json(['status' => true ,
           'message' => 'La empresa ya fue registrada como cliente', 'redirect' => '/clientes/' . $cliente->id ]);

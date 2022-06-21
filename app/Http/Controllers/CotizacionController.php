@@ -32,12 +32,12 @@ class CotizacionController extends Controller {
     } else {
       $listado = Cotizacion::visible()->orderBy('id', 'desc')->paginate(15)->appends(request()->query());
     }
-    return view('cotizacion.index', ['listado' => $listado]);
+    $this->viewBag = $listado;
+    return view('cotizacion.index', $this->viewBag );
   }
 
   public function show(Request $resquest, Cotizacion $cotizacion) {
     $cotizacion->codigo = '';
-    $breadcrumbs[] = [ 'name' => "Detalle Cotizacion" ];
     $cliente  = isset( $cotizacion->cliente_id ) ? $cotizacion->cliente() : null;
     $timeline = $cotizacion->timeline();
     $contacto = isset($cotizacion->contacto_id) ? $cotizacion->contacto() : null; 
@@ -51,14 +51,22 @@ class CotizacionController extends Controller {
     return redirect()->route('oportunidades.show', [ 'oportunidad' => $cotizacion->oportunidad_id ]);
   }
   public function create(Request $request) {
+    
     $cotizacion = new Cotizacion;
     $cotizacion->monto = 0;
     $cotizacion->nomenclatura = '';
     $cotizacion->rotulo = '';
+
     if(!empty($_GET['oportunidad_id'])) {
       $cotizacion->oportunidad_id = $_GET['oportunidad_id'];
     }
-    return view($request->ajax() ? 'cotizacion.fast' : 'cotizacion.create', compact('cotizacion'));
+
+    $this->viewBag['breadcrumbs'][] = [ 'name' => 'Nueva cotizacion' ];
+
+    $this->viewBag['cotizacion'] = $cotizacion;
+
+    return view($request->ajax() ? 'cotizacion.fast' : 'cotizacion.create', $this->viewBag );
+
   }
 
   public function store(Request $request){

@@ -11,32 +11,17 @@
 @section('content')
     <div class="row">
         <div class="offset-12 col-md-1" style="margin-bottom: 10px;text-align:right;">
-          <a class="btn btn-default" href="/callerids/crear" style="color: #fff; background-color: #007bff; border-color: #007bff;">
-              Nuevo
+          <a class="btn btn-primary" href="/callerids/crear">
+             + Nuevo
           </a>
         </div>
     </div>
 <div class="row" id="basic-table">
   <div class="col-12">
     <div class="card">
-      <div class="card-header d-flex justify-content-between">
+      <!--<div class="card-header d-flex justify-content-between">
         <h4 class="card-title">Callerids</h4>
-
-        <form class="form" style="width:100%"  action="/callerids" method="GET" name="">
-        <div class="col-4 d-flex justify-content-between">
-        <select class="form-control" name="paginate">
-          <option value="2" >2</option>
-          <option value="10">10</option>
-          <option value="15">15</option>
-          <option value="20">20</option>
-          <option value="25">25</option>
-        </select>
-        <button class="btn btn-primary" type="submit"> Enviar </button>
-       </div>
-        </form>
-        
-
-      </div>
+      </div>-->
       <div class="card-content">
         <div class="card-body">
   <div class="table-responsive">

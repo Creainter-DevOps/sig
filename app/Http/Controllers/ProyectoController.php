@@ -11,7 +11,9 @@ use App\Persona;
 use App\Ubigeo;
 
 class ProyectoController extends Controller {
+ 
   protected $viewBag; 
+
   public function __construct()
   {
     $this->middleware('auth');
@@ -29,7 +31,8 @@ class ProyectoController extends Controller {
       } else {
           $listado = Proyecto::where( 'eliminado', false )->orderBy('fecha_desde', 'desc')->paginate(15)->appends(request()->query());
       }
-      return view('proyectos.index', ['listado' => $listado]);
+      $this->viewBag['listado'] = $listado;
+      return view('proyectos.index',  $this->viewBag );
   }
   public function create(Request $request, proyecto $proyecto)
   {

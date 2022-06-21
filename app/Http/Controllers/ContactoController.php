@@ -26,13 +26,18 @@ class ContactoController extends Controller {
     } else {
       $listado = Contacto::where('eliminado', false )->orderBy( 'id', 'desc')->paginate(15)->appends(request()->query());
     }
-    return view('contactos.index', ['listado' => $listado]);
+    $this->viewBag['listado'] = $listado;
+    return view('contactos.index', $this->viewBag);
   }
 
   public function show( Request $request, Contacto $contacto ) {
      $cliente = $contacto->cliente();
-     $breadcrumbs[] = [ 'name' => "Detalle Contacto" ];
-     return view( 'contactos.show'  , compact('contacto', 'cliente','breadcrumbs'));
+
+     $this->viewBag['breadcrumbs'][] = [ 'name' => "Detalle Contacto" ];
+     $this->viewBag['cliente'] = $cliente;
+     $this->viewBag['contacto'] = $contacto;
+
+     return view( 'contactos.show', $this->viewBag );
   }
   
   public function create(Request $request, Contacto $contacto) {

@@ -8,6 +8,7 @@ return [
   "Oportunidades" => "Oportunidades",
   "Actividades" => "Actividades",
   "Contactos" => "Contactos",
+  "Documentos" => "Documentos",
   "Cotizaciones" => "Cotizaciones",
   "Licitaciones" => "Licitaciones",
   "Clientes" => "Clientes",

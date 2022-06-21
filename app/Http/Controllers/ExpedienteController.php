@@ -13,6 +13,8 @@ use App\Helpers\Helper;
 use PhpOffice\PhpWord; 
 use Illuminate\Http\UploadedFile;
 use App\Http\Requests\StoreFileRequest;
+use Auth;
+use Illuminate\Support\Facades\DB;
 
 class ExpedienteController extends Controller
 {
@@ -53,6 +55,41 @@ class ExpedienteController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+    public function inicio(Cotizacion $cotizacion ){
+      
+      $licitacion = $cotizacion->oportunidad()->licitacion();
+      $validaciones = [];   
+      $empresa = $cotizacion->empresa();
+      $logo_header = config('constants.ruta_storage') . $empresa->logo_header;
+      $logo_central = config('constants.ruta_storage') . $empresa->logo_central;
+      $firma = EmpresaFirma::porEmpresa( $cotizacion->empresa_id, 'FIRMA');
+      $visado = EmpresaFirma::porEmpresa( $cotizacion->empresa_id, 'VISADO');
+      
+      if ( file_exists( $logo_header  ) || file_exists($logo_central)  ){
+        $validaciones['empresa_logos'] = true;
+      }
+      if (!empty($firma) && !empty($visado) ){
+        $validaciones['sellos_firmas'] = true;          
+      }
+      if (!empty($empresa->representante_nombres ) &&  !empty($empresa->representante_documento) ){
+        $validaciones['representante'] = true;  
+      }
+      //dd($cotizacion);
+      if ( !empty( $cotizacion->monto) && !empty($cotizacion->moneda_id)){
+        $validaciones['montos'] = true;  
+      }  
+
+      return view('expediente.inicio', compact('cotizacion','licitacion', 'validaciones'));
+
+    }
+    public function inicio_store(Cotizacion $cotizacion ){
+           
+      $cotizacion->elaborado_por   = Auth::user()->id;
+      $cotizacion->elaborado_desde = DB::raw('now()');
+      $cotizacion->elaborado_step  = 1;
+      $cotizacion->save();
+      return redirect('/expediente/'. $cotizacion->id . '/paso01');
+    }
 
     public function paso01(Cotizacion $cotizacion) {
       $plantillas = Documento::plantillas();
@@ -60,8 +97,12 @@ class ExpedienteController extends Controller
       $licitacion = $cotizacion->oportunidad()->licitacion();
       $empresa = $cotizacion->empresa()->toArray();
 
-      $workspace['inputs'] = array_merge($workspace['inputs'], $empresa);
-//      echo "<pre>";print_r($workspace);exit;
+      if(!empty($workspace['inputs'])) {
+        $workspace['inputs'] = array_merge($workspace['inputs'], $empresa);
+      } else {
+        $workspace['inputs'] = $empresa;
+      }
+      // echo "<pre>";print_r($workspace);exit;
       $cotizacion->json_save($workspace);
       return view('expediente.paso01', compact('cotizacion','licitacion','workspace','plantillas'));
 
@@ -87,11 +128,16 @@ class ExpedienteController extends Controller
           'rotulo'         => $doc->rotulo,
           'filename'       => $doc->filename,
           'root'           => $cotizacion->oportunidad()->folder(true) . 'EXPEDIENTE/' . $doc->filename,
+          'timestamp'      => time(),
         ];
       }
 //      echo "<pre>";print_r($workspace);exit;
       $cotizacion->json_save($workspace);
-      $cotizacion->log('EXPEDIENTE/PASO01', 'Se ha iniciado con el paso 1');
+     // $cotizacion->elaborado_por   = Auth::user()->id;
+     // $cotizacion->elaborado_desde = DB::raw('now()');
+     // $cotizacion->elaborado_step  = 2;
+      $cotizacion->save();
+      //$cotizacion->log('EXPEDIENTE/PASO01', 'Se ha iniciado con el paso 1');
       return redirect('/expediente/' . $cotizacion->id . '/paso02');
 
     }
@@ -125,13 +171,14 @@ class ExpedienteController extends Controller
         $outputd = config('constants.ruta_storage') . dirname(Helper::replace_extension($file['root'], 'pdf'));
         $thumb   = config('constants.ruta_storage') . Helper::replace_extension($file['root'], 'jpg');
         $thumb_0 = config('constants.ruta_storage') . Helper::replace_extension($file['root'], 'jpg', '-0');
+        $thumb_r = config('constants.ruta_storage') . Helper::replace_extension($file['root'], 'jpg', '-*');
 
-        $commands[] = '/usr/bin/libreoffice --convert-to pdf ' . $input . ' --outdir ' . $outputd;
-        $commands[] = '/usr/bin/convert -alpha remove -density 150 '.  $output . ' -quality 100 '. $thumb;
-        $commands[] = '/bin/mv ' . $thumb . ' ' . $thumb_0;
+        exec('/bin/rm ' . $output);
+        exec('/usr/bin/libreoffice --convert-to pdf ' . $input . ' --outdir ' . $outputd);
+        #exec('/usr/bin/convert -alpha remove -density 150 '.  $output . ' -quality 100 '. $thumb);
+        #exec('/bin/mv ' . $thumb . ' ' . $thumb_0);
 
-        $metadata = Helper::metadata($input);
-
+        $metadata = Helper::metadata($output);
         /*$documento = Documento::nuevo([
           'tipo'           => $file['tipo'],
           'es_plantilla'   => false,
@@ -141,50 +188,56 @@ class ExpedienteController extends Controller
         ]);*/
 
         $workspace['paso03'][$id. '/n']  = $this->formatoCard([
-          'orden'   => $order,
-          'page'    => 0,
-          'folio'   => $metadata['Pages'] ,
-          'tipo'    => $file['tipo'],
-          'rotulo'  => $file['rotulo'],
-          'archivo' => Helper::replace_extension($file['root'], 'pdf'),
-          'imagen'  => Helper::replace_extension($file['root'], 'jpg', '-0'),
-          'is_part' => false,
+          'orden'     => $order,
+          'page'      => 0,
+          'folio'     => $metadata['Pages'] ,
+          'tipo'      => $file['tipo'],
+          'rotulo'    => $file['rotulo'],
+          'archivo'   => Helper::replace_extension($file['root'], 'pdf'),
+          'imagen'    => Helper::replace_extension($file['root'], 'jpg', '-0'),
+          'is_part'   => false,
+          'timestamp' => time(),
         ]);
 
         $order++;
       }
-      $pid = Helper::parallel_command($commands);
+      /*$pid = Helper::parallel_command($commands);
       $workspace['parallel'] = [
         'method' => 'paso03',
         'pids'   => $pid,
-      ];
+      ];*/
 
       $cotizacion->json_save($workspace);
-      $cotizacion->log('EXPEDIENTE/PASO02', 'Se ha iniciado con el paso 2');
+      $cotizacion->elaborado_por   = Auth::user()->id;
+      $cotizacion->elaborado_step  = 3;
+      $cotizacion->save();
+      //$cotizacion->log('EXPEDIENTE/PASO02', 'Se ha iniciado con el paso 2');
       return redirect('/expediente/' . $cotizacion->id . '/paso03');
     }
     public function paso03(Cotizacion $cotizacion) {
       $workspace = $cotizacion->json_load();
+
+      $workspace['paso03'] = $this->workspace_ordenar($workspace['paso03']);
       if(isset($_GET['demo'])) {
         echo "<pre>";
-        print_r($workspace['paso03']);
+        print_r($workspace);
         exit;
       }
-      $cotizacion->log('EXPEDIENTE/PASO03', 'Se ha iniciado con el paso 3');
+      //$cotizacion->log('EXPEDIENTE/PASO03', 'Se ha iniciado con el paso 3');
       $oportunidad = $cotizacion->oportunidad();
       $entidad = Empresa::find($oportunidad->licitacion()->empresa_id);
       return view('expediente.paso03', compact( 'entidad', 'oportunidad' ,'workspace','cotizacion'));
       /* En este paso renderizamos toda la variable paso03, y cada vez que se saca uno o añade debe afectar solo al paso03 */
     }
+
     public function paso03_store(Cotizacion $cotizacion, Request $request) {
 
       $workspace = $cotizacion->json_load();
-      $cotizacion->log('EXPEDIENTE/PASO03', 'Se ha iniciado con el paso 3');
+      //$cotizacion->log('EXPEDIENTE/PASO03', 'Se ha iniciado con el paso 3');
       $commands = []; 
       /* Se trabaja los pdf por individuales, realizando el custom */
       $commands[] = 'sleep 2';
       $commands[] = 'echo "Se ha iniciado el proceso..."';
-
 
       $estampados = [];
       $temp = EmpresaFirma::porEmpresa($cotizacion->empresa_id, 'FIRMA');
@@ -211,6 +264,8 @@ class ExpedienteController extends Controller
         return array_shift($estampados[$tipo]);
       };
 
+      $ant_repe = [];
+
       foreach($workspace['paso03'] as $key => $file) {
         if(!$file['is_part']) {
           if(!empty($file['estampados']['firma']) || !empty($file['estampados']['visado'])) {
@@ -232,7 +287,14 @@ class ExpedienteController extends Controller
             continue;
           }
         } else {
-          $workspace['paso03'][$key]['root'] = config('constants.ruta_storage') . $file['archivo'];
+          $file_page = Helper::file_name(Helper::replace_extension($file['archivo'], 'pdf', '-' . ($file['page'] + 1)));
+          if(!file_exists(config('constants.ruta_temporal') . $file_page) && !in_array($file['archivo'], $ant_repe)) {
+            $ant_repe[] = $file['archivo'];
+            $input  = config('constants.ruta_storage') . $file['archivo'];
+            $output = config('constants.ruta_temporal') . Helper::file_name(Helper::replace_extension($file['archivo'], 'pdf', '-%d'));
+            $commands[] = "/usr/bin/pdfseparate '" . $input . "' '" . $output . "'";
+          }
+          $workspace['paso03'][$key]['root'] = config('constants.ruta_temporal') . $file_page;
           continue;
         }
 
@@ -288,6 +350,7 @@ class ExpedienteController extends Controller
           $pdf_individuales[] = $file['root'];
         }
       }
+
       $dir = config('constants.ruta_storage') . $cotizacion->oportunidad()->folder(true);
 
       $output = $dir . 'EXPEDIENTE/Propuesta.pdf';
@@ -306,12 +369,12 @@ class ExpedienteController extends Controller
       $commands[] = 'echo "Proceso de foliación de PDF"';
       $commands[] = '/bin/pdf-foliar ' . $output_final;
 
-      /*
-      echo "<pre>";
+      /*echo "<pre>";
       print_r($commands);
-      exit;
-       */
+      exit;*/
       //      $meta = Helper::metadata($output_final);
+
+      $documentos_ids = array_unique($documentos_ids);
       if(empty($cotizacion->documento_id)) {
         $doc = Documento::nuevo([
           'cotizacion_id'  => $cotizacion->id,
@@ -341,8 +404,12 @@ class ExpedienteController extends Controller
         'method' => 'paso04',
         'pids'   => $pid,
       ];
-      $workspace["documento_final"] = $doc->archivo;
+      $workspace["documento_final"] = $doc->archivo . '?t=' . time();
       $cotizacion->json_save($workspace);
+      $cotizacion->elaborado_por   = Auth::user()->id;
+      $cotizacion->elaborado_hasta = DB::raw('now()');
+      $cotizacion->elaborado_step  = 4;
+      $cotizacion->save();
 
       return redirect('/expediente/' . $cotizacion->id . '/paso04');
     }
@@ -376,8 +443,8 @@ class ExpedienteController extends Controller
         'finished' => $finished,
         'log'      => $log,
         'data'     => [
-          'url'       => 'https://sig.creainter.com.pe/storage/' . $cotizacion->oportunidad()->folder(true) . 'EXPEDIENTE/Propuesta.pdf',
-          'url_seace' => 'https://sig.creainter.com.pe/storage/' . $cotizacion->oportunidad()->folder(true) . 'EXPEDIENTE/Propuesta_Seace.pdf',
+          'url'       => 'https://sig.creainter.com.pe/storage/' . $cotizacion->oportunidad()->folder(true) . 'EXPEDIENTE/Propuesta.pdf?t=' . time(),
+          'url_seace' => 'https://sig.creainter.com.pe/storage/' . $cotizacion->oportunidad()->folder(true) . 'EXPEDIENTE/Propuesta_Seace.pdf?t=' . time(),
         ]
       ]);
     }
@@ -387,7 +454,7 @@ class ExpedienteController extends Controller
       if (empty($query)) {
         $resultados = Documento::recomendadas($cotizacion->oportunidad_id);
       } else {
-        $resultados = Documento::busqueda($query);
+        $resultados = Documento::busqueda($cotizacion->oportunidad_id, $query);
       }
       if(!empty($resultados)) {
         $resultados = $resultados->toArray();
@@ -421,36 +488,66 @@ class ExpedienteController extends Controller
 
       $cid = static::workspace_get_id($workspace, $documento->id, 'n');
 
-      $workspace['paso03'][$cid] = $this->formatoCard([
-        'cid'     => $cid,
-        'id'      => $documento->id,
-        'orden'   => sizeof($workspace['paso03']),
-        'page'    => 0,
-        'tipo'    => $documento->tipo,
-        'folio'   => $documento->folio,
-        'rotulo'  => $documento->rotulo,
-        'archivo' => $documento->archivo,
-        'is_part' => false,
-      ]);
+      $orden = !empty($orden) ? $orden : sizeof($workspace['paso03']);
 
-      if(!$documento->es_reusable) {
-        if(!empty($documento->generado_de_id)) {
-          unset($workspace['paso03'][$cid]['id']);
-          $documento->delete();
+      $append = [];
+
+      if(!empty($documento->es_ordenable)) {
+        $workspace['paso03'] = $this->workspace_space($workspace['paso03'], $orden, $documento->folio);
+        foreach(range(0, $documento->folio - 1) as $pp) {
+          $cid = static::workspace_get_id($workspace['paso03'], $documento->id, $pp);
+          $append[$cid] = $this->formatoCard([
+            'cid'     => $cid,
+            'id'      => $documento->id,
+            'orden'   => $orden,
+            'page'    => $pp,
+            'tipo'    => $documento->tipo,
+            'folio'   => $documento->folio,
+            'rotulo'  => $documento->rotulo,
+            'archivo' => $documento->archivo,
+            'is_part' => true,
+          ]);
+          if(!$documento->es_reusable) {
+            if(!empty($documento->generado_de_id)) {
+              unset($append[$cid]['id']);
+              $documento->delete();
+            }
+          }
+          $orden++;
+        }
+      } else {
+        $workspace['paso03'] = $this->workspace_space($workspace['paso03'], $orden, 1);
+        $cid = static::workspace_get_id($workspace['paso03'], $documento->id, 'n');
+        $append[$cid] = $this->formatoCard([
+          'cid'     => $cid,
+          'id'      => $documento->id,
+          'orden'   => $orden,
+          'page'    => 0,
+          'tipo'    => $documento->tipo,
+          'folio'   => $documento->folio,
+          'rotulo'  => $documento->rotulo,
+          'archivo' => $documento->archivo,
+          'is_part' => false,
+        ]);
+        if(!$documento->es_reusable) {
+          if(!empty($documento->generado_de_id)) {
+            unset($append[$cid]['id']);
+            $documento->es_reusable = true;
+            $documento->delete();
+          }
         }
       }
 
-      $workspace['paso03'] = $this->workspace_move($workspace['paso03'], $cid, $orden);
+      foreach($append as $cid => $v) {
+        $workspace['paso03'][$cid] = $v;
+      }
 
       $cotizacion->json_save($workspace);
 
       return response()->json([
         'status' => true , 
         'orden' => $orden,
-        'es_reusable' => $documento->es_reusable,
-        'data' => [
-          $workspace['paso03'][$cid],
-        ]
+        'data' => array_values($append),
       ]);
     }
     public function eliminarDocumento(Request $request, Cotizacion $cotizacion) {
@@ -482,6 +579,7 @@ class ExpedienteController extends Controller
 
       $workspace['paso03'] = $this->workspace_move($workspace['paso03'] , $cid , $orden); 
       $cotizacion->json_save($workspace);
+
       return response()->json([
         'status' => true,
         'data' => $workspace['paso03']
@@ -495,8 +593,16 @@ class ExpedienteController extends Controller
     public  function workspace_get_card( $matrix, $cid ) {
       return $matrix[$cid];
     }
-
-    public function workspace_move( $matrix, $cidx, $orden ) {
+    public function workspace_space($matrix, $orden, $space) {
+      $cids = $this->workspace_get_range($matrix, $orden, null);
+      foreach($cids as $cid) {
+        $c = $this->workspace_get_card($matrix, $cid);
+        $c['orden'] += $space;
+        $matrix[$cid] = $c;
+      }
+      return $matrix;
+    }
+    public function workspace_move($matrix, $cidx, $orden, $space = 1) {
       
       $o_i = $this->workspace_get_card($matrix, $cidx);
 
@@ -506,17 +612,17 @@ class ExpedienteController extends Controller
         return $matrix;
       }
       if ( $o_i > $orden ) {
-        $cids = $this->workspace_get_range( $matrix, $o_i, $orden );
+        $cids = $this->workspace_get_range($matrix, $o_i, $orden);
         foreach($cids as $cid) {
           $c = $this->workspace_get_card($matrix, $cid);
-          $c['orden'] += 1;
+          $c['orden'] += $space;
           $matrix[$cid] = $c;
         }
       } else {
-        $cids = $this->workspace_get_range( $matrix, $o_i, $orden);
+        $cids = $this->workspace_get_range($matrix, $o_i, $orden);
         foreach($cids as $cid) {
           $c = $this->workspace_get_card($matrix, $cid);
-          $c['orden'] -= 1;
+          $c['orden'] -= $space;
           $matrix[$cid] = $c;
         }
       }
@@ -524,7 +630,7 @@ class ExpedienteController extends Controller
       return $this->workspace_ordenar($matrix);
     }   
 
-    public function workspace_ordenar($matrix) {
+    public static function workspace_ordenar($matrix) {
       uasort($matrix, function($item1,$item2) {
         return $item1['orden'] - $item2['orden']; 
       });
@@ -538,11 +644,14 @@ class ExpedienteController extends Controller
       return $matrix;
     }
 
-    public function workspace_get_range($matrix, $o_i, $o_f) {
-
+    public function workspace_get_range($matrix, $o_i, $o_f = null) {
       $matrix = array_filter($matrix, function($c) use ($o_i, $o_f) {
-        if($o_i > $o_f) {
+        if($o_f === null) {
+          return $c['orden'] >= $o_i;
+
+        } elseif($o_i > $o_f) {
           return $c['orden'] <= $o_i && $c['orden'] >= $o_f;
+
         } else {
           return $c['orden'] <= $o_f && $c['orden'] > $o_i;
         }
@@ -611,7 +720,7 @@ class ExpedienteController extends Controller
     }
     public function actualizar_archivo(Cotizacion $cotizacion, StoreFileRequest $request ){
 
-      $workspace = $cotizacion->oportunidad()->json_load();
+      $workspace = $cotizacion->json_load();
 
       $doc = Documento::find( $request->get("documento_id") );
       $dir = config('constants.ruta_storage') . $cotizacion->oportunidad()->folder(true);
@@ -625,30 +734,34 @@ class ExpedienteController extends Controller
       $doc->folio = $meta['Pages'];
 
       $workspace['paso02'][$request->get("key")]["folio"] = $meta["Pages"];
-      $cotizacion->oportunidad()->json_save($workspace);
+      $cotizacion->json_save($workspace);
 
       return response()->json( ['status' => true,'data'    ] );
     }
-    public function generarImagen(Cotizacion $cotizacion,  Request $request ) {
+    public function generarImagen(Cotizacion $cotizacion,  Request $request) {
 
-      $page   = $request->get('page');
-      $cid = $request->get("cid");
+      $page = $request->get('page');
+      $cid  = $request->get("cid");
+
       $workspace = $cotizacion->json_load();   
       if (!isset($workspace["paso03"][$cid])) {
         exit;
       }
       $card = $workspace["paso03"][$cid];
-      if (isset( $card["id"])){
+      if($page == 0 && !empty($card['page'])) {
+        $page = $card['page'];
+        $request->page = $page;
+      }
+      if(!empty($card['id'])) {
         return app()->call('App\Http\Controllers\DocumentoController@generarImagen', [
-          "request" => $request,
-          "documento" => Documento::find( $card["id"] )
+          'request' => $request,
+          'documento' => Documento::find($card["id"])
         ]);
       } 
       $input  = config('constants.ruta_storage') . $card["archivo"];
-      $name   = 'thumb_' . md5($cid . '-' . $page) . '.jpg';
+      $name   = 'thumb_' . md5($cotizacion->id . '-' . $cid . '-' . $page . '-' . $card['timestamp']) . '.jpg';
       $output = config('constants.ruta_temporal') . $name;
 
-//      dd($workspace["paso03"][$cid]);
       if(!file_exists($input)) {
         sleep(5);
       }

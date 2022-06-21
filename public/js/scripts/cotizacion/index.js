@@ -1,7 +1,7 @@
 function eliminar(e){
   console.log(e.target);   
   window.event.preventDefault();  
-  dialogDelete( 'Desea Eliminar este registro',deleteItem(e.target.href));
+  dialogDelete( 'Desea Eliminar este registro',e.target.href);
 }
 
 $(document).ready(function() {

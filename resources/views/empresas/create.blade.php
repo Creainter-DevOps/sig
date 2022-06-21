@@ -1,6 +1,6 @@
 
 @extends('layouts.contentLayoutMaster')
-@section('title','Registrar empresa')
+@section('title','Nueva empresa')
 @section('content')
 <div class="col-12">
   <div class="card">
@@ -12,9 +12,9 @@
           </div>
           @endif
           <div class="block">
-              <div class="block-header block-header-default">
+              <!--<div class="block-header block-header-default">
                   <h3 class="block-title">Nueva empresa</h3>
-              </div>
+              </div>-->
               <div class="block-content">
                   <form action="/empresas" method="POST" class="form-horizontal form-data" id="" >
                       @include('empresas.form')

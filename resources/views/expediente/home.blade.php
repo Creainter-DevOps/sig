@@ -53,15 +53,15 @@
             <div class="blockEndProcess">
               <div style="background: #efefef;border: 1px solid #d5d5d5;border-radius: 5px;padding: 5px;">
                 <iframe  class="doc" src='https://sig.creainter.com.pe/storage/{{ $workspace['documento_final'] }}' width='1366px' height='623px' frameborder='0'>This is an embedded <a target='_blank' href='http://office.com'>Microsoft Office</a> document, powered by <a target='_blank' href='http://office.com/webapps'>Office Online</a>.</iframe>
-              </div>
-              <div class="text-center" style="padding:10px;">
-                <a class="btn btn-primary text-white" data-url-download target="_blank"> Propuesta 
-                  <i class="bx bxs-download" ></i>
-                  </a>
-                <a class="btn btn-secondary text-white" data-url-download-seace target="_blank"> Propuesta SEACE
-                  <i class="bx bxs-download" ></i>
-                </a>
-              </div>
+                        </div>
+                      <div class="text-center" style="padding:10px;">
+                        <a class="btn btn-primary text-white" data-url-download target="_blank"> Propuesta 
+                          <i class="bx bxs-download" ></i>
+                          </a>
+                        <a class="btn btn-secondary text-white" data-url-download-seace target="_blank"> Propuesta SEACE
+                          <i class="bx bxs-download" ></i>
+                        </a>
+                      </div>
 </div>
           </div>
         </div>

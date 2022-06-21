@@ -46,7 +46,11 @@ class Etiqueta extends Model {
     protected $casts = [
         'email_verified_at' => 'datetime',
       ];
-    
+
+      public static function nuevo($nombre) {
+        $rp = collect(DB::select("SELECT osce.etiqueta_registrar(:name) id", ['name' => $nombre]))->first();;
+        return static::find($rp->id);
+      }
     public static function listado() {
       $rp = DB::select("
         SELECT C.*

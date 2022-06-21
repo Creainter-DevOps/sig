@@ -15,8 +15,16 @@ use App\Helpers\Chartjs;
 use App\Helpers\Helper;
 
 class OportunidadController extends Controller {
+  
+  protected $viewBag;
+
   public function __construct() {
     $this->middleware('auth');
+    $this->viewBag['pageConfigs'] = ['pageHeader' => true ];
+    $this->viewBag['breadcrumbs'] = [
+      ["link" => "/dashboard", "name" => "Home" ],
+      ["link" => "/proyectos", "name" => "Oportunidades" ]
+    ];
   }
   public function index(Request $request)
   {
@@ -26,7 +34,10 @@ class OportunidadController extends Controller {
       } else {
           $listado = Oportunidad::list()->paginate(15)->appends(request()->query());
       }
-      return view('oportunidad.index', ['listado' => $listado]);
+
+      $this->viewBag['listado'] = $listado;
+
+      return view('oportunidad.index', $this->viewBag );
   }
   public function create(Request $request)
   {

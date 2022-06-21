@@ -201,6 +201,84 @@
   margin-left: -400px;padding: 10px 20px;border: 1px solid #727272;
   display: none;
 }
+.wrapper {
+  max-width: 330px;
+  font-family: 'Helvetica';
+  font-size: 14px;
+}
+
+.StepProgress {
+  position: relative;
+  padding-left: 45px;
+  list-style: none;
+}
+.StepProgress::before {
+  display: inline-block;
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 15px;
+  width: 10px;
+  height: 100%;
+  border-left: 2px solid #CCC;
+}
+.StepProgress-item {
+  position: relative;
+  counter-increment: list;
+}
+.StepProgress-item:not(:last-child) {
+  padding-bottom: 20px;
+}
+.StepProgress-item::before {
+  display: inline-block;
+  content: '';
+  position: absolute;
+  left: -30px;
+  height: 100%;
+  width: 10px;
+}
+.StepProgress-item::after {
+  content: '';
+  display: inline-block;
+  position: absolute;
+  top: 0;
+  left: -37px;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #CCC;
+  border-radius: 50%;
+  background-color: #FFF;
+}
+.StepProgress-item.is-done::before {
+  border-left: 2px solid green;
+}
+.StepProgress-item.is-done::after {
+  content: "✔";
+  font-size: 10px;
+  color: #FFF;
+  text-align: center;
+  border: 2px solid green;
+  background-color: green;
+}
+.StepProgress-item.current::before {
+  border-left: 2px solid green;
+}
+.StepProgress-item.current::after {
+  content: counter(list);
+  padding-top: 1px;
+  width: 19px;
+  height: 18px;
+  top: -4px;
+  left: -40px;
+  font-size: 14px;
+  text-align: center;
+  color: green;
+  border: 2px solid green;
+  background-color: white;
+}
+.StepProgress strong {
+  display: block;
+}
 </style>
 
 @if(!empty($oportunidad))
@@ -215,47 +293,60 @@
       <div class="card-content">
         <div class="card-body">
           {{ $e->descripcion }}
-          @if(!empty($e->cotizacion))
-            <div data-editable="/cotizaciones/{{ $e->cotizacion->id }}?_update=monto">{{ Helper::money($e->cotizacion->monto) }}</div><br />
-            <div class="text-center mb-1">
-              <span class="{{ $e->cotizacion->estado()['class'] }}">{{ $e->cotizacion->estado()['message'] }}</span>
-            </div>
-            @if( $e->cotizacion)
+            @if(empty($oportunidad->revisado_el) && false)
+              <div>Debe marcar como <b>REVISADO</b></div>
+             @elseif(empty($e->cotizacion) && strtotime($licitacion->fecha_participacion_hasta) > time())
               <div class="text-center">
-                <a class="btn btn-sm btn-success" href="/expediente/{{ $e->cotizacion->id }}/paso01">Documentos</a>
-              </div>
-            @endif  
-          @endif
-          @if(empty($oportunidad->revisado_el))
-            <div>Debe marcar como <b>REVISADO</b></div>
-          @elseif(!empty($oportunidad->rechazado_el) || !empty($oportunidad->archivado_el))
-            <div>No disponible acciones</div>
-          @elseif(empty($e->cotizacion) && strtotime($licitacion->fecha_participacion_hasta) > time())
-            <div class="text-center">
-              <a class="btn btn-sm btn-success" href="/licitaciones/{{ $licitacion->id }}/interes/{{ $e->id }}">Interés</a>
-            </div>
-          @elseif(empty($e->cotizacion) && strtotime($licitacion->fecha_participacion_hasta) <= time())
+                <a class="btn btn-sm btn-success" href="/licitaciones/{{ $licitacion->id }}/interes/{{ $e->id }}">Interés</a>
+             </div>
+            @elseif(empty($e->cotizacion) && strtotime($licitacion->fecha_participacion_hasta) <= time())
             <div>Fuera de plazo</div>
-          @else
-            <div class="d-flex justify-content-end">
-            @if(!$e->cotizacion->estado()['timeout'])
-              @if(empty($e->cotizacion->participacion_el))
-                <a href="/licitaciones/{{ $licitacion->id }}/participar/{{ $e->cotizacion->id }}" class="btn btn-sm btn-info mr-25">Registrar Participación</a>
-              @elseif(empty($e->cotizacion->propuesta_el))
-                <a href="/licitaciones/{{ $licitacion->id }}/propuesta/{{ $e->cotizacion->id }}" class="btn btn-sm btn-dark">Enviar Propuesta</a>
-              @endif
-            @endif
-            </div>
-            @endif
-            @if(!empty($e->cotizacion->seace_participacion_log))
-              <div style="font-size: 11px;background: #29237e;margin-top: 4px;border-radius: 4px;padding: 5px;color: #fff;max-height: 160px;overflow: auto;">{!! nl2br($e->cotizacion->seace_participacion_log) !!}</div>
+            @else
+              <div class="wrapper">
+                <ul class="StepProgress">
+                <li class="StepProgress-item is-done">
+                  <strong>Participación</strong>
+                  @if(!empty($e->cotizacion))
+                  <div class="text-center mb-1">
+                    <span class="{{ $e->cotizacion->estado_participacion()['class'] }}">{{ $e->cotizacion->estado_participacion()['message'] }}</span>
+                    @if(!empty($e->cotizacion->seace_participacion_log))
+              <!--<div style="font-size: 11px;background: #29237e;margin-top: 4px;border-radius: 4px;padding: 5px;color: #fff;max-height: 160px;overflow: auto;">{!! nl2br($e->cotizacion->seace_participacion_log) !!}</div> -->
               @if(!empty($e->cotizacion->seace_participacion_fecha))
                 <div style="text-align: center;margin-top: 5px;">
-                  <div class="btn btn-sm btn-primary certificado_button">Constancia de Registro</div>
+                  <span class="badge badge-primary certificado_button">Constancia</span>
                   <div class="certificado_body">{!! $e->cotizacion->seace_participacion_html !!}</div>
-                  <div>{{ Helper::fecha($e->cotizacion->seace_participacion_fecha, true) }}</div>
+                  <div style="font-size:11px;">{{ Helper::fecha($e->cotizacion->seace_participacion_fecha, true) }}</div>
                 </div>
               @endif
+            @endif
+                  </div>
+                  @endif
+                   @if(!$e->cotizacion->estado()['timeout'])
+                    @if(empty($e->cotizacion->participacion_el))
+                      <a href="/licitaciones/{{ $licitacion->id }}/participar/{{ $e->cotizacion->id }}" class="btn btn-sm btn-info mr-25">Registrar Participación</a>
+                    @endif
+                  @endif
+                </li>
+                <li class="StepProgress-item is-done">
+                  <strong>Propuesta</strong>
+                  @if(!empty($e->cotizacion))
+                  <div class="text-center mb-1">
+                    <span class="{{ $e->cotizacion->estado_propuesta()['class'] }}">{{ $e->cotizacion->estado_propuesta()['message'] }}</span>
+                  </div>
+                  @endif
+                  @if( $e->cotizacion)
+                    <div class="text-center" style="margin-bottom:10px;">
+                      <a class="btn btn-sm btn-success" href="/expediente/{{ $e->cotizacion->id }}/inicio">Armar Expediente</a>
+                    </div>
+                  @endif
+                   @if(!$e->cotizacion->estado()['timeout'])
+                    @if(empty($e->cotizacion->propuesta_el))
+                      <a href="/licitaciones/{{ $licitacion->id }}/propuesta/{{ $e->cotizacion->id }}" class="btn btn-sm btn-dark">Enviar Propuesta</a>
+                    @endif
+                  @endif
+                </li>
+                </ul>
+              </div>
             @endif
       </div>
   </div>

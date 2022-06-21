@@ -132,7 +132,6 @@ Route::resource('contactos', 'ContactoController')->parameters([
     'contactos' => 'contacto'
 ]);
 
-
 Route::get('productos/autocomplete', 'ProductoController@autocomplete');
 Route::resource('productos', 'ProductoController')->parameters([
   'productos' => 'producto'
@@ -189,6 +188,8 @@ Route::get('expediente/{cotizacion}/generarImagen','ExpedienteController@generar
 Route::post('expediente/{cotizacion}/custom','ExpedienteController@custom_store')->name('expediente.custom');
 
 Route::post('expediente/{cotizacion}/eliminarDocumento','ExpedienteController@eliminarDocumento')->name('expediente.eliminarDocumento');
+Route::get('expediente/{cotizacion}/inicio','ExpedienteController@inicio')->name('expediente.inicio');
+Route::post('expediente/{cotizacion}/inicio','ExpedienteController@inicio_store');
 Route::post('expediente/{cotizacion}/busquedaDocumentos','ExpedienteController@busquedaDocumentos')->name('expediente.busquedaDocumentos');
 
 

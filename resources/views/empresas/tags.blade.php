@@ -1,17 +1,18 @@
 @extends('layouts.contentLayoutMaster')
-@section('title','Empresas')
+@section('title','Etiquetas')
 @section('content')
     <div class="row">
-        <div class="offset-12 " style="margin-bottom: 10px;text-align:right;">
-              <a class="btn btn-primary " href="/empresas/tags/nuevo" style="margin-right:5px;" > Nuevo </a>
-          </div>
-          @foreach ($empresas as $empresa )
-          <div class="offset-12">
-          <a class="btn btn-secondary" href="/empresas/<?= $empresa->id ?>/tags" style="margin-left:5px;" >
-              <?= $empresa->seudonimo; ?>
-            </a>
-        </div>
+      <!--<div class="offset-12 " style="margin-bottom: 10px;text-align:right;">
+            <a class="btn btn-primary " href="/empresas/tags/nuevo" style="margin-right:5px;" > Nuevo </a>
+        </div>-->
+        <div class="col-12" style="margin-bottom:10px;" >
+        @foreach ($empresas as $empresa )
+        <a class="btn btn-secondary" href="/empresas/<?= $empresa->id ?>/tags" style="margin-right:5px;" >
+            <?= $empresa->seudonimo; ?>
+          </a>
         @endforeach
+        </div>
+      </div>
     </div>
     <div class="card">
         <div class="card-header block-header-default">
@@ -33,7 +34,7 @@
                         <th width="5%">Opciones</th>
                     </thead>
                     <tbody>
-                        @foreach ($empresa_etiquetas as $etiqueta)
+                        @foreach ($etiquetas  as $etiqueta)
                             <tr>
                                 <td>{{ $etiqueta->empresa  }}</td>
                                 <td>{{ $etiqueta->nombre  }}</td>
@@ -52,8 +53,9 @@
                 </table>
             </div>
           </div>
-          <div class="card-footer d-flex flex-row-reverse justify-content-between  ">
+          <div class="card-footer d-flex">
           </div>
+          <div class="form-group" style="margin-left:20px;"></div>
         </div>
     </div>
 @endsection

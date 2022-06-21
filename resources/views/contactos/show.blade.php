@@ -54,9 +54,6 @@ tr.block_details > td > div {
     </div>
   </div>
 </div>  
-<div class="col-6">
-  @include('contactos.timeline')
-</div>
 @endsection
 
 {{-- vendor scripts --}}

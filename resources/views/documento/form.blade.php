@@ -30,7 +30,7 @@
       </div>
     </div>
 @endif
-    <div class="col-md-6 col-12" data-campo="contrato certificado constancia firma visado administrativo">
+    <div class="col-md-6 col-12" data-campo="contrato certificado constancia firma visado administrativo cv">
       <div class="form-label-group">
           <input type="text" class="form-control autocomplete"
              data-ajax="/empresas/autocomplete" name="empresa_id" autocomplete="nope"
@@ -109,7 +109,7 @@
     </div>
     <div class="col-md-6 col-12" data-campo="contrato" >
       <div class="form-label-group" >
-          <input type="text" class="form-control" value="{{ old ( 'monto', $documento->monto ) }}" name="monto">
+          <input type="numeric" class="form-control" value="{{ old ( 'monto', $documento->monto ) }}" name="monto" min="10" max="99999999" step="0.01">
           <label for="">Monto</label>
       </div>
     </div>
@@ -148,9 +148,11 @@
       </div>
     </div>
     @endif
+    @if(empty($documento->es_reusable))
     <div class="col-12" style="padding: 10px 30px;font-size: 15px;">
       <input type="checkbox" name="es_reusable" class="switch-input" value="1" /> El documento generado o subido será reusable?
     </div>
+    @endif
     <div class="col-12 d-flex justify-content-end">
       <button type="submit" class="btn btn-primary mr-1 mb-1">Guardar</button>
       <button type="reset" class="btn btn-light-secondary mr-1 mb-1">Limpiar</button>

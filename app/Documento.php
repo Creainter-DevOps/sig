@@ -53,8 +53,13 @@ class Documento extends Model
     public function vinculo_empresa() {
       return $this->belongsTo('App\Empresa', 'vinculo_empresa_id')->first();
     }
-    public static function busqueda($query) {
-      return static::where('rotulo','ILIKE','%'. $query . '%')->get();
+    public static function busqueda($oportunidad_id, $query) {
+      $query = strtoupper($query);
+      return static::hydrate(DB::select("SELECT * FROM osce.fn_documento_busqueda(:tenant, :oportunidad, :texto)", [
+        'tenant' => Auth::user()->tenant_id,
+        'oportunidad' => $oportunidad_id,
+        'texto'       => $query,
+      ]));
     }
 
     public function generar_documento( $cotizacion, $data , $destino) {
@@ -62,7 +67,11 @@ class Documento extends Model
      $documento = new Documento(); 
      $documento->fill($data);  
      $inputs = [];
-     
+
+     if(!empty($data['rotulo'])) {
+       $inputs["ROTULO"] = $data['rotulo'];
+     } 
+
      if ( !empty( $data->pesonal_id ) ) {
         $personal = Documento::find($data->personal_id);
         $inputs["PERSONAL.ID"] = $personal->nombres;
@@ -84,9 +93,8 @@ class Documento extends Model
        $inputs["LICITACION.TIPO"] = $licitacion->tipo;
        $inputs["LICITACION.ROTULO"] = strtoupper($licitacion->rotulo);
        $inputs["LICITACION.FECHA_PROPUESTA"] = $licitacion->fecha_propuesta;
-       $inputs["LICITACION.PLAZO_SERVICIO"] = $licitacion->plazo_servicio;
-       
-       $inputs["ROTULO"] = $data['rotulo'];
+       $inputs["LICITACION.PLAZO_SERVICIO"] = $cotizacion->plazo_servicio;
+      
        $inputs["FECHA"] = Helper::fecha_letras($licitacion->fecha_propuesta_hasta); 
        /*$inputs["FECHA_INICIO"] = $data["fecha_inicio"];
        $inputs["FECHA_FIN"] = $data["fecha_fin"];
@@ -106,19 +114,22 @@ class Documento extends Model
         $inputs["EMPRESA.RUC"] = $empresa->ruc;
         $inputs["EMPRESA.DIRECCION"] = strtoupper($empresa->direccion);
         $inputs["EMPRESA.REPRESENTANTE_NOMBRES"] = strtoupper($empresa->representante_nombres);
+
         $inputs["EMPRESA.REPRESENTANTE_DOCUMENTO"] = strtoupper($empresa->representante_documento);
         //$inputs["EMPRESA.IMAGEN_FIRMA"] = $empresa->imagen_firma;
         //$inputs["EMPRESA.IMAGEN_VISADO"] = $empresa->imagen_visado;
         //$inputs["EMPRESA.IMAGEN_FOOTER"] = $empresa->logo_head;
+        
         $inputs["EMPRESA.IMAGEN_HEADER"] = $empresa->logo_head;
+        $inputs["EMPRESA.IMAGEN_CENTRAL"] = $empresa->logo_central;
         $inputs["EMPRESA.SUNARP_REGISTRO"] = $empresa->sunarp_registro;
         $inputs["EMPRESA.DIRECCION"] = strtoupper($empresa->direccion);
-        $inputs["EMPRESA.CORREO"] = $empresa->correo;
+        $inputs["EMPRESA.CORREO"] = $empresa->correo_electronico;
         $inputs["EMPRESA.TELEFONO"] = $empresa->telefono;
           
      } 
      
-     if( !empty( $data['empresa_vinculada_id']) ) {
+     if ( !empty( $data['empresa_vinculada_id']) ) {
 
         $empresa = Empresa::find( $cotizacion->empresa_id ); 
         $inputs["EMPRESA_VINCULADA.RAZON_SOCIAL"] = $empresa->razon_social; 
@@ -128,7 +139,6 @@ class Documento extends Model
         $inputs["EMPRESA_VINCULADA.REPRESENTANTE_DOCUMENTO"] = $empresa->representante_documento;
         //$inputs["EMPRESA_VINCULADA.IMAGEN_FIRMA"] = $empresa->imagen_firma;
         //$inputs["EMPRESA_VINCULADA.IMAGEN_VISADO"] = $empresa->representante_documento;
-
      } 
      
      //$empresa = Empresa::find( $cotizacion->empresa_id );   
@@ -138,6 +148,6 @@ class Documento extends Model
      //dd($plantilla);
      Helper::docx_fill_template($plantilla, $inputs, $destino);
 
-     return  $documento;
+     return $documento;
     }
 }

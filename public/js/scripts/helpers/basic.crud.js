@@ -1,10 +1,14 @@
 function deleteItem(url){
-  fetch(url).
+  fetch(url,{
+    method : 'DELETE',
+    headers : { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+    }
+    }).
     then( response => response.json() ).
     then( data => {
         console.log( data );
         if(data.status){
-          toastSuccess();
+          toastSuccess( data.refresh || false);
         }else{
           toastError();
         }
@@ -22,8 +26,7 @@ forms.forEach((element) =>{
   let formData = new FormData(form);
   
   fetch( action, {
-    headers : {
-      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+    headers : { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
     },
     method: md,
     body:formData

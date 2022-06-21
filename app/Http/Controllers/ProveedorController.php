@@ -7,6 +7,8 @@ use App\Proveedor;
 use App\ProveedorProducto;
 use App\Empresa;
 use Auth;
+
+
 class ProveedorController extends Controller
 {
     /**
@@ -14,15 +16,31 @@ class ProveedorController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    protected $viewBag;
+    
+    public function __construct()
+    {
+      $this->middleware('auth');
+      $this->viewBag['pageConfigs'] = ['pageHeader' => true ];
+      $this->viewBag['breadcrumbs'] = [
+        ["link" => "/dashboard", "name" => "Home" ],
+        ["link" => "/proyectos", "name" => "Proveedores" ]
+      ];
+    }
+
     public function index(Request $request )
     {
-         $search = $request->input('search');
-        if(!empty($search)) {
+        $search = $request->input('search');
+
+        if ( !empty($search) ) {
             $listado = Proveedor::search($search)->paginate(15)->appends(request()->query());
         } else {
             $listado = Proveedor::orderBy('created_at', 'desc')->paginate(15)->appends(request()->query());
         }
-        return view('proveedores.index', ['listado' => $listado]); 
+
+        $this->viewBag['listado'] = $listado;
+        return view( 'proveedores.index',  $this->viewBag ); 
+
     }
 
     /**
@@ -32,7 +50,9 @@ class ProveedorController extends Controller
      */
     public function create( Request $request, Proveedor $proveedor)
     {
-       return view(  $request->ajax() ?  'proveedores.fast'  : 'proveedores.create' , compact('proveedor'));
+       $this->viewBag['breadcrumbs'][] = ['name' => 'Nuevo'];
+       $this->viewBag['cliente'] = $proveedor;
+       return view(  $request->ajax() ?  'proveedores.fast'  : 'proveedores.create' ,$this->viewBag);
     }
 
     /**
@@ -117,11 +137,10 @@ class ProveedorController extends Controller
       $proveedor->save();
       return response()->json([ 'status' => true , 'refresh' => true ] ); 
     }
-    public function productos( Request $request,int  $id ){
-      //$pproducto->fill( $request->all() );
-      //$pproducto->save();
-      $proveedor = Proveedor::find( $id );
-      return view('proveedores.productos', compact('proveedor')); 
+    public function productos( Request $request, Proveedor $proveedor ){
+      $this->viewBag['breadcrumbs'][] = [ 'name' => $proveedor->empresa()->razon_social ];  
+      $this->viewBag['proveedor'] = $proveedor;
+      return view('proveedores.productos', $this->viewBag); 
       //return response()->json( [ 'status' => true , 'object' => $ps ] );
     }
 

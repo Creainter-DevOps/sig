@@ -1,6 +1,6 @@
 @extends('layouts.contentLayoutMaster')
 {{-- title --}}
-@section('title','Contactos')
+@section('title','Documentos')
 {{-- vendor style --}}
 @section('vendor-styles')
 <link rel="stylesheet" type="text/css" href="{{asset('vendors/css/tables/datatable/datatables.min.css')}}">
@@ -16,12 +16,12 @@
 @section('content')
 <!-- table Transactions start -->
 <div class="row">
-        <div class="offset-12 col-md-1" style="margin-bottom: 10px;text-align:right;">
-                <a class="btn btn-default" href="/documentos/crear" style="color: #fff; background-color: #007bff; border-color: #007bff;">
-                    Nuevo
-                </a>
-        </div>
+  <div class="offset-12 col-md-1" style="margin-bottom: 10px;">
+    <a class="btn btn-primary" href="/documentos/crear" >
+        Nuevo
+    </a>
   </div>
+</div>
 <!-- table Transactions end -->
 
 <!-- table success start -->

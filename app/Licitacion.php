@@ -58,6 +58,11 @@ class Licitacion extends Model
     public function rechazar() {
       DB::select('SELECT osce.fn_licitacion_accion_rechazar(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ')');
     }
+    public function etiquetas() {
+      $rp = collect(DB::select('SELECT osce.fn_etiquetas_a_rotulo(L.etiquetas_id) ee
+      FROM osce.licitacion L WHERE id = ' . $this->id))->first();
+      return $rp->ee; 
+    }
     public function oportunidad() {
       return $this->belongsTo('App\Oportunidad', 'id', 'licitacion_id')->first();
       $oportunidad = Oportunidad::where('licitacion_id',$this->id)

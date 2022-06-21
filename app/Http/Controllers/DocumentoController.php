@@ -16,6 +16,7 @@ use App\Cotizacion;
 class DocumentoController extends Controller {
 
   protected $viewBag = [];
+  
   public function __construct() {
     $this->middleware('auth');
     $this->viewBag['pageConfigs'] = ['pageHeader' => true];
@@ -32,7 +33,8 @@ class DocumentoController extends Controller {
     } else {
       $listado = Documento::orderBy( 'id', 'desc')->paginate(15)->appends(request()->query());
     }
-    return view('documento.index', ['listado' => $listado]);
+    $this->viewBag['listado'] = $listado;
+    return view('documento.index', $this->viewBag  );
   }
 
   public function show( Request $request, Documento $documento ) {
@@ -76,6 +78,9 @@ class DocumentoController extends Controller {
   public function store(StoreFileRequest $request)
   {
     $data = $request->input();
+    //$data['tenant_id']  = Auth::user()->tenant_id;
+    //$data['created_by'] = Auth::user()->id;
+
     $orden = $request->orden;
       if(!empty($request->generado_de_id)) {
         $plantilla = Documento::find($request->generado_de_id);
@@ -114,19 +119,20 @@ class DocumentoController extends Controller {
          exit(22);
        }
      }
-
-      $fileName = auth()->id() . '_' . time() . '.'. $request->archivo->extension();
+     $extension = $request->archivo->extension();
+      $fileName = auth()->id() . '_' . time() . '.'. $extension;
       $type = $request->archivo->getClientMimeType();
       $size = $request->archivo->getSize();
-
+      
       $destino = public_path('storage/' . $request->tipo) . '/' . $fileName;
       $request->archivo->move(public_path('storage/' . $request->tipo), $fileName);
 
       $meta = Helper::metadata($destino);
 
-      $data['archivo'] = $request->tipo . '/' . $fileName;
-      $data['folio']   = $meta['Pages'] ?? 1;
-      $data['formato'] = strtoupper($request->archivo->extension());
+      $data['archivo']  = $request->tipo . '/' . $fileName;
+      $data['folio']    = $meta['Pages'] ?? 1;
+      $data['formato']  = strtoupper($extension);
+      $data['filename'] = $fileName;
 
       $doc = Documento::nuevo($data);
 
@@ -192,18 +198,19 @@ class DocumentoController extends Controller {
     $documento->log('eliminado');    
     return response()->json(['status'=> true , 'refresh' => true  ]); 
   }
+
   public function generarImagen(Request $request, Documento $documento) {
-    $page   = $request->get('page');
+    $page   = $request->page;
     $input  = config('constants.ruta_storage') . $documento->archivo;
     $name   = 'thumb_' . md5($documento->id . '-' . $page) . '.jpg';
     $output = config('constants.ruta_temporal') . $name;
-//echo $output;exit;
-    if(!file_exists($input)){
+
+    if(!file_exists($input)) {
       echo "404";
       exit;
     }
     if(!file_exists($output)) {
-      exec("/usr/bin/convert -density 150 '" . $input . "[" . $page . "]' -quality 100 -alpha remove '" . $output . "'");
+      exec("/usr/bin/convert -density 150 '" . $input . "[" . $page . "]' -quality 70 -resize x400 -alpha remove '" . $output . "'");
     }
     $headers = [
       'Content-Description' => 'Imagen de Documento',

@@ -16,6 +16,10 @@
       <td colspan="3"><a href="#" onclick="window.location.href='odir:{!! addslashes(Auth::user()->dir_sharepoint . $oportunidad->folder()) !!}';">{{ $oportunidad->folder() }}</a></td>
     </tr>
     <tr>
+      <th>Palabras Claves:</th>
+      <td colspan="3">{{ $oportunidad->etiquetas() }}</td>
+    </tr>
+    <tr>
       <th>Aprobado</th>
       <td>{{ Helper::fecha($oportunidad->aprobado_el, true) }} {{ $oportunidad->aprobado_por }}</td>
       <th>Rechazado</th>

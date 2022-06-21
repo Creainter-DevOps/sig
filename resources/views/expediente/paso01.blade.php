@@ -5,6 +5,28 @@
       <div class="card">
         <div class="card-content mt-2">
           <div class="card-body">
+            <ul class="nav nav-tabs justify-content-center" role="tablist">
+              <li class="nav-item">
+                <a class="nav-link active" href="/expediente/{{ $cotizacion->id }}/paso01">
+                  Anexos
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link disabled" href="/expediente/{{ $cotizacion->id }}/paso02">
+                  Modificación
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link disabled" href="/expediente/{{ $cotizacion->id }}/paso03">
+                  Mesa de Trabajo
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link disabled" href="/expediente/{{ $cotizacion->id }}/paso04">
+                  Magia
+                </a>
+              </li>
+            </ul>
             <div class="wizard-horizontal">
                 <div class="row">
                       <div class="col-6">
@@ -62,4 +84,18 @@
       </div>
     </div>
   </div>
+@endsection
+@section('page-scripts')
+  @parent
+<script>
+function verify_check_widget() {
+  if ($(this).is(':checked')) {
+    $(this).closest('.widget-todo-item').find('.widget-more').stop().slideDown();
+  } else {
+    $(this).closest('.widget-todo-item').find('.widget-more').stop().slideUp();
+  }
+}
+$(".checkbox__input").each(verify_check_widget);
+$(".checkbox__input").on('click', verify_check_widget);
+</script>
 @endsection

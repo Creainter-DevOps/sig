@@ -46,7 +46,9 @@ class CalleridController extends Controller
      */
     public function create(Callerid $caller)
     {
-         return view('callerid.create',compact('caller'));
+       $this->viewBag['breadcrumbs'][] = [ 'name' => "Nuevo Caller" ];
+       $this->viewBag['caller'] = $caller;
+       return view('callerid.create', $this->viewBag );
     }
 
     /**

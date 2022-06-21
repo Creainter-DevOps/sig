@@ -8,7 +8,7 @@
 @endif
 <div class="card">
     <div class="card-header block-header-default">
-        <h3 class="block-title">Nuevo cliente</h3>
+<!--        <h3 class="block-title">Nuevo cliente</h3>-->
     </div>
     <div class="card-content">
        <div class="card-body">

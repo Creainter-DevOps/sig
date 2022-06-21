@@ -1,5 +1,5 @@
 @extends('layouts.contentLayoutMaster')
-@section('title', 'Nuevo Cliente') 
+@section('title', 'Etiquetas') 
 @section('vendor-styles')
 <link rel="stylesheet" type="text/css" href="{{asset('vendors/css/forms/select/select2.min.css')}}">
 @endsection
@@ -10,9 +10,9 @@
 </div>
 @endif
 <div class="card">
-    <div class="card-header block-header-default">
+    <!--<div class="card-header block-header-default">
     <h3 class="block-title">Etiquetas : <?= $empresa->razon_social; ?></h3>
-    </div>
+    </div>-->
     <div class="card-content">
        <div class="card-body">
        <div class="card-title" >A favor</div>   

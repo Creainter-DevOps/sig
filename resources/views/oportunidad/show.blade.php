@@ -18,10 +18,11 @@
             class="users-avatar-shadow rounded-circle" height="64" width="64">
         </a>
         <div class="media-body pt-25">
+          <h4>{{$oportunidad->rotulo }} </h4>
           @if (isset( $oportunidad->nombre) && isset( $oportunidad->que_es) )
-            <h4 class="media-heading">{{ $oportunidad->codigo }}</h4>
+            <h6 class="media-heading">{{ $oportunidad->codigo }}</h6>
           @else
-          <h4 class="media-heading">{{  isset( $oportunidad->codigo) ? $oportunidad->codigo : $oportunidad->que_es  }}</h4>
+          <h6 class="media-heading">{{ isset( $oportunidad->codigo) ? $oportunidad->codigo : $oportunidad->que_es  }}</h6>
           <span>{{ $oportunidad->nomenclatura }}</span>
           @endif
         </div>

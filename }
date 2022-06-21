@@ -36,16 +36,18 @@ tr.block_details>td>div {
 
 @section('content')
     <div class="row">
-        <div class="col-md-2" style="margin-bottom: 10px;">
-          <a class="btn btn-primary" href="/clientes/crear"> + Nuevo </a>
+        <div class="offset-12 col-md-1" style="margin-bottom: 10px;text-align:right;">
+                <a class="btn btn-default" href="/clientes/crear" style="color: #fff; background-color: #007bff; border-color: #007bff;">
+                    Nuevo
+                </a>
         </div>
     </div>
 <div class="row" id="basic-table">
   <div class="col-12">
     <div class="card">
-      <!--<div class="card-header">
+      <div class="card-header">
         <h4 class="card-title">Resultados</h4>
-      </div>-->
+      </div>
       <div class="card-content">
         <div class="card-body">
   <div class="table-responsive">
@@ -86,7 +88,8 @@ tr.block_details>td>div {
         </tbody>
     </table>
    </div>
-   </div>
+
+      </div>
    <div class="card-footer">  
     {{ $listado->links() }}
    </div>

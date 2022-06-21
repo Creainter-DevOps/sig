@@ -1,7 +1,20 @@
 <div style="padding: 10px;background: #bd8efb;">
-<div style="width:100%;overflow:auto;max-height:500px;">
+<div style="width:100%;overflow:auto;max-height:500px;padding-right: 5px;">
   @if($card['is_part'])
-    <img src="https://sig.creainter.com.pe/storage/{{ $card['imagen']}}" style="width:100%">
+    <div style="text-align: center;background: #bd8ffb;color: #fff;">
+        <div>Pagina {{ $card['page'] + 1 }} de {{ $card['folio'] }}</div>
+        <div class="contentPoint">
+          <img class="imagePoint" src="/expediente/{{ $cotizacion->id  }}/generarImagen?page=0&cid={{$cid}}" style="width:100%" data-cid="{{ $cid }}" data-page="{{ $card['page'] }}">
+          <div class="puntero"></div>
+          @foreach($card['estampados'] as $ttk => $ttv)
+            @foreach($ttv as $ttp => $tt)
+              @if($ttp == $card['page'])
+                <div class="estampado" data-tipo="{{ $ttk }}" style="left:{{ $tt['x'] * 100 }}%;top:{{ $tt['y'] * 100 }}%;"></div>
+              @endif
+            @endforeach
+          @endforeach
+        </div>
+      </div>
   @else
     @for($i = 0; $i < $card['folio']; $i++)
       <div style="text-align: center;background: #bd8ffb;color: #fff;">
@@ -27,5 +40,6 @@
   <div style="padding-bottom: 8px;">
     <div data-tools="firma">Firma</div>
     <div data-tools="visado">Visado</div>
+    <div >Descargar</div>
   </div>
   </div>

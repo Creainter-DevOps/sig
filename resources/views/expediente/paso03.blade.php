@@ -1,310 +1,47 @@
-@extends('layouts.contentLayoutMaster')
-{{-- page Title --}}
-@section('title','Widgets')
-{{-- vendor scripts --}}
-@section('vendor-styles')
-<link rel="stylesheet" type="text/css" href="{{asset('vendors/css/charts/apexcharts.css')}}">
-<link rel="stylesheet" type="text/css" href="{{asset('vendors/css/extensions/dragula.min.css')}}">
-<link rel="stylesheet" type="text/css" href="{{asset('vendors/css/pickers/daterange/daterangepicker.css')}}">
-<link rel="stylesheet" type="text/css" href="{{asset('vendors/css/extensions/swiper.min.css')}}">
-<link rel="stylesheet" type="text/css" href="{{asset('css/plugins/forms/wizard.css')}}">
-<style>
-
-  .SortAnimation{
-    width:100%;
-  }
-
-  .BlockLayout{
-    display:grid;
-    grid-template-columns: 1fr  1fr 1fr;
-    grid-gap:10px;
-  }
-
-  .file{
-    background-color: white;
-    border: 1px solid red;  
-    min-height: 120px;
-    width: 150px;
-    display:flex;
-    align-items:end;
-    justify-content:center;
-  }
-
-  .file p{
-    text-align:center;
-  }
-
-  img.background_image{
-    position: absolute;
-    height: auto;
-    top: 0;
-    width: 100%;
-  }
-
-  #ContainerOne .StackedListItem .StackedListContent{
-    z-index:9;
-  } 
-  #ContainerOne .StackedListItem{
-    list-style :none;
-    min-height:180px;
-    border:1px solid red;
-    cursor:pointer;
-    border: solid 1px #ccc;
-    color: rgba(0, 0, 0, 0.87);
-    cursor: move;
-    overflow:hidden;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    background: #fff;
-    border-radius: 4px;
-    margin-right: 25px;
-    position: relative;
-    z-index: 1;
-    box-sizing: border-box;
-    padding: 10px;
-    transition: box-shadow 200ms cubic-bezier(0, 0, 0.2, 1);
-    box-shadow: 0 3px 1px -2px rgb(0 0 0 / 20%), 0 2px 2px 0 rgb(0 0 0 / 14%), 0 1px 5px 0 rgb(0 0 0 / 12%);
-display:flex;
-    align-items:end;
-  }
-
-  #ContainerTwo .StackedListItem{
-    list-style :none;
-    height:160px;
-    border:1px solid red;
-    min-height: 140px;
-    cursor:pointer;
-border: solid 1px #ccc;
-    color: rgba(0, 0, 0, 0.87);
-    cursor: move;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    background: #fff;
-    border-radius: 4px;
-    margin-right: 25px;
-    position: relative;
-    z-index: 1;
-    box-sizing: border-box;
-    padding: 10px;
-    transition: box-shadow 200ms cubic-bezier(0, 0, 0.2, 1);
-    box-shadow: 0 3px 1px -2px rgb(0 0 0 / 20%), 0 2px 2px 0 rgb(0 0 0 / 14%), 0 1px 5px 0 rgb(0 0 0 / 12%);
-    display:flex;
-    align-items:end;
-  }
-  #ContainerTwo .StackedListItem h4 { 
-    font-size:15px;  
-  }
-
-  #MultipleContainers{
-    width:100%;
-    display:grid;
-    grid-template-columns: 1fr 300px; 
-    min-height: 500px;
-  }
-
-  #ContainerTwo .StackedList{
-    display:flex;
-    flex-direction: column;
-    align-items: center;
-    grid-gap:15px;
-    padding: 0;
-  }
-
-  .doc {
-    width: 100%;
-    height: 100% ;
-    min-height: 550px; 
-  }
-
-  #ContainerOne .StackedList {
-    display:grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;  
-    grid-gap:15px;
-    min-height: 200px;
-    padding: 0;
-    border: 1px dashed #5030ff;
-    margin: 15px;
-    padding: 10px;
-    border-radius: 10px;
-    border-width: 3px;
-    padding-bottom: 217px;
-  }
-  #ContainerTwo .StackedList {
-    display:grid;
-    grid-template-columns: 1fr; 
-    border: 1px dashed #0689f9;
-    padding: 10px;
-    border-radius: 10px;
-    border-width: 3px;
-    padding-bottom: 50px;
-    overflow: auto;
-    max-height: 650px;
-  } 
-
-  #ContainerOne .StackedListContent .Heading {
-    color: #dfe3e7;
-    background-color: #1a233a;
-    width: 100%;
-    padding: 1px 4px; 
-    border-radius: 5px;
-    margin-top: 2px;
-  }
-  .BloqueBusqueda {
-    max-height: 100%;
-    overflow: auto;
-  } 
-  .BloqueBusqueda > .StackedListItem {
-     max-height: 60px;
-  }
-.boxDraggable {
-    list-style: none;
-    cursor: pointer;
-    position: relative;
-    border: solid 1px #ccc;
-    color: rgba(0, 0, 0, 0.87);
-    border-radius: 4px;
-    padding: 5px;
-    background: #fff;
-    transition: box-shadow 200ms cubic-bezier(0, 0, 0.2, 1);
-    box-shadow: 0 3px 1px -2px rgb(0 0 0 / 20%), 0 2px 2px 0 rgb(0 0 0 / 14%), 0 1px 5px 0 rgb(0 0 0 / 12%);
-    padding-bottom: 15px;
-}
-.boxDraggable .tools {
-    position: absolute;
-    top: 3px;
-    right: 3px;
-    background: rgb(0 0 0 / 32%);
-    border-radius: 3px;
-    padding: 2px 10px;
-    font-size: 11px;
-    color: #fff;
-}
-.boxDraggable[data-plantilla='true'] {
-    background-color: #ffebd0;
-    color: #000;
-    border: 1px solid #ffd49a;
-}
-.boxDraggable[data-tipo='CONTRATO'] {
-}
-.boxDraggable[data-tipo='CONTRATO'] .CardContentTitulo {
-    font-size: 11px;
-    text-align: center;
-}
-
-.boxDraggable[data-tipo='CONTRATO'] .CardContentDesc01 {
-    text-align: center;
-    font-size: 12px;
-}
-.boxDraggable[data-tipo='CONTRATO'] .CardContentDesc01 {
-    text-align: center;
-    font-size: 12px;
-}
-
-.boxDraggable[data-tipo='CONTRATO'] .CardContentDesc02 {
-position: absolute;
-    bottom: 0;
-    left: 0;
-    font-size: 11px;
-    padding-left: 20px;
-    padding-bottom: 2px;
-}
-.boxDraggable[data-tipo='CONTRATO'] .CardContentDesc03 {
-position: absolute;
-    bottom: 0;
-    right: 0;
-    font-size: 11px;
-    padding-right: 20px;
-    padding-bottom: 2px;
-}
-.draggable-container--is-dragging {
-  background: #fbf4ff;
-}
-.draggable-source--is-dragging {
-    background: #ffffff!important;
-    border: 1px dashed #00cd07!important;
-    border-width: 2px!important;
-}
-.draggable-source--is-dragging > * {
-  display: none;
-}
-[data-tools] {
-    cursor: pointer;
-    display: inline-block;
-    padding: 5px 20px;
-    margin: 2px 5px;
-    background: #fff;
-    color: black;
-    text-align: center;
-    border-radius: 5px;
-}
-.contentPoint {
-  position:relative;
-}
-.contentPoint.activePoint .puntero {
-  display:block!important;
-}
-.contentPoint .puntero {
-  display: none;
-  position: absolute;
-  z-index: 999;
-  top: 0;
-  left: 0;
-  width: 25px;
-  height: 25px;
-  background: #00e707;
-}
-.contentPoint .estampado[data-tipo='firma'] {
-  position: absolute;
-  z-index: 999;
-  width: 50px;
-  height: 50px;
-  background: #ff7600;
-}
-.contentPoint .estampado[data-tipo='visado'] {
-  position: absolute;
-  z-index: 999;
-  width: 50px;
-  height: 50px;
-  background: #188aff;
-}
-.folio {
-  padding: 2px 6px ;
-  width:max-content;
-  color:white;
-  font-size: 15px;
-  border-radius: 5px;
-  background-color: orange ;
-}
-</style>
-<meta name="csrf-token" content="{{ csrf_token() }}">
-@endsection
-{{-- page styles --}}
-@section('page-styles')
-<link rel="stylesheet" type="text/css" href="{{asset('css/pages/widgets.css')}}">
-@endsection
-@section('content')
+@extends('expediente.theme')
+@section('contenedor')
 <section id="icon-tabs">
   <div class="row">
     <div class="col-12">
       <div class="card">
         <div class="card-content mt-2">
           <div class="card-body">
+            <ul class="nav nav-tabs justify-content-center" role="tablist">
+              <li class="nav-item">
+                <a class="nav-link" href="/expediente/{{ $cotizacion->id }}/paso01">
+                  Anexos
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/expediente/{{ $cotizacion->id }}/paso02">
+                  Modificación
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" href="/expediente/{{ $cotizacion->id }}/paso03">
+                  Mesa de Trabajo
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link disabled" href="/expediente/{{ $cotizacion->id }}/paso04">
+                  Magia
+                </a>
+              </li>
+            </ul>
+
             <div class="wizard-horizontal" style="padding: 0 15px;">
                 <div class="row">
                   <section id="MultipleContainers" >
                     <article id="ContainerOne" class="StackedListWrapper StackedListWrapper--sizeLarge StackedListWrapper--axisHorizontal Container" style="position:relative;">
                       <header class="StackedListHeader">
-                        <h3 class="Heading Heading--size3 Heading--colorWhite">Ordenar PDF</h3>
+                        <h3 class="Heading Heading--size3 Heading--colorWhite">Mesa de Trabajo</h3>
                         <button class="btn btn-primary btn-sm" data-popup="/documentos/nuevo"  style="margin-right: 25px;position: absolute;top: 0;right: 10px;">+ Nuevos Documentos</button>
                       </header>
 
                       <ul class="StackedList" data-container="draw">
                       @foreach ($workspace['paso03'] as $k => $file)
                       <li class="boxDraggable StackedListItem StackedListItem--isDraggable StackedListItem--item1" data-id="{{ $k }}" data-orden="{{$file['orden'] }}" data-firma="{{ !empty($file['estampados']['firma']) ? "true" : '' }}" data-tipo="{{ $file['tipo'] }}"  data-visado="{{ !empty($file['estampados']['visado']) ? "true" : '' }}" data-tipo="{{ $file['tipo'] }}">
-                        <img class="background_image" src="/expediente/{{ $cotizacion->id }}/generarImagen?page=0&cid={{$k}}"/>
+                        <img class="background_image" src="/expediente/{{ $cotizacion->id }}/generarImagen?page=0&cid={{$k}}&t={{time()}}"/>
                         <div class="StackedListContent">
                           <div class="tools">
                             <a href="javascript:void(0);" data-popup="/expediente/{{$cotizacion->id }}/visualizar?cid={{ $k }}">Editar</a>
@@ -346,7 +83,6 @@ position: absolute;
                   </article>
                   </section>
                 </div>
-              </fieldset>
               <!-- body content of Step 3 end-->
             </div>
           </div>
@@ -355,25 +91,18 @@ position: absolute;
     </div>
   </div>
 </section>
-  <!-- Form wizard with number tabs section end -->
-  <!-- Task App Widget Ends -->
-  </div>
-  </div>
-</section>
-<!-- Widgets Charts End -->
 @endsection
-{{-- vendor scripts --}}
-@section('vendor-scripts')
 
+@section('vendor-scripts')
 <script src="{{asset('vendors/js/charts/apexcharts.min.js')}}"></script>
 <script src="{{asset('vendors/js/extensions/dragula.min.js')}}"></script>
 <script src="{{asset('vendors/js/extensions/swiper.min.js')}}"></script>
 <script src="{{asset('vendors/js/extensions/jquery.steps.min.js')}}"></script>
 <script src="{{asset('vendors/js/forms/validation/jquery.validate.min.js')}}"></script>
-
 @endsection
-{{-- page scripts --}}
+
 @section('page-scripts')
+@parent
 <script src="{{asset('js/scripts/forms/wizard-steps.js')}}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/draggable/1.0.0-beta.12/draggable.bundle.js" integrity="sha512-CY+c7SEffH9ZOj1B9SmTrJa/ulG0I6K/6cr45tCcLh8/jYqsNZ6kqvTFbc8VQA/rl9c2r4QBOx2Eur+2vkVWsA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
@@ -385,8 +114,9 @@ $(document).on('click', '[data-tools]', function() {
 });
 
 $(document).on('mousemove', '.contentPoint', function(e) {
-  var x = e.clientX - $(this).offset().left - 13;
-  var y = e.clientY - $(this).offset().top - 13;
+  var x = e.pageX - $(this).offset().left;
+  var y = e.pageY - $(this).offset().top;
+  console.log('mousemove', '.contentPoint', x, y);
   if(x >= 20 && x <= $(this).width() - 45
     && y >= 20 && y <= $(this).height() - 45) {
     $(this).find('.puntero').css({
@@ -397,8 +127,8 @@ $(document).on('mousemove', '.contentPoint', function(e) {
 });
 
 $(document).on('click', '.contentPoint', function(e) {
-  var x = e.clientX - $(this).offset().left;
-  var y = e.clientY - $(this).offset().top;
+  var x = e.pageX - $(this).offset().left;
+  var y = e.pageY - $(this).offset().top;
 
   var cid = $(this).find('img').attr('data-cid');
   var page = $(this).find('img').attr('data-page');
@@ -430,15 +160,16 @@ $(document).on('click', '.contentPoint', function(e) {
     console.log(element);
     console.log(current_tool );
     console.log ( element.dataset.firma )
-    if ( current_tool == "firma" && ( element.dataset.firma == null || element.dataset.firma == 'undefined' ) ){
+    if ( current_tool == "firma" && ( element.dataset.firma != "true" || element.dataset.firma == 'undefined' ) ){
 
       current_tool = null;
-      element.dataset.firma == "true"  
+      element.dataset.firma = "true"  
       element.querySelector('.Pattern--typeHalftone').insertAdjacentHTML('afterbegin','<span class="text-white" style="text-align:center; padding:3px;border-radius:4px; background-color:#ff7600;"><i class="bx bxs-edit-alt"></i> </span>');
        
-    } else if ( current_tool == "visado" && (element.dataset.visado == null || element.dataset.visado == 'undefined' ) ){
+    } else if ( current_tool == "visado" && (element.dataset.visado != "true" || element.dataset.visado == 'undefined' ) ){
 
-      element.dataset.visado == "true"  
+      current_tool = null;
+      element.dataset.visado = "true"  
       element.querySelector('.Pattern--typeHalftone').insertAdjacentHTML('beforeend',' <span class="text-white" style="margin-left:2px;text-align:center; padding:3px;border-radius:4px; background-color:#188aff ;" > <i class="bx bx-check-circle"></i> </span>')
     }
 
@@ -643,14 +374,13 @@ realizar_busqueda('');
       method: 'post',
       body: formdata 
     }).then( response => response.json())
-      .then( data => {
+      .then( res => {
       if(render === true) {
-        doc = data.data[0];
-        console.log(data);
+        res.data.forEach(doc => {
         var container = document.querySelector('#ContainerOne .StackedList');
         container.insertAdjacentHTML('beforeend',`
                       <li class="boxDraggable StackedListItem StackedListItem--isDraggable StackedListItem--item1" data-id="${doc.cid}" data-orden="${ doc.orden }" data-tipo="${doc.tipo}">
-                        <img class="background_image" src="/expediente/${cotizacion_id}/generarImagen?cid=${ doc.cid }&page=${ doc.page }" />
+                        <img class="background_image" src="/expediente/${cotizacion_id}/generarImagen?cid=${ doc.cid }&page=${ doc.page }&t={{time()}}" />
                         <div class="StackedListContent">
                           <div class="tools">
                             <a href="javascript:void(0);" data-popup="/expediente/${cotizacion_id}/visualizar?cid=${ doc.cid }">Editar</a>
@@ -667,6 +397,7 @@ realizar_busqueda('');
                         </div>
                       </li>
                       `);
+        });
       }
       render_dom_popup();
       })   

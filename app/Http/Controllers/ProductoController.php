@@ -11,10 +11,24 @@ class ProductoController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    protected $viewBag;
+
+
+    public function __construct(){
+       $this->middleware('auth');
+       $this->viewBag['pageConfigs'] = ['pageHeader' => true ];
+       $this->viewBag['breadcrumbs'] = [
+         ["link" => "/dashboard", "name" => "Home" ],
+         ["link" => "/proyectos", "name" => "Productos" ]
+       ];
+    }
+
     public function index()
     {
-      $listado = Producto::get();
-      return view( 'productos.index', compact('listado'));
+
+      $listado = Producto::where('eliminado',false)->paginate(15); 
+      $this->viewBag['listado'] = $listado; 
+      return view( 'productos.index', $this->viewBag );
     }
 
     /**
@@ -24,7 +38,9 @@ class ProductoController extends Controller
      */
     public function create(Producto $producto)
     {
-        return view('productos.create', compact('producto'));
+       $this->viewBag['producto'] = $producto;
+       $this->viewBag['breadcrumbs'][] = ['name' => 'Nuevo producto']; 
+       return view('productos.create', $this->viewBag );
     }
 
     /**
@@ -61,8 +77,11 @@ class ProductoController extends Controller
      */
     public function edit($id)
     {
-      $producto = Producto::find($id);
-      return view('productos.edit',compact('producto')); 
+       $producto = Producto::find($id);
+
+       $this->viewBag['producto'] = $producto;
+       $this->viewBag['breadcrumbs'][] = ['name' => 'Editar producto']; 
+       return view('productos.edit', $this->viewBag ); 
     }
 
     /**
@@ -72,6 +91,7 @@ class ProductoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+
     public function update(Request $request, $id)
     {
        $producto = Producto::find($id);
@@ -88,7 +108,10 @@ class ProductoController extends Controller
      */
     public function destroy($id)
     {
-        //
+       $product = Producto::find($id);
+       $product->eliminado = true;
+       $product->save();
+       return response()->json(['status' => true, 'refresh' => true]);
     }
 
     public function autocomplete(Request $request ){

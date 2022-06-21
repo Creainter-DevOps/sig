@@ -10,18 +10,16 @@
 
 @section('content')
     <div class="row">
-        <div class="offset-12 col-md-1" style="margin-bottom: 10px;text-align:right;">
-          <a class="btn btn-default" href="/cotizaciones/crear" style="color: #fff; background-color: #007bff; border-color: #007bff;">
-              Nuevo Cotización
-          </a>
+        <div class="offset-12 col-md-3" style="margin-bottom: 10px;">
+          <a class="btn btn-primary" href="/cotizaciones/crear" style=""> + Nueva Cotización</a>
         </div>
     </div>
 <div class="row" id="basic-table">
   <div class="col-12">
     <div class="card">
-      <div class="card-header">
+      <!--<div class="card-header">
         <h4 class="card-title">Oportunidades</h4>
-      </div>
+      </div>-->
       <div class="card-content">
         <div class="card-body">
   <div class="table-responsive">
@@ -73,7 +71,6 @@
       <div class="form-group" style="margin-left:20px;">Mostrando {{ count($listado) }} de {{ $listado->total() }} registros</div>
       </div>
     </div>
-  </div>
 </div>
 @endsection
 

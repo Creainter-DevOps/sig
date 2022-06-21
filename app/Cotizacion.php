@@ -23,7 +23,18 @@ class Cotizacion extends Model
   const UPDATED_AT = null;
   const CREATED_AT = null;
 
-
+  public function __construct(array $data = array()) {
+    $this->fill($data);
+    if(!empty($data['inx_estado_participacion'])) {
+      $this->inx_estado_participacion = $data['inx_estado_participacion'];
+    }
+    if(!empty($data['inx_estado_propuesta'])) {
+      $this->inx_estado_propuesta = $data['inx_estado_propuesta'];
+    }
+    if(!empty($data['inx_estado_buenapro'])) {
+      $this->inx_estado_buenapro = $data['inx_estado_buenapro'];
+    }
+  }
   public function oportunidad() {
     return $this->belongsTo('App\Oportunidad', 'oportunidad_id')->first();
   }
@@ -40,7 +51,8 @@ class Cotizacion extends Model
      */
     protected $fillable = [
       'id','empresa_id','fecha','monto','duracion_meses','oportunidad_id','interes_el','interes_por','participacion_el','participacion_por','propuesta_el','propuesta_por',
-      'plazo_servicio','plazo_garantia','plazo_instalacion','validez','moneda_id','observacion','terminos','seace_participacion_log','seace_participacion_fecha','seace_participacion_html','documento_id'
+      'plazo_servicio','plazo_garantia','plazo_instalacion','validez','moneda_id','observacion','terminos','seace_participacion_log','seace_participacion_fecha','seace_participacion_html','documento_id',
+      'elaborado_por','elaborado_desde','elaborado_hasta','elaborado_step','elaborado_json'
     ];
 
     /**
@@ -229,6 +241,21 @@ class Cotizacion extends Model
         ];
       }
     }
+    public function estado_participacion() {
+      if(!empty($this->inx_estado_participacion)) {
+        return json_decode($this->inx_estado_participacion, true);
+      }
+    }
+    public function estado_propuesta() {
+      if(!empty($this->inx_estado_propuesta)) {
+        return json_decode($this->inx_estado_propuesta, true);
+      }
+    }
+    public function estado_pro() {
+      if(!empty($this->inx_estado)) {
+        return json_decode($this->inx_estado, true);
+      }
+    }
     public static function visible() {
       return static::select('osce.cotizacion.*')
         ->join('osce.oportunidad', 'oportunidad.id','cotizacion.oportunidad_id')
@@ -253,9 +280,14 @@ class Cotizacion extends Model
       });
     }
     public function json_load() {
+//      if(!empty($this->elaborado_json)) {
+        return json_decode($this->elaborado_json, true);
+//      }
       return Helper::json_load('expediente_' . $this->id . '.json');
     }
     public function json_save($x) {
-      return Helper::json_save('expediente_' . $this->id . '.json', $x);
+      $this->elaborado_json = json_encode($x);
+      return $this->save();
+//      return Helper::json_save('expediente_' . $this->id . '.json', $x);
     }
 }

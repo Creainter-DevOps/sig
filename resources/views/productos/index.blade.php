@@ -13,26 +13,20 @@
 @endsection
 
 @section('content')
-<!-- table Transactions start -->
-</section>
-<!-- table Transactions end -->
-<!-- table success start -->
-<section id="table-success">
-  <div class="card">
-    <!-- datatable start -->
-    <div class="card">
-    <div class="card-header">
-      <!-- head -->
-      <!-- Single Date Picker and button -->
-      <div class="heading-elements" style="display:flex;justify-content:space-between; align-items:center;position:initial;" >
-        <ul class="list-inline mb-0">
-          <li class="ml-2"><a class="btn btn-primary" href="/productos/crear"><i class="bx bx-plus mr-1"></i> Nuevo </a></li>
-        </ul>
-      </div>
+    <div class="row">
+        <div class="offset-12 col-md-1" style="margin-bottom: 10px;">
+                <a class="btn btn-primary" href="/productos/crear">
+                     + Nuevo
+                </a>
+        </div>
     </div>
+<div  class="row" id="basic-table">
+    <!-- datatable start -->
+    <div class="col-12">
+    <div class="card">
     <div class="card-body" >
     <div class="table-responsive">
-      <table id="table-extended-success" class="table mb-0">
+      <table class="table table-sm" id="table-extended-success" class="table mb-0">
         <thead>
           <tr>
             <th>Nombres</th>
@@ -60,7 +54,7 @@
                 <div class="dropdown-menu dropdown-menu-right">
                   <a class="dropdown-item" href="{{ route( 'productos.show', [ 'producto' => $producto->id ] ) }}"><i class="bx bx-show-alt mr-1"></i> Ver más</a>
                   <a class="dropdown-item" href="{{ route( 'productos.edit', [ 'producto' => $producto->id ] ) }}"><i class="bx bx-edit-alt mr-1"></i> Editar</a>
-                  <a class="dropdown-item" onclick="eliminar(event)" href="/productos/{{ $producto->id }}/eliminar"><i class="bx bx-trash mr-1"></i> Eliminar</a>
+                  <a class="dropdown-item" onclick="eliminar(event)" href="{{ route('productos.destroy', [ 'producto' => $producto->id ] ) }}"><i class="bx bx-trash mr-1"></i> Eliminar</a>
                 </div>
               </div>
             </td>
@@ -70,12 +64,17 @@
       </table>
     </div>
     </div>
+
       <div class="card-footer" >
+       {{ $listado->links() }}
+       </div>
+       <div class="form-group" style="margin-left:20px;">Mostrando {{ count($listado) }} de {{ $listado->total() }} registros</div>
       </div>
     </div>
     <!-- datatable ends -->
   </div>
-</section>
+  </div>
+</div>
 @endsection
 
 {{-- vendor scripts --}}

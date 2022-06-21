@@ -1,5 +1,5 @@
 @extends('layouts.contentLayoutMaster')
-@section('title', 'Nuevo Cliente') 
+@section('title', 'Editar Cliente') 
 @section('content')
 @if(session()->has('message'))
 <div class="alert alert-success">
@@ -7,9 +7,9 @@
 </div>
 @endif
 <div class="card">
-    <div class="card-header block-header-default">
+    <!--<div class="card-header block-header-default">
         <h3 class="block-title">Editar producto</h3>
-    </div>
+    </div>-->
     <div class="card-content">
        <div class="card-body">
         <form action="{{ route('productos.update', ['producto' => $producto->id ])}}" method="post" class="form-horizontal form-data" id="form-data" >

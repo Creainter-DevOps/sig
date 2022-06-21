@@ -109,6 +109,7 @@ class EmpresaController extends Controller {
      * @param  \DummyFullModelClass  $DummyModelVariable
      * @return \Illuminate\Http\Response
      */
+
     public function update(Request $request, Empresa $empresa )
     {
       // Session::flash('message_success', 'Se ha realizado la modificación con éxito.');
@@ -129,12 +130,12 @@ class EmpresaController extends Controller {
      * @param  \DummyFullModelClass  $DummyModelVariable
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Cliente $cliente )
+    public function destroy(Empresa $empresa )
     {
       /* Proceso para eliminar */
-      $cliente->eliminado = true;
-      $cliente->save();
-      $cliente->log('eliminado');
+      $empresa->eliminado = true;
+      $empresa->save();
+      $empresa->log('eliminado');
       return response()->json(['status'=> true , 'refresh' => true  ]); 
     }
     public function addRepresentante(Request $request, Cliente $cliente)
@@ -158,6 +159,7 @@ class EmpresaController extends Controller {
             'correo_electronico' => $request->input('correo_electronico'),
             'telefono' => $request->input('telefono'),
         ]);
+
         return back();
      }
      public function delRepresentante(Request $request, Cliente $cliente, Contacto $contacto)
@@ -176,18 +178,26 @@ class EmpresaController extends Controller {
      }
 
      public function tags(){
-       $empresas = Empresa::where('tenant_id', Auth::user()->tenant_id)->get();  
+       $empresas = Empresa::where('tenant_id', Auth::user()->tenant_id)-> get();  
        $empresa_etiquetas = Etiqueta::empresas();
-       return view('empresas.tags', compact( 'empresas', 'empresa_etiquetas' ));
+       $this->viewBag['breadcrumbs'][] = [ 'name'=> 'Etiquetas' ]; 
+       $this->viewBag['etiquetas'] = $empresa_etiquetas;
+       $this->viewBag['empresas'] = $empresas;
+       return view('empresas.tags', $this->viewBag );
      }
 
      public function tags_empresa(Empresa $empresa ){
        $etiquetas = EmpresaEtiqueta::with('etiqueta','empresa')->where('empresa_id',$empresa['id'])->get();   
-       return view('empresas.tag_empresa', compact('empresa','etiquetas' ));
+
+       $this->viewBag['breadcrumbs'][] = ['name' => $empresa->razon_social ];
+       $this->viewBag['empresa'] = $empresa;
+       $this->viewBag['etiquetas'] = $etiquetas;
+
+       return view('empresas.tag_empresa', $this->viewBag );
+
      }
      public function tagCreate( Request $request, Etiqueta $etiqueta, Empresa $empresa ) {
-       $etiqueta->fill( $request->except([ 'empresa_id','tipo']));
-       $etiqueta->save();
+       $etiqueta = Etiqueta::nuevo($request->nombre);
        EmpresaEtiqueta::create([ 'tenant_id' => Auth::user()->tenant_id, 'empresa_id' => $request->input('empresa_id'), 'etiqueta_id' => $etiqueta->id , 'tipo' => $request->input('tipo') ]);
        return response()->json([ 'success'=> true , 'id' => $etiqueta->id ]);
      }

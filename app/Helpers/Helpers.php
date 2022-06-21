@@ -216,11 +216,9 @@ class Helper
           'height' => 50
         ]
       );
-      unset($data['logo_head']);
     }
-    if(!empty($data['logo_central'])) {
-      $templateProcessor->setImageValue('LogoCentral',config('constants.ruta_storage').  $data['logo_central']  );
-      unset($data['logo_central']);
+    if(!empty($data['EMPRESA.IMAGEN_CENTRAL'])) {
+      $templateProcessor->setImageValue( 'EMPRESA.IMAGEN_CENTRAL',config('constants.ruta_storage').  $data['EMPRESA.IMAGEN_CENTRAL'] );
     }
     $templateProcessor->setValues($data);
     return $templateProcessor->saveAs($output);

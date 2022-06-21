@@ -18,8 +18,8 @@
       <div class="col-xl-4 col-md-6 col-12 dashboard-greetings">
         <div class="card">
           <div class="card-header">
-            <h3 class="greeting-text">Congratulations John!</h3>
-            <p class="mb-0">Best seller of the month</p>
+            <h3 class="greeting-text">Hola {{ '@' . Auth::user()->usuario }}</h3>
+            <p class="mb-0">Hoy Lunes 13 de Junio, es un gran día</p>
           </div>
           <div class="card-content">
             <div class="card-body">

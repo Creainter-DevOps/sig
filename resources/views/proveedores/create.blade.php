@@ -1,5 +1,5 @@
 @extends('layouts.contentLayoutMaster')
-@section('title', 'Nuevo Cliente') 
+@section('title', 'Nuevo Proveedor') 
 @section('content')
 @section('custom-styles')
   <link rel="stylesheet" type="text/css" href="{{ asset('css/pages/app-invoice.css') }}">
@@ -11,7 +11,7 @@
 @endif
 <div class="card">
     <div class="card-header block-header-default">
-        <h3 class="block-title">Nuevo proveedor</h3>
+       <!--<h3 class="block-title">Nuevo proveedor</h3>-->
     </div>
     <div class="card-content">
        <div class="card-body">

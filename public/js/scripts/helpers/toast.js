@@ -15,11 +15,16 @@ const dialogBasic = Swal.mixin  ({
     cancelButtonText: 'Cancelar'
 })
 
-function toastSuccess( message = 'Operacion Realizada correctamente', timer = 2000  ){
+function toastSuccess(refresh = false, message = 'Operacion Realizada correctamente', timer = 2000  ){
     ToastBasic.fire( {
       timer: timer,
       icon : 'success',
       title : message,
+      didClose:() => {
+        if(refresh){
+          location.reload();
+        } 
+      } 
     });
 }
 function toastInfo(message ='' , timer = 2000 ){
@@ -55,10 +60,14 @@ function toastError (message = 'Error... Algo sucedio', timer = 3000 ){
   });
 }
 
-function dialogDelete( message = ' Desea eliminar este registro' ){
+function dialogDelete( message = ' Desea eliminar este registro',id_item ){
   return dialogBasic.fire({
     title: message,
     icon: 'warning',
+  }).then( (result) => {
+    if ( result.isConfirmed) {
+      deleteItem( id_item );    
+    }
   })
 }
 

@@ -1,6 +1,6 @@
 @extends('layouts.contentLayoutMaster')
 {{-- page title --}}
-@section('title','Invoice List')
+@section('title','Proyectos')
 {{-- vendor style --}}
 @section('vendor-styles')
 @endsection
@@ -19,9 +19,9 @@
 <div class="row" id="basic-table">
   <div class="col-12">
     <div class="card">
-      <div class="card-header">
+      <!--<div class="card-header">
         <h4 class="card-title">Proyectos</h4>
-      </div>
+      </div>-->
       <div class="card-content">
         <div class="card-body">
   <div class="table-responsive">

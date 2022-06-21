@@ -34,6 +34,10 @@
                   <td>{{ Helper::money($licitacion->monto) }}</td>
                 </tr>
                 <tr>
+                  <td>Palabras Claves:</td>
+                  <td>{{ $licitacion->etiquetas() }}</td>
+                </tr>
+                <tr>
                   <td>Adjuntos:</td>
                   <td>
                   <ul>

@@ -2,21 +2,17 @@
 @section('title','Empresas')
 @section('content')
     <div class="row">
-        <div class="offset-12 col-md-1" style="margin-bottom: 10px;text-align:right;">
-            <a class="btn btn-default" href="/empresas/crear" style="color: #fff; background-color: #007bff; border-color: #007bff;">
-                Nuevo
+        <div class="col-md-4" style="margin-bottom: 10px;">
+            <a class="btn btn-primary" href="/empresas/crear">
+               + Nuevo
              </a>
-        </div>
-          <div class="offset-12 col-md-1" style="margin-bottom: 10px;text-align:right;">
-            <a class="btn btn-default" href="/empresas/tags" style="color: #fff; background-color: #007bff; border-color: #007bff;">
-                    Tags
-             </a>
+            <a class="btn btn-primary" href="/empresas/tags"> <i class='bx bxs-purchase-tag'></i> Etiquetas </a>
         </div>
     </div>
     <div class="card">
-        <div class="card-header block-header-default">
+        <!--<div class="card-header block-header-default">
             <h3 class="block-title">Empresas</h3>
-        </div>
+        </div>-->
         @if(session()->has('message'))
         <div class="alert alert-success">
             {{ session()->get('message') }}
@@ -62,7 +58,7 @@
                 </table>
             </div>
           </div>
-          <div class="card-footer d-flex flex-row-reverse justify-content-between  ">
+          <div class="card-footer">
             {{ $listado->links() }}
              <div class="form-group" style="margin-left:20px;">Mostrando {{ count($listado) }} de {{ $listado->total() }} registros</div>
           </div>

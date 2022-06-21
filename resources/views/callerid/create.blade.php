@@ -1,5 +1,5 @@
 @extends('layouts.contentLayoutMaster')
-@section('title', 'Nuevo Proyecto')
+@section('title', 'Nuevo Caller') 
 @section('vendor-styles')
 <link rel="stylesheet" type="text/css" href="{{asset('vendors/css/vendors.min.css')}} ">
 <link rel="stylesheet" type="text/css" href="{{asset('vendors/css/pickers/pickadate/pickadate.css')}}">

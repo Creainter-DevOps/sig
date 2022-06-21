@@ -81,6 +81,11 @@ class Oportunidad extends Model
       }
       return '--';
     }
+    public function etiquetas() {
+      $rp = collect(DB::select('SELECT osce.fn_etiquetas_a_rotulo(L.etiquetas_id) ee
+      FROM osce.oportunidad L WHERE id = ' . $this->id))->first();
+      return $rp->ee;
+    }
     public function licitacion() {
       return $this->belongsTo('App\Licitacion', 'licitacion_id')->first();
     }
@@ -190,7 +195,10 @@ class Oportunidad extends Model
     }
     public function empresas() {
       $rp = DB::select("
-        SELECT E.razon_social, E.ruc, E.descripcion, E.id e_empresa_id, C.*, C.id c_cotizacion_id, C.seace_participacion_log, C.seace_participacion_fecha, C.seace_participacion_html
+        SELECT E.razon_social, E.ruc, E.descripcion, E.id e_empresa_id, C.*, C.id c_cotizacion_id, C.seace_participacion_log, C.seace_participacion_fecha, C.seace_participacion_html,
+          osce.fn_cotizacion_fecha_estado_participacion(1, C.id::int) inx_estado_participacion,
+          osce.fn_cotizacion_fecha_estado_propuesta(1, C.id::int) inx_estado_propuesta,
+          osce.fn_cotizacion_fecha_estado_buenapro(1, C.id::int) inx_estado_buenapro
         FROM osce.empresa E
         LEFT JOIN osce.cotizacion C ON C.oportunidad_id = " . $this->id . " AND C.empresa_id = E.id
         WHERE E.tenant_id = " . $this->tenant_id . "
@@ -270,7 +278,7 @@ AND L.fecha_participacion_hasta + INTERVAL '12' HOUR >= NOW()
        SELECT x.*,
          L.fecha_participacion_hasta,
          CONCAT(
-           (CASE WHEN x.documento_id IS NOT NULL THEN '<i class=\"bx bxs-circle\" style=\"color:#438eff;\"></i>' ELSE '' END),
+           (CASE WHEN x.expediente_step IS NOT NULL THEN CONCAT('<span style=\"background: #438eff;font-size: 11px;color: white;padding: 1px 4px;border-radius: 3px;margin-right: 2px;\">', x.expediente_step::text, '</span>') ELSE '' END),
            (CASE WHEN x.cantidad_externo > 0 THEN '<i class=\"bx bxs-circle\" style=\"color:orange;\"></i>' ELSE '' END),
            (CASE WHEN x.aprobado_el >= DATE_TRUNC('day', NOW()) - INTERVAL '1' DAY THEN '<i class=\"bx bxs-circle\" style=\"color:green;\"></i>' ELSE '' END),
            UPPER(L.rotulo)
@@ -279,6 +287,7 @@ AND L.fecha_participacion_hasta + INTERVAL '12' HOUR >= NOW()
          osce.fn_etiquetas_a_rotulo(x.etiquetas_id) etiquetas
 FROM (
 SELECT O.*,
+  osce.fn_oportunidad_expediente_step(O.tenant_id, O.id) as expediente_step,
   (SELECT COUNT(*) FROM osce.oportunidad_externo WHERE oportunidad_id = O.id) cantidad_externo,
   (SELECT COUNT(*) FROM osce.cotizacion C WHERE C.oportunidad_id = O.id AND C.eliminado IS NULL AND C.participacion_el IS NULL AND COALESCE(LENGTH(C.seace_participacion_log), 0) > 0) no_es_posible,
   (SELECT COUNT(*) FROM osce.cotizacion C WHERE C.oportunidad_id = O.id AND C.eliminado IS NULL AND C.interes_el IS NOT NULL) empresas_interes,
@@ -300,7 +309,7 @@ ORDER BY L.fecha_participacion_hasta ASC, id DESC");
         SELECT x.*,
           L.fecha_propuesta_hasta,
          CONCAT(
-           (CASE WHEN x.documento_id IS NOT NULL THEN '<i class=\"bx bxs-circle\" style=\"color:#438eff;\"></i>' ELSE '' END),
+           (CASE WHEN x.expediente_step IS NOT NULL THEN CONCAT('<span style=\"background: #438eff;font-size: 11px;color: white;padding: 1px 4px;border-radius: 3px;margin-right: 2px;\">', x.expediente_step::text, '</span>') ELSE '' END),
            (CASE WHEN x.cantidad_externo > 0 THEN '<i class=\"bx bxs-circle\" style=\"color:orange;\"></i>' ELSE '' END),
            (CASE WHEN x.aprobado_el >= DATE_TRUNC('day', NOW()) - INTERVAL '1' DAY THEN '<i class=\"bx bxs-circle\" style=\"color:green;\"></i>' ELSE '' END),
            UPPER(L.rotulo)
@@ -309,6 +318,7 @@ ORDER BY L.fecha_participacion_hasta ASC, id DESC");
          osce.fn_etiquetas_a_rotulo(x.etiquetas_id) etiquetas
 FROM (
 SELECT O.*,
+  osce.fn_oportunidad_expediente_step(O.tenant_id, O.id) as expediente_step,
   (SELECT COUNT(*) FROM osce.oportunidad_externo WHERE oportunidad_id = O.id) cantidad_externo,
   osce.fn_usuario_rotulo(O.aprobado_por) aprobado_usuario,
   aprobado_el aprobado_fecha
@@ -397,7 +407,7 @@ ORDER BY L.buenapro_fecha ASC, L.fecha_buena_hasta ASC, O.id ASC");
       if(!empty($this->inx_estado_participacion)) {
         return json_decode($this->inx_estado_participacion, true);
       }
-      exit(333);
+      exit;
       $ahora = time();
       $participacion_desde = strtotime($this->licitacion()->fecha_participacion_desde);
       $participacion_hasta = strtotime($this->licitacion()->fecha_participacion_hasta);
@@ -449,7 +459,7 @@ ORDER BY L.buenapro_fecha ASC, L.fecha_buena_hasta ASC, O.id ASC");
       if(!empty($this->inx_estado_propuesta)) {
         return json_decode($this->inx_estado_propuesta, true);
       }
-      exit(2222);
+      exit;
       $ahora = time();
       $participacion_desde = strtotime($this->licitacion()->fecha_participacion_desde);
       $participacion_hasta = strtotime($this->licitacion()->fecha_participacion_hasta);
@@ -508,7 +518,7 @@ ORDER BY L.buenapro_fecha ASC, L.fecha_buena_hasta ASC, O.id ASC");
       if(!empty($this->inx_estado)) {
         return json_decode($this->inx_estado, true);
       }
-      exit(111);
+      exit;
       $ahora = time();
       $pro_desde = strtotime($this->licitacion()->fecha_buena_desde);
       $pro_hasta = strtotime($this->licitacion()->fecha_buena_hasta);
