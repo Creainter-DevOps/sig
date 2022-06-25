@@ -37,7 +37,8 @@ $(document).ready(function () {
         localStorage.setItem("usersStatus", usersDataArray[6]);
     })
     // render stored local storage data on page named page-users-view
-    if (localStorage.usersId !== undefined) {
+    /*if (localStorage.usersId !== undefined ) {
+        console.log(localStorage.usersId);
         $(".users-view-id").html(localStorage.getItem("usersId"));
         $(".users-view-username").html(localStorage.getItem("usersUsername"));
         $(".users-view-name").html(localStorage.getItem("usersName"));
@@ -52,7 +53,7 @@ $(document).ready(function () {
         if ($(".users-view-status").text() === "Close") {
             $(".users-view-status").toggleClass("badge-light-success badge-light-warning")
         }
-    }
+    }*/
     // page users list verified filter
     $("#users-list-verified").on("change", function () {
         var usersVerifiedSelect = $("#users-list-verified").val();

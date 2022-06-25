@@ -7,7 +7,6 @@ use App\Helpers\NumeroALetras;
 
 class Helper
 {
-
   public static function parallel_command($cmd, $data = null) {
     $stdout = static::json_path('pid_' . uniqid() . '.log');
     if(is_array($cmd)) {
@@ -87,6 +86,7 @@ class Helper
     static::json_save('process_' . $pid, $work);
     return $work;
   }
+  
   public static function parallel_status_pool($pid_pool) {
     if(!is_array($pid_pool)) {
       return static::parallel_status($pid_pool);
@@ -125,34 +125,70 @@ class Helper
     }
     return null;
   }
+
   public static function json_path($x, $path = null) {
     return ($path ?? '/tmp/') . $x;
   }
+
   public static function json_has($x, $path = null) {
     return file_exists(static::json_path($x, $path));
   }
+
   public static function json_timeout($x, $time, $path = null) {
     return filemtime(static::json_path($x, $path)) <= (time() - ($time * 1));
   }
+  
   public static function json_load($x, $path = null) {
     if(!static::json_has($x, $path)) {
       return [];
     }
     return json_decode(file_get_contents(static::json_path($x, $path)), true);
   }
+
   public static function json_save($x, $data, $path = null) {
     return file_put_contents(static::json_path($x, $path), json_encode($data));
   }
+
   public static function json_delete($x, $path = null) {
     @unlink(static::json_path($x, $path));
     return true;
   }
-  public static function metadata($file) {
-    $out = shell_exec("/usr/bin/exiftool " . $file);
+
+  public static function array_group_by($a, $b){
+    $_temp = array();
+    $f = array_shift($b);
+    $indice = is_array($f) ? $f['key'] : $f;
+    foreach($a as $n) {
+      if(!is_array($f)) {
+        $_temp[$n[$indice]][] = $n;
+      } else {
+        if(!isset($_temp[$n[$indice]])) {
+          $_temp[$n[$indice]] = !empty($f['only']) ? array_only_keys($n, $f['only']) : array();
+          $_temp[$n[$indice]]['children'] = array();
+        }
+        $_temp[$n[$indice]]['children'][] = array_delete_keys($n, $f['only']);
+      }
+    }
+    if(!empty($b)) {
+      foreach($_temp as $n) {
+        if(!is_array($f)) {
+          $_temp[$n[$indice]] = array_group_by($_temp[$n[$indice]], $b);
+        } else {
+          $_temp[$n[$indice]]['children'] = array_group_by($_temp[$n[$indice]]['children'], $b);
+        }
+      }
+    }
+    return $_temp;  
+  }
+
+  public static function metadata($file, $cmd = '/usr/bin/exiftool', $antirec = 0) {
+
+    $out = shell_exec($cmd . ' ' . $file);
     $out = explode("\n", $out);
     $out = array_filter($out, function($n) {
       return !empty($n);
     });
+
     $out = array_map(function($n) {
       $l = explode(':', $n, 2);
       $l = array_map('trim', $l);
@@ -162,6 +198,11 @@ class Helper
     foreach($out as $v) {
       if(isset($v[1])) {
         $_out[$v[0]] = $v[1];
+      }
+    }
+    if(empty($_out['Pages']) && empty($_out['Page Count'])) {
+      if($antirec == 0) {
+        $_out = static::metadata($file, '/usr/bin/pdfinfo', 1);
       }
     }
     if(empty($_out['Pages'])) {

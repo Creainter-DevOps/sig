@@ -70,9 +70,28 @@ class Documento extends Model
 
      if(!empty($data['rotulo'])) {
        $inputs["ROTULO"] = $data['rotulo'];
-     } 
+     } elseif(!empty($cotizacion->rotulo)) {
+       $inputs["ROTULO"] = $cotizacion->rotulo;
+     }
 
-     if ( !empty( $data->pesonal_id ) ) {
+     if(!empty($cotizacion->rotulo)) {
+       $inputs['COTIZACION.ROTULO']       = $cotizacion->rotulo;
+       $inputs['COTIZACION.NOMENCLATURA'] = $cotizacion->nomenclatura();
+       if(!empty($cotizacion->oportunidad()->empresa_id)) {
+         $inputs['COTIZACION.ENTIDAD']      = $cotizacion->oportunidad()->empresa()->razon_social;
+         $inputs['COTIZACION.DIRECCION']    = $cotizacion->oportunidad()->empresa()->direccion;
+       }
+       $inputs['COTIZACION.FECHA']        = Helper::fecha($cotizacion->fecha);
+       $inputs['COTIZACION.MONTO_NETO']   = 200;
+       $inputs['COTIZACION.DESCUENTO']    = 20;
+       $inputs['COTIZACION.IGV']          = 100;
+       $inputs['COTIZACION.MONTO_TOTAL']  = $cotizacion->monto;
+       $inputs['COTIZACION.PLAZO_INSTALACION'] = $cotizacion->plazo_instalacion;
+       $inputs['COTIZACION.PLAZO_GARANTIA']    = $cotizacion->plazo_garantia;
+     }
+
+
+     if (!empty($data->pesonal_id)) {
         $personal = Documento::find($data->personal_id);
         $inputs["PERSONAL.ID"] = $personal->nombres;
         $input["PERSONAL.DOCUMENTO"] = $personal->documento;

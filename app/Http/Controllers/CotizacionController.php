@@ -132,6 +132,15 @@ class CotizacionController extends Controller {
                                   ->where('cotizacion_id', $id )->get(); 
     return response()->json( [ 'cotizacion' =>  $cotizacion, 'detalle' => $detalle ]);
   }
+  public function registrarParticipacion(Request $request, Cotizacion $cotizacion) {
+    $cotizacion->registrar_participacion();
+    return redirect('/oportunidades/' . $cotizacion->oportunidad_id . '/');
+  }
+  public function registrarPropuesta(Request $request, Cotizacion $cotizacion) {
+    $cotizacion->registrar_propuesta();
+    return redirect('/oportunidades/' . $cotizacion->oportunidad_id . '/');
+  }
+
   public function detalleSave( Request $request , $id){
     $oportunidad = $request->all();
     $cotizacion = Cotizacion::find($id);

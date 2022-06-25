@@ -189,8 +189,9 @@ class ExpedienteController extends Controller
 
         $workspace['paso03'][$id. '/n']  = $this->formatoCard([
           'orden'     => $order,
+          'hash'      => uniqid(),
           'page'      => 0,
-          'folio'     => $metadata['Pages'] ,
+          'folio'     => $metadata['Pages'],
           'tipo'      => $file['tipo'],
           'rotulo'    => $file['rotulo'],
           'archivo'   => Helper::replace_extension($file['root'], 'pdf'),
@@ -225,8 +226,8 @@ class ExpedienteController extends Controller
       }
       //$cotizacion->log('EXPEDIENTE/PASO03', 'Se ha iniciado con el paso 3');
       $oportunidad = $cotizacion->oportunidad();
-      $entidad = Empresa::find($oportunidad->licitacion()->empresa_id);
-      return view('expediente.paso03', compact( 'entidad', 'oportunidad' ,'workspace','cotizacion'));
+      #$entidad = Empresa::find($oportunidad->licitacion()->empresa_id);
+      return view('expediente.paso03', compact('oportunidad' ,'workspace','cotizacion'));
       /* En este paso renderizamos toda la variable paso03, y cada vez que se saca uno o añade debe afectar solo al paso03 */
     }
 
@@ -234,6 +235,7 @@ class ExpedienteController extends Controller
 
       $workspace = $cotizacion->json_load();
       //$cotizacion->log('EXPEDIENTE/PASO03', 'Se ha iniciado con el paso 3');
+      $folios = 0;
       $commands = []; 
       /* Se trabaja los pdf por individuales, realizando el custom */
       $commands[] = 'sleep 2';
@@ -266,10 +268,11 @@ class ExpedienteController extends Controller
 
       $ant_repe = [];
 
+      $workspace['paso03'] = static::workspace_ordenar($workspace['paso03']);
+
       foreach($workspace['paso03'] as $key => $file) {
         if(!$file['is_part']) {
           if(!empty($file['estampados']['firma']) || !empty($file['estampados']['visado'])) {
-            $file['hash'] = uniqid();
             $workspace['paso03'][$key] = $file;
             $input  = config('constants.ruta_storage') . $file['archivo'];
             $output = config('constants.ruta_temporal') . $file['hash'] . '-%d.pdf';
@@ -283,19 +286,23 @@ class ExpedienteController extends Controller
             }, $workspace['paso03'][$key]['root']);
 
           } else {
+            $file['hash'] = uniqid();
             $workspace['paso03'][$key]['root'] = config('constants.ruta_storage') . $file['archivo'];
             continue;
           }
         } else {
-          $file_page = Helper::file_name(Helper::replace_extension($file['archivo'], 'pdf', '-' . ($file['page'] + 1)));
-          if(!file_exists(config('constants.ruta_temporal') . $file_page) && !in_array($file['archivo'], $ant_repe)) {
+
+          $file_page = Helper::file_name(Helper::replace_extension($file['hash'], 'pdf', '-' . ($file['page'] + 1)));
+//          print_r($file_page); echo "\n";
+          //if(!file_exists(config('constants.ruta_temporal') . $file_page) && !in_array($file['archivo'], $ant_repe)) {
+          if(!in_array($file['archivo'], $ant_repe)) {
             $ant_repe[] = $file['archivo'];
             $input  = config('constants.ruta_storage') . $file['archivo'];
-            $output = config('constants.ruta_temporal') . Helper::file_name(Helper::replace_extension($file['archivo'], 'pdf', '-%d'));
+            $output = config('constants.ruta_temporal') . Helper::file_name(Helper::replace_extension($file['hash'], 'pdf', '-%d'));
             $commands[] = "/usr/bin/pdfseparate '" . $input . "' '" . $output . "'";
           }
           $workspace['paso03'][$key]['root'] = config('constants.ruta_temporal') . $file_page;
-          continue;
+#          continue;
         }
 
         if(!empty($file['estampados']['firma'])) {
@@ -307,7 +314,11 @@ class ExpedienteController extends Controller
             if(file_exists($input) || true) {
               $commands[] = 'echo "Proceso de estampado de pdf"';
               $commands[] = '/bin/estampar ' . $input . ' ' . $sello . ' ' . $ff['x'] . ' ' . $ff['y'] . " '" . $output . "'";
-              $workspace['paso03'][$key]['root'][$pp] = $input;
+              if($file['page'] == $pp && $file['is_part']) {
+                $workspace['paso03'][$key]['root'] = $output;
+              } else {
+                $workspace['paso03'][$key]['root'][$pp] = $output;
+              }
             } else {
               $commands[] = '/bin/noexiste ' . $input;
             }
@@ -322,7 +333,11 @@ class ExpedienteController extends Controller
             if(file_exists($input) || true) {
               $commands[] = 'echo "Proceso de estampado de pdf"';
               $commands[] = '/bin/estampar ' . $input . ' ' . $sello . ' ' . $ff['x'] . ' ' . $ff['y'] . " '" . $output . "'";
-              $workspace['paso03'][$key]['root'][$pp] = $input;
+              if($file['page'] == $pp && $file['is_part']) {
+                $workspace['paso03'][$key]['root'] = $output;
+              } else {
+                $workspace['paso03'][$key]['root'][$pp] = $output;
+              }
             } else {
               $commands[] = '/bin/noexiste ' . $input;
             }
@@ -337,6 +352,7 @@ class ExpedienteController extends Controller
       $pdf_individuales = [];
       $documentos_ids = [];
       foreach($workspace['paso03'] as $key => $file) {
+        $folios += $file['folio'] ?? 1;
         if(!empty($file['id'])) {
           $documentos_ids[] = $file['id'];
         } elseif(!empty($file['generado_de_id'])) {
@@ -369,9 +385,12 @@ class ExpedienteController extends Controller
       $commands[] = 'echo "Proceso de foliación de PDF"';
       $commands[] = '/bin/pdf-foliar ' . $output_final;
 
-      /*echo "<pre>";
+/*
+echo "<pre>";
       print_r($commands);
-      exit;*/
+      exit;
+*/
+
       //      $meta = Helper::metadata($output_final);
 
       $documentos_ids = array_unique($documentos_ids);
@@ -384,8 +403,8 @@ class ExpedienteController extends Controller
           'es_ordenable'  => false,
           'es_reusable'   => false,
           'tipo'          => "EXPEDIENTE",
-          'folio'         => 0,
-          'rotulo'        => 'Expediente: ' . $cotizacion->oportunidad()->licitacion()->nomenclatura,
+          'folio'         => $folios,
+          'rotulo'        => 'Expediente: ' . $cotizacion->oportunidad()->codigo,
           'archivo'       => $cotizacion->oportunidad()->folder(true) .'EXPEDIENTE/Propuesta_Seace.pdf',
           'filename'      => 'Propuesta_Seace.pdf',
           'formato'       => 'PDF',
@@ -396,6 +415,7 @@ class ExpedienteController extends Controller
       } else {
         $doc = Documento::find($cotizacion->documento_id);
         $doc->documentos_id = '{' . implode(',', $documentos_ids) . '}';
+        $doc->folio         = $folios;
         $doc->save();
       }
 
@@ -415,7 +435,9 @@ class ExpedienteController extends Controller
     }
     public function paso04(Cotizacion $cotizacion) {
       $workspace = $cotizacion->json_load();
-      return view('expediente.paso04', compact('workspace','cotizacion'));
+
+      $documento = Documento::find($cotizacion->documento_id);
+      return view('expediente.paso04', compact('workspace','cotizacion','documento'));
       /*
        * AQUI LLEGA FINALIZADO, O EN PROCESO Y ESO DEBEMOS VERIFICAR CON AJAX
        * ASI MISMO IR MOSTRANDO EL LOG PARA QUE EL USUARIO LOGRE VER ALGO DEL AVANCE...
@@ -492,6 +514,7 @@ class ExpedienteController extends Controller
 
       $append = [];
 
+      $hash = uniqid();
       if(!empty($documento->es_ordenable)) {
         $workspace['paso03'] = $this->workspace_space($workspace['paso03'], $orden, $documento->folio);
         foreach(range(0, $documento->folio - 1) as $pp) {
@@ -500,12 +523,14 @@ class ExpedienteController extends Controller
             'cid'     => $cid,
             'id'      => $documento->id,
             'orden'   => $orden,
+            'hash'    => $hash,
             'page'    => $pp,
             'tipo'    => $documento->tipo,
-            'folio'   => $documento->folio,
+            'folio'   => 1,#$documento->folio,
             'rotulo'  => $documento->rotulo,
             'archivo' => $documento->archivo,
             'is_part' => true,
+            'timestamp' => time(),
           ]);
           if(!$documento->es_reusable) {
             if(!empty($documento->generado_de_id)) {
@@ -522,12 +547,14 @@ class ExpedienteController extends Controller
           'cid'     => $cid,
           'id'      => $documento->id,
           'orden'   => $orden,
+          'hash'    => $hash,
           'page'    => 0,
           'tipo'    => $documento->tipo,
           'folio'   => $documento->folio,
           'rotulo'  => $documento->rotulo,
           'archivo' => $documento->archivo,
           'is_part' => false,
+          'timestamp' => time(),
         ]);
         if(!$documento->es_reusable) {
           if(!empty($documento->generado_de_id)) {
@@ -577,7 +604,7 @@ class ExpedienteController extends Controller
       $cid = $request->get('id');
       $orden = $request->get('orden');
 
-      $workspace['paso03'] = $this->workspace_move($workspace['paso03'] , $cid , $orden); 
+      $workspace['paso03'] = $this->workspace_move($workspace['paso03'], $cid, $orden);
       $cotizacion->json_save($workspace);
 
       return response()->json([
@@ -605,13 +632,12 @@ class ExpedienteController extends Controller
     public function workspace_move($matrix, $cidx, $orden, $space = 1) {
       
       $o_i = $this->workspace_get_card($matrix, $cidx);
-
-      $o_i = $o_i['orden'];      
+      $o_i = $o_i['orden'];
 
       if($o_i == $orden) {
         return $matrix;
       }
-      if ( $o_i > $orden ) {
+      if ($o_i > $orden) {
         $cids = $this->workspace_get_range($matrix, $o_i, $orden);
         foreach($cids as $cid) {
           $c = $this->workspace_get_card($matrix, $cid);
@@ -690,9 +716,7 @@ class ExpedienteController extends Controller
 
       $workspace = $cotizacion->json_load();
       $cid = $request->get('cid');
-      
-      unset( $workspace['paso03'][$cid]['estampados'] );   
-
+      $workspace['paso03'][$cid]['estampados'] =[];   
       $cotizacion->json_save($workspace);
       return response()->json(['status' => true ]);
     }
@@ -706,6 +730,19 @@ class ExpedienteController extends Controller
           'firma'  => [],
         ],
       ];
+      if(!empty($x['is_part'])) {
+        $default['estampados']['visado'][$x['page']] = [
+          'x' => rand(85000, 92999) / 100000,
+          'y' => rand(85000, 92999) / 100000,
+        ];
+      } else {
+        for($i = 0; $i < $x['folio']; $i++) {
+          $default['estampados']['visado'][$i] = [
+            'x' => rand(85000, 92999) / 100000,
+            'y' => rand(85000, 92999) / 100000,
+          ];
+        }
+      }
       return array_merge($default, $x);
     }
     /**

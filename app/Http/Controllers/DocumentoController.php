@@ -128,7 +128,6 @@ class DocumentoController extends Controller {
       $request->archivo->move(public_path('storage/' . $request->tipo), $fileName);
 
       $meta = Helper::metadata($destino);
-
       $data['archivo']  = $request->tipo . '/' . $fileName;
       $data['folio']    = $meta['Pages'] ?? 1;
       $data['formato']  = strtoupper($extension);
@@ -215,7 +214,27 @@ class DocumentoController extends Controller {
     $headers = [
       'Content-Description' => 'Imagen de Documento',
       'Content-Type' => 'image/jpg',
-   ];
+  ];
+    return \Response::download($output, $name, $headers);
+  }
+
+  public function descargarParte(Request $request, Documento $documento) {
+    $page   = $request->page;
+    $input  = config('constants.ruta_storage') . $documento->archivo;
+    $name   = 'part_' . md5($documento->id . '-' . $page) . '.pdf';
+    $output = config('constants.ruta_temporal') . $name;
+
+    if(!file_exists($input)) {
+      echo "404";
+      exit;
+    }
+    if(!file_exists($output)) {
+      exec("/usr/bin/pdfseparate '" . $input . "' -f " . $page . " -l " . $page . " '" . $output . "'");
+    }
+    $headers = [
+      'Content-Description' => 'Parte del Documento: ' . $name,
+      'Content-Type' => 'document/pdf',
+   ];
     return \Response::download($output, $name, $headers);
   }
 }

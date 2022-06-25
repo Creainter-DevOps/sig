@@ -13,8 +13,6 @@ class UsuarioController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-
-    
     
     protected $viewBag; 
 
@@ -24,12 +22,13 @@ class UsuarioController extends Controller
       $this->viewBag['pageConfigs'] = ['pageHeader' => true ];
       $this->viewBag['breadcrumbs'] = [
         ["link" => "/dashboard", "name" => "Home" ],
-        ["link" => "/proyectos", "name" => "Clientes" ]
+        ["link" => "/usuarios", "name" => "Usuarios" ]
       ];
     }
 
     public function index()
     {
+      $this->viewBag['listado'] = User::paginate(15);      
       return view('usuarios.index',$this->viewBag );     
     }
 
@@ -40,7 +39,7 @@ class UsuarioController extends Controller
      */
     public function create()
     {
-        //
+       return view('usuarios.create', $this->viewBag );
     }
 
     /**
@@ -62,7 +61,9 @@ class UsuarioController extends Controller
      */
     public function show($id)
     {
-        //
+       $user = User::find($id); 
+       //$this->viewBag[' = $user;
+      return view('usuarios.show', compact('user')); 
     }
 
     /**
@@ -71,9 +72,12 @@ class UsuarioController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit( $user )
     {
-        //
+        $usuario = User::find($user);
+        $this->viewBag['breadcrumbs'] [] = ['name' => "Editar usuario" ] ;
+        $this->viewBag['usuario'] = $usuario;
+        return view ( 'usuarios.edit', $this->viewBag );
     }
 
     /**

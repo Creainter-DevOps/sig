@@ -1,6 +1,6 @@
 @extends('layouts.contentLayoutMaster')
 {{-- page title --}}
-@section('title','Clientes')
+@section('title','Usuarios')
 {{-- vendor style --}}
 @section('vendor-styles')
 <link rel="stylesheet" type="text/css" href="{{asset('vendors/css/tables/datatable/datatables.min.css')}}">
@@ -15,7 +15,7 @@
 @section('content')
     <div class="row">
         <div class="col-md-2" style="margin-bottom: 10px;">
-          <a class="btn btn-primary" href="/clientes/crear"> + Nuevo </a>
+          <a class="btn btn-primary" href="/usuarios/crear"> + Nuevo </a>
         </div>
     </div>
 <div class="row" id="basic-table">
@@ -27,32 +27,30 @@
     <table class="table table-sm mb-0" style="width:100%">
       <thead>
         <tr>
+          <th>ID</th>
           <th>Usuario</th>
           <th>Nombres</th>
           <th>U.Sesion</th>
           <th></th>
-          <th>Telefono</th>
-          <th>Web</th>
           <th width="5%">Opciones</th>
         </tr>
       </thead>
       <tbody>
-      @foreach ($listado as $cliente)
+      @foreach ($listado as $usuario)
         <tr>
-          <td>{{ $cliente->id }}</td>
-          <td>{{ $cliente->empresa()->ruc }}</td>
-          <td>{{ $cliente->empresa()->razon_social }}</td>
-          <td>{{ $cliente->empresa()->seudonimo }}</td>
-          <td>{{ $cliente->empresa()->telefono }}</td>
-          <td>{{ $cliente->empresa()->web }}</td>
+          <td>{{ $usuario->id }}</td>
+          <td>{{ $usuario->usuario }}</td>
+          <td></td>
+          <td></td>
+          <td></td>
           <td class="text-center py-1">
               <div class="dropdown">
                 <span class="bx bx-dots-vertical-rounded font-medium-3 dropdown-toggle nav-hide-arrow cursor-pointer" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="menu">
                 </span>
                 <div class="dropdown-menu dropdown-menu-right" x-placement="top-end" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(19px, -7px, 0px);">
-                  <a class="dropdown-item" href="{{ route('clientes.show', ['cliente' => $cliente->id ]) }}"><i class="bx bx-show-alt mr-1"></i> Ver Mas </a>
-                  <!--<a class="dropdown-item" href="{{ route('clientes.edit', [ 'cliente' =>  $cliente->id ]) }}"  ><i class="bx bx-edit-alt mr-1"></i> Editar</a>-->
-                  <a class="dropdown-item" data-confirm-remove="{{ route('clientes.destroy', ['cliente' => $cliente->id ]) }}" href="#" ><i class="bx bx-trash mr-1"></i> Eliminar</a> 
+                  <a class="dropdown-item" href="{{ route('usuarios.show', ['usuario' => $usuario->id ]) }}"><i class="bx bx-show-alt mr-1"></i> Ver Mas </a>
+                  <a class="dropdown-item" href="{{ route('usuarios.edit', [ 'usuario' =>  $usuario->id ]) }}"  ><i class="bx bx-edit-alt mr-1"></i> Editar</a>
+                  <a class="dropdown-item" data-confirm-remove="{{ route('usuarios.destroy', ['usuario' => $usuario->id ]) }}" href="#" ><i class="bx bx-trash mr-1"></i> Eliminar</a> 
                 </div>
               </div>
             </td>

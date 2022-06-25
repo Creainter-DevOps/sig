@@ -29,8 +29,8 @@
 <!--          <th style="width:150px;">Código</th> -->
           <th>Cliente</th>
           <th>Rótulo</th>
-          <th>Aprobado el</th>
-          <th>Enviado el</th>
+          <th>Solicitado</th>
+          <th>Respondido</th>
           <th>Costos</th>
           <th></th>
         </tr>
@@ -38,8 +38,9 @@
       <tbody>
       @foreach ($listado as $oportunidad)
         <tr>
-<!--          <td><div>{{ $oportunidad->codigo }}</div></td>-->
-          <td style="width: 200px;">{{ $oportunidad->institucion() }}</td>
+          <td style="width: 200px;">
+          {{ $oportunidad->institucion() }}
+          </td>
           @if($oportunidad->automatica)
           <td><i class="ficon bx bx-cloud" style="color:#00c506;"></i> {{ $oportunidad->rotulo() }}</td>
           @else

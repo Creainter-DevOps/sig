@@ -72,6 +72,19 @@ class Actividad extends Model
       $actividad->fill($this->toArray());
       $actividad->save();
     }
+    public static  function actividad_usuario( $fecha_desde, $fecha_hasta ){
+      $rpta = DB::select("
+      SELECT A.created_on::DATE, U.usuario, A.tipo, COUNT(A.tipo) acciones 
+      FROM osce.actividad  A
+      JOIN PUBLIC.usuario U ON U.id = A.created_by
+      WHERE A.created_on::date > '". $fecha_desde  . "' 
+      and A.created_on::date < '". $fecha_hasta . "'  
+      GROUP BY A.tipo, U.id, A.created_on::date
+      ORDER BY  A.created_on::DATE DESC, U.usuario  ASC, A.tipo ASC  
+      ");
+      return static::hydrate($rpta);
+    }
+    
     public function creado() {
       $rp = $this->belongsTo('App\User', 'created_by')->first();
       if(!empty($rp)) {

@@ -47,7 +47,7 @@
               </li>
             </ul>
             <div class="blockProcess">
-              <div style="font-size: 30px;text-align: center;color: #8b5bff;">Se está procesando el documento</div>
+              <div style="font-size: 30px;text-align: center;color: #8b5bff;">Se está procesando {{ $documento->folio }} páginas...</div>
               <div class="blockLog"></div>
             </div>
             <div class="blockEndProcess">
@@ -56,12 +56,33 @@
                 This is an embedded <a target='_blank' href='http://office.com'>Microsoft Office</a> document, powered by <a target='_blank' href='http://office.com/webapps'>Office Online</a>.</iframe>
               </div>
               <div class="text-center" style="padding:10px;">
-                <a class="btn btn-primary text-white" data-url-download target="_blank"> Propuesta 
+              <div class="row">
+                <div class="col-3">
+                <a class="btn btn-primary text-white" data-url-download target="_blank"> Propuesta Original 
                   <i class="bx bxs-download" ></i>
                   </a>
-                <a class="btn btn-secondary text-white" data-url-download-seace target="_blank"> Propuesta SEACE
-                  <i class="bx bxs-download" ></i>
-                </a>
+                  </div>
+                  <div class="col-3">
+                  <a class="btn btn-secondary text-white" data-url-download-seace target="_blank"> Propuesta SEACE
+                    <i class="bx bxs-download" ></i>
+                  </a>
+                  </div>
+                  <div class="col-3">
+                    <div class="input-group">
+                      <input type="number" class="form-control" placeholder="Página" value="1" min="1" max="{{ $documento->folio }}">
+                      <div class="input-group-append">
+                        <button class="btn btn-primary" type="button" onclick="javascript:descargar_pagina(this);">Descargar Página</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-3">
+                  @if(empty($cotizacion->propuesta_el))
+                    <a class="btn btn-secondary text-white" data-confirm href="/cotizaciones/{{ $cotizacion->id }}/enviar" class="btn btn-sm btn-dark">Enviar Propuesta</a>
+                  @else
+                    Ya se ha registrado el Envio:<br /> {{ Helper::fecha($cotizacion->propuesta_el, true) }}
+                  @endif
+                  </div>
+                </div>
               </div>
 </div>
           </div>
@@ -73,6 +94,18 @@
 @section('page-scripts')
   @parent
 <script>
+function descargar_pagina(box) {
+  let page = $(box).closest('.input-group').find('input').val();
+  if(!(page >= 1)) {
+    return alert('Ingrese una página válida');
+  }
+  const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = '/documentos/{{ $documento->id }}/descargarParte?page=' + page;
+    a.download = 'Parte_de_documento_' + page + '.pdf';
+    document.body.appendChild(a);
+    a.click();
+}
 function parallelStatus() {
   let url = '/expediente/{{ $cotizacion->id }}/parallelStatus';
   fetch(url, {

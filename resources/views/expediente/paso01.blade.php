@@ -31,9 +31,13 @@
                 <div class="row">
                       <div class="col-6">
                         <div style="background: #efefef;border: 1px solid #d5d5d5;border-radius: 5px;padding: 5px;">
+                          @if(!empty($cotizacion->oportunidad()->licitacion_id))
                           <iframe class="doc" src='https://view.officeapps.live.com/op/embed.aspx?src=http://prodapp.seace.gob.pe/SeaceWeb-PRO/SdescargarArchivoAlfresco?fileCode={{$licitacion->bases_integradas}}' frameborder='0' style="height:600px">
                             This is an embedded <a target='_blank' href='http://office.com'>Microsoft Office</a> document, powered by <a target='_blank' href='http://office.com/webapps'>Office Online</a>.
                           </iframe>
+                          @else
+                          Solo Oportunidad
+                          @endif
                         </div>
                       </div>
                       <div class="col-6">

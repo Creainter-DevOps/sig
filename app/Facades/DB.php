@@ -11,7 +11,7 @@ class DB extends originalDB
     {
       $hash = 'query_' . md5($query);
       if(Helper::json_has($hash)) {
-        if(Helper::json_timeout($hash, $time)) {
+        if(!Helper::json_timeout($hash, $time)) {
           return Helper::json_load($hash);
         }
       }

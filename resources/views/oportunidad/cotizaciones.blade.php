@@ -15,7 +15,7 @@
                   <th>Items</th>
                   <th>Monto</th>
                   <th style="width:80px;">Emitida</th>
-                  <th>Folder</th>
+                  <th>Expediente</th>
                   <th style="width:140px"></th>
                 </tr>
               </thead>
@@ -31,7 +31,8 @@
                   <td class="text-center">{{ count($cotizacion->items()) }}</td>
                   <td class="text-center">{{ $cotizacion->monto() }}</td>
                   <td class="">{{ Helper::fecha( $cotizacion->fecha) }}</td>
-                  <td class="text-center"><a href="#" onclick="window.location.href='odir:{!! addslashes(Auth::user()->dir_sharepoint . $cotizacion->folder()) !!}';">Folder</a></td>
+                  <!--<td class="text-center"><a href="#" onclick="window.location.href='odir:{!! addslashes(Auth::user()->dir_sharepoint . $cotizacion->folder()) !!}';">Folder</a></td>-->
+                  <td class="text-center"><a href="{{ route('expediente.inicio',[ 'cotizacion'=> $cotizacion->id ])}}">Folder</a></td>
 <td style="width: 75px;text-align: center;">
          @if(!empty($cotizacion->proyecto()->id))
          <a href="{{ route( 'proyectos.show', [ 'proyecto' => $cotizacion->proyecto()->id ] ) }}" title="Ver el Proyecto"><i class="bx bx-share"></i></a>

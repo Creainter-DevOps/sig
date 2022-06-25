@@ -34,26 +34,20 @@
 <a class="btn btn-success"href="/licitaciones/{{ $licitacion->id }}/aprobar">Aprobar</a>  
 @else
 @if(!empty($oportunidad->rechazado_el))
-  <input type="text" data-editable="/oportunidades/{{  $oportunidad->id }}?_update=motivo" placeholder="¿Por qué motivo?" style="margin-right: 10px;" value="{{ $oportunidad->motivo }}">
   <div class="text-center">Rechazado el {{ Helper::fecha($oportunidad->rechazado_el, true) }}</div>
 @elseif(!empty($oportunidad->archivado_el))
-  <input type="text" data-editable="/oportunidades/{{  $oportunidad->id }}?_update=motivo" placeholder="¿Por qué motivo?" style="margin-right: 10px;" value="{{ $oportunidad->motivo }}">
   <div class="text-center">Archivado el {{ Helper::fecha($oportunidad->archivado_el, true) }}</div>
   <a class="btn btn-primary" href="/licitaciones/{{$oportunidad->licitacion_id}}/documento" ><i class="bx bxs-file-pdf"></i></a>
 @elseif(empty($oportunidad->aprobado_el))
-  <input type="text" data-editable="/oportunidades/{{  $oportunidad->id }}?_update=motivo" placeholder="¿Por qué motivo?" style="margin-right: 10px;" value="{{ $oportunidad->motivo }}">
   <a href="/licitaciones/{{ $licitacion->id }}/aprobar" class="btn btn-sm btn-success mr-25">Aprobar</a>
-  <a href="/licitaciones/{{ $licitacion->id }}/rechazar" class="btn btn-sm btn-danger mr-25">Rechazar</a>
+  <a data-confirm-input="¿Por qué desea Rechazarlo?" href="/licitaciones/{{ $licitacion->id }}/rechazar" class="btn btn-sm btn-danger mr-25">Rechazar</a>
 @elseif(empty($oportunidad->revisado_el))
-  <input type="text" data-editable="/oportunidades/{{  $oportunidad->id }}?_update=motivo" placeholder="¿Por qué motivo?" style="margin-right: 10px;" value="{{ $oportunidad->motivo }}">
   <a href="/licitaciones/{{ $licitacion->id }}/revisar" class="btn btn-sm btn-success mr-25">Revisar</a>
-  <a href="/licitaciones/{{ $licitacion->id }}/rechazar" class="btn btn-sm btn-danger mr-25">Rechazar</a>
+  <a data-confirm-input="¿Por qué desea Rechazarlo?" href="/licitaciones/{{ $licitacion->id }}/rechazar" class="btn btn-sm btn-danger mr-25">Rechazar</a>
 @elseif($oportunidad->estado == 'PENDIENTE')
-  <input type="text" data-editable="/oportunidades/{{  $oportunidad->id }}?_update=motivo" placeholder="¿Por qué motivo?" style="margin-right: 10px;" value="{{ $oportunidad->motivo }}">
-  <a href="/licitaciones/{{ $licitacion->id }}/rechazar" class="btn btn-sm btn-danger mr-25">Rechazar</a>
+  <a data-confirm-input="¿Por qué desea Rechazarlo?" href="/licitaciones/{{ $licitacion->id }}/rechazar" class="btn btn-sm btn-danger mr-25">Rechazar</a>
 @else
-  <input type="text" data-editable="/oportunidades/{{  $oportunidad->id }}?_update=motivo" placeholder="¿Por qué motivo?" style="margin-right: 10px;" value="{{ $oportunidad->motivo }}">
-  <a href="/licitaciones/{{ $licitacion->id }}/archivar" class="btn btn-sm btn-danger">Archivar</a>
+  <a data-confirm-input="¿Por qué desea Archivarlo?" href="/licitaciones/{{ $licitacion->id }}/archivar" class="btn btn-sm btn-danger mr-25">Archivar</a>
 @endif
 @endif
     </div>

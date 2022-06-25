@@ -289,32 +289,28 @@ position: absolute;
 <!-- Form wizard with number tabs section end -->
 <!-- Form wizard with icon tabs section start -->
 <section id="icon-tabs">
-      <div class="row">
-  <div class="col-6">
-    <div class="row">
-      <div class="col-12">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-body">
-        @include('licitacion.table', ['licitacion' => $cotizacion->oportunidad()->licitacion()])
+  <div class="row">
+    @if(!empty($cotizacion->oportunidad()->licitacion_id))
+    <div class="col-6">
+      <div class="card">
+        <div class="card-content">
+          <div class="card-body">
+            @include('licitacion.table', ['licitacion' => $cotizacion->oportunidad()->licitacion()])
+          </div>
         </div>
       </div>
-    </div>
       </div>
-      <div class="col-12">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-body">
-        @include('licitacion.cronograma', ['licitacion'=> $cotizacion->oportunidad()->licitacion()])
-        </div>
+      <div class="col-6">
+          <div class="card">
+            <div class="card-content">
+              <div class="card-body">
+                @include('licitacion.cronograma', ['licitacion'=> $cotizacion->oportunidad()->licitacion()])
+              </div>
+            </div>
+          </div>
       </div>
-    </div>
-      </div>
-    </div>
-  </div>
-  <div class="col-6">
-    <div class="row">
-      <div class="col-12">
+      @endif
+      <div class="col-6">
     <div class="card">
       <div class="card-content">
         <div class="card-body">
@@ -323,7 +319,7 @@ position: absolute;
       </div>
     </div>
       </div>
-      <div class="col-12">
+      <div class="col-6">
     <div class="card">
       <div class="card-content">
         <div class="card-body">
@@ -333,8 +329,6 @@ position: absolute;
     </div>
       </div>
     </div>
-  </div>
-</div>
 
 @yield('contenedor')
 </section>

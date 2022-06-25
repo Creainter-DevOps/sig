@@ -30,7 +30,8 @@
             <div class="wizard-horizontal">
                 <div class="row">
                       <div class="col-6" id="iframe_container" >
-                      <iframe  class="doc" src='https://view.officeapps.live.com/op/embed.aspx?src=https://sig.creainter.com.pe/storage/{{ reset($workspace['paso02'])['root']  }}?t={{time()}}' width='1366px' height='623px' frameborder='0'>This is an embedded <a target='_blank' href='http://office.com'>Microsoft Office</a> document, powered by <a target='_blank' href='http://office.com/webapps'>Office Online</a>.</iframe>
+                      <iframe  class="doc" src='https://view.officeapps.live.com/op/embed.aspx?src=https://sig.creainter.com.pe/storage/{{ reset($workspace['paso02'])['root']  }}?t={{time()}}' width='1366px' frameborder='0'  style="height:600px">
+                      This is an embedded <a target='_blank' href='http://office.com'>Microsoft Office</a> document, powered by <a target='_blank' href='http://office.com/webapps'>Office Online</a>.</iframe>
                       </div>
                       <div class="col-6">
                         <div class="card widget-todo">
@@ -57,7 +58,7 @@
                                   </div>
                                   <div class="widget-todo-item-action d-flex align-items-center">
                                     <div class="badge badge-pill badge-light-success mr-1" onclick="visualizar(this)" style="cursor:pointer;" data-url="{{'https://sig.creainter.com.pe/storage/' . $anexo['root'] }}?t={{time()}}"><i class="bx bx-show"></i> </div>
-                                    <a class="avatar bg-rgba-secondary  m-0 mr-50" href="https://sig.creainter.com.pe/storage/{{$anexo['root']}}" >
+                                    <a class="avatar bg-rgba-secondary  m-0 mr-50" href="https://sig.creainter.com.pe/storage/{{$anexo['root']}}" download="documento.docx" rel="noopener noreferrer">
                                       <div class="avatar-content">
                                         <span class="font-size-base text-primary"></span>
                                           <i class="bx bxs-download"></i>
@@ -97,7 +98,7 @@ function visualizar(e){
    let url = e.dataset.url
    let contairner_iframe= document.getElementById('iframe_container');
    contairner_iframe.innerHTML = '';
-   let html = `<iframe class="doc" src='https://view.officeapps.live.com/op/embed.aspx?src=${url}' width='1366px' height='623px' frameborder='0'>
+   let html = `<iframe class="doc" src='https://view.officeapps.live.com/op/embed.aspx?src=${url}' width='1366px' frameborder='0' style="height:600px">
      This is an embedded <a target='_blank' href='http://office.com'>Microsoft Office</a> documen</iframe>`;
    contairner_iframe.insertAdjacentHTML('beforeend', html );
 }

@@ -77,7 +77,7 @@
                         </div>
                         @if (!empty($cotizacion->documento_id))
                         <div style="background: #efefef;border: 1px solid #d5d5d5;border-radius: 5px;padding: 5px;">
-                          <iframe  class="doc" src='https://sig.creainter.com.pe/storage/{{ $cotizacion->documento()->archivo }}' frameborder='0' style="height:400px;">
+                          <iframe  class="doc" src='https://sig.creainter.com.pe/storage/{{ $cotizacion->documento()->archivo }}' frameborder='0' style="height:600px;">
                           This is an embedded <a target='_blank' href='http://office.com'>Microsoft Office</a> document, powered by <a target='_blank' href='http://office.com/webapps'>Office Online</a>.</iframe>
                         </div>
                         @endif

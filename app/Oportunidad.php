@@ -274,7 +274,44 @@ AND L.fecha_participacion_hasta + INTERVAL '12' HOUR >= NOW()
       return static::hydrate($rp); 
     }
    static function listado_participanes_por_vencer() {
-     $rp = DB::cache(20, "
+     $rp = DB::cache(60, "
+     SELECT
+  z.*,
+  CONCAT(
+    (CASE WHEN z.expediente_step IS NOT NULL THEN CONCAT('<span style=\"background: #438eff;font-size: 11px;color: white;padding: 1px 4px;border-radius: 3px;margin-right: 2px;\">', z.expediente_step::text, '</span>') ELSE '' END),
+    (CASE WHEN z.cantidad_externo > 0 THEN '<i class=\"bx bxs-circle\" style=\"color:orange;font-size: 10px;\"></i>' ELSE '' END),
+    (CASE WHEN z.aprobado_el >= DATE_TRUNC('day', NOW()) - INTERVAL '1' DAY THEN '<i class=\"bx bxs-circle\" style=\"color:green;font-size: 10px;\"></i>' ELSE '' END),
+    UPPER(z.rotulo)
+  ) inx_rotulo
+FROM (
+  SELECT
+    x.*,
+    osce.fn_oportunidad_expediente_step(x.tenant_id, x.id) as expediente_step,
+    (SELECT COUNT(*) FROM osce.oportunidad_externo WHERE oportunidad_id = x.id) cantidad_externo,
+    osce.fn_usuario_rotulo(x.aprobado_por) aprobado_usuario,
+    osce.fn_oportunidad_fecha_estado_participacion(1, x.id) inx_estado_participacion,
+    osce.fn_etiquetas_a_rotulo(x.etiquetas_id) etiquetas
+  FROM (
+    SELECT
+      O.*,
+      (SELECT COUNT(*) FROM osce.cotizacion C
+        WHERE C.oportunidad_id = O.id AND C.eliminado IS NULL AND C.participacion_el IS NULL AND COALESCE(LENGTH(C.seace_participacion_log), 0) > 0) no_es_posible,
+      (SELECT COUNT(*) FROM osce.cotizacion C
+        WHERE C.oportunidad_id = O.id AND C.eliminado IS NULL AND C.interes_el IS NOT NULL) empresas_interes
+    FROM (
+      SELECT O.tenant_id, O.id, O.licitacion_id, O.aprobado_el, O.etiquetas_id, O.aprobado_por, O.rotulo, O.fecha_participacion_hasta, O.correo_id
+      FROM osce.oportunidad O
+      WHERE O.fecha_participacion_hasta >= NOW() - INTERVAL '4' DAY AND O.fecha_participacion_hasta <= NOW() + INTERVAL '2' DAY
+        AND O.tenant_id = 1 AND O.estado = 1 AND O.aprobado_el IS NOT NULL
+    		AND O.rechazado_el IS NULL AND O.archivado_el IS NULL
+    ) O
+  ) x
+  WHERE x.no_es_posible > 0 OR x.empresas_interes = 0 OR x.aprobado_el::date = NOW()::date
+	OR x.fecha_participacion_hasta <= NOW() + INTERVAL '2' DAY
+) z
+ORDER BY z.fecha_participacion_hasta ASC, z.id ASC
+LIMIT 100");
+     /*$rp = DB::cache(20, "
        SELECT x.*,
          L.fecha_participacion_hasta,
          CONCAT(
@@ -301,17 +338,53 @@ AND
   OR (L.fecha_participacion_hasta - INTERVAL '4' DAY <= NOW() AND L.fecha_participacion_hasta + INTERVAL '2' DAY >= NOW()))
 -- WHERE x.cantidad_interes = 0 OR x.cantidad_interes <> x.cantidad_participadas
 WHERE L.fecha_participacion_hasta <= NOW() + INTERVAL '2' DAY OR x.no_es_posible > 0 OR x.empresas_interes = 0 OR x.aprobado_el::date = NOW()::date
-ORDER BY L.fecha_participacion_hasta ASC, id DESC");
+ORDER BY L.fecha_participacion_hasta ASC, id DESC");*/
       return static::hydrate($rp);
    }
     static function listado_propuestas_por_vencer() {
       $rp = DB::cache(20, "
+SELECT
+  z.*,
+  CONCAT(
+    (CASE WHEN z.expediente_step IS NOT NULL THEN CONCAT('<span style=\"background: #438eff;font-size: 11px;color: white;padding: 1px 4px;border-radius: 3px;margin-right: 2px;\">', z.expediente_step::text, '</span>') ELSE '' END),
+    (CASE WHEN z.cantidad_externo > 0 THEN '<i class=\"bx bxs-circle\" style=\"color:orange;font-size: 10px;\"></i>' ELSE '' END),
+    (CASE WHEN z.aprobado_el >= DATE_TRUNC('day', NOW()) - INTERVAL '1' DAY THEN '<i class=\"bx bxs-circle\" style=\"color:green;font-size: 10px;\"></i>' ELSE '' END),
+    UPPER(z.rotulo)
+  ) inx_rotulo
+FROM (
+  SELECT
+    x.*,
+    osce.fn_oportunidad_expediente_step(x.tenant_id, x.id) as expediente_step,
+    (SELECT COUNT(*) FROM osce.oportunidad_externo WHERE oportunidad_id = x.id) cantidad_externo,
+    osce.fn_usuario_rotulo(x.aprobado_por) aprobado_usuario,
+    osce.fn_oportunidad_fecha_estado_propuesta(1, x.id) inx_estado_propuesta,
+    osce.fn_etiquetas_a_rotulo(x.etiquetas_id) etiquetas
+  FROM (
+    SELECT
+      O.*,
+      (SELECT COUNT(*) FROM osce.cotizacion C
+        WHERE C.oportunidad_id = O.id AND C.eliminado IS NULL AND C.interes_el IS NOT NULL) empresas_interes
+    FROM (
+      SELECT O.tenant_id, O.id, O.licitacion_id, O.aprobado_el, O.etiquetas_id, O.aprobado_por, O.rotulo, O.fecha_propuesta_hasta, O.correo_id
+      FROM osce.oportunidad O
+      WHERE O.fecha_propuesta_hasta >= NOW() - INTERVAL '10' DAY AND O.fecha_propuesta_hasta <= NOW() + INTERVAL '20' DAY
+		AND O.tenant_id = 1 AND O.estado = 1 AND O.aprobado_el IS NOT NULL
+		AND O.rechazado_el IS NULL AND O.archivado_el IS NULL
+		AND O.fecha_participacion IS NOT NULL
+    ) O
+  ) x
+  WHERE x.empresas_interes = 0 OR x.aprobado_el::date = NOW()::date
+	OR x.fecha_propuesta_hasta <= NOW() + INTERVAL '15' DAY
+) z
+ORDER BY z.fecha_propuesta_hasta ASC, z.id ASC
+LIMIT 100");
+      /*
         SELECT x.*,
           L.fecha_propuesta_hasta,
          CONCAT(
            (CASE WHEN x.expediente_step IS NOT NULL THEN CONCAT('<span style=\"background: #438eff;font-size: 11px;color: white;padding: 1px 4px;border-radius: 3px;margin-right: 2px;\">', x.expediente_step::text, '</span>') ELSE '' END),
-           (CASE WHEN x.cantidad_externo > 0 THEN '<i class=\"bx bxs-circle\" style=\"color:orange;\"></i>' ELSE '' END),
-           (CASE WHEN x.aprobado_el >= DATE_TRUNC('day', NOW()) - INTERVAL '1' DAY THEN '<i class=\"bx bxs-circle\" style=\"color:green;\"></i>' ELSE '' END),
+           (CASE WHEN x.cantidad_externo > 0 THEN '<i class=\"bx bxs-circle\" style=\"color:orange;font-size: 10px;\"></i>' ELSE '' END),
+           (CASE WHEN x.aprobado_el >= DATE_TRUNC('day', NOW()) - INTERVAL '1' DAY THEN '<i class=\"bx bxs-circle\" style=\"color:green;font-size: 10px;\"></i>' ELSE '' END),
            UPPER(L.rotulo)
          ) inx_rotulo,
          osce.licitacion_fecha_estado_propuesta(1, L.id::int) inx_estado_propuesta,
@@ -329,7 +402,7 @@ AND
   ((L.fecha_propuesta_desde - INTERVAL '2' DAY <= NOW() AND L.fecha_propuesta_hasta + INTERVAL '2' DAY >= NOW())
   OR (L.fecha_propuesta_hasta - INTERVAL '10' DAY <= NOW() AND L.fecha_propuesta_hasta + INTERVAL '10' DAY >= NOW()))
 -- WHERE x.cantidad_propuestas = 0 OR x.cantidad_propuestas <> x.cantidad_participadas
-ORDER BY L.fecha_propuesta_hasta ASC, id DESC");
+ORDER BY L.fecha_propuesta_hasta ASC, id DESC");*/
       return static::hydrate($rp);
     }
     static function listado_propuestas_buenas_pro() {
@@ -337,13 +410,14 @@ ORDER BY L.fecha_propuesta_hasta ASC, id DESC");
     SELECT
       O.*,
       CONCAT(
-           (CASE WHEN O.cantidad_externo > 0 THEN '<i class=\"bx bxs-circle\" style=\"color:orange;\"></i>' ELSE '' END),
-           (CASE WHEN O.aprobado_el >= DATE_TRUNC('day', NOW()) - INTERVAL '1' DAY THEN '<i class=\"bx bxs-circle\" style=\"color:green;\"></i>' ELSE '' END),
+           (CASE WHEN O.cantidad_externo > 0 THEN '<i class=\"bx bxs-circle\" style=\"color:orange;font-size: 10px;\"></i>' ELSE '' END),
+           (CASE WHEN O.aprobado_el >= DATE_TRUNC('day', NOW()) - INTERVAL '1' DAY THEN '<i class=\"bx bxs-circle\" style=\"color:green;font-size: 10px;\"></i>' ELSE '' END),
            UPPER(L.nomenclatura)
          ) nomenclatura,
       osce.licitacion_fecha_estado_buenapro(O.tenant_id, O.licitacion_id::int) inx_estado,
       osce.licitacion_ganadores(O.tenant_id, O.licitacion_id::int) inx_ganadores,
-      osce.fn_etiquetas_a_rotulo(L.etiquetas_id) etiquetas
+      osce.fn_etiquetas_a_rotulo(L.etiquetas_id) etiquetas,
+      osce.fn_oportunidad_involucrados(O.tenant_id, O.id) elaborado_por
 FROM (SELECT O.*,
 (SELECT COUNT(*) FROM osce.oportunidad_externo WHERE oportunidad_id = O.id) cantidad_externo
 FROM osce.oportunidad O
@@ -352,18 +426,19 @@ AND O.fecha_participacion IS NOT NULL
  AND O.fecha_propuesta IS NOT NULL
 ) O
 JOIN osce.licitacion L ON L.id = O.licitacion_id AND L.eliminado IS NULL AND ((L.fecha_buena_desde >= NOW() AND L.fecha_buena_hasta <= NOW())
-  OR (L.fecha_buena_hasta >= NOW() - INTERVAL '20' DAY AND L.fecha_buena_hasta <= NOW() + INTERVAL '20' DAY)
-  OR (L.buenapro_fecha >= NOW() - INTERVAL '30' DAY))
+  OR (L.fecha_buena_hasta >= NOW() - INTERVAL '30' DAY AND L.fecha_buena_hasta <= NOW() + INTERVAL '30' DAY)
+  OR (L.buenapro_fecha >= NOW() - INTERVAL '50' DAY))
 ORDER BY L.buenapro_fecha ASC, L.fecha_buena_hasta ASC, O.id ASC");
       return static::hydrate($rp);
     }
    static function listado_aprobadas() {
-      $rp = DB::select("
+      $rp = DB::cache(60 * 2, "
         SELECT O.*
     FROM osce.oportunidad O
     JOIN osce.licitacion L ON L.id = O.licitacion_id AND L.eliminado IS NULL
     WHERE O.aprobado_el IS NOT NULL AND O.rechazado_el IS NULL AND O.archivado_el IS NULL
-    ORDER BY O.aprobado_el DESC, O.id ASC");
+    ORDER BY O.aprobado_el DESC, O.id ASC
+    LIMIT 100");
       return static::hydrate($rp);
     }
     public function aprobar() {
@@ -372,11 +447,15 @@ ORDER BY L.buenapro_fecha ASC, L.fecha_buena_hasta ASC, O.id ASC");
     public function revisar() {
       DB::select('SELECT osce.fn_oportunidad_accion_revisar(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ')');
     }
-    public function rechazar() {
-      DB::select('SELECT osce.fn_oportunidad_accion_rechazar(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ')');
+    public function rechazar($motivo) {
+      DB::select('SELECT osce.fn_oportunidad_accion_rechazar(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ', :texto)', [
+      'texto' => $motivo
+      ]);
     }
-    public function archivar() {
-      DB::select('SELECT osce.fn_oportunidad_accion_archivar(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ')');
+    public function archivar($motivo) {
+      DB::select('SELECT osce.fn_oportunidad_accion_archivar(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ', :texto)', [
+      'texto' => $motivo
+      ]);
     }
     public function registrar_interes(Empresa $empresa) {
       DB::select('SELECT osce.fn_oportunidad_accion_interes(' . Auth::user()->tenant_id . ', ' . $this->id . ', ' . Auth::user()->id . ', ' . $empresa->id . ');');
@@ -550,6 +629,9 @@ ORDER BY L.buenapro_fecha ASC, L.fecha_buena_hasta ASC, O.id ASC");
           }
           if(empty($n['empresa'])) {
             return null;
+          }
+          if(!empty($n['tenant'])) {
+            return '<b>' . $n['empresa'] . '</b> por ' . $n['monto'];
           }
           return $n['empresa'] . ' por ' . $n['monto'];
         }, $gds);

@@ -52,7 +52,7 @@ class Cotizacion extends Model
     protected $fillable = [
       'id','empresa_id','fecha','monto','duracion_meses','oportunidad_id','interes_el','interes_por','participacion_el','participacion_por','propuesta_el','propuesta_por',
       'plazo_servicio','plazo_garantia','plazo_instalacion','validez','moneda_id','observacion','terminos','seace_participacion_log','seace_participacion_fecha','seace_participacion_html','documento_id',
-      'elaborado_por','elaborado_desde','elaborado_hasta','elaborado_step','elaborado_json'
+      'elaborado_por','elaborado_desde','elaborado_hasta','elaborado_step','elaborado_json','rotulo',
     ];
 
     /**
@@ -135,7 +135,7 @@ class Cotizacion extends Model
 #      }
     }
     public function migrateProyecto() {
-      return DB::select('SELECT osce.fn_migrar_cotizacion_a_proyecto(' . $this->id . ', ' . Auth::user()->id . ') id;')[0]->id;
+      return DB::select('SELECT osce.fn_migrar_cotizacion_a_proyecto(' . Auth::user()->tenant_id . ', ' . $this->id . ', ' . Auth::user()->id . ') id;')[0]->id;
     }
     public function timeline() {
       return $this->hasMany('App\Actividad','cotizacion_id')->orderBy('id', 'desc')->get();
@@ -153,12 +153,11 @@ class Cotizacion extends Model
       return $this->oportunidad()->cronograma();
     }
     public function estado() {
-//      dd($this->oportunidad());
       $ahora = time();
-      $participacion_desde = strtotime($this->licitacion()->fecha_participacion_desde);
-      $participacion_hasta = strtotime($this->licitacion()->fecha_participacion_hasta);
-      $propuesta_desde = strtotime($this->licitacion()->fecha_propuesta_desde);
-      $propuesta_hasta = strtotime($this->licitacion()->fecha_propuesta_hasta);
+      $participacion_desde = strtotime($this->oportunidad()->fecha_participacion_desde);
+      $participacion_hasta = strtotime($this->oportunidad()->fecha_participacion_hasta);
+      $propuesta_desde = strtotime($this->oportunidad()->fecha_propuesta_desde);
+      $propuesta_hasta = strtotime($this->oportunidad()->fecha_propuesta_hasta);
 
       if($ahora >= $propuesta_hasta) {
         if(!empty($this->propuesta_el)) {

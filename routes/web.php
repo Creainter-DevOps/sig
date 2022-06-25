@@ -108,17 +108,7 @@ Route::get('clientes/{cliente}/registrar-producto', 'ClienteController@registarP
 Route::post('clientes/getProvincias', 'ClienteController@getProvincias');
 Route::post('clientes/getDistritos', 'ClienteController@getDistritos');
 
-Route::get('cotizaciones/autocomplete', 'CotizacionController@autocomplete');
-Route::post('cotizaciones/{cotizacion}/observacion', 'CotizacionController@observacion');
-Route::get('cotizaciones/{cotizacion}/proyecto', 'CotizacionController@proyecto')->name('cotizaciones.proyecto');
-Route::get('cotizaciones/{cotizacion}/exportar', 'CotizacionController@exportar')->name('cotizacion.exportar');
-Route::get('cotizaciones/{cotizacion}/detalle', 'CotizacionController@detalle')->name('cotizacion.detalle');
-Route::post('cotizaciones/{cotizacion}/detalle', 'CotizacionController@detallesave');
-Route::get('cotizaciones/{cotizacion}/enviar', 'CotizacionController@enviar')
-  ->name('cotizacion.enviar'); 
-Route::resource('cotizaciones', 'CotizacionController')->parameters([
-  'cotizaciones' => 'cotizacion'
-]);
+
 
 Route::post('proveedor/save/producto', 'ProveedorController@saveproducto')->name('proveedor.saveproducto');
 Route::get('proveedores/{proveedor}/productos','ProveedorController@productos')->name('proveedores.productos');
@@ -142,21 +132,15 @@ Route::resource('cartas', 'CartaController')->parameters([
   'cartas' => 'carta'
 ]);
 
+Route::get('reportes', 'ReporteController@index');
+Route::get('reportes/usuarios', 'ReporteController@usuarios');
+Route::get('reportes/usuarios/descargar', 'ReporteController@descargar_reporte');
+//Route::get('reportes/usuarios', 'ReporteController@index');
 
 Route::get('actas/autocomplete', 'ActaController@autocomplete');
 Route::resource('actas', 'ActaController')->parameters([
   'actas' => 'acta'
 ]);
-
-Route::get('oportunidades/convertir/proyecto/{cotizacion}','OportunidadController@proyecto')->name( 'oportunidad.proyecto' );
-Route::get('oportunidades/autocomplete','OportunidadController@autocomplete');
-Route::get('oportunidades/autocomplete_codigo','OportunidadController@search_codigo');
-Route::get('oportunidades/{oportunidad}/cerrar','OportunidadController@cerrar')->name('oportunidades.cerrar');
-
-Route::resource('oportunidades', 'OportunidadController')->parameters([
-  'oportunidades' => 'oportunidad'
-]);
-
 
 Route::get('expediente/{cotizacion}/generar','ExpedienteController@generar');
 Route::post('expediente/{cotizacion}/ordenar','ExpedienteController@actualizar_orden');
@@ -204,6 +188,7 @@ Route::resource('expediente', 'ExpedienteController')->parameters([
 Route::get('documentos/nuevo','DocumentoController@form_nuevo');
 //Route::get('documentos/{documento}/generarImagen/{$cotizacion}','DocumentoController@generarImagen');
 Route::get('documentos/{documento}/generarImagen','DocumentoController@generarImagen');
+Route::get('documentos/{documento}/descargarParte','DocumentoController@descargarParte');
 
 Route::resource('documentos', 'DocumentoController')->parameters([
   'documentos' => 'documento'
@@ -214,30 +199,50 @@ Route::resource('personales', 'PersonalController')->parameters([
   'personales' => 'personal'
 ]);
 
+
+Route::get('cotizaciones/autocomplete', 'CotizacionController@autocomplete');
+Route::get('cotizaciones/{cotizacion}/registrarParticipacion','CotizacionController@registrarParticipacion');
+Route::get('cotizaciones/{cotizacion}/registrarPropuesta','CotizacionController@registrarPropuesta');
+Route::get('cotizaciones/{cotizacion}/proyecto','CotizacionController@proyecto')->name( 'oportunidad.proyecto' );
+Route::post('cotizaciones/{cotizacion}/observacion', 'CotizacionController@observacion');
+Route::get('cotizaciones/{cotizacion}/proyecto', 'CotizacionController@proyecto')->name('cotizaciones.proyecto');
+Route::get('cotizaciones/{cotizacion}/exportar', 'CotizacionController@exportar')->name('cotizacion.exportar');
+Route::get('cotizaciones/{cotizacion}/detalle', 'CotizacionController@detalle')->name('cotizacion.detalle');
+Route::post('cotizaciones/{cotizacion}/detalle', 'CotizacionController@detallesave');
+Route::get('cotizaciones/{cotizacion}/enviar', 'CotizacionController@enviar')->name('cotizacion.enviar');
+Route::resource('cotizaciones', 'CotizacionController')->parameters([
+  'cotizaciones' => 'cotizacion'
+]);
+
+
+Route::get('oportunidades/{oportunidad}/aprobar','OportunidadController@aprobar');
+Route::post('oportunidades/{oportunidad}/rechazar','OportunidadController@rechazar');
+Route::post('oportunidades/{oportunidad}/archivar','OportunidadController@archivar');
+Route::get('oportunidades/{oportunidad}/revisar','OportunidadController@revisar');
+Route::get('oportunidades/{oportunidad}/interes/{empresa}','OportunidadController@interes');
+Route::get('oportunidades/autocomplete','OportunidadController@autocomplete');
+Route::get('oportunidades/autocomplete_codigo','OportunidadController@search_codigo');
+Route::get('oportunidades/{oportunidad}/cerrar','OportunidadController@cerrar')->name('oportunidades.cerrar');
+
+Route::resource('oportunidades', 'OportunidadController')->parameters([
+  'oportunidades' => 'oportunidad'
+]);
+
 Route::get('licitaciones/autocomplete','LicitacionController@autocomplete');
 Route::post('licitaciones/actualizar/{oportunidad}','LicitacionController@update')->name("licitacion.update");
-
 Route::get('licitaciones/calendario','LicitacionController@calendario');
 Route::get('licitaciones/nuevas','LicitacionController@listNuevas');
 Route::get('licitaciones/archivadas','LicitacionController@listArchivadas');
 Route::get('licitaciones/eliminadas','LicitacionController@listEliminadas');
 Route::get('licitaciones/aprobadas','LicitacionController@listAprobadas');
-Route::resource('licitaciones', 'LicitacionController')->parameters([
-  'licitaciones' => 'licitacion'
-]);
-
 Route::get('licitaciones/{licitacion}/detalles','LicitacionController@show');
 Route::get('licitaciones/{licitacion}/actualizar','LicitacionController@actualizar')->name('licitacion.actualizar');
 Route::get('licitaciones/{licitacion}/aprobar','LicitacionController@aprobar');
-Route::get('licitaciones/{licitacion}/revisar','LicitacionController@revisar');
-Route::get('licitaciones/{licitacion}/interes/{empresa}','LicitacionController@interes');
-Route::get('licitaciones/{licitacion}/rechazar','LicitacionController@rechazar');
-Route::get('licitaciones/{licitacion}/archivar','LicitacionController@archivar');
+Route::post('licitaciones/{licitacion}/rechazar','LicitacionController@rechazar');
 Route::post('licitaciones/{licitacion}/observacion','LicitacionController@observacion');
-Route::get('licitaciones/{licitacion}/participar/{cotizacion}','LicitacionController@registrarParticipacion');
-
-Route::get('licitaciones/{licitacion}/documento','LicitacionController@documento');
-Route::get('licitaciones/{licitacion}/propuesta/{cotizacion}','LicitacionController@registrarPropuesta');
+Route::resource('licitaciones', 'LicitacionController')->parameters([
+  'licitaciones' => 'licitacion'
+]);
 
 
 //Application Routes

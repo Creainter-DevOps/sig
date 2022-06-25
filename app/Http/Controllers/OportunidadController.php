@@ -152,4 +152,72 @@ class OportunidadController extends Controller {
      return Response()->json( $data->get() );
    
    }
+  public function aprobar(Request $request, Oportunidad $oportunidad)
+  {
+    $oportunidad->aprobar();
+    if(!$request->ajax()) {
+      return redirect('/oportunidades/' . $oportunidad->id . '/');
+    } else {
+      return response()->json([
+        'status'  => 'success',
+        'message' => 'Se ha realizado registro con éxito.',
+        'data' => $oportunidad
+      ]);
+    }
+  }
+  public function revisar(Request $request, Oportunidad $oportunidad)
+  {
+    if(empty($oportunidad->revisado_el)) {
+      $oportunidad->revisar();
+      return redirect('/oportunidades/' . $oportunidad->id . '/');
+    } else {
+      return redirect('/oportunidades/');
+    }
+  }
+  public function rechazar(Request $request, Oportunidad $oportunidad)
+  {
+    $motivo = $request->input('value');
+
+    if(empty($motivo)) {
+      return response()->json([
+        'status'  => false,
+        'message' => 'Debe indicar el motivo',
+      ]);
+    }
+    $oportunidad->rechazar($motivo);
+    if($request->ajax()) {
+      return response()->json([
+        'status'  => true,
+        'message' => 'Se ha realizado registro con éxito.',
+        'data' => $oportunidad
+      ]);
+    } else {
+      return redirect('/oportunidades');
+    }
+  }
+
+  public function archivar(Request $request, Oportunidad $oportunidad)
+  {
+    $motivo = $request->input('value');
+    if(empty($motivo)) {
+      return response()->json([
+        'status'  => false,
+        'message' => 'Debe indicar el motivo',
+      ]);
+    }
+    $oportunidad->archivar($motivo);
+    if($request->ajax()) {
+      return response()->json([
+        'status'  => true,
+        'message' => 'Se ha realizado registro con éxito.',
+        'data' => $oportunidad
+      ]);
+    } else {
+      return redirect('/oportunidades');
+    }
+  }
+  public function interes(Request $request, Oportunidad $oportunidad, Empresa $empresa) {
+    $oportunidad->registrar_interes($empresa);
+    return redirect('/oportunidades/' . $oportunidad->id . '/');
+  }
 }

@@ -103,6 +103,9 @@ class LicitacionController extends Controller {
   }
   public function show(Request $request, Licitacion $licitacion) {
     $oportunidad = $licitacion->oportunidad();
+    if(!empty($oportunidad->id)) {
+      return redirect('/oportunidades/' . $oportunidad->id);
+    }
     return view('licitacion.detalle', compact('licitacion','oportunidad'));
   }
   public function observacion( Request $request, Licitacion $licitacion) {
@@ -115,71 +118,6 @@ class LicitacionController extends Controller {
         }
       }
       return back();
-  }
-  public function documento(){
-    
-    return view('licitacion.documentos');
-
-   $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor(__DIR__ . '/../../../resources/files/Borrador.docx');
-   $templateProcessor->setValue(array('{{usuario}}'), array('07 Sep 2017'));
-   header("Content-Disposition: attachment; filename=Plantilla.docx");
-   $templateProcessor->saveAs("php://output");
-   //$templateProcessor->saveAs('Plantilla.docx');
-
-    /*$phpWord = new \PhpOffice\PhpWord\PhpWord();
-    $section = $phpWord->addSection();
-    // Adding Text element to the Section having font styled by default...
-    $section->addText(
-        '"Learn from yesterday, live for today, hope for tomorrow. '
-            . 'The important thing is not to stop questioning." '
-            . '(Albert Einstein)'
-    );
-
-    /*
-     * Note: it's possible to customize font style of the Text element you add in three ways:
-     * - inline;
-     * - using named font style (new font style object will be implicitly created);
-     * - using explicitly created font style object.
-     */
-
-    // Adding Text element with font customized inline...
-    /*$section->addText(
-        '"Great achievement is usually born of great sacrifice, '
-            . 'and is never the result of selfishness." '
-            . '(Napoleon Hill)',
-        array('name' => 'Tahoma', 'size' => 10)
-      );*/
-
-    // Adding Text element with font customized using named font style...
-    /*$fontStyleName = 'oneUserDefinedStyle';
-    $phpWord->addFontStyle(
-        $fontStyleName,
-        array('name' => 'Tahoma', 'size' => 10, 'color' => '1B2232', 'bold' => true)
-    );
-    $section->addText(
-        '"The greatest accomplishment is not in never falling, '
-            . 'but in rising again after you fall." '
-            . '(Vince Lombardi)',
-        $fontStyleName
-      );*/
-
-    // Adding Text element with font customized using explicitly created font style object...
-    /*$fontStyle = new \PhpOffice\PhpWord\Style\Font();
-    $fontStyle->setBold(true);
-    $fontStyle->setName('Tahoma');
-    $fontStyle->setSize(13);
-    $myTextElement = $section->addText('"Believe you can and you\'re halfway there." (Theodor Roosevelt)');
-    $myTextElement->setFontStyle($fontStyle);*/
-
-    // Saving the document as OOXML file...
-    /*$objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007',true);
-    header("Content-Disposition: attachment; filename=File.docx");
-    $objWriter->save("php://output" );*/
-    //header("Content-Disposition: attachment; filename='helloWorld.docx'");
-    //readfile($temp_file); // or echo file_get_contents($temp_file);
-    //unlink($temp_file);  // remove temp file
-    //echo "documento guardado";
-   // echo write($phpWord, basename(__FILE__, '.php'), $writers );
   }
   public function actualizar(Request $request, Licitacion $licitacion) {
     $licitacion->buenapro_revision = false;
@@ -208,24 +146,21 @@ public function aprobar(Request $request, Licitacion $licitacion)
       ]);
   }
 }
-public function revisar(Request $request, Licitacion $licitacion)
-{
-  $oportunidad = $licitacion->oportunidad();
-  if(empty($oportunidad->revisado_el)) {
-    $oportunidad->revisar();
-    return redirect('/licitaciones/' . $licitacion->id . '/detalles');
-  } else {
-    return redirect('/licitaciones/');
-  }
-}
 public function rechazar(Request $request, Licitacion $licitacion)
 {
-  $licitacion->rechazar();
   $oportunidad = $licitacion->oportunidad();
-  $oportunidad->rechazar(); 
+  $motivo = $request->input('value');
+
+  if(empty($motivo)) {
+    return response()->json([
+        'status'  => false,
+        'message' => 'Debe indicar el motivo',
+    ]);
+  }
+  $oportunidad->rechazar($motivo);
   if($request->ajax()) {
       return response()->json([
-        'status'  => 'success',
+        'status'  => true,
         'message' => 'Se ha realizado registro con éxito.',
         'data' => $oportunidad
       ]);
@@ -233,12 +168,6 @@ public function rechazar(Request $request, Licitacion $licitacion)
     return redirect('/licitaciones');
   }
 }
-
-/*public function update(Request $request, Oportunidad $oportunidad){
-  $oportunidad->update($request->all());
-  if(is_numeric($oportunidad-> )
-  return response()->json(['status' => true ]);
-}*/
 
 public function update(Request $request, Oportunidad $oportunidad) {
   $dato =  $request->input("field");
@@ -251,34 +180,6 @@ public function update(Request $request, Oportunidad $oportunidad) {
   return response()->json(['status' => true , 'value' => $value ]);
 }
 
-public function covertirproyecto($id){
-  $oportunidad = Oportunidad::find($id);
-  $proyecto = new Proyecto();
-  $proyecto->oportunidad_id = $oportunidad->id;
-  $proyecto->empresa_id    = $oportunidad->id;
-  $proyecto->oportunidad_id = $oportunidad->id;
-  $proyecto->oportunidad_id = $oportunidad->id;
-}
-public function archivar(Request $request, Licitacion $licitacion) {
-  $oportunidad = $licitacion->oportunidad();
-  $oportunidad->archivar();
-   return redirect('/licitaciones');
-}
-public function interes(Request $request, Licitacion $licitacion, Empresa $empresa) {
-  $oportunidad = $licitacion->oportunidad();
-  $oportunidad->registrar_interes($empresa);
-  return redirect('/licitaciones/' . $licitacion->id . '/detalles');
-}
-public function registrarParticipacion(Request $request, Licitacion $licitacion, Cotizacion $cotizacion) {
-    $oportunidad = $licitacion->oportunidad();
-    $cotizacion->registrar_participacion();
-    return redirect('/licitaciones/' . $licitacion->id . '/detalles');
-  }
-public function registrarPropuesta(Request $request, Licitacion $licitacion, Cotizacion $cotizacion) {
-    $oportunidad = $licitacion->oportunidad();
-    $cotizacion->registrar_propuesta();
-    return redirect('/licitaciones/' . $licitacion->id . '/detalles');
-  }
 public function autocomplete(Request $request ){
     $query = $request->input('query');
     $list = Oportunidad::search( $query )->selectRaw("oportunidad.id,  CONCAT_WS( ':', licitacion.procedimiento_id , licitacion.rotulo) as value " )->get();

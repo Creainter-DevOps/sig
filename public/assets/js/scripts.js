@@ -656,6 +656,56 @@ function render_input_time() {
         }
     });
 }
+function render_confirm_input() {
+  $("[data-confirm-input]").each(function () {
+    var box = this;
+    var text = $(box).attr("data-confirm-input") || "¿Cual fue el motivo?";
+    var url  = $(box).attr('href');
+    console.log("CONFIRM ", box);
+    $(this).on("click", function (e) {
+      e.preventDefault();
+            var modal = $("<div>")
+                .addClass("modal fade")
+                .attr("role", "dialog")
+                .attr("aria-labelledby", "modal-fadein")
+                .attr("aria-hidden", "true");
+            modal.html('<div class="modal-dialog"><div class="modal-content" style="box-shadow: none;background-color: transparent;margin-top: 20%;"><div class="modal-body">'+ 
+                  '<p class="text-white text-large fw-light mb-1">' + text + '</p>' +
+                  '<div class="input-group input-group-lg mb-1">' +
+                  '<input type="text" class="form-control bg-white border-0">' +
+                  '<button class="btn btn-primary" type="button" id="subscribe">Realizar</button>' +
+                  '</div><div class="text-start text-white opacity-50">Debe indicar el motivo de su solicitud</div></div></div></div>');
+            $("body").append(modal);
+            modal.modal("show");
+            modal.find("button.btn-primary").on("click", function () {
+              Fetchx({
+                url: url,
+                type: 'POST',
+                headers : {
+                  'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+                  },
+                data: {
+                  value: modal.find('input.form-control').val(),
+                },
+                dataType: 'json',
+                success: function(res) {
+                  if(!res.status) {
+                    modal.find('.text-start').text(res.message);
+                  } else {
+                    $(box).slideUp();
+                    console.log('MODAL', modal);
+                    modal.modal("hide");
+                    modal.remove();
+                    $('body').removeClass('modal-open');
+                    $(".modal-backdrop").remove();
+                  }
+                }
+              });
+            });
+            return false;
+    });
+  });
+}
 function render_link_confirm() {
     $("[data-confirm]").each(function () {
         var box = this;
@@ -962,6 +1012,7 @@ function render_editable() {
 function micro_ready() {
   render_confirm_remove();
   render_link_confirm();
+  render_confirm_input();
   render_dom_popup();
   render_input_time();
   render_table();

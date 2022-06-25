@@ -119,6 +119,7 @@ $(document).on('click', '[data-remove]', function(e) {
   current_tool = $(this).attr('data-tools');
   //$('.contentPoint').addClass('activePoint');
   let url = '/expediente/{{$cotizacion->id}}/eliminarFirmas';
+  let bodyModal =  e.target.parentNode.parentNode.parentNode;
   var cid = e.target.parentNode.parentNode.parentNode.querySelector('.imagePoint').dataset.cid;
   console.log(cid);
 
@@ -126,7 +127,7 @@ $(document).on('click', '[data-remove]', function(e) {
 
   formdata.append('cid', cid );
 
-   fetch( url , {
+   fetch( url, {
       method: 'post',
       headers: {
         "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -136,16 +137,27 @@ $(document).on('click', '[data-remove]', function(e) {
    .then( response => response.json() )
    .then( data => {
       console.log(data)
+
+       let element = document.querySelector( `[data-id="${cid}"]` );  
+       element.querySelector('.Pattern--typeHalftone').innerHTML = '';
+       let estampados = bodyModal.querySelectorAll('.estampado')
+       estampados.forEach( (estampado) => {
+        if(estampado.dataset.tipo != "null" ){
+          estampado.parentNode.removeChild(estampado);  
+        }  
+       }) 
    });
 
 });
+
+
 
 $(document).on('mousemove', '.contentPoint', function(e) {
   var x = e.pageX - $(this).offset().left;
   var y = e.pageY - $(this).offset().top;
   console.log('mousemove', '.contentPoint', x, y);
-  if(x >= 20 && x <= $(this).width() - 45
-    && y >= 20 && y <= $(this).height() - 45) {
+  if(x >= 50 && x <= $(this).width() - 75
+    && y >= 50 && y <= $(this).height() - 75) {
     $(this).find('.puntero').css({
       left: x,
       top: y,
@@ -231,6 +243,7 @@ function eliminarCid(cid) {
   .then( data => {
   });
 }
+
 function realizar_busqueda( query ) {
   let url = '/expediente/{{$cotizacion->id}}/busquedaDocumentos';
   let formdata = new FormData();
@@ -248,13 +261,13 @@ function realizar_busqueda( query ) {
     box.html("");
     data.forEach(n => {
       box.append(`<li class="boxDraggable StackedListItem--isDraggable" data-id="${n.id}" data-plantilla="${n.es_plantilla}" data-tipo="${n.tipo}" data-folio="${n.folio}" data-es-ordenable="${n.es_ordenable}">
-                        <div class="CardContent">
-                          <div class="CardContentTitulo">${ n.rotulo }</div>
-                          <div class="CardContentDesc01">${ n.desc01 }</div>
-                          <div class="CardContentDesc02">${ n.desc02 }</div>
-                          <div class="CardContentDesc03">${ n.desc03 }</div>
-                        </div>
-                      </li>`);
+                  <div class="CardContent">
+                    <div class="CardContentTitulo">${ n.rotulo }</div>
+                    <div class="CardContentDesc01">${ n.desc01 }</div>
+                    <div class="CardContentDesc02">${ n.desc02 }</div>
+                    <div class="CardContentDesc03">${ n.desc03 }</div>
+                  </div>
+                </li>`);
     })
   });
 }
@@ -407,7 +420,7 @@ realizar_busqueda('');
                         <div class="StackedListContent">
                           <div class="tools">
                             <a href="javascript:void(0);" data-popup="/expediente/${cotizacion_id}/visualizar?cid=${ doc.cid }">Editar</a>
-                            <a href="javascript:eliminarCid(${doc.cid});">Eliminar</a>
+                            <a href="javascript:eliminarCid('${doc.cid}');">Eliminar</a>
                           </div>
                           <div class="DragHandle">
                           </div>

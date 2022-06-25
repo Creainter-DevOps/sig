@@ -199,6 +199,10 @@ class EmpresaController extends Controller {
      }
      public function tagCreate( Request $request, Etiqueta $etiqueta, Empresa $empresa ) {
        $etiqueta = Etiqueta::nuevo($request->nombre);
+       $etiqueta->solicitado_el = DB::raw('now()');
+       $etiqueta->solicitado_por = Auth::user()->id;
+       $etiqueta->aprobado_el = DB::raw('now()');
+       $etiqueta->aprobado_por = Auth::user()->id;
        EmpresaEtiqueta::create([ 'tenant_id' => Auth::user()->tenant_id, 'empresa_id' => $request->input('empresa_id'), 'etiqueta_id' => $etiqueta->id , 'tipo' => $request->input('tipo') ]);
        return response()->json([ 'success'=> true , 'id' => $etiqueta->id ]);
      }

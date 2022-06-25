@@ -334,7 +334,7 @@ var $primary = '#5A8DEE',
       <div class="col-xl-6 col-12 dashboard-marketing-campaign">
         <div class="card marketing-campaigns">
           <div class="card-header d-flex justify-content-between align-items-center pb-1">
-            <h4 class="card-title">Participaciones por Vencer ({{ count($participaciones_por_vencer) }})</h4>
+            <h4 class="card-title">Registro en Oportunidades ({{ count($participaciones_por_vencer) }})</h4>
           </div>
           <div class="table-responsive" style="padding: 0 15px;">
             <table class="table table-striped table-reduce">
@@ -348,7 +348,11 @@ var $primary = '#5A8DEE',
               </thead>
               <tbody>
 @foreach($participaciones_por_vencer as $v)
-                <tr>
+                @if(!empty($v->correo_id))
+                  <tr style="background: #fff9dc;">
+                @else
+                  <tr>
+                @endif
                   <td class="">
                     <div style="font-size:11px;">{!! $v->inx_rotulo !!}</div>
                     <div style="font-size:9px;">Aprobado el {{ Helper::fecha($v->aprobado_fecha, true) }} por {{ $v->aprobado_usuario }}</div>
@@ -362,7 +366,7 @@ var $primary = '#5A8DEE',
                     <div style="font-size:10px;">{{ $v->etiquetas }}</div>
                   </td>
                   <td class="text-center" style="width:20px;">
-                    <a href="/licitaciones/{{ $v->licitacion_id }}/detalles">
+                    <a href="/oportunidades/{{ $v->id }}/">
                       <i class="bx bx-show-alt"></i>
                     </a>
                   </td>
@@ -373,56 +377,10 @@ var $primary = '#5A8DEE',
             <!-- table ends -->
           </div>
         </div>
-      </div>
-      <div class="col-xl-6 col-12 dashboard-marketing-campaign">
+        <div class="dashboard-marketing-campaign">
         <div class="card marketing-campaigns">
           <div class="card-header d-flex justify-content-between align-items-center pb-1">
-            <h4 class="card-title">Propuestas por Vencer ({{ count($propuestas_por_vencer) }})</h4>
-          </div>
-          <div class="table-responsive" style="padding: 0 15px;">
-            <table class="table table-striped table-reduce">
-              <thead>
-                <tr>
-                  <th>Nomenclatura</th>
-                  <th>Base</th>
-                  <th style="width:120px;">Estado</th>
-                  <th style="width:20px;"></th>
-                </tr>
-              </thead>
-              <tbody>
-@foreach($propuestas_por_vencer as $v)
-                <tr>
-                  <td class="">
-                    <div style="font-size:11px;">{!! $v->inx_rotulo !!}</div>
-                    <div style="font-size:9px;">Aprobado el {{ Helper::fecha($v->aprobado_fecha, true) }} por {{ $v->aprobado_usuario }}</div>
-                  </td>
-                  <td class="text-center" style="width:100px;">
-                    <span>{{ Helper::money($v->monto_base) }}</span>
-                  </td>
-                  <td class="text-center" style="width:120px;">
-                    <span class="{{ $v->estado_propuesta()['class'] }}">{{ $v->estado_propuesta()['message'] }}</span>
-                    <div style="font-size:11px;">{{ Helper::fecha($v->fecha_propuesta_hasta, true) }}</div>
-                    <div style="font-size:10px;">{{ $v->etiquetas }}</div>
-                  </td>
-                  <td class="text-center" style="width:20px;">
-                    <a href="/licitaciones/{{ $v->licitacion_id }}/detalles">
-                      <i class="bx bx-show-alt"></i>
-                    </a>
-                  </td>
-                </tr>
-@endforeach
-              </tbody>
-            </table>
-            <!-- table ends -->
-          </div>
-        </div>
-      </div>
-<!-- Dashboard Ecommerce ends -->
-      <!-- Task Card Starts -->
-      <div class="col-xl-6 col-12 dashboard-marketing-campaign">
-        <div class="card marketing-campaigns">
-          <div class="card-header d-flex justify-content-between align-items-center pb-1">
-            <h4 class="card-title">Buenas Pro ({{ count($propuestas_en_pro) }})</h4>
+            <h4 class="card-title">Resultado en Oportunidades ({{ count($propuestas_en_pro) }})</h4>
           </div>
          <div class="table-responsive" style="padding: 0 15px;">
             <table class="table table-striped table-reduce">
@@ -431,7 +389,7 @@ var $primary = '#5A8DEE',
                   <th>Nomenclatura</th>
                   <th style="width:120px;">Estado</th>
                   <th>Ganadora</th>
-                  <th>Condición</th>
+                  <th>Elaborado por</th>
                   <th style="width:20px;"></th>
                 </tr>
               </thead>
@@ -448,10 +406,10 @@ var $primary = '#5A8DEE',
                     {!! $v->ganadora() !!}
                   </td>
                   <td class="text-center" style="width:120px;">
-                    <span>{{ $v->render_estado() }}</span>
+                    <span style="font-size: 10px;">{!! implode('<br/>', explode(',', $v->elaborado_por)) !!}</span>
                   </td>
                   <td class="text-center" style="width:20px;">
-                    <a href="/licitaciones/{{ $v->licitacion_id }}/detalles">
+                    <a href="/oportunidades/{{ $v->id }}/">
                       <i class="bx bx-show-alt"></i>
                     </a>
                   </td>
@@ -463,6 +421,56 @@ var $primary = '#5A8DEE',
           </div>
         </div>
       </div>
+      </div>
+      <div class="col-xl-6 col-12 dashboard-marketing-campaign">
+        <div class="card marketing-campaigns">
+          <div class="card-header d-flex justify-content-between align-items-center pb-1">
+            <h4 class="card-title">Expedientes ({{ count($propuestas_por_vencer) }})</h4>
+          </div>
+          <div class="table-responsive" style="padding: 0 15px;">
+            <table class="table table-striped table-reduce">
+              <thead>
+                <tr>
+                  <th>Nomenclatura</th>
+                  <th>Base</th>
+                  <th style="width:120px;">Estado</th>
+                  <th style="width:20px;"></th>
+                </tr>
+              </thead>
+              <tbody>
+@foreach($propuestas_por_vencer as $v)
+                @if(!empty($v->correo_id))
+                  <tr style="background: #fff9dc;">
+                @else
+                  <tr>
+                @endif
+                  <td class="">
+                    <div style="font-size:11px;">{!! $v->inx_rotulo !!}</div>
+                    <div style="font-size:9px;">Aprobado el {{ Helper::fecha($v->aprobado_fecha, true) }} por {{ $v->aprobado_usuario }}</div>
+                  </td>
+                  <td class="text-center" style="width:100px;">
+                    <span>{{ Helper::money($v->monto_base) }}</span>
+                  </td>
+                  <td class="text-center" style="width:120px;">
+                    <span class="{{ $v->estado_propuesta()['class'] }}">{{ $v->estado_propuesta()['message'] }}</span>
+                    <div style="font-size:11px;">{{ Helper::fecha($v->fecha_propuesta_hasta, true) }}</div>
+                    <div style="font-size:10px;">{{ $v->etiquetas }}</div>
+                  </td>
+                  <td class="text-center" style="width:20px;">
+                    <a href="/oportunidades/{{ $v->id }}/">
+                      <i class="bx bx-show-alt"></i>
+                    </a>
+                  </td>
+                </tr>
+@endforeach
+              </tbody>
+            </table>
+            <!-- table ends -->
+          </div>
+        </div>
+      </div>
+<!-- Dashboard Ecommerce ends -->
+      <!-- Task Card Starts -->
     </div>
   </section>
   <!-- Dashboard Analytics end -->

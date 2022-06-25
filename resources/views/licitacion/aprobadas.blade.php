@@ -44,7 +44,6 @@ tr.block_details>td>div {
       <thead>
         <tr>
           <th>Institución</th>
-          <th>Proceso</th>
           <th>Objeto</th>
           <th>Rótulo</th>
           <th>Participación</th>
@@ -54,8 +53,7 @@ tr.block_details>td>div {
       @foreach ($list as $oportunidad)
       <tbody class="block" data-licitacion-id="{{ $oportunidad->licitacion()->id }}" data-oportunidad-id="{{ $oportunidad->id }}">
         <tr class="block_header">
-          <td>{{ $oportunidad->licitacion()->entidad }}</td>
-          <td>{{ $oportunidad->licitacion()->tipo_proceso }}</td>
+          <td>{{ $oportunidad->empresa()->razon_social }}</td>
           <td>{{ $oportunidad->licitacion()->tipo_objeto }}</td>
           <td>{{ $oportunidad->licitacion()->rotulo }}</td>
           <td>{{ Helper::fecha($oportunidad->licitacion()->fecha_participacion_hasta) }}<br /><span class="{{ $oportunidad->estado()['class'] }}">{{ $oportunidad->estado()['message'] }}</span></td>
