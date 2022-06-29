@@ -101,6 +101,16 @@ class LicitacionController extends Controller {
   public function calendario(){
     return view('licitacion.calendar');
   }
+
+  public function mini(){
+
+    $licitacion = Licitacion::listado_nuevas()[0];
+    // dd($licitacion);
+    $licitacion->tipo = isset($licitacion->oportunidad_id )? 'oportunidad' : 'licitaciones';
+    
+    return view('licitacion.mini', compact('licitacion'));   
+  }
+
   public function show(Request $request, Licitacion $licitacion) {
     $oportunidad = $licitacion->oportunidad();
     if(!empty($oportunidad->id)) {
@@ -142,7 +152,8 @@ public function aprobar(Request $request, Licitacion $licitacion)
       return response()->json([
         'status'  => 'success',
         'message' => 'Se ha realizado registro con éxito.',
-        'data' => $oportunidad
+        'data' => $oportunidad,
+        'refresh' => true
       ]);
   }
 }
@@ -157,12 +168,24 @@ public function rechazar(Request $request, Licitacion $licitacion)
         'message' => 'Debe indicar el motivo',
     ]);
   }
+  if ( !isset($oportunidad) ){
+    $licitacion->eliminado = now();
+
+      if( $request->ajax()) {
+         return response()->json([
+           'status'  => true,
+           'message' => 'Se ha realizado registro con éxito.',
+           'refresh' => true
+         ]);
+      }
+  }
   $oportunidad->rechazar($motivo);
   if($request->ajax()) {
       return response()->json([
         'status'  => true,
         'message' => 'Se ha realizado registro con éxito.',
-        'data' => $oportunidad
+        'data' => $oportunidad,
+        'refresh' => true
       ]);
   } else {
     return redirect('/licitaciones');

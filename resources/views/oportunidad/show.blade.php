@@ -1,31 +1,6 @@
 @extends('layouts.contentLayoutMaster')
 @section('title', 'Detalle Oportunidad')
 
-@section('vendor-styles')
-    <link rel="stylesheet" type="text/css" href="{{ asset('vendors/css/tables/datatable/datatables.min.css') }}">
-    <link rel="stylesheet" type="text/css"
-        href="{{ asset('vendors/css/tables/datatable/extensions/dataTables.checkboxes.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('vendors/css/tables/datatable/responsive.bootstrap.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('vendors/css/extensions/dragula.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('vendors/css/extensions/swiper.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('css/pages/widgets.css') }}">
-@endsection
-
-@section('vendor-scripts')
-    <script src="{{ asset('vendors/js/tables/datatable/datatables.min.js') }}"></script>
-    <script src="{{ asset('vendors/js/tables/datatable/dataTables.bootstrap4.min.js') }}"></script>
-    <script src="{{ asset('vendors/js/tables/datatable/datatables.checkboxes.min.js') }}"></script>
-    <script src="{{ asset('vendors/js/tables/datatable/dataTables.responsive.min.js') }}"></script>
-    <script src="{{ asset('vendors/js/tables/datatable/responsive.bootstrap.min.js') }}"></script>
-    <script src="{{ asset('vendors/js/extensions/dragula.min.js') }}"></script>
-    <script src="{{ asset('vendors/js/extensions/swiper.min.js') }}"></script>
-@endsection
-
-@section('page-scripts')
-    <script src="{{ asset('js/scripts/pages/page-users.js') }}"></script>
-    <script src="{{ asset('js/scripts/cards/widgets.js') }}"></script>
-@endsection
-
 @section('content')
 
     <style>
@@ -234,7 +209,8 @@
                 </div>
             @endif
             <div class="col-12">
-                @if (!empty($oportunidad))
+                <div class="row">
+                  <div class="col-6">
                     <div class="card">
                         <div class="card-content">
                             <div class="card-body">
@@ -242,76 +218,75 @@
                             </div>
                         </div>
                     </div>
-                @endif
+                  </div>
+                  <div class="col-6">
+
+@include('actividad.create', [
+                    'into' => [
+                        'licitacion_id' => $oportunidad->licitacion_id,
+                        'oportunidad_id' => $oportunidad->id,
+                    ],
+                ])
+                  </div>
+                </div>
             </div>
         </div>
         <div class="row">
-            <div class="col-6">
-                <div class="card">
-                    <div class="card-content">
-                        <div class="card-body">
-                            <table class="table table-borderless table-sm">
-                                <tbody>
-                                    @if (!empty($oportunidad))
-                                        <tr>
-                                            <td>Monto Base:</td>
-                                            <td style="display:flex;">
-                                                <div data-editable="/oportunidades/{{ $oportunidad->id }}?_update=monto_base"
-                                                    data-name="monto_base">{{ Helper::money($oportunidad->monto_base) }}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Instalación:</td>
-                                            <td class="d-flex align-items-end">
-                                                <div data-editable="/oportunidades/{{ $oportunidad->id }}?_update=instalacion_dias"
-                                                    data-name="instalacion_dias">
-                                                    {{ $oportunidad->instalacion_dias ?? 0 }}</div><label>días</label>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Servicio:</td>
-                                            <td class="d-flex align-items-end ">
-                                                <div data-editable="/oportunidades/{{ $oportunidad->id }}?_update=duracion_dias"
-                                                    data-name="duracion_dias">{{ $oportunidad->duracion_dias ?? 0 }}
-                                                </div> <label>días</label>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Garantía:</td>
-                                            <td class="d-flex align-items-end">
-                                                <div data-editable="/oportunidades/{{ $oportunidad->id }}?_update=garantia_dias"
-                                                    data-name="garantia_dias">{{ $oportunidad->garantia_dias ?? 0 }}
-                                                </div> <label>días</label>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Estado</td>
-                                            <td>
-                                                <h3>{{ $oportunidad->render_estado() }}</h3>
-                                            </td>
-                                        </tr>
-                                    @endif
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-6">
+            <div class="col-12">
                 <div class="card">
                     <div class="card-content">
                         <div class="card-body">
                             @if (!empty($oportunidad->id))
                                 <label>Apuntes</label>
-                                <div data-ishtml
-                                    data-editable="/oportunidades/{{ $oportunidad->id }}?_update=observacion">
-                                    {!! $oportunidad->observacion !!}</div>
+                                <div data-ishtml data-editable="/oportunidades/{{ $oportunidad->id }}?_update=observacion">
+                                @if(!empty($oportunidad->observacion))
+                                    {!! $oportunidad->observacion !!}
+                                @else
+                                <table class="table table-sm table-bordered" style="width: 100%;"><tbody>
+                                <tr>
+                                  <td style="max-width:33%;width: 33%;min-width: 33%;height: 40px;"></td>
+                                  <td style="max-width:33%;width: 33%;min-width: 33%;"></td>
+                                  <td style="max-width:33%;width: 33%;min-width: 33%;"></td>
+                                </tr></tbody></table>
+                                @endif
+                                </div>
                             @endif
                         </div>
                     </div>
                 </div>
             </div>
+            @if(!empty($oportunidad->correo_id))
+            <div class="col-12">
+              <h5>Requerimientos por Correo</h5>
+    <div class="card">
+      <div class="card-body">
+    <table class="table table-sm mb-0 table-bordered table-vcenter">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Desde</th>
+          <th>Asunto</th>
+          <th>Adjuntos</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+@foreach($oportunidad->correosRelacionados() as $r)
+        <tr>
+          <td>{{ Helper::fecha($r->fecha, true) }}</td>
+          <td>{{ $r->correo_desde }}</td>
+          <td>{{ $r->asunto }}</td>
+          <td>{{ $r->adjuntos_cantidad }}</td>
+          <td><a href="javascript:void(0)" data-popup="/correos/{{ $r->id }}/ver">Abrir</a></td>
+        </tr>
+@endforeach
+      </tbody>
+    </table>
+      </div>
+    </div>
+
+            </div>
+            @endif
             <div class="col-6">
                 @if (!empty($oportunidad) && !empty($oportunidad->proyecto()))
                     <div class="card">
@@ -328,15 +303,60 @@
             </div>
         </div>
 
+<style>
+.editable_tag {
+    position:relative;
+    padding: 3px;
+    font-size: 9px;
+    box-shadow: none;
+    border: 1px solid #4b87f5;
+    background: #fff;
+    color: #000;
+    border-radius: 4px;
+    min-width: 30px;
+    width: 90px;
+    display: inline-block;
+    outline: none;
+    text-align:center;
+}
+.editable_tag:after {
+  position: absolute;
+  content: atr(title);
+  background: red;
+  width: 100px;
+  height:20px;
+  color:#000;
+}
+.editable_tag:focus {
+    background: #fff;
+    color: #000;
+    border: 1px solid #878787;
+    width: 99%;
+    outline: none;
+    font-size: 11px;
+    padding: 5px;
+    margin: 4px 0;
+    text-align:center;
+}
 
-        <h5>Cotizaciones</h5>
+.editable_tag::placeholder {
+  color: #b3b3b3;
+  opacity: 1;
+  font-size:10px;
+  background: #e1e0e0!important;
+}
+
+</style>
+        <h5>Elaboración de Propuestas</h5>
         <div class="row">
             @foreach ($oportunidad->empresas() as $e)
                 <div class="col-2 col-sm-2">
                     <div class="card">
                         <div class="card-header">
-                            <h6 class="card-title">{{ $e->razon_social }} <span class="small"> -
-                                    {{ $e->ruc }}</span></h6>
+                          @if(!empty($e->cotizacion))
+                            <div style="position: relative;top: -5px;font-size: 11px;background: #ffb16e;color: #fff;padding: 2px;text-align: center;border-radius: 3px;">{{ $e->cotizacion->nomenclatura() }}</div>
+                            @endif
+                            <h6 class="card-title" style="font-size: 15px;">{{ $e->razon_social }}<br /><span class="small">{{ $e->ruc }}</span></h6>
                         </div>
                         <div class="card-content">
                             <div class="card-body">
@@ -351,37 +371,35 @@
                                 @elseif(empty($e->cotizacion) && strtotime($oportunidad->fecha_participacion_hasta) <= time())
                                     <div>Fuera de plazo</div>
                                 @else
+<div style="padding-bottom: 15px;">                                
+<input class="editable_tag" type="text" data-editable="/cotizaciones/{{ $e->cotizacion->id }}?_update=rotulo" placeholder="Rótulo" value="{{ $e->cotizacion->rotulo }}">
+<input class="editable_tag" type="number" data-editable="/cotizaciones/{{ $e->cotizacion->id }}?_update=monto" placeholder="Monto" value="{{ $e->cotizacion->monto }}" min="0" max="999999999" step="0.01">
+<input class="editable_tag" type="date" data-editable="/cotizaciones/{{ $e->cotizacion->id }}?_update=fecha" placeholder="Fecha" value="{{ $e->cotizacion->fecha }}">
+<input class="editable_tag" type="date" data-editable="/cotizaciones/{{ $e->cotizacion->id }}?_update=validez" placeholder="Validez" value="{{ $e->cotizacion->validez }}">
+<input class="editable_tag" type="text" data-editable="/cotizaciones/{{ $e->cotizacion->id }}?_update=plazo_instalacion" placeholder="Instalación" value="{{ $e->cotizacion->plazo_instalacion }}">
+<input class="editable_tag" type="text" data-editable="/cotizaciones/{{ $e->cotizacion->id }}?_update=plazo_servicio" placeholder="Servicio" value="{{ $e->cotizacion->plazo_servicio }}">
+<input class="editable_tag" type="text" data-editable="/cotizaciones/{{ $e->cotizacion->id }}?_update=plazo_garantia" placeholder="Garantía" value="{{ $e->cotizacion->plazo_garantia }}">
+</div>
                                     <div class="wrapper">
                                         <ul class="StepProgress">
                                             <li class="StepProgress-item is-done">
                                                 <strong>Participación</strong>
-                                                @if (!empty($e->cotizacion))
                                                     <div class="text-center mb-1">
                                                         <span
                                                             class="{{ $e->cotizacion->estado_participacion()['class'] }}">{{ $e->cotizacion->estado_participacion()['message'] }}</span>
-                                                        @if (!empty($e->cotizacion->seace_participacion_log))
-                                                            <!--<div style="font-size: 11px;background: #29237e;margin-top: 4px;border-radius: 4px;padding: 5px;color: #fff;max-height: 160px;overflow: auto;">{!! nl2br($e->cotizacion->seace_participacion_log) !!}</div> -->
-                                                            @if (!empty($e->cotizacion->seace_participacion_fecha))
-                                                                <div style="text-align: center;margin-top: 5px;">
-                                                                    <span
-                                                                        class="badge badge-primary certificado_button">Constancia</span>
-                                                                    <div class="certificado_body">
-                                                                        {!! $e->cotizacion->seace_participacion_html !!}</div>
-                                                                    <div style="font-size:11px;">
-                                                                        {{ Helper::fecha($e->cotizacion->seace_participacion_fecha, true) }}
-                                                                    </div>
+                                                            @if (!empty($e->cotizacion->participacion_por))
+                                                                <div style="text-align: center;margin-top: 5px;font-size:10px;">
+                                                                  por {{ $e->cotizacion->participacion_por }}
                                                                 </div>
                                                             @endif
-                                                        @endif
+                                                            @if (!$e->cotizacion->estado()['timeout'])
+                                                              @if (empty($e->cotizacion->participacion_el))
+                                                                <a href="/cotizaciones/{{ $e->cotizacion->id }}/registrarParticipacion"
+                                                                  class="btn btn-sm btn-info mr-25">Registrar
+                                                                  Participación</a>
+                                                              @endif
+                                                            @endif
                                                     </div>
-                                                @endif
-                                                @if (!$e->cotizacion->estado()['timeout'])
-                                                    @if (empty($e->cotizacion->participacion_el))
-                                                        <a href="/cotizaciones/{{ $e->cotizacion->id }}/registrarParticipacion"
-                                                            class="btn btn-sm btn-info mr-25">Registrar
-                                                            Participación</a>
-                                                    @endif
-                                                @endif
                                             </li>
                                             <li class="StepProgress-item is-done">
                                                 <strong>Propuesta</strong>
@@ -391,13 +409,10 @@
                                                             class="{{ $e->cotizacion->estado_propuesta()['class'] }}">{{ $e->cotizacion->estado_propuesta()['message'] }}</span>
                                                     </div>
                                                 @endif
-                                                @if ($e->cotizacion)
                                                     <div class="text-center" style="margin-bottom:10px;">
-                                                        <a class="btn btn-sm btn-success"
-                                                            href="/expediente/{{ $e->cotizacion->id }}/inicio">Armar
-                                                            Expediente</a>
+                                                        <a href="/expediente/{{ $e->cotizacion->id }}/inicio">Expediente</a>
+                                                        {{ $e->cotizacion->elaborado_por }}
                                                     </div>
-                                                @endif
                                                 @if (!$e->cotizacion->estado()['timeout'])
                                                     @if (empty($e->cotizacion->propuesta_el))
                                                         <a href="/cotizaciones/{{ $e->cotizacion->id }}/registrarPropuesta"
@@ -409,6 +424,9 @@
                                     </div>
                                 @endif
                             </div>
+                            @if(!empty($e->cotizacion))
+                            <div style="position: absolute;bottom: 3px;right: 10px;font-size: 11px;">Registrado por {{ $e->cotizacion->interes_por }}</div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -416,28 +434,47 @@
         </div>
 
         <div class="row">
-            <div class="col-12">
-                @include('actividad.create', [
-                    'into' => [
-                        'licitacion_id' => $oportunidad->licitacion_id,
-                        'oportunidad_id' => $oportunidad->id,
-                    ],
-                ])
-            </div>
-        </div>
-        <div>
-
-
-
-
-
-
-
-
+            <div class="col-6">
             <div class="card ">
                 <div class="card-header">
                     <h4 class="card-title">
-                        Análisis de Oportunidad
+                        Oportunidades Similares
+                    </h4>
+                </div>
+                <div class="card-content">
+                    <div class="card-body">
+                        <table class="table mb-0 table-sm" style="font-size:11px;">
+                            <thead>
+                                <tr>
+                                    <td>Servicio</th>
+                                    <td>Monto</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($oportunidad->similares() as $s)
+                                    <tr>
+                                        <td>
+                                            <div style="font-weight: bold;font-size: 9px;">
+                                                {{ $s->entidad }} - {{ $s->anho }}</div>
+                                            <div style="">{{ strtoupper($s->rotulo) }}</div>
+                                        </td>
+                                            <td colspan="1" style="width:80px;font-size:11px;text-align:right;">
+                                                123</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+
+            </div>
+            <div class="col-6">
+            <div class="card ">
+                <div class="card-header">
+                    <h4 class="card-title">
+                        Licitaciones Similares
                     </h4>
                 </div>
                 <div class="card-content">
@@ -452,7 +489,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($oportunidad->similares() as $s)
+                                @foreach ($oportunidad->licitaciones_similares() as $s)
                                     <tr>
                                         <td>
                                             <div style="font-weight: bold;font-size: 9px;">{{ $s->licitaciones }} x
@@ -484,7 +521,15 @@
                     </div>
                 </div>
             </div>
-          
+
+
+            </div>
+        </div>
+        <div>
+
+
+
+
 
 
 
@@ -492,3 +537,29 @@
         </div>
     </section>
 @endsection
+
+
+@section('vendor-styles')
+    <link rel="stylesheet" type="text/css" href="{{ asset('vendors/css/tables/datatable/datatables.min.css') }}">
+    <link rel="stylesheet" type="text/css"
+        href="{{ asset('vendors/css/tables/datatable/extensions/dataTables.checkboxes.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('vendors/css/tables/datatable/responsive.bootstrap.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('vendors/css/extensions/dragula.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('vendors/css/extensions/swiper.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/pages/widgets.css') }}">
+@endsection
+
+@section('vendor-scripts')
+    <script src="{{ asset('vendors/js/tables/datatable/datatables.min.js') }}"></script>
+    <script src="{{ asset('vendors/js/tables/datatable/dataTables.bootstrap4.min.js') }}"></script>
+    <script src="{{ asset('vendors/js/tables/datatable/datatables.checkboxes.min.js') }}"></script>
+    <script src="{{ asset('vendors/js/tables/datatable/dataTables.responsive.min.js') }}"></script>
+    <script src="{{ asset('vendors/js/tables/datatable/responsive.bootstrap.min.js') }}"></script>
+    <script src="{{ asset('vendors/js/extensions/dragula.min.js') }}"></script>
+    <script src="{{ asset('vendors/js/extensions/swiper.min.js') }}"></script>
+@endsection
+
+@section('page-scripts')
+    <script src="{{ asset('js/scripts/pages/page-users.js') }}"></script>
+@endsection
+

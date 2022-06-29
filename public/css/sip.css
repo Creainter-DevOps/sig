@@ -250,10 +250,6 @@
   color: #fff;
 }
 
-[data-editable-view]:after {
-  content: '';
-
-}
 .block_space {
   background: #f1f1f1;
   padding: 7px;

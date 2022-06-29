@@ -14,6 +14,14 @@ const dialogBasic = Swal.mixin  ({
     confirmButtonText: 'Aceptar',
     cancelButtonText: 'Cancelar'
 })
+function toastCheck( timer = 200 ){
+    
+  ToastBasic.fire( {
+     timer: timer,
+     title: 'Aprobar',
+     icon : 'success',
+  });
+}
 
 function toastSuccess(refresh = false, message = 'Operacion Realizada correctamente', timer = 2000  ){
     ToastBasic.fire( {

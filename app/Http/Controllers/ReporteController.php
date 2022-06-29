@@ -24,38 +24,74 @@ class ReporteController extends Controller
     }
 
     public function usuarios(){
-      return view('reportes.usuarios');
+     $licitacion = Helper::array_group_by( Actividad::aprobadas_desaprobadas()->toArray(), ['key'=> 'tipo'] ) ;
+
+     $apro = Helper::array_group_by( $licitacion['LICITACION/APROBAR'] , ['key'=> 'created_on'] ) ;
+
+     $desapro = Helper::array_group_by( $licitacion['LICITACION/RECHAZAR'] , ['key'=> 'created_on'] ) ;
+
+     $dias = [];
+     $data_apro = [];
+     $data_desapro = [];
+     for($i = 0 ; $i < 6 ;  $i++ ){
+       $dias[] =date('Y-m-d', strtotime( '-' . $i . ' day', strtotime(date('r'))));  
+     }
+     $dias = array_reverse( ($dias) );   
+     foreach($dias as $dia ){
+       $data_apro[] = isset($apro[$dia]) ? $apro[$dia][0]['acciones'] :  0;
+
+     }
+     
+     foreach( $dias as $dia ){
+       $data_desapro[] = isset($desapro[$dia]) ? $desapro[$dia][0]['acciones'] :  0;
+     }
+     $data_chart['series'] = [
+       [ 'name' =>  'Aprobar',
+         'data' => $data_apro
+       ],
+       [ 'name' =>  'Aprobar',
+         'data' => $data_desapro
+       ],
+     ];
+     $data_chart = (json_encode($data_chart['series']));
+     $data_categorias = json_encode($dias, true ) ; 
+     $actividades = Actividad::cantidad_actividades();
+     
+     $data_pie = [];
+
+     foreach ($actividades as $actividad ){
+       $data_pie['series'][] = $actividad->acciones;
+       $data_pie['labels'][] = $actividad->tipo;
+     }
+     $data_pie = json_encode($data_pie); 
+     //dd($data_pie) ;
+     return view( 'reportes.usuarios', compact( 'data_chart', 'data_categorias', 'data_pie'));
+
     }
 
     public function descargar_reporte( Request $request){
 
-      $tipo = $request->get('usuario'); 
+     $tipo = $request->get('usuario'); 
 
-      $fecha_desde = $request->get('fecha_desde');
-      $fecha_hasta = $request->get('fecha_hasta');
+     $fecha_desde = $request->get('fecha_desde');
+     $fecha_hasta = $request->get('fecha_hasta');
 
-      $formato = $request->get('pdf');
+     $formato = $request->get('pdf');
 
-      $usuarios = (Actividad::actividad_usuario($fecha_desde, $fecha_hasta ))->toArray();
-
-      $actividades = Helper::array_group_by( $usuarios, ["key" => "usuario" ]);
+     $usuarios = (Actividad::actividad_usuario($fecha_desde, $fecha_hasta ))->toArray();
+     
+     $actividades = Helper::array_group_by( $usuarios, ["key" => "usuario" ]);
     
-      // dd( $actividades );
-
-       $actividades = array_map( function ($fecha) {
-         return array_map(function($actividad ){
-           return [ 'created_on' => Helper::fecha( $actividad['created_on'] ),
-                    'usuario'  => $actividad['usuario'],
-                    'tipo'  => $actividad['tipo'],
-                    'acciones' => $actividad['acciones']
-                  ];
-         }, $fecha );
-        }, $actividades );
+     $actividades = array_map( function ($fecha) {
+       return array_map(function($actividad ){
+         return [ 'created_on' => Helper::fecha( $actividad['created_on'] ),
+                  'usuario'  => $actividad['usuario'],
+                  'tipo'  => $actividad['tipo'],
+                  'acciones' => $actividad['acciones']
+                ];
+       }, $fecha );
+      }, $actividades );
       return Helper::pdf('reportes.usuario',compact('actividades') ,'P', "Reportes.pdf" );
-    }
-
-    function reporte_usuarios_actividades(){
-        
     }
 
 

@@ -84,6 +84,27 @@ class Actividad extends Model
       ");
       return static::hydrate($rpta);
     }
+    public static function aprobadas_desaprobadas(){
+
+      $rpta = DB::select("
+      SELECT A.tipo,A.created_on::DATE,COUNT(A.tipo_id) acciones
+      FROM osce.actividad  A
+      WHERE (A.tipo_id = 19 OR A.tipo_id = 18) AND ( A.created_on::date >= (CURRENT_DATE - 7 ) )
+      GROUP BY A.tipo_id, A.created_on::DATE,A.tipo
+      ORDER BY 2 DESC, 1  ASC");
+
+      return static::hydrate($rpta);
+    }
+
+    public static function cantidad_actividades(){
+      $rpta =  DB::select("SELECT AT.tipo, COUNT(A.tipo_id) acciones
+        FROM osce.actividad A
+        JOIN osce.actividad_tipo AT ON AT.id = A.tipo_id
+        WHERE A.created_on::date > ( CURRENT_DATE - EXTRACT(DAY FROM CURRENT_DATE)::INTEGER)  AND AT.tipo ILIKE '%LICITACION%'
+        GROUP BY A.tipo_id, AT.tipo
+        ");     
+      return $rpta;
+    } 
     
     public function creado() {
       $rp = $this->belongsTo('App\User', 'created_by')->first();

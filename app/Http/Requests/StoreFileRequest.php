@@ -27,4 +27,15 @@ class StoreFileRequest extends FormRequest
 #            'file' => 'required|file|mimes:jpg,jpeg,bmp,png,doc,docx,csv,rtf,xlsx,xls,txt,pdf,zip'
 #        ];
     }
+    public function gsutil($input, $path, $name = null) {
+      $temporal_dir  = config('constants.ruta_storage') . '/';
+      $file = $this->{$input};
+      if($name === null) {
+        $name = uniqid() . '.' . strtolower($file->extension());
+      }
+      $file->move($temporal_dir, $name);
+      $destino = trim($path, '/') . '/' . $name;
+      exec("/snap/bin/gsutil '" . $temporal_dir . $name . "' 'gs://creainter-peru/" . $destino . "'");
+      return $destino;
+    }
 }

@@ -27,8 +27,11 @@
 <!-- table success start -->
 <section id="table-success">
   <div class="card">
-    <!-- datatable start -->
-    <div class="card-body" >
+    <div class="card-body">
+
+    <div id="Bucket" data-path="/"></div>
+
+
     <div class="table-responsive table-sm ">
       <table id="table-extended-success" class="table mb-0">
         <thead>
@@ -85,4 +88,8 @@
 {{-- page scripts --}}
 @section('page-scripts')
   <script src="{{asset('js/scripts/cotizacion/index.js')}}"></script>
+  <script src="{{asset('js/Bucket.js')}}"></script>
+  <script>
+    Bucketjs.capture(document.getElementById('Bucket'));
+  </script>
 @endsection

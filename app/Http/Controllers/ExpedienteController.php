@@ -82,12 +82,12 @@ class ExpedienteController extends Controller
       return view('expediente.inicio', compact('cotizacion','licitacion', 'validaciones'));
 
     }
-    public function inicio_store(Cotizacion $cotizacion ){
-           
+    public function inicio_store(Cotizacion $cotizacion) {
       $cotizacion->elaborado_por   = Auth::user()->id;
       $cotizacion->elaborado_desde = DB::raw('now()');
       $cotizacion->elaborado_step  = 1;
       $cotizacion->save();
+      $cotizacion->log('EXPEDIENTE/INICIO', 'Se inició la elaboración del Expediente');
       return redirect('/expediente/'. $cotizacion->id . '/paso01');
     }
 
@@ -431,6 +431,8 @@ echo "<pre>";
       $cotizacion->elaborado_step  = 4;
       $cotizacion->save();
 
+      $cotizacion->log('EXPEDIENTE/FIN', 'Se finalizó la elaboración del Expediente');
+
       return redirect('/expediente/' . $cotizacion->id . '/paso04');
     }
     public function paso04(Cotizacion $cotizacion) {
@@ -771,13 +773,13 @@ echo "<pre>";
 
       $workspace = $cotizacion->json_load();
 
-      $doc = Documento::find( $request->get("documento_id") );
+      $doc = Documento::find($request->get("documento_id"));
       $dir = config('constants.ruta_storage') . $cotizacion->oportunidad()->folder(true);
       $dir = Helper::mkdir_p($dir . 'EXPEDIENTE/');
 
       $destino = $dir . $doc->filename;
 
-      $request->archivo->move( $dir , $doc->filename );
+      $request->archivo->move($dir, $doc->filename);
 
       $meta = Helper::metadata($destino);
       $doc->folio = $meta['Pages'];

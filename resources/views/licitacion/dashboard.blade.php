@@ -355,7 +355,7 @@ var $primary = '#5A8DEE',
                 @endif
                   <td class="">
                     <div style="font-size:11px;">{!! $v->inx_rotulo !!}</div>
-                    <div style="font-size:9px;">Aprobado el {{ Helper::fecha($v->aprobado_fecha, true) }} por {{ $v->aprobado_usuario }}</div>
+                    <div style="font-size:9px;">Aprobado el {{ Helper::fecha($v->aprobado_el, true) }} por {{ $v->aprobado_por }}</div>
                   </td>
                   <td class="text-center" style="width:100px;">
                     <span>{{ Helper::money($v->monto_base) }}</span>
@@ -446,7 +446,7 @@ var $primary = '#5A8DEE',
                 @endif
                   <td class="">
                     <div style="font-size:11px;">{!! $v->inx_rotulo !!}</div>
-                    <div style="font-size:9px;">Aprobado el {{ Helper::fecha($v->aprobado_fecha, true) }} por {{ $v->aprobado_usuario }}</div>
+                    <div style="font-size:9px;">Aprobado el {{ Helper::fecha($v->aprobado_el, true) }} por {{ $v->aprobado_por }}</div>
                   </td>
                   <td class="text-center" style="width:100px;">
                     <span>{{ Helper::money($v->monto_base) }}</span>

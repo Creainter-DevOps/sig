@@ -40,15 +40,6 @@ class Correo extends Model
         'email_verified_at' => 'datetime',
       ];
 
-    public static function relacionados($id) {
-      if(empty($id)) {
-        return [];
-      }
-      $rp = DB::select("SELECT * FROM osce.correo WHERE id = :id OR id IN (SELECT correo_id FROM osce.correo_hilo WHERE token_id = (SELECT token_id FROM osce.correo_hilo WHERE correo_id = :id LIMIT 1))", ['id' => $id]);
-      return static::hydrate($rp);
-    }
-
-
     public function timeline(){
       return $this->hasMany('App\Actividad','contacto_id')->orderBy('id' , 'DESC')->get();   
     }

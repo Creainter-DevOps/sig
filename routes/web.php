@@ -231,6 +231,7 @@ Route::resource('oportunidades', 'OportunidadController')->parameters([
 Route::get('licitaciones/autocomplete','LicitacionController@autocomplete');
 Route::post('licitaciones/actualizar/{oportunidad}','LicitacionController@update')->name("licitacion.update");
 Route::get('licitaciones/calendario','LicitacionController@calendario');
+Route::get('licitaciones/mini','LicitacionController@mini');
 Route::get('licitaciones/nuevas','LicitacionController@listNuevas');
 Route::get('licitaciones/archivadas','LicitacionController@listArchivadas');
 Route::get('licitaciones/eliminadas','LicitacionController@listEliminadas');
@@ -244,6 +245,11 @@ Route::resource('licitaciones', 'LicitacionController')->parameters([
   'licitaciones' => 'licitacion'
 ]);
 
+
+Route::get('correos/{correo}/ver','CorreoController@ver')->name('correos.ver');
+Route::resource('correos', 'CorreoController')->parameters([
+  'correos' => 'correo'
+]);
 
 //Application Routes
 Route::get('/app-email','ApplicationController@emailApplication');

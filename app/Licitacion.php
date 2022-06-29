@@ -29,7 +29,7 @@ class Licitacion extends Model
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password','buenapro_revision',
+        'name', 'email', 'password','buenapro_revision','bases_integradas'
     ];
 
     /**
@@ -63,6 +63,12 @@ class Licitacion extends Model
       FROM osce.licitacion L WHERE id = ' . $this->id))->first();
       return $rp->ee; 
     }
+    public function similares() {
+      return DB::select("
+        SELECT *, array_to_string(B.licitaciones_id,',') ids
+        FROM osce.fn_licitacion_similares(:tenant, :referencia) B
+        LIMIT 20", ['tenant' => Auth::user()->tenant_id, 'referencia' => $this->id]);
+    }
     public function oportunidad() {
       return $this->belongsTo('App\Oportunidad', 'id', 'licitacion_id')->first();
       $oportunidad = Oportunidad::where('licitacion_id',$this->id)
@@ -82,24 +88,30 @@ class Licitacion extends Model
       return $this->hasMany('App\LicitacionItem','licitacion_id')
         ->orderBy('item', 'desc')->get();
     }
-    public function ganadora() {
-      $items = $this->items();
-      if(count($items) == 0) {
-        return '';
-      } else {
-        $r = [];
-        foreach($items as $i) {
-          if($i->resultado == 'Desierto') {
-            $r[] = 'DESIERTO';
-          } else {
-            if(!empty($i->empresa()->id)) {
-              $r[] = $i->empresa()->razon_social;
-            }
-          }
-        }
-        return implode('/', $r);
+    public function ganadora($json = -1) {
+      if($json === -1) {
+        $rp = collect(DB::select("SELECT osce.licitacion_ganadores(" . Auth::user()->tenant_id . ", '" . $this->id . "'::int) dd"))->first();
+        $json = $rp->dd;
       }
-      return '0';
+      $gds = json_decode($json, true);
+        $gds = is_array($gds) ? $gds : [];
+        $gds = array_map(function($n) {
+          $n['empresa'] = trim($n['empresa']);
+          if($n['empresa'] == 'Desierto') {
+            return $n['empresa'];
+          }
+          if(empty($n['empresa'])) {
+            return null;
+          }
+          if(!empty($n['tenant'])) {
+            return '<b>' . $n['empresa'] . '</b> por ' . $n['monto'];
+          }
+          return $n['empresa'] . ' por ' . $n['monto'];
+        }, $gds);
+        $gds = array_filter($gds, function($n) {
+           return $n !== null;
+        });
+        return !empty($gds) ? implode(' / ', $gds) : null;
     }
     public function empresa() {
       return $this->belongsTo('App\Empresa', 'empresa_id')->first();
@@ -129,7 +141,7 @@ class Licitacion extends Model
             Limit 500
             ");*/
       $rp = DB::select("
-            SELECT L.*
+            SELECT L.*,O.licitacion_id
             FROM osce.licitacion L
             LEFT JOIN osce.oportunidad O ON L.id = O.licitacion_id AND L.eliminado IS NULL
             WHERE L.buenapro_fecha IS NULL AND O.licitacion_id IS NULL AND L.created_on >= NOW() - INTERVAL '30' DAY AND L.procedimiento_id IS NOT NULL AND L.fecha_participacion_hasta >= NOW()
