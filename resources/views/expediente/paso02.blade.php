@@ -30,7 +30,7 @@
             <div class="wizard-horizontal">
                 <div class="row">
                       <div class="col-6" id="iframe_container" >
-                      <iframe  class="doc" src='https://view.officeapps.live.com/op/embed.aspx?src=https://sig.creainter.com.pe/storage/{{ reset($workspace['paso02'])['root']  }}?t={{time()}}' width='1366px' frameborder='0'  style="height:600px">
+                      <iframe  class="doc" src='https://view.officeapps.live.com/op/embed.aspx?src=https://sig.creainter.com.pe/expediente/{{ $cotizacion->id }}/temporal?file={{ reset($workspace['paso02'])['uri'] }}&t={{time()}}' width='1366px' frameborder='0'  style="height:600px">
                       This is an embedded <a target='_blank' href='http://office.com'>Microsoft Office</a> document, powered by <a target='_blank' href='http://office.com/webapps'>Office Online</a>.</iframe>
                       </div>
                       <div class="col-6">
@@ -57,14 +57,14 @@
                                     <span class="widget-todo-title ml-50">{{$anexo['rotulo'] }}</span>
                                   </div>
                                   <div class="widget-todo-item-action d-flex align-items-center">
-                                    <div class="badge badge-pill badge-light-success mr-1" onclick="visualizar(this)" style="cursor:pointer;" data-url="{{'https://sig.creainter.com.pe/storage/' . $anexo['root'] }}?t={{time()}}"><i class="bx bx-show"></i> </div>
-                                    <a class="avatar bg-rgba-secondary  m-0 mr-50" href="https://sig.creainter.com.pe/storage/{{$anexo['root']}}" download="documento.docx" rel="noopener noreferrer">
+                                    <div class="badge badge-pill badge-light-success mr-1" onclick="visualizar(this)" style="cursor:pointer;" data-url="{{'https://sig.creainter.com.pe/expediente/' . $cotizacion->id . '/temporal?file=' . $anexo['uri'] }}&t={{time()}}"><i class="bx bx-show"></i> </div>
+                                    <a class="avatar bg-rgba-secondary  m-0 mr-50" href="/expediente/{{ $cotizacion->id }}/temporal?file={{$anexo['uri']}}&t={{time()}}" download="documento.docx" rel="noopener noreferrer">
                                       <div class="avatar-content">
                                         <span class="font-size-base text-primary"></span>
                                           <i class="bx bxs-download"></i>
                                       </div>
                                     </a>
-                                    <input type="file" id="archivo-{{$anexo["generado_de_id"]}}" name="archivo-{{$anexo['generado_de_id'] }}" hidden style="display:none;" accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-docid="{{ $anexo['generado_de_id'] }}" data-key="{{ $key }}" onchange="actualizar_archivo(this)" /> 
+                                    <input type="file" id="archivo-{{$anexo["generado_de_id"]}}" name="archivo-{{$anexo['generado_de_id'] }}" hidden style="display:none;" accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-docid="{{ $anexo['generado_de_id'] }}" data-cid="{{ $key }}" onchange="actualizar_archivo(this)" /> 
                                     
                                      <a class="avatar bg-rgba-primary m-0 mr-50" onclick="$('#archivo-{{$anexo['generado_de_id']}}').click();"  >
                                       <div class="avatar-content">
@@ -127,11 +127,10 @@ function visualizar(e){
 
   function actualizar_archivo(file) {
     let box = $(file).closest('.widget-todo-item-action');
-    let url = "/expediente/{{ $cotizacion->id }}/archivo/actualizar";
+    let url = "/expediente/{{ $cotizacion->id }}/actualizar";
     let formdata = new FormData();
     formdata.append('archivo', file.files[0])
-    formdata.append('documento_id', file.dataset.docid);
-    formdata.append('key', file.dataset.key)
+    formdata.append('cid', file.dataset.cid);
 
     box.prepend(`
                                     <div class="avatar bg-rgba-warning m-0 mr-50">
@@ -140,19 +139,23 @@ function visualizar(e){
                                           <i class="bx bx-loader-circle"></i>
                                         </div>
                                       </div>`);
-    fetch( url , {
+    Fetchx({
+      title: 'Actualizar Archivo',
+      url: url,
       headers: {
          "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
       },
-      method: 'post',
-      body:formdata,
-    }).then(response=> response.json())
-      .then( data => {
+      type: 'post',
+      data:formdata,
+      processData: false,
+      contentType: false,
+      success: function() {
         box.find('.bg-rgba-warning').slideUp();
         let see = box.find('.badge-light-success');
         see.attr('data-url', see.attr('data-url') + Math.random());
         see.click();
-      });
+      }
+    });
   }
 </script>
 @endsection

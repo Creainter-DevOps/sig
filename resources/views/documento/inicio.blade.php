@@ -1,4 +1,4 @@
-@extends('expediente.theme')
+@extends('documento.theme')
 @section('contenedor')
   <div class="row">
     <div class="col-12">
@@ -16,11 +16,11 @@
                             <ul class="list-inline d-flex mb-0">
                               <li class="d-flex align-items-center">
                                 <i class='bx bx-check-circle font-medium-3 mr-50'></i>
-                                <div class=" mr-1">{{ $cotizacion->empresa()->seudonimo }}</div>
+                                <div class=" mr-1"><div>
                               </li>
                             </ul>
                           </div>
-                          <form class="form" action="{{ route('expediente.inicio', ['cotizacion' => $cotizacion->id])}}" method="post">
+                          <form class="form" action="{{ route('documento.expediente_inicio', ['documento' => $documento->id])}}" method="post">
                             @csrf
                           <div class="card-body px-0 py-1" style="display:flex;justify-content:center; ">
                             <ul class="widget-todo-list-wrapper" id="list-anexos">
@@ -66,18 +66,18 @@
                           </form>
                         </div>
                       </div>
-                      @if (!empty($cotizacion->elaborado_step))
+                      @if (!empty($documento->cotizacion()->elaborado_step))
                       <div class="col-9">
                         <div>
                           <div style="font-size: 27px;color: #fd4f1b;">Se ha encontrado el documento</div>
                           <div>Para continuar editando el documento, haga click abajo:</div>
                           <div style="padding: 10px 0px;">
-                            <a href="/expediente/{{ $cotizacion->id }}/paso0{{ $cotizacion->elaborado_step }}" class="btn btn-primary text-white btn-sm" style="margin-right: 5px;">Seguir Trabajando</a>
+                            <a href="/documento/{{ $documento->id }}/paso0" class="btn btn-primary text-white btn-sm" style="margin-right: 5px;">Seguir Trabajando</a>
                           </div>
                         </div>
                         @if (!empty($cotizacion->documento_id))
                         <div style="background: #efefef;border: 1px solid #d5d5d5;border-radius: 5px;padding: 5px;">
-                          <iframe  class="doc" src='https://storage.googleapis.com/creainter-peru/storage/{{ $cotizacion->documento()->archivo }}' frameborder='0' style="height:600px;">
+                          <iframe  class="doc" src='https://storage.googleapis.com/creainter-peru/storage/{{ $documento->archivo }}' frameborder='0' style="height:600px;">
                           This is an embedded <a target='_blank' href='http://office.com'>Microsoft Office</a> document, powered by <a target='_blank' href='http://office.com/webapps'>Office Online</a>.</iframe>
                         </div>
                         @endif

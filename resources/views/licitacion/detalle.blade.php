@@ -150,7 +150,7 @@
   <div class="card">
     <div class="card-content">
       <div class="card-body">
-@if(!empty($oportunidad->id))
+      @if(!empty($oportunidad->id))
         <label>Apuntes</label>
         <div data-ishtml data-editable="/oportunidades/{{  $oportunidad->id }}?_update=observacion">{!! $oportunidad->observacion !!}</div>
 @endif

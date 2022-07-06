@@ -11,6 +11,7 @@
 {{-- page style --}}
 @section('page-styles')
 <link rel="stylesheet" type="text/css" href="{{ asset('css/themes/layout.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ asset('css/Bucket.css') }}">
 @endsection
 
 @section('content')
@@ -29,7 +30,7 @@
   <div class="card">
     <div class="card-body">
 
-    <div id="Bucket" data-path="/"></div>
+    <div id="Bucket" data-bucket="1" data-path="/CONTRATO" data-upload="true"></div>
 
 
     <div class="table-responsive table-sm ">

@@ -19,9 +19,9 @@
                 </tr>
                 <tr>
                   <th>Directorio:</th>
-                  <td><a href="#" onclick="window.location.href='odir:{!! addslashes(Auth::user()->dir_sharepoint . $proyecto->folder()) !!}';">{{ $proyecto->folder() }}</a></td>
-                  <th>Contrato:</th>
-                  <td><a href="javascript:void(0);" onclick="window.location.href='odir:{!! addslashes(Auth::user()->dir_sharepoint . $proyecto->folder() . 'CONTRATO\\') !!}';">Folder</a></td>
+                  <td colspan="3">
+                    <a href="javascript:void(0);" data-popup="/documentos/visor?path={{ $proyecto->folder(true) }}&pid={{ $proyecto->id }}">{{ $proyecto->folder() }}</a>
+                  </td>
                 </tr>
                 <tr>
                   <th>Fecha de Firma:</th>

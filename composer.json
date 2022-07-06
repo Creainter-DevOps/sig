@@ -52,6 +52,7 @@
             "database/factories"
         ],
         "files": [
+            "app/Helpers/misc.php",
             "app/Helpers/Helpers.php",
             "app/Helpers/NumeroALetras.php"
         ]

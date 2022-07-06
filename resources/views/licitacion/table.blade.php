@@ -59,4 +59,26 @@
 
               </tbody>
             </table>
+            <table class="table table-sm mb-0 table-bordered table-vcenter"  style="width:100%">
+              <thead>
+                <th>Item</th>
+                <th>Descripción</th>
+                <th>Unidad</th>
+                <th>Cantidad</th>
+                <th>Referencial</th>
+                <th>Adjudicado</th>
+              </thead>
+              <tbody>
+            @foreach($licitacion->items() as $e)
+            <tr>
+              <td>{{ $e->item }}</td>
+              <td>{{ substr($e->descripcion, 0, 30) }}</td> 
+              <td>{{ $e->unidad_medida }}</td>
+              <td>{{ $e->cantidad_solicitada }}</td>
+              <td>{{ Helper::money($e->valor_referencial) }}</td>
+              <td>{{ Helper::money($e->monto_adjudicado) }}</td>
+            </tr>
+            @endforeach
+            </tbody>
+            </table>
 </div>

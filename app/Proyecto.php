@@ -60,7 +60,10 @@ class Proyecto extends Model
       }
       return 'xx';
     }
-    public function folder() {
+    public function folder($unix = false) {
+      if($unix) {
+        return 'PROYECTOS/' . $this->codigo . '/';
+      }
       return '\\PROYECTOS\\' . $this->codigo . '\\';
     }
     public static function generarCodigo($year = null)

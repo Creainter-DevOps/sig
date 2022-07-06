@@ -11,7 +11,9 @@
     </tr>
     <tr>
       <th>Carpeta</th>
-      <td colspan="3"><a href="#" onclick="window.location.href='odir:{!! addslashes(Auth::user()->dir_sharepoint . $oportunidad->folder()) !!}';">{{ $oportunidad->folder() }}</a></td>
+      <td colspan="3">
+        <a href="javascript:void(0);" data-popup="/documentos/visor?path={{ $oportunidad->folder(true) }}&oid={{ $oportunidad->id }}">{{ $oportunidad->folder() }}</a>
+      </td>
     </tr>
     <tr>
       <th>Palabras Claves:</th>

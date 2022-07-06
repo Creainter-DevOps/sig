@@ -19,6 +19,7 @@ function merge(first, second) {
 }
 
 function Fetchx(params, inmediate) {
+  var idToast = null;
     if (
         typeof params.id !== "undefined" &&
         typeof params.delay !== "undefined"
@@ -38,6 +39,9 @@ function Fetchx(params, inmediate) {
             $(params.loading)
                 .addClass("request_" + myId)
                 .slideDown();
+        }
+        if(typeof params.title !== 'undefined') {
+          idToast = toastr.info('Se está procesando la solicitud', params.title, { positionClass: 'toast-top-right', containerId: 'toast-top-right', 'timeOut': 0 });
         }
     };
     var ocultar = function () {
@@ -66,12 +70,23 @@ function Fetchx(params, inmediate) {
         params.success = function ($x) {
             ocultar();
             temp_success($x, params);
+            if(typeof params.title !== 'undefined') {
+              toastr.clear(idToast);
+              toastr.success('Se ha realizado con éxito', params.title, { positionClass: 'toast-top-right', containerId: 'toast-top-right', 'timeOut': 2000 });
+            }
         };
     } else {
         params.success = function ($x) {
             ocultar($x, params);
         };
     }
+    params.error = function ($x) {
+      ocultar($x, params);
+      if(typeof params.title !== 'undefined') {
+        toastr.clear(idToast);
+        toastr.error('Ocurrió un problema durante la ejecución', params.title, { positionClass: 'toast-top-right', containerId: 'toast-top-right', 'timeOut': 2000 });
+      }
+    };
     return $.ajax(params);
 }
 
@@ -736,6 +751,7 @@ function render_dom_popup() {
     $("[data-popup]").each(function () {
         var box = $(this);
         var form = box.attr("data-popup");
+        var title = box.attr('data-title') || 'Proceso';
         $(this).attr("data-url", form);
         box.removeAttr("data-popup");
         console.log("POPUP", form, box);
@@ -753,10 +769,11 @@ function render_dom_popup() {
                     .attr("aria-labelledby", "modal-fadein")
                     .attr("aria-hidden", "true");
                 modal.html(
-                    '<div class="modal-dialog" role="document"><div class="modal-content" style="min-width:700px;">Cargando...</div></div>'
+                    '<div class="modal-dialog" role="document" style="max-width: 1000px;width: fit-content;min-width: 500px;"><div class="modal-content" style="min-width:700px;">Cargando...</div></div>'
                 );
                 $("body").append(modal);
                 Fetchx({
+                  title: title,
                     url: form,
                     type: "GET",
                     success: function (data) {
@@ -766,6 +783,7 @@ function render_dom_popup() {
                             e.preventDefault();
                             var formulario = modal.find("form");
                             return Fetchx({
+                              title: title,
                                 url: formulario.attr("action"),
                                 type: "POST",
                                 processData: false,
@@ -844,6 +862,7 @@ function render_confirm_remove() {
             }).then(function (e) {
                 if (e.value) {
                     Fetchx({
+                      title: 'Eliminación',
                         url: url,
                         type: "DELETE",
                         headers : {
@@ -959,6 +978,7 @@ function render_editable() {
       stt = setTimeout(function() {
         var tt = is_html ? box.html() : (is_div ? box.text() : box.val());
           Fetchx({
+            title: 'Edición',
             url: xhr,
             headers : {
                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
@@ -1303,6 +1323,7 @@ function operarMilisegundos(t1, t2, op) {
         actual = $(espacio).html();
         var bloque = $("<div>").addClass('bloqueModificable');
         Fetchx({
+          title: 'Habilitando Edición',
             id: 'save-punto',
             delay: 0,
             loading: '#loading_calendar',
@@ -1341,6 +1362,7 @@ function operarMilisegundos(t1, t2, op) {
         var serial = $(espacio).find('.tipFormulario').serialize();
         serial += '&_token=' + $("[name='_token']").val() + '&id=' + $(espacio).attr('data-modaly-id');
         Fetchx({
+          title: 'Edición',
             id: 'save-punto',
             delay: 0,
             loading: '#loading_calendar',

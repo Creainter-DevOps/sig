@@ -1,5 +1,6 @@
 <?php 
 namespace App\Helpers;
+
 use Config;
 use Illuminate\Support\Str;
 use PhpOffice\PhpWord; 
@@ -7,6 +8,25 @@ use App\Helpers\NumeroALetras;
 
 class Helper
 {
+  public static function gsutil_exists($file) {
+    $cmd = 'export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"';
+    $cmd .= ";/snap/bin/gsutil -q stat '$file'; echo $?";
+    $out = shell_exec($cmd);
+    $out = trim($out);
+    return $out === '0';
+  }
+  public static function gsutil_cp($from, $to) {
+    $cmd = 'export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"';
+    $cmd .= ";/snap/bin/gsutil cp '" . $from . "' '" . $to . "'";
+    exec($cmd);
+    return true;
+  }
+  public static function gsutil_mv($from, $to) {
+    $cmd = 'export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"';
+    $cmd .= ";/snap/bin/gsutil mv '" . $from . "' '" . $to . "'";
+    exec($cmd);
+    return true;
+  }
   public static function parallel_command($cmd, $data = null) {
     $stdout = static::json_path('pid_' . uniqid() . '.log');
     if(is_array($cmd)) {
@@ -252,17 +272,17 @@ class Helper
   }  
 
   public static function docx_fill_template($input, $data, $output) {
-    $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($input);
+    $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor(gs($input));
     if(!empty($data['EMPRESA.IMAGEN_HEADER'])) {
       $templateProcessor->setImageValue('EMPRESA.IMAGEN_HEADER',
         [
-          'path' => config('constants.ruta_storage') .  $data['EMPRESA.IMAGEN_HEADER'],
+          'path' => gs(config('constants.ruta_storage') .  $data['EMPRESA.IMAGEN_HEADER']),
           'height' => 50
         ]
       );
     }
     if(!empty($data['EMPRESA.IMAGEN_CENTRAL'])) {
-      $templateProcessor->setImageValue( 'EMPRESA.IMAGEN_CENTRAL',config('constants.ruta_storage').  $data['EMPRESA.IMAGEN_CENTRAL'] );
+      $templateProcessor->setImageValue('EMPRESA.IMAGEN_CENTRAL', gs(config('constants.ruta_storage') . $data['EMPRESA.IMAGEN_CENTRAL']));
     }
     $templateProcessor->setValues($data);
     return $templateProcessor->saveAs($output);
@@ -575,5 +595,103 @@ public static function subir_documento( $archivo, $name ){
     public static function fileTemp($extencion = 'pdf'){
        return config('constants.ruta_temporal') . uniqid() . "." . $extencion;   
     }
+
+
+    /* Workspace */
+    public static function workspace_get_id($id, $page) {
+      return $id . '/' . $page;
+    }
+
+    public static function workspace_get_card( $matrix, $cid ) {
+      return $matrix[$cid];
+    }
+    public static function workspace_space($matrix, $orden, $space) {
+      $cids = static::workspace_get_range($matrix, $orden, null);
+      foreach($cids as $cid) {
+        $c = static::workspace_get_card($matrix, $cid);
+        $c['orden'] += $space;
+        $matrix[$cid] = $c;
+      }
+      return $matrix;
+    }
+    public static function formatoCard($x) {
+      $default = [
+        'documento' => null,
+        'imagen' => null,
+        'estampados' => [
+          'visado' => [],
+          'firma'  => [],
+        ],
+      ];
+      if(!empty($x['is_part'])) {
+        $default['estampados']['visado'][$x['page']] = [
+          'x' => rand(10000, 20999) / 100000,
+          'y' => rand(85000, 92999) / 100000,
+        ];
+      } else {
+        for($i = 0; $i < $x['folio']; $i++) {
+          $default['estampados']['visado'][$i] = [
+            'x' => rand(10000, 20999) / 100000,
+            'y' => rand(85000, 92999) / 100000,
+          ];
+        }
+      }
+      return array_merge($default, $x);
+    }
+    public static function workspace_move($matrix, $cidx, $orden, $space = 1) {
+
+      $o_i = static::workspace_get_card($matrix, $cidx);
+      $o_i = $o_i['orden'];
+
+      if($o_i == $orden) {
+        return $matrix;
+      }
+      if ($o_i > $orden) {
+        $cids = static::workspace_get_range($matrix, $o_i, $orden);
+        foreach($cids as $cid) {
+          $c = static::workspace_get_card($matrix, $cid);
+          $c['orden'] += $space;
+          $matrix[$cid] = $c;
+        }
+      } else {
+        $cids = static::workspace_get_range($matrix, $o_i, $orden);
+        foreach($cids as $cid) {
+          $c = static::workspace_get_card($matrix, $cid);
+          $c['orden'] -= $space;
+          $matrix[$cid] = $c;
+        }
+      }
+      $matrix[$cidx]['orden'] = (int) $orden;
+      return static::workspace_ordenar($matrix);
+    }
+
+    public static function workspace_ordenar($matrix) {
+      uasort($matrix, function($item1,$item2) {
+        return $item1['orden'] - $item2['orden'];
+      });
+      $i = 0;
+      $matrix = array_map(function($n) use(&$i) {
+        $n['orden'] = $i;
+        $i++;
+        return $n;
+      }, $matrix);
+
+      return $matrix;
+    }
+    public static function workspace_get_range($matrix, $o_i, $o_f = null) {
+      $matrix = array_filter($matrix, function($c) use ($o_i, $o_f) {
+        if($o_f === null) {
+          return $c['orden'] >= $o_i;
+
+        } elseif($o_i > $o_f) {
+          return $c['orden'] <= $o_i && $c['orden'] >= $o_f;
+
+        } else {
+          return $c['orden'] <= $o_f && $c['orden'] > $o_i;
+        }
+      });
+     return array_keys($matrix);
+    }
+
 }
 

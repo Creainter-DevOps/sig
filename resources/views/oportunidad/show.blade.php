@@ -354,7 +354,9 @@
                     <div class="card">
                         <div class="card-header">
                           @if(!empty($e->cotizacion))
-                            <div style="position: relative;top: -5px;font-size: 11px;background: #ffb16e;color: #fff;padding: 2px;text-align: center;border-radius: 3px;">{{ $e->cotizacion->nomenclatura() }}</div>
+                            <div style="position: relative;top: -5px;font-size: 11px;background: #ffb16e;color: #fff;padding: 2px;text-align: center;border-radius: 3px;">
+                            <a href="javascript:void(0);" data-popup="/documentos/visor?path={{ $e->cotizacion->folder(true) }}&oid={{ $oportunidad->id }}&cid={{ $e->cotizacion->id }}" style="color:#fff;">{{ $e->cotizacion->nomenclatura() }}</a>
+                            </div>
                             @endif
                             <h6 class="card-title" style="font-size: 15px;">{{ $e->razon_social }}<br /><span class="small">{{ $e->ruc }}</span></h6>
                         </div>
@@ -547,6 +549,7 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('vendors/css/extensions/dragula.min.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('vendors/css/extensions/swiper.min.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('css/pages/widgets.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/Bucket.css') }}">
 @endsection
 
 @section('vendor-scripts')
@@ -561,5 +564,6 @@
 
 @section('page-scripts')
     <script src="{{ asset('js/scripts/pages/page-users.js') }}"></script>
+    <script src="{{ asset('js/Bucket.js') }}"></script>
 @endsection
 

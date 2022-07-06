@@ -133,6 +133,7 @@ Route::resource('cartas', 'CartaController')->parameters([
 ]);
 
 Route::get('reportes', 'ReporteController@index');
+
 Route::get('reportes/usuarios', 'ReporteController@usuarios');
 Route::get('reportes/usuarios/descargar', 'ReporteController@descargar_reporte');
 //Route::get('reportes/usuarios', 'ReporteController@index');
@@ -142,9 +143,11 @@ Route::resource('actas', 'ActaController')->parameters([
   'actas' => 'acta'
 ]);
 
+Route::get('movil', 'LicitacionController@movil');
+
+
 Route::get('expediente/{cotizacion}/generar','ExpedienteController@generar');
 Route::post('expediente/{cotizacion}/ordenar','ExpedienteController@actualizar_orden');
-Route::post('expediente/{cotizacion}/agregarDocumento','ExpedienteController@agregarDocumento');
 
 Route::get('expediente/{cotizacion}/paso01','ExpedienteController@paso01');
 Route::post('expediente/{cotizacion}/paso01','ExpedienteController@paso01_store')->name('expediente.paso01');
@@ -159,37 +162,63 @@ Route::get('expediente/{cotizacion}/paso04','ExpedienteController@paso04');
 
 Route::post('expediente/{cotizacion}/paso04','ExpedienteController@paso04_store')->name('expediente.paso04');
 
-Route::post('expediente/{cotizacion}/agregarDocumento/{documento}', 'ExpedienteController@agregarDocumento');
+#Route::post('expediente/{cotizacion}/agregarDocumento/{documento}', 'ExpedienteController@agregarDocumento');
 
 Route::get('expediente/{cotizacion}/visualizar', 'ExpedienteController@visualizar_documento');
 
+Route::get('expediente/{cotizacion}/temporal', 'ExpedienteController@descargarTemporal');
+
 Route::post('expediente/{cotizacion}/estampar', 'ExpedienteController@estamparDocumento');
 
-Route::post('expediente/{cotizacion}/eliminarFirmas', 'ExpedienteController@eliminarFirmas');
 
 Route::post('expediente/{cotizacion}/parallelStatus','ExpedienteController@parallelStatus');
 
-Route::post('expediente/{cotizacion}/archivo/actualizar','ExpedienteController@actualizar_archivo');
+Route::post('expediente/{cotizacion}/actualizar','ExpedienteController@actualizar');
 
 Route::get('expediente/{cotizacion}/generarImagen','ExpedienteController@generarImagen');
 
 Route::post('expediente/{cotizacion}/custom','ExpedienteController@custom_store')->name('expediente.custom');
 
 Route::post('expediente/{cotizacion}/eliminarDocumento','ExpedienteController@eliminarDocumento')->name('expediente.eliminarDocumento');
+
+Route::get('documentos/{documento}/visualizar', 'DocumentoController@visualizar_documento');
 Route::get('expediente/{cotizacion}/inicio','ExpedienteController@inicio')->name('expediente.inicio');
 Route::post('expediente/{cotizacion}/inicio','ExpedienteController@inicio_store');
 Route::post('expediente/{cotizacion}/busquedaDocumentos','ExpedienteController@busquedaDocumentos')->name('expediente.busquedaDocumentos');
-
 
 Route::resource('expediente', 'ExpedienteController')->parameters([
   'expediente' => 'expediente'
 ]);
 
+Route::get('etiquetas/mini','EtiquetaController@mini')->name('expediente.custom');
+Route::resource('etiquetas', 'EtiquetaController')->parameters([
+  'etiquetas' => 'etiqueta'
+]);
+
+Route::post('documentos/{documento}/parallelStatus','DocumentoController@parallelStatus');
+Route::post('documentos/{documento}/agregarDocumento/{doc}','DocumentoController@agregarDocumento');
 Route::get('documentos/nuevo','DocumentoController@form_nuevo');
 //Route::get('documentos/{documento}/generarImagen/{$cotizacion}','DocumentoController@generarImagen');
+
+//Route::get('documentos/{documento}/expediente/inicio','DocumentoController@expediente_inicio');
+//Route::post('documentos/{documento}/expediente/inicio','DocumentoController@expediente_inicio')->name("documento.expediente_inicio");
+Route::get('documentos/{documento}/expediente/paso01','DocumentoController@expediente_paso01')->name("documento.expediente_paso01");
+Route::get('documentos/{documento}/expediente/paso02','DocumentoController@expediente_paso02')->name("documento.expediente_paso02");
+Route::post('documentos/{documento}/expediente/paso01','DocumentoController@expediente_paso01_store')->name("documento.expediente_paso01_store");
+Route::get('documentos/{documento}/generarImagenTemporal','DocumentoController@generarImagenTemporal');
 Route::get('documentos/{documento}/generarImagen','DocumentoController@generarImagen');
 Route::get('documentos/{documento}/descargarParte','DocumentoController@descargarParte');
 
+Route::post('documentos/{documento}/ordenar','DocumentoController@actualizar_orden');
+Route::post('documentos/{documento}/eliminarFirmas', 'DocumentoController@eliminarFirmas');
+Route::post('documentos/{documento}/estampar', 'DocumentoController@estamparDocumento');
+Route::post('documentos/{documento}/eliminarDocumento','DocumentoController@eliminarDocumento')->name('documento.eliminarDocumento');
+Route::post('documentos/crearExpediente', 'DocumentoController@crearExpediente')->name('documentos.crearExpediente');
+Route::get('documentos/{documento}/expediente', 'DocumentoController@expediente')->name('documentos.expediente');
+Route::get('documentos/visor', 'DocumentoController@visor')->name('documentos.visor');
+Route::post('documentos/ajax/get', 'DocumentoController@ajax_get')->name('documentos.ajax_get');
+Route::post('documentos/ajax/upload', 'DocumentoController@ajax_upload')->name('documentos.ajax_upload');
+Route::post('documentos/{documento}/buscar', 'DocumentoController@buscar')->name('documentos.buscar');
 Route::resource('documentos', 'DocumentoController')->parameters([
   'documentos' => 'documento'
 ]);

@@ -1,4 +1,4 @@
-@extends('expediente.theme')
+@extends('documento.theme')
 @section('contenedor')
 <style>
 .blockProcess {
@@ -26,22 +26,22 @@
           <div class="card-body">
             <ul class="nav nav-tabs justify-content-center" role="tablist">
               <li class="nav-item">
-                <a class="nav-link" href="/expediente/{{ $cotizacion->id }}/paso01">
+                <a class="nav-link" href="/documentos/{{ $documento->id }}/paso01">
                   Anexos
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="/expediente/{{ $cotizacion->id }}/paso02">
+                <a class="nav-link" href="/documentos/{{ $documento->id }}/paso02">
                   Modificación
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="/expediente/{{ $cotizacion->id }}/paso03">
+                <a class="nav-link" href="/documentos/{{ $documento->id }}/paso03">
                   Mesa de Trabajo
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link active" href="/expediente/{{ $cotizacion->id }}/paso04">
+                <a class="nav-link active" href="/documentos/{{ $documento->id }}/paso04">
                   Magia
                 </a>
               </li>
@@ -76,10 +76,10 @@
                     </div>
                   </div>
                   <div class="col-3">
-                  @if(empty($cotizacion->propuesta_el))
-                    <a class="btn btn-secondary text-white" data-confirm href="/cotizaciones/{{ $cotizacion->id }}/enviar" class="btn btn-sm btn-dark">Enviar Propuesta</a>
+                  @if(empty($documento->propuesta_el))
+                    <a class="btn btn-secondary text-white" data-confirm href="/documentos/{{ $documento->id }}/enviar" class="btn btn-sm btn-dark">Enviar Propuesta</a>
                   @else
-                    Ya se ha registrado el Envio:<br /> {{ Helper::fecha($cotizacion->propuesta_el, true) }}
+                    Ya se ha registrado el Envio:<br /> {{ Helper::fecha($documento->propuesta_el, true) }}
                   @endif
                   </div>
                 </div>
@@ -107,7 +107,7 @@ function descargar_pagina(box) {
     a.click();
 }
 function parallelStatus() {
-  let url = '/expediente/{{ $cotizacion->id }}/parallelStatus';
+  let url = '/documentos/{{ $documento->id }}/parallelStatus';
   fetch(url, {
     method: 'post',
     headers: {

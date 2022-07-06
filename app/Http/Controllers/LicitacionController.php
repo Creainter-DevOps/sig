@@ -102,13 +102,17 @@ class LicitacionController extends Controller {
     return view('licitacion.calendar');
   }
 
-  public function mini(){
+  public function movil(){
+    return view('licitacion.movil');  
+  }
 
-    $licitacion = Licitacion::listado_nuevas()[0];
-    // dd($licitacion);
-    $licitacion->tipo = isset($licitacion->oportunidad_id )? 'oportunidad' : 'licitaciones';
+  public function mini(Request $request ){
+    if($request->ajax() ){
+      $licitaciones = Licitacion::listado_por_aprobar();
+      return response()->json([ 'status'=> true, 'data' => $licitaciones ] );   
+    }
     
-    return view('licitacion.mini', compact('licitacion'));   
+    return view('licitacion.prueba');   
   }
 
   public function show(Request $request, Licitacion $licitacion) {
@@ -168,9 +172,11 @@ public function rechazar(Request $request, Licitacion $licitacion)
         'message' => 'Debe indicar el motivo',
     ]);
   }
+
   if ( !isset($oportunidad) ){
     $licitacion->eliminado = now();
-
+    $licitacion->save();
+     
       if( $request->ajax()) {
          return response()->json([
            'status'  => true,

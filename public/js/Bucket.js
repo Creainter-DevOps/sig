@@ -1,10 +1,9 @@
 var Bucketjs = (function () {
   var _instance = this;
   var elements = {};
-  var requestPull = [];
-  var timerPull = null;
-  var indexPullFiles = 0;
   var commit = [];
+  var _element = null;
+  var bucket_path = null;
 
   var validateFile = function (file) {
     var validTypes = [
@@ -30,7 +29,7 @@ var Bucketjs = (function () {
     }
     return true;
   };
-  var handleFiles = function (bucket_id, files) {
+  var handleFiles = function (files) {
     if (files.length === 0) {
       return false;
     }
@@ -39,22 +38,22 @@ var Bucketjs = (function () {
         commitBucket(files[i]);
       }
     }
-    pushBucket(bucket_id);
+    pushBucket();
   };
   var commitBucket = function (file) {
     commit.push(file);
   };
-  var pushBucket = function (bucket_id) {
+  var pushBucket = function () {
     if (commit.length === 0) {
       return false;
     }
     var formData = new FormData();
-    formData.append("id", bucket_id);
+    formData.append("path", bucket_path);
     for (var i = 0, len = commit.length; i < len; i++) {
       formData.append("files[]", commit[i]);
     }
     commit = [];
-    $(elements[bucket_id])
+    $(_element)
       .find(".bucket-loading")
       .attr("data-loading", "push")
       .slideDown();
@@ -62,10 +61,11 @@ var Bucketjs = (function () {
     ajax.onreadystatechange = function (e) {
       if (ajax.readyState === 4) {
         if (ajax.status === 200) {
-          pullBucket(bucket_id);
+          goPath(bucket_path);
+          pullBucket();
         } else {
           alert("Ha ocurrido un error inesperado");
-          pullBucket(bucket_id);
+          pullBucket();
         }
       }
     };
@@ -73,7 +73,7 @@ var Bucketjs = (function () {
       if (evt.lengthComputable) {
         var percentComplete = parseInt((evt.loaded / evt.total) * 100);
         console.log("Upload: " + percentComplete + "% complete");
-        $(elements[bucket_id])
+        $(_element)
         .find(".bucket-avance")
         .animate({
           height: percentComplete + "%",
@@ -81,36 +81,86 @@ var Bucketjs = (function () {
         .attr("data-porcen", percentComplete + "%");
       }
     };
-    ajax.open("POST", "/bucket/upload", true);
+    ajax.open("POST", "/documentos/ajax/upload", true);
+    ajax.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').getAttribute("content"));
     ajax.send(formData);
   };
+  var breadDir = function() {
+
+  };
+
   var renderElement = function (box) {
-    var bucket_id  = $(box).attr("data-bucket");
-    var can_upload = $(box).attr('data-upload') || false;
+    _element = box;
+    var can_upload = $(_element).attr('data-upload') || false;
+
     can_upload = can_upload === 'true';
-    if (typeof elements[bucket_id] !== "undefined") {
-      if (!$(elements[bucket_id]).is(":visible")) {
-        $(elements[bucket_id]).remove();
+    if (typeof elements !== "undefined") {
+      if (!$(elements).is(":visible")) {
+        $(elements).remove();
       }
     }
-    requestPull.push(box);
+
     $(box).addClass("bucket bucket-initial");
+    $(box).append($("<div>").addClass('bucket-navigation').append($('<div>').text('/')));
     $(box).append($("<div>").addClass('bucket-button-full').text('Más'));
-    $(box).append($("<div>").addClass('bucket-space-upload').text('Subir Archivo'));
-    $(box).append($("<ul>"));
-    $(box).on("click", '.name', function (e) {
-      console.log('Click NAME', this);
-      e.stopPropagation();
-      window.open('https://storage.googleapis.com/educativa.site/' + $(this).closest('li').attr("data-download"));
-    });
-    elements[bucket_id] = box;
-    box.bucket_id = bucket_id;
-    $(box).removeAttr("data-bucket");
+    $(box).append($("<div>").addClass('bucket-options')
+      .append('<a href="javascript:void(0);" class="bucketOptionExpediente">Crear Expediente</a>')
+      .append('<a href="javascript:void(0);" class="bucketOptionDirectory">Crear Carpeta</a>')
+      .append('<a href="javascript:void(0);" class="bucketOptionUpload">Subir Archivo</a>')
+    );
+//    $(box).append($("<div>").addClass('bucket-space-upload').text('Subir Archivo'));
+    $(box).append($('<div>').addClass('bucket-table-content').html($("<table>").addClass('table table-sm').css({width: '100%'})
+      .append($("<thead>").html("<tr><th colspan='2'>Archivo</th><th>Descripción</th><th>Tamaño</th><th>Propietario</th><th>Subido el</th><th></th></tr>"))
+      .append($("<tbody>"))));
+    box.bucket_path = bucket_path;
+//    $(box).removeAttr("data-path");
     $(box).on('click', '.bucket-button-full', function() {
       $(box).toggleClass('bucket-full');
     });
     if(can_upload) {
-      $(box).on('click', ".bucket-space-upload", function (e) {
+      $(box).on('click', ".bucketOptionExpediente", function(e) {
+        let dir = prompt('Ingrese el nombre del Expediente');
+        let oid = $(_element).attr('data-oid');
+        let cid = $(_element).attr('data-cid');
+        if(!dir) {
+          return false;
+        }
+        if(!(/^[a-zA-Z0-9\-]+$/.test(dir))) {
+          alert('Ingrese un nombre correcto.(Numeros, letras, Guión)');
+          return $(this).click();
+        }
+        Fetchx({
+          id: "bucket-create-expediente",
+          delay: 50,
+          loading: $("[data-loading='pull'][data-id='" + 0 + "']"),
+          url: "/documentos/crearExpediente",
+          data: { path: bucket_path, name: dir, oid: oid, cid: cid },
+          type: "POST",
+          headers : {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+          },
+          dataType: "json",
+          success: function (res) {
+            goPath(bucket_path);
+          },
+          complete: function () {
+            $(_element).find("[data-loading='pull']")
+              .removeAttr("data-loading");
+          },
+        });
+      });
+      $(box).on('click', ".bucketOptionDirectory", function(e) {
+        let dir = prompt('Ingrese el nombre de la carpeta');
+        if(!dir) {
+          return false;
+        }
+        if(!(/^[a-zA-Z0-9\-]+$/.test(dir))) {
+          alert('Ingrese un nombre correcto.(Numeros, letras, Guión)');
+          return $(this).click();
+        }
+        goPath(bucket_path + '/' + dir);
+      });
+      $(box).on('click', ".bucketOptionUpload", function (e) {
         if (e.target !== this) {
           return false;
         }
@@ -125,105 +175,126 @@ var Bucketjs = (function () {
         fakeInput.addEventListener("change", function () {
           var files = fakeInput.files;
           console.log("UPLOADES", files);
-          handleFiles(bucket_id, files);
+          handleFiles(files);
         });
         console.log("Subir archivo!");
         return false;
       });
     }
   };
-  var fillFiles = function (box, files) {
-    var ul = $(box).find("ul");
-    ul.empty();
-    for (var i in files) {
+  var goPath = function(path) {
+    bucket_path = path ||  '/';
+    bucket_path = bucket_path.replace(/^\/+|\/+$/gm,'');
+    _element.bucket_path = bucket_path;
+
+    var acumulado = '';
+    var html = $('<div>');
+    bucket_path.split('/').forEach(function (item) {
+      acumulado += '/' + item;
+      html.append($('<span>').text('/'));
+      html.append($('<a>').attr('href', 'javascript:void(0)').attr('data-path', acumulado).text(item).on('click', function() {
+        goPath($(this).attr('data-path'));
+      }));
+    });
+    $(_element).find('.bucket-navigation>div').html(html);
+    pullFiles();
+  };
+  var fillFile = function (file) {
+    var ul = $(_element).find("tbody");
+    if(file.download) {
       ul.append(
-        $("<li>")
-          .attr("data-id", files[i].id)
-          .attr("data-download", files[i].download)
-          .append($("<div>").addClass('rotulo')
-            .append(
-              $("<div>")
-                .addClass("name")
-                .text(files[i].name)
-                .attr("title", "Subido el: " + files[i].uploaded)
-            )
-            .append($("<span>").addClass("size").text(files[i].size))
-            .append($("<span>").addClass("extension").text(files[i].extension)))
-          .append($("<div>").addClass('details')
-          .append($("<span>").addClass("author").text(files[i].user).attr('title','Subido por:'))
-          .append($("<span>").addClass("uploaded").text(files[i].uploaded).attr('title','Subido el:'))
-          .append($("<span>").addClass("delete").text('Eliminar').attr('title','Acción no disponible').on('click', function() {
+        $("<tr>")
+          .attr("data-download", file.download)
+          .append($("<td>").html('<i style="font-size:11px;" class="bx bxs-' + (file.is_file ? 'file' : 'folder') + '"></i>'))
+          .append($("<td>").addClass('text-left rotulo').text(file.name ?? 'En desarrollo').on('click', function() {
+            if(!file.download) {
+              return false;
+            }
+            if(!file.is_file) {
+              goPath(file.download);
+            } else {
+              window.open('https://storage.googleapis.com/creainter-peru/storage/' + $(this).closest('tr').attr("data-download"));
+            }
+            }))
+          .append($("<td>").addClass('rotulo').text(file.rotulo))
+          .append($("<td>").addClass("size").text(file.size))
+          .append($("<td>").addClass("uploaded").text(file.created_by))
+          .append($("<td>").addClass("uploaded").text(file.created_on).attr('title','Subido el:'))
+          .append($("<td>").addClass("delete").text('Eliminar').attr('title','Acción no disponible').on('click', function() {
+            if(!file.download) {
+              return false;
+            }
 						var li = $(this).closest('li');
 						var li_id = li.attr('data-id');
 						li.slideUp();
 						Fetchx({
-      id: "delete" + li_id,
-      url: "/bucket/delete",
-      type: "POST",
-      data: { id: li_id },
-      dataType: "json",
-      compete: function (data) {
-            console.log("Adios");
-      },
-    });
-
+              id: "delete" + li_id,
+              url: "/bucket/delete",
+              type: "POST",
+              data: { id: li_id },
+              dataType: "json",
+              complete: function (data) {
+                    console.log("Adios");
+                },
+            });
 						console.log('Eliminar', li.attr('data-id'));
 					}))
-      ));
+      );
+    } else {
+      ul.append(
+        $("<tr>")
+          .attr("data-download", file.download)
+          .append($("<td>").html('<i style="font-size:11px;" class="bx bxs-file"></i>'))
+          .append($("<td>").addClass('text-left rotulo').html('<span style="color: #0c7200;">En desarrollo</span>').on('click', function() {
+            let url = '/documentos/' + file.id + '/expediente/paso01';
+            window.open(url, '_blank').focus();
+          }))
+          .append($("<td>").addClass('rotulo').text(file.rotulo))
+          .append($("<td>").addClass("size").text('...'))
+          .append($("<td>").addClass("uploaded").text(file.created_by))
+          .append($("<td>").addClass("uploaded").text(file.created_on).attr('title','Subido el:'))
+          .append($("<td>").addClass("delete"))
+      );
     }
-    //$(box).find('ul').html(ul);
   };
   var pullBucket = function (bucket_id) {
     requestPull.push(elements[bucket_id]);
   };
   var pullFiles = function () {
-    if (requestPull.length == 0) {
-      return false;
-    }
-    indexPullFiles++;
-    console.log("Bucket-pull", requestPull.length);
-    var ids = [];
-    for (var index in requestPull) {
-      ids.push(requestPull[index].bucket_id);
-      $(requestPull[index])
+      $(_element)
         .removeClass("bucket-initial")
         .addClass("bucket-ready");
-      if (!$(requestPull[index]).find(".bucket-loading").length) {
-        $(requestPull[index]).prepend(
+
+        $(_element).prepend(
           $("<div>")
             .addClass("bucket-loading")
             .html(
               '<div class="bucket-barra"><div class="bucket-avance" data-porcen="0%"></div></div>'
             )
         );
-      }
-      $(requestPull[index])
+      $(_element)
         .find(".bucket-loading")
-        .attr("data-loading", "pull")
-        .attr("data-id", indexPullFiles);
-    }
-    console.log("Bucket-Pull", indexPullFiles, requestPull);
-    requestPull = [];
+        .attr("data-loading", "pull");
+    
     Fetchx({
-      id: "bucket-pull-" + indexPullFiles,
+      id: "bucket-pull-" + 0,
       delay: 50,
-      loading: $("[data-loading='pull'][data-id='" + indexPullFiles + "']"),
-      url: "/bucket/get",
+      loading: $("[data-loading='pull'][data-id='" + 0 + "']"),
+      url: "/documentos/ajax/get",
+      data: { path: bucket_path },
       type: "POST",
-      data: { ids: ids.join(",") },
+      headers : {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+      },
       dataType: "json",
-      success: function (data) {
-        $.each(data.buckets, function (k, n) {
-          if (typeof elements[k] !== "undefined") {
-            fillFiles(elements[k], n);
-          } else {
-            console.log("No se encuentra Bucket:", k, n);
-          }
+      success: function (res) {
+        $(_element).find("tbody").empty();
+        $.each(res.data, function (k, n) {
+          fillFile(n);
         });
       },
       complete: function () {
-        $("[data-loading='pull'][data-id='" + indexPullFiles + "']")
-          .removeAttr("data-id")
+        $(_element).find("[data-loading='pull']")
           .removeAttr("data-loading");
       },
     });
@@ -232,8 +303,7 @@ var Bucketjs = (function () {
     capture: function (box) {
       console.log("Bucketjs-capture", box);
       renderElement(box);
-//      clearInterval(timerPull);
-//      timerPull = setInterval(pullFiles, 2000);
+      goPath($(box).attr('data-path') ||  '/');
     },
     getElements: function () {
       return elements;

@@ -11,6 +11,7 @@
 
     <!-- BEGIN: Page Vendor JS-->
     @yield('vendor-scripts')
+    <script src="{{asset('vendors/js/extensions/toastr.min.js') }}"></script>
     <!-- END: Page Vendor JS-->
 
     <!-- BEGIN: Theme JS-->

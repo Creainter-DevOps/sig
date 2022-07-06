@@ -24,41 +24,59 @@ class Documento extends Model
 
     protected $fillable = [
       'tipo','archivo','folio','es_plantilla', 'es_ordenable','rotulo','portada','created_by','formato','generado_de_id','documentos_id',
-      'empresa_id','personal_id','vinculo_empresa_id','fecha_firma','fecha_desde','fecha_hasta','plazo_servicio','monto_texto','monto','fecha_acta','filename','es_reusable',
+      'empresa_id','personal_id','vinculo_empresa_id','fecha_firma','fecha_desde','fecha_hasta','plazo_servicio','monto_texto','monto','fecha_acta','filename','es_reusable','tenant_id',
+      'filesize','filename','directorio','oportunidad_id','cotizacion_id','licitacion_id','elaborado_json','elaborado_por','elaborado_desde','elaborado_hasta'
     ];
     protected $casts = [
       'es_reusable'  => 'boolean',
     ];
-
 
     public static function nuevo($data) {
       $data['created_by'] = Auth::user()->id;
       $data['tenant_id']  = Auth::user()->tenant_id;
       return static::create($data);
     }
+
     public static function plantillas() {
       return static::hydrate(DB::select("SELECT * FROM osce.fn_documento_plantillas(:id)", ['id' => Auth::user()->tenant_id]));
     }
-
-    public static function recomendadas($oportunidad_id) {
-      return static::hydrate(DB::select("SELECT * FROM osce.fn_documento_recomendadas(:tenant, :oportunidad)", [
+    public static function obtenerArchivos($path) {
+      return DB::select("SELECT * FROM osce.fn_documento_get_path(:tenant, :path)", [
         'tenant' => Auth::user()->tenant_id,
-        'oportunidad' => $oportunidad_id
-      ]));
+        'path'   => $path,
+      ]);
     }
     public function empresa() {
       return $this->belongsTo('App\Empresa', 'empresa_id')->first();
     }
 
+    public function oportunidad() {
+      return $this->belongsTo( 'App\Oportunidad', 'oportunidad_id' )->first();
+    }
+
+    public function licitacion() {
+      return $this->belongsTo( 'App\Licitacion', 'licitacion_id' )->first();
+    }
+
+    public function cotizacion() {
+      return $this->belongsTo( 'App\Cotizacion', 'cotizacion_id' )->first();
+    }
+
     public function vinculo_empresa() {
       return $this->belongsTo('App\Empresa', 'vinculo_empresa_id')->first();
     }
-    public static function busqueda($oportunidad_id, $query) {
-      $query = strtoupper($query);
-      return static::hydrate(DB::select("SELECT * FROM osce.fn_documento_busqueda(:tenant, :oportunidad, :texto)", [
+    public function recomendadas() {
+      return static::hydrate(DB::select("SELECT * FROM osce.fn_documento_recomendadas(:tenant, :referencia)", [
         'tenant' => Auth::user()->tenant_id,
-        'oportunidad' => $oportunidad_id,
-        'texto'       => $query,
+        'referencia' => $this->id
+      ]));
+    }
+    public function busqueda($query) {
+      $query = strtoupper($query);
+      return static::hydrate(DB::select("SELECT * FROM osce.fn_documento_busqueda(:tenant, :referencia, :texto)", [
+        'tenant'     => Auth::user()->tenant_id,
+        'referencia' => $this->id,
+        'texto'      => $query,
       ]));
     }
 
@@ -74,7 +92,7 @@ class Documento extends Model
        $inputs["ROTULO"] = $cotizacion->rotulo;
      }
 
-     if(!empty($cotizacion->rotulo)) {
+     if(!empty($cotizacion->rotulo) && isset($cotizacion) ) {
        $inputs['COTIZACION.ROTULO']       = $cotizacion->rotulo;
        $inputs['COTIZACION.NOMENCLATURA'] = $cotizacion->nomenclatura();
        if(!empty($cotizacion->oportunidad()->empresa_id)) {
@@ -103,7 +121,7 @@ class Documento extends Model
      //$inputs["CUSTOM.PADDING"] = $data["padding"];
      //$inputs["CUSTOM.MARGIN"] = $data["margin"];
      
-     if (!empty($cotizacion->oportunidad()->licitacion_id)) {
+     if (!empty($cotizacion) && !empty($cotizacion->oportunidad()->licitacion_id)) {
 
        $licitacion = $cotizacion->oportunidad()->licitacion();
        $inputs["LICITACION.ID"] = $licitacion->id;
@@ -115,11 +133,12 @@ class Documento extends Model
        $inputs["LICITACION.PLAZO_SERVICIO"] = $cotizacion->plazo_servicio;
       
        $inputs["FECHA"] = Helper::fecha_letras($licitacion->fecha_propuesta_hasta); 
-       /*$inputs["FECHA_INICIO"] = $data["fecha_inicio"];
-       $inputs["FECHA_FIN"] = $data["fecha_fin"];
-       $inputs["FECHA_ACTA"] = $data["fecha_acta"];
-       $inputs["MONTO_NUMERO"] = $data["monto_numero"];
-        */
+
+       $inputs["FECHA_INICIO"] = @$data["fecha_inicio"];
+       $inputs["FECHA_FIN"] = @$data["fecha_fin"];
+       $inputs["FECHA_ACTA"] = @$data["fecha_acta"];
+       $inputs["MONTO_NUMERO"] = @$data["monto_numero"];
+        
        $inputs["MONTO_NUMERO"] = Helper::money($cotizacion->monto, $cotizacion->moneda_id);
        $inputs["MONTO_TEXTO"]  = Helper::dinero_a_texto($cotizacion->monto, $cotizacion->moneda_id);
        $inputs["MONTO_TOTAL"]  = Helper::money($cotizacion->monto, $cotizacion->moneda_id);
@@ -168,5 +187,15 @@ class Documento extends Model
      Helper::docx_fill_template($plantilla, $inputs, $destino);
 
      return $documento;
+    }
+    public function folder_workspace() {
+      return config('constants.ruta_temporal') . 'workspace-' . $this->id . '/';
+    }
+    public function json_load() {
+      return json_decode($this->elaborado_json, true);
+    }
+    public function json_save($x) {
+      $this->elaborado_json = json_encode($x);
+      return $this->save();
     }
 }

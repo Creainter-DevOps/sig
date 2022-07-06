@@ -20,6 +20,7 @@ class Cotizacion extends Model
   
   protected $connection = 'interno';
   protected $table = 'osce.cotizacion';
+
   const UPDATED_AT = null;
   const CREATED_AT = null;
 
@@ -34,6 +35,9 @@ class Cotizacion extends Model
     if(!empty($data['inx_estado_buenapro'])) {
       $this->inx_estado_buenapro = $data['inx_estado_buenapro'];
     }
+  }
+  public function documento() {
+    return $this->belongsTo('App\Documento', 'documento_id')->first();
   }
   public function oportunidad() {
     return $this->belongsTo('App\Oportunidad', 'oportunidad_id')->first();
@@ -75,9 +79,6 @@ class Cotizacion extends Model
     
     public function proyecto() {
       return $this->belongsTo('App\Proyecto', 'id','cotizacion_id')->first();
-    }
-    public function documento(){
-      return $this->hasMany( 'App\Documento', 'id', 'documento_id')->first();
     }
     public function nomenclatura() {
       return $this->oportunidad()->codigo . '-' . $this->numero;
@@ -278,15 +279,13 @@ class Cotizacion extends Model
           ->orWhereRaw("LOWER(licitacion.descripcion) LIKE ? ", ["%{$query}%" ]);
       });
     }
+    public function folder_workspace() {
+      return config('constants.ruta_temporal') . 'workspace-' . $this->id . '/';
+    }
     public function json_load() {
-//      if(!empty($this->elaborado_json)) {
-        return json_decode($this->elaborado_json, true);
-//      }
-      return Helper::json_load('expediente_' . $this->id . '.json');
+      return Helper::json_load('cotz-' . $this->id);
     }
     public function json_save($x) {
-      $this->elaborado_json = json_encode($x);
-      return $this->save();
-//      return Helper::json_save('expediente_' . $this->id . '.json', $x);
+      return Helper::json_save('cotz-' . $this->id, $x);
     }
 }

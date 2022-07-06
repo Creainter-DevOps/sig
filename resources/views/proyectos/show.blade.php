@@ -3,6 +3,9 @@
 @section('title','Users View')
 {{-- page styles --}}
 @section('content')
+@section('page-styles')
+<link rel="stylesheet" type="text/css" href="{{asset('css/Bucket.css')}}">
+@endsection
 <!-- users view start -->
 <section class="users-view">
   <!-- users view media object start -->
@@ -294,4 +297,5 @@
 {{-- page scripts --}}
 @section('page-scripts')
 <script src="{{asset('js/scripts/pages/page-users.js')}}"></script>
+<script src="{{asset('js/Bucket.js')}}"></script>
 @endsection

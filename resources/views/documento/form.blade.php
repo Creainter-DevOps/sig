@@ -2,12 +2,18 @@
 @csrf
 <div class="form-body" style="padding:10px;margin-top:15px;" >
 <div class="row">
+@if(!empty($expediente_id))
+   <input type="hidden" name="expediente_id" value="{{ $expediente_id }}" >
+   <input type="hidden" name="orden" value="{{ $orden ?? '' }}">
+@endif
+
 @if(!empty($cotizacion_id))
    <input type="hidden" name="orden" value="{{ $orden ?? '' }}"   >
-   <input type="hidden" name="cotizacion_id" value="{{ $cotizacion_id ?? '' }}" >
+   <input type="hidden" name="expediente" value="{{ $expediente->id ?? '' }}" >
+   <input type="hidden" name="cotizacion_id" value="{{ $cotizacion_id }}">
 @endif
 @if(!empty($plantilla))
-   <input type="hidden" name="generado_de_id" value="{{ $plantilla->id }}"   >
+   <input type="hidden" name="generado_de_id" value="{{ $plantilla->id }}">
    <input type="hidden" name="tipo" value="{{ $plantilla->tipo }}">
   <div class="col-12">
   </div>

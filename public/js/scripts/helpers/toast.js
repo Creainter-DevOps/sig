@@ -4,7 +4,14 @@ const ToastBasic = Swal.mixin({
   showConfirmButton: false,
   timerProgressBar: true,
 })
-
+function toast(icon,message , timer = 500 ){
+  ToastBasic.fire( {
+     timer: timer,
+     position: 'top-end',
+     title: message ,
+     icon : icon ,
+  });
+}
 const dialogBasic = Swal.mixin  ({
     toast: true,
     position: 'top',
@@ -15,7 +22,6 @@ const dialogBasic = Swal.mixin  ({
     cancelButtonText: 'Cancelar'
 })
 function toastCheck( timer = 200 ){
-    
   ToastBasic.fire( {
      timer: timer,
      title: 'Aprobar',

@@ -167,6 +167,10 @@ class EmpresaController extends Controller {
         $contacto->delete();
         return back();
      }
+     public function etiqueta_verificar(){
+
+       $etiquestas = Etiqueta::whereNotNull('verificada_el')->whereNotNull('rechazado_el')->first();     
+     }
      public function autocomplete(Request $request) {
        $query = $request->input('query');
        $data = Empresa::search($query)

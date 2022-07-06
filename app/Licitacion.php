@@ -29,7 +29,7 @@ class Licitacion extends Model
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password','buenapro_revision','bases_integradas'
+        'name', 'email', 'password','buenapro_revision','bases_integradas','eliminado'
     ];
 
     /**
@@ -144,9 +144,20 @@ class Licitacion extends Model
             SELECT L.*,O.licitacion_id
             FROM osce.licitacion L
             LEFT JOIN osce.oportunidad O ON L.id = O.licitacion_id AND L.eliminado IS NULL
-            WHERE L.buenapro_fecha IS NULL AND O.licitacion_id IS NULL AND L.created_on >= NOW() - INTERVAL '30' DAY AND L.procedimiento_id IS NOT NULL AND L.fecha_participacion_hasta >= NOW()
+            WHERE L.buenapro_fecha IS NULL AND L.eliminado IS NULL AND O.licitacion_id IS NULL AND L.created_on >= NOW() - INTERVAL '30' DAY AND L.procedimiento_id IS NOT NULL AND L.fecha_participacion_hasta >= NOW()
             ORDER BY L.id DESC
             LIMIT 100");
+      return static::hydrate($rp);
+    }
+    
+   public  static function listado_por_aprobar() {
+      $rp = DB::select("
+            SELECT L.*, osce.fn_empresa_rotulo(". Auth::user()->tenant_id . ", coalesce(L.empresa_id,O.empresa_id )) empresa, O.licitacion_id
+            FROM osce.licitacion L
+            LEFT JOIN osce.oportunidad O ON L.id = O.licitacion_id AND L.eliminado IS NULL
+            WHERE L.buenapro_fecha IS NULL AND L.eliminado IS NULL AND O.licitacion_id IS NULL AND L.created_on >= NOW() - INTERVAL '30' DAY AND L.procedimiento_id IS NOT NULL AND L.fecha_participacion_hasta >= NOW()
+            ORDER BY L.id DESC
+            LIMIT 15");
       return static::hydrate($rp);
     }
     public function cronograma() {

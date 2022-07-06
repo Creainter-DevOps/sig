@@ -46,7 +46,9 @@
 @if(empty($cotizacion->oportunidad()->licitacion_id))
   <tr>
     <th>Directorio:</th>
-    <td colspan="4"><a href="#" onclick="window.location.href='odir:{!! addslashes(Auth::user()->dir_sharepoint . $cotizacion->folder()) !!}';">{{ $cotizacion->folder() }}</a></td>
+    <td colspan="4">
+      <a href="javascript:void(0);" data-popup="/documentos/visor?path={{ $cotizacion->folder(true) }}&cid={{ $cotizacion->id }}">{{ $cotizacion->folder() }}</a>
+    </td>
   </tr>
 @endif
 </tbody>
