@@ -150,10 +150,10 @@ dd($empresa);
       return redirect('/documento/'. $cotizacion->id . '/expediente/paso01');
   }
   
-  public function expediente( Request $request, Documento $documento ) {
+  /*public function expediente( Request $request, Documento $documento ) {
     $workspace = $documento->json_load();
     return view('documento.expediente', compact('workspace','documento'));
-  }
+    }*/
 
   public function expediente_paso01( Request $request, Documento $documento){
     $workspace = $documento->json_load();
@@ -532,22 +532,42 @@ echo "<pre>";
     }
   }
   
-  public function agregarDocumento( Documento $documento, Documento  $doc, Request $request ) {
-//    $documento = $cotizacion->documento();
+  public function agregarDocumento(Documento $documento, Documento  $doc, Request $request) {
       $workspace = $documento->json_load();
-      //$doc =Documento::find( $request->get("doc_id")); 
       $orden = $request->get('orden');
 
-      $cid = Helper::workspace_get_id( $doc->id, 'n');
+      $cid = Helper::workspace_get_id($doc->id, 'n');
 
-      //$orden = !empty($orden) ? $orden : sizeof($workspace['paso03']);
+      $orden = !empty($orden) ? $orden : sizeof($workspace['paso03']);
       $append = [];
       $hash = uniqid();
 
       $ruta = config('constants.ruta_storage') . $doc->archivo;
-      #print_r($ruta);
       $ruta = gs($ruta);
-      #dd($ruta);
+
+
+
+      if(!in_array($doc->formato, ['PDF','DOC','DOCX','XLS','XLSX'])) {
+        return response()->json([
+          'status'  => false,
+          'message' => 'No es posible agregar el formato. (' . $doc->formato . ')',
+        ]);
+      }
+      if($doc->formato != 'PDF') {
+        $destino  = Helper::file_name(Helper::replace_extension($ruta, 'pdf'));
+        $path_pdf = Helper::mkdir_p($documento->folder_workspace());
+
+        exec("/usr/bin/libreoffice --convert-to pdf '" . $ruta . "' --outdir " . $path_pdf);
+
+        $ruta = $path_pdf . $destino;
+        $meta = Helper::metadata($ruta);
+        $doc->id = null;
+        $doc->folio = $meta['Pages'];
+
+      }
+
+
+
       if(!empty($doc->es_ordenable)) {
         $workspace['paso03'] = Helper::workspace_space($workspace['paso03'], $orden, $doc->folio);
         foreach(range(0, $doc->folio - 1) as $pp) {
@@ -768,6 +788,7 @@ echo "<pre>";
         'rotulo'     => $n->rotulo,
         'created_by' => $n->created_by,
         'created_on' => Helper::fecha($n->created_on, true),
+        'plantilla'  => $n->plantilla,
         'size'       => $n->filesize,
       ];
     }, $data);

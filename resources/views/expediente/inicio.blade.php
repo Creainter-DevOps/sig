@@ -22,47 +22,6 @@
                           </div>
                           <form class="form" action="{{ route('expediente.inicio', ['cotizacion' => $cotizacion->id])}}" method="post">
                             @csrf
-                          <div class="card-body px-0 py-1" style="display:flex;justify-content:center; ">
-                            <ul class="widget-todo-list-wrapper" id="list-anexos">
-                                <li  style="display:flex;" > 
-                                  @if (isset($validaciones['empresa_logos']))
-                                    <i class="bx bx-check-circle font-medium-3 mr-50" style="color:green; font-size:15px; "></i>
-                                  @else
-                                    <i class="bx bxs-x-circle  font-medium-3 mr-50" style="color:red; font-size:15px; "></i>
-                                  @endif  
-                                  <p>Logos de empresa</p>
-                                </li>
-                                @if (isset($validaciones['sellos_firmas']))
-                                <li style="display:flex;" > 
-                                  <i class="bx bx-check-circle font-medium-3 mr-50" style="color:green; font-size:15px; "></i>
-                                  @else
-                                    <i class="bx bxs-x-circle  font-medium-3 mr-50" style="color:red; font-size:15px; "></i>
-                                  @endif  
-                                  <p>Sellos y firmas</p>
-                                </li>
-                                <li style="display:flex;" > 
-                                @if (isset($validaciones['representante']))
-                                  <i class="bx bx-check-circle font-medium-3 mr-50" style="color:green; font-size:15px; "></i>
-                                @else 
-                                  <i class="bx bxs-x-circle  font-medium-3 mr-50" style="color:red; font-size:15px; "></i>
-                                @endif
-                                  <p> Datos de representante</p>
-                                </li>
-                                <li style="display:flex;"> 
-                                @if (isset($validaciones['montos']))
-                                  <i class="bx bx-check-circle font-medium-3 mr-50" style="color:green; font-size:15px; "></i>
-                                  @else
-                                     <i class="bx bxs-x-circle  font-medium-3 mr-50" style="color:red; font-size:15px; "></i>
-                                  @endif 
-                                  <p>Costos y montos de cotizacion</p>
-                                </li>
-                             </ul>
-                          </div>
-                          <div style="display:flex;justify-content:center;" >
-                            @if ( sizeof($validaciones ) >= 4 )
-                              <button class="btn btn-primary text-white" type="submit"  id="save">Iniciar Expediente</button>
-                            @endif
-                          </div>
                           </form>
                         </div>
                       </div>
@@ -83,6 +42,31 @@
                         @endif
                       </div>
                       @endif
+                      <template id="template-validaciones" >
+                          <div class="card-body px-0 py-1" style="display:flex;justify-content:center; ">
+                            <ul class="widget-todo-list-wrapper" id="list-anexos">
+                                <li style="display:flex;" > 
+                                  <i class="font-medium-3 mr-50" style="font-size:15px;"></i>
+                                  <p>Logos de empresa</p>
+                                </li>
+                                <li style="display:flex;" > 
+                                  <i class="font-medium-3 mr-50" style="font-size:15px;"></i>
+                                  <p>Sellos y firmas</p>
+                                </li>
+                                <li style="display:flex;" > 
+                                  <i class="font-medium-3 mr-50" style="font-size:15px;"></i>
+                                  <p> Datos de representante</p>
+                                </li>
+                                <li style="display:flex;"> 
+                                  <i class="font-medium-3 mr-50" style="font-size:15px;"></i>
+                                  <p>Costos y montos de cotizacion</p>
+                                </li>
+                             </ul>
+                          </div>
+                          <div style="display:flex;justify-content:center;" >
+                              <button class="btn btn-primary text-white" style = "display:none;" type="submit"  id="save">Iniciar Expediente</button>
+                          </div>
+                      </template>
                 </div>
             </div>
           </div>
@@ -93,7 +77,10 @@
 @endsection
 @section('page-scripts')
   @parent
+  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
 <script>
+
 function verify_check_widget() {
   if ($(this).is(':checked')) {
     $(this).closest('.widget-todo-item').find('.widget-more').stop().slideDown();
@@ -104,4 +91,48 @@ function verify_check_widget() {
 $(".checkbox__input").each(verify_check_widget);
 $(".checkbox__input").on('click', verify_check_widget);
 </script>
+
+<script>
+ function fn_trigger(){
+   actualizar_validaciones();  
+ }
+ function  actualizar_validaciones (){
+  let container = document.querySelector("form.form");
+  //container.classList.add("loader");
+  container.innerHTML = '';
+  fetch("/expediente/{{ $cotizacion->id }}/inicio",{
+   headers : { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
+      'X-Requested-With': 'XMLHttpRequest'
+       }
+     }) 
+    .then(response => response.json()) 
+    .then(data => {
+      if (data.status ) {
+        let template = document.getElementById("template-validaciones").content;
+        let clone = template.cloneNode(true);
+        let list = clone.getElementById("list-anexos");  
+        //console.log(data);
+         Object.values(data.validaciones).forEach( (item, index) => {
+          var icon = list.querySelector(`li:nth-child(${index + 1}) i`)
+          if ( item == true){
+            icon.classList.add("bx", "bx-check-circle");
+            icon.style.color = "green";
+          }else{
+            icon.classList.add("bx", "bx-x-circle");
+            icon.style.color = "red";
+          }
+        }) 
+        if( !Object.values(data.validaciones).includes(false)  ){
+          clone.querySelector("#save").style.display = "block";   
+        } 
+        //container.classList.remove("loader");
+        container.append(clone);        
+      }
+    })  
+  }
+ 
+  actualizar_validaciones ();
+
+</script>
+
 @endsection

@@ -4,10 +4,15 @@
                     <article id="ContainerOne" class="StackedListWrapper StackedListWrapper--sizeLarge StackedListWrapper--axisHorizontal Container" style="position:relative;">
                       <header class="StackedListHeader">
                         <h3 class="Heading Heading--size3 Heading--colorWhite">Mesa de Trabajo</h3>
-                        <button class="btn btn-primary btn-sm" data-popup="/documentos/nuevo"  style="margin-right: 25px;position: absolute;top: 0;right: 10px;">+ Nuevos Documentos</button>
+                        <div style="margin-right: 25px;position: absolute;top: 0;right: 10px;">
+                          <button class="btn btn-primary btn-sm" id="btnRepositorio">Agregar de Repositorio</button>
+                          <button class="btn btn-primary btn-sm" data-popup="/documentos/nuevo">Subir Documento</button>
+                        </div>
                       </header>
-
-                      <ul class="StackedList" data-container="draw">
+                      <div id="drawRepositorio" style="padding: 5px 15px;">
+                        <div id="BucketRepositorio" data-bucket="1" data-path="{{ $documento->directorio }}" data-upload="true" style="border:3px dashed #ff9900!important;"></div>
+                      </div>
+                      <ul class="StackedListDrag StackedList" data-container="draw" data-dropzone="draw">
                       @if(!empty($workspace['paso03']))
                       @foreach ($workspace['paso03'] as $k => $file)
                       <li class="boxDraggable StackedListItem StackedListItem--isDraggable StackedListItem--item1" data-id="{{ $k }}" data-orden="{{$file['orden'] }}" data-firma="{{ !empty($file['estampados']['firma']) ? "true" : '' }}" data-tipo="{{ $file['tipo'] }}"  data-visado="{{ !empty($file['estampados']['visado']) ? "true" : '' }}" data-tipo="{{ $file['tipo'] }}">
@@ -20,10 +25,10 @@
                           <div class="DragHandle">
                           </div>
                           <div class="Pattern Pattern--typeHalftone" style="position:absolute; top:4px;left:4px;" >
-                             @if ( !empty( $file['estampados']['firma'] ))
+                             @if ( !empty($file['estampados']['firma'] ))
                                 <span class="text-white" style="text-align:center; padding:3px;border-radius:4px; background-color:#ff7600;"><i class="bx bxs-edit-alt"></i> </span>
                              @endif
-                             @if ( !empty( $file['estampados']['visado'] )) 
+                             @if ( !empty($file['estampados']['visado'] )) 
                                 <span class="text-white" style="margin-left:2px;text-align:center; padding:3px;border-radius:4px; background-color:#188aff ;" > <i class="bx bx-check-circle"></i> </span>
                              @endif
                           </div>
@@ -36,10 +41,6 @@
                       @endforeach
                       @endif
                      </ul>
-                     <form method="post" action="{{ route('documento.expediente_paso01_store',['documento' => $documento->id ] ) }}">
-                        @csrf
-                       <button class="btn btn-primary" type="submit"  >Guardar</button>
-                    </form>
                     </article>
                     <article id="ContainerTwo" class="StackedListWrapper StackedListWrapper--sizeMedium StackedListWrapper--hasScrollIndicator Container">
                     <header class="StackedListHeader">
@@ -48,7 +49,8 @@
                       <input placeholder="Buscar" id="buscar" type="text" class="form-control" aria-label="Text input with dropdown button">
                       </div>
                     </header>
-                    <ul class="StackedList StackedList--hasScroll BloqueBusqueda" data-container="news"></ul>
+                    <ul class="StackedListDrag StackedList StackedList--hasScroll BloqueBusqueda" data-container="news" data-dropzone="draw">
+                    </ul>
                   </article>
                   </section>
                 </div>
@@ -58,9 +60,10 @@
 <script src="{{asset('js/scripts/forms/wizard-steps.js')}}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/draggable/1.0.0-beta.12/draggable.bundle.js" integrity="sha512-CY+c7SEffH9ZOj1B9SmTrJa/ulG0I6K/6cr45tCcLh8/jYqsNZ6kqvTFbc8VQA/rl9c2r4QBOx2Eur+2vkVWsA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
-
 var current_tool = null;
-
+$('#btnRepositorio').on('click', function() {
+  $('#drawRepositorio').toggle();
+});
 $(document).on('click', '[data-tools]', function() {
   current_tool = $(this).attr('data-tools');
   $('.contentPoint').addClass('activePoint');
@@ -220,22 +223,27 @@ function realizar_busqueda( query ) {
 }
 realizar_busqueda('');
 
+
+var bucket = new Bucketjs();
+bucket.capture(document.getElementById('BucketRepositorio'));
+
   const Classes = {
     draggable: 'StackedListItem--isDraggable',
     capacity: 'draggable-container-parent--capacity',
     dropzone: 'StackedListItem--isDropZone'
   };
 
-  const containers = document.querySelectorAll('#MultipleContainers .StackedList');
+  const containers = document.querySelectorAll('#MultipleContainers .StackedListDrag');
 
   if (containers.length === 0) {
-    //return false;
-     console.log("sin contenedores");
+   console.log("sin contenedores");
   }
+  console.log('CONTENEDORES', containers);
 
   const sortable = new Draggable.Sortable(containers, {
     delay: 100,
     draggable: `.${Classes.draggable}`,
+    dropzone: `.${Classes.dropzone}`,
     mirror: {
       constrainDimensions: true,
     },
@@ -251,25 +259,33 @@ realizar_busqueda('');
 
   // --- Draggable events --- //
   sortable.on('drag:start', (evt) => {
+    console.log('drag:start');
     currentMediumChildren = sortable.getDraggableElementsForContainer(sortable.containers[1])
       .length;
     capacityReached = currentMediumChildren === containerTwoCapacity;
     lastOverContainer = evt.sourceContainer;
     containerTwoParent.classList.toggle(Classes.capacity, capacityReached);
   });
-
+  sortable.on('droppable:dropped', (evt) => {
+    console.log('droppable:dropped');
+  });
   sortable.on('sortable:sort', (evt) => {
+    console.log('sortable:sort', evt.dragEvent.sourceContainer.dataset.container, evt.dragEvent.sourceContainer.dataset.dropzone, evt.dragEvent.overContainer.dataset.container);
+    if(evt.dragEvent.sourceContainer.dataset.dropzone != evt.dragEvent.overContainer.dataset.container) {
+      console.log('CANCELANDO...');
+//      sortable.dragging = false;
+      return evt.cancel();
+    }
     if (!capacityReached) {
       //console.log('SOURCE', evt.dragEvent.source );
       return;
     }
-
     const sourceIsCapacityContainer = evt.dragEvent.sourceContainer === sortable.containers[1];
 
     if (!sourceIsCapacityContainer && evt.dragEvent.overContainer === sortable.containers[1]) {
       evt.cancel();
     }
-
+    
   });
 
   sortable.on('sortable:sorted', (evt) => {
@@ -286,77 +302,90 @@ realizar_busqueda('');
     if ( evt.data.oldContainer != lastOverContainer && $(lastOverContainer).attr('data-container') == 'draw') {
       var box = evt.data.dragEvent.data.originalSource;
       console.log('NUEVO ELEMENTO', evt.data.dragEvent, lastOverContainer);
-      $(evt.data.dragEvent.data.source).remove();
       if (box.dataset.plantilla == "true") {
         let url = '/documentos/nuevo?generado_de_id=' + box.dataset.id + "&expediente_id=" + {{$documento->id}} + "&orden=" + evt.data.newIndex 
         var button = $("<button>").attr('data-popup', url );
         $("body").append(button);
         render_dom_popup();
         button.click();
-        return 0 ;
+        return 0;
       }
-
-      agregarDocumento(box.dataset.id, evt.data.newIndex, true);
+      console.log('agregarDocumento');
+      agregarDocumento(box.dataset.id, evt.data.newIndex, true, evt.data.dragEvent.data.originalSource);
+      return 0;
 
     } else if ( evt.data.oldContainer != lastOverContainer && $(lastOverContainer).attr('data-container') == 'news') {
       var box = evt.data.dragEvent.data.originalSource;
       console.log('RETIRAR ELEMENTO', box, lastOverContainer);
-      move_card( box.dataset.id,evt.data.newIndex);
+      $(box).remove();
+      return 0;
 
-    } else if ( lastOverContainer === evt.data.newContainer) {
-      console.log('MOVER', lastOverContainer, evt);
+    } else if ( lastOverContainer === evt.data.newContainer && $(lastOverContainer).attr('data-container') == 'draw' && evt.data.newIndex !== evt.data.oldIndex) {
+      console.log('MOVER', evt.data.newIndex, evt.data.oldIndex, lastOverContainer, evt);
       var box = evt.data.dragEvent.data.originalSource;
-      move_card( box.dataset.id,evt.data.newIndex);
+      move_card( box.dataset.id, evt.data.newIndex);
+      return 0;
     }
   });
 
 
-  function workspace(data){
-    data.forEach((item )  => {
-     
-    })
-  }
-
-  function move_card (id,orden){
+  function move_card (id, orden){
       let url = '/documentos/{{ $documento->id }}/ordenar';
       let formdata = new FormData();
       formdata.append('id', id);
       formdata.append('orden', orden);
       //formdata.append('page', page) ;
 
-      fetch( url, {
-        method: 'post',
+      Fetchx({
+        title: 'Ordenando',
+        url: url,
+        type: 'post',
         headers: {
           "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute('content') 
         },
-        body: formdata    
-      }).then( response => response.json() )
-        .then( data => {
+        data: { id: id, orden: orden },
+        dataType: 'json',
+        success: function(data) {
           console.log(data);
-        });
+        }
+      });
   }
-
-  function agregarDocumento(documento_id, orden, render) {
+  function insertAtIndex(container, box, i) {
+    console.log('insertAtIndex', i);
+    i --;
+    if(i < 0) {
+     $(container).prepend(box);
+     return;
+    }
+    var apoyo = $(container).children().eq(i);
+    if(apoyo.length) {
+      apoyo.after(box);
+    } else {
+      $(container).append(box);
+    }
+  }
+  function agregarDocumento(documento_id, orden, render, reemplazar) {
     orden  = orden  || 0;
     render = render || false;
-    
+   
     let url = '/documentos/{{ $documento->id }}/agregarDocumento/' + documento_id;
 
-    let formdata = new FormData();
-    formdata.append('orden', orden);
-
-    fetch(url , {
+    Fetchx({
+      title: 'Agregar Documento',
+      url: url,
       headers: {
          "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute('content') 
       },
-      method: 'post',
-      body: formdata 
-    }).then( response => response.json())
-      .then( res => {
-      if(render === true) {
-        res.data.forEach(doc => {
-        var container = document.querySelector('#ContainerOne .StackedList');
-        container.insertAdjacentHTML('beforeend',`
+      type: 'post',
+      data: { orden: orden }, 
+      success: function(res) {
+        $(reemplazar).remove();
+        if(!res.status) {
+          return toastr.error('Denegado', res.message);
+        }
+        if(render === true) {
+          res.data.forEach(doc => {
+            insertAtIndex('#ContainerOne .StackedListDrag.StackedList', `
                       <li class="boxDraggable StackedListItem StackedListItem--isDraggable StackedListItem--item1" data-id="${doc.cid}" data-orden="${ doc.orden }" data-tipo="${doc.tipo}">
                         <img class="background_image" src="/documentos/{{ $documento->id}}/generarImagenTemporal?cid=${ doc.cid }&page=${ doc.page }&t={{time()}}" />
                         <div class="StackedListContent">
@@ -373,12 +402,12 @@ realizar_busqueda('');
                           <div class="Heading Heading--size4 text-no-select">${ doc.rotulo }</div>
                         </div>
                         </div>
-                      </li>
-                      `);
-        });
-      }
-      render_dom_popup();
-      })   
+                      </li>`, orden);
+          });
+        }
+        render_dom_popup();
+      },
+    });
   }
  
 </script>

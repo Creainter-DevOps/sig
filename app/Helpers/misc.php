@@ -1,7 +1,10 @@
 <?php
 
+function file_ext($file) {
+  return strtolower(pathinfo($file, PATHINFO_EXTENSION));
+}
 function gs_file($extension = 'pdf') {
-  return uniqid() . '.' . $extension;
+  return date('Y_m_d') . '-' . uniqid() . '.' . $extension;
 }
 function gs_exists($file) {
   if(strpos($file, 'gs://') !== false) {

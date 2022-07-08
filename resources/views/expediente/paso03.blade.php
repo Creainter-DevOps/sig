@@ -30,11 +30,11 @@
             </ul>
             @include('documento.mesa', compact('documento','workspace'))
             <div style="position: absolute;bottom: 15px;right: 20px;">
-                       <form method="post" action="{{ route('expediente.paso03',['cotizacion' => $cotizacion->id ]) }}"  >
-                       @csrf
-                       <button class="btn btn-primary" type="submit">Procesar</a>
-                       </form>
-                     </div>
+              <form method="post" action="{{ route('expediente.paso03',['cotizacion' => $cotizacion->id ]) }}"  >
+               @csrf
+               <button class="btn btn-primary" type="submit">Procesar</a>
+               </form>
+             </div>
           </div>
         </div>
       </div>

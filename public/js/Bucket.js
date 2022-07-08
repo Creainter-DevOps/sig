@@ -1,4 +1,4 @@
-var Bucketjs = (function () {
+function Bucketjs () {
   var _instance = this;
   var elements = {};
   var commit = [];
@@ -94,15 +94,14 @@ var Bucketjs = (function () {
     var can_upload = $(_element).attr('data-upload') || false;
 
     can_upload = can_upload === 'true';
-    if (typeof elements !== "undefined") {
-      if (!$(elements).is(":visible")) {
-        $(elements).remove();
+    if (typeof _element !== "undefined") {
+      if (!$(_element).is(":visible")) {
+        $(_element).remove();
       }
     }
 
     $(box).addClass("bucket bucket-initial");
-    $(box).append($("<div>").addClass('bucket-navigation').append($('<div>').text('/')));
-    $(box).append($("<div>").addClass('bucket-button-full').text('Más'));
+    $(box).append($("<div>").addClass('bucket-navigation').append($('<div>').text('/').addClass('bar')).append($('<div>').addClass('goto').text('Ir')));
     $(box).append($("<div>").addClass('bucket-options')
       .append('<a href="javascript:void(0);" class="bucketOptionExpediente">Crear Expediente</a>')
       .append('<a href="javascript:void(0);" class="bucketOptionDirectory">Crear Carpeta</a>')
@@ -111,11 +110,22 @@ var Bucketjs = (function () {
 //    $(box).append($("<div>").addClass('bucket-space-upload').text('Subir Archivo'));
     $(box).append($('<div>').addClass('bucket-table-content').html($("<table>").addClass('table table-sm').css({width: '100%'})
       .append($("<thead>").html("<tr><th colspan='2'>Archivo</th><th>Descripción</th><th>Tamaño</th><th>Propietario</th><th>Subido el</th><th></th></tr>"))
-      .append($("<tbody>"))));
+      .append($("<tbody>").addClass('StackedListDrag').attr('data-container', 'repository').attr('data-dropzone', 'draw'))));
     box.bucket_path = bucket_path;
 //    $(box).removeAttr("data-path");
     $(box).on('click', '.bucket-button-full', function() {
-      $(box).toggleClass('bucket-full');
+      //$(box).toggleClass('bucket-full');
+    });
+    $(box).on('click', ".goto", function() {
+      let dir = prompt('Ingrese la ruta:', bucket_path);
+      if(!dir) {
+        return false;
+      }
+      if(!(/^[a-zA-Z0-9\-\/]+$/.test(dir))) {
+        alert('Ingrese un nombre correcto.(Numeros, letras, Guión)');
+        return $(this).click();
+      }
+      goPath(dir);
     });
     if(can_upload) {
       $(box).on('click', ".bucketOptionExpediente", function(e) {
@@ -181,6 +191,7 @@ var Bucketjs = (function () {
         return false;
       });
     }
+    typeof _instance.__event_onRender !== 'undefined' && _instance.__event_onRender();
   };
   var goPath = function(path) {
     bucket_path = path ||  '/';
@@ -196,7 +207,7 @@ var Bucketjs = (function () {
         goPath($(this).attr('data-path'));
       }));
     });
-    $(_element).find('.bucket-navigation>div').html(html);
+    $(_element).find('.bucket-navigation>div.bar').html(html);
     pullFiles();
   };
   var fillFile = function (file) {
@@ -204,6 +215,9 @@ var Bucketjs = (function () {
     if(file.download) {
       ul.append(
         $("<tr>")
+          .addClass(file.is_file ? 'StackedListItem--isDraggable' : 'es_directorio')
+          .attr('data-id', file.id)
+          .attr('data-plantilla', file.plantilla ? 'true' : 'false')
           .attr("data-download", file.download)
           .append($("<td>").html('<i style="font-size:11px;" class="bx bxs-' + (file.is_file ? 'file' : 'folder') + '"></i>'))
           .append($("<td>").addClass('text-left rotulo').text(file.name ?? 'En desarrollo').on('click', function() {
@@ -301,12 +315,15 @@ var Bucketjs = (function () {
   };
   return {
     capture: function (box) {
-      console.log("Bucketjs-capture", box);
       renderElement(box);
+      console.log("Bucketjs-capture", box);
       goPath($(box).attr('data-path') ||  '/');
     },
     getElements: function () {
       return elements;
     },
+    onRender: function (cb) {
+      _instance.__event_onRender = cb;
+    }
   };
-})();
+};

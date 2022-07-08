@@ -55,7 +55,7 @@ class ExpedienteController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function inicio(Cotizacion $cotizacion ){
+    public function inicio(Request $request, Cotizacion $cotizacion ){
       
       $licitacion = $cotizacion->oportunidad()->licitacion();
       $validaciones = [];   
@@ -65,20 +65,17 @@ class ExpedienteController extends Controller
       $firma = EmpresaFirma::porEmpresa( $cotizacion->empresa_id, 'FIRMA');
       $visado = EmpresaFirma::porEmpresa( $cotizacion->empresa_id, 'VISADO');
 
-      if (gs_exists($logo_central) || gs_exists($logo_header)) {
-        $validaciones['empresa_logos'] = true;
-      }
-      if (!empty($firma) && !empty($visado) ){
-        $validaciones['sellos_firmas'] = true;          
-      }
-      if (!empty($empresa->representante_nombres ) &&  !empty($empresa->representante_documento) ){
-        $validaciones['representante'] = true;  
-      }
-      //dd($cotizacion);
-      if ( !empty( $cotizacion->monto) && !empty($cotizacion->moneda_id)){
-        $validaciones['montos'] = true;
-      }  
+      $validaciones['empresa_logos'] = (gs_exists($logo_central) || gs_exists($logo_header)) ? true : false; 
 
+      $validaciones['sellos_firmas'] = (!empty($firma) && !empty($visado)) ? true:false;
+
+      $validaciones['representante'] = (!empty($empresa->representante_nombres ) &&  !empty($empresa->representante_documento) ) ? true : false;
+
+      $validaciones['montos'] = (!empty( $cotizacion->monto) && !empty($cotizacion->moneda_id)) ? true : false;
+
+      if( $request->ajax()){
+        return response()->json([ 'status' => true, 'validaciones' => $validaciones ]);  
+      }
       return view('expediente.inicio', compact('cotizacion','licitacion', 'validaciones'));
 
     }

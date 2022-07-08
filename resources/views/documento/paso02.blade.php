@@ -19,29 +19,20 @@
   display: none;
 }
 </style>
+<section id="icon-tabs">
   <div class="row">
     <div class="col-12">
       <div class="card">
         <div class="card-content mt-2">
-          <div class="card-body">
+
             <ul class="nav nav-tabs justify-content-center" role="tablist">
               <li class="nav-item">
-                <a class="nav-link" href="/documentos/{{ $documento->id }}/paso01">
-                  Anexos
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/documentos/{{ $documento->id }}/paso02">
-                  Modificación
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/documentos/{{ $documento->id }}/paso03">
+                <a class="nav-link " href="/documentos/{{ $documento->id }}/expediente/paso01">
                   Mesa de Trabajo
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link active" href="/documentos/{{ $documento->id }}/paso04">
+                <a class="nav-link active" href="/documentos/{{ $documento->id }}/expediente/paso02">
                   Magia
                 </a>
               </li>
@@ -76,20 +67,16 @@
                     </div>
                   </div>
                   <div class="col-3">
-                  @if(empty($documento->propuesta_el))
-                    <a class="btn btn-secondary text-white" data-confirm href="/documentos/{{ $documento->id }}/enviar" class="btn btn-sm btn-dark">Enviar Propuesta</a>
-                  @else
-                    Ya se ha registrado el Envio:<br /> {{ Helper::fecha($documento->propuesta_el, true) }}
-                  @endif
                   </div>
                 </div>
               </div>
-</div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
+</section>
 @endsection
 @section('page-scripts')
   @parent
@@ -122,7 +109,7 @@ function parallelStatus() {
       $(".blockEndProcess").show();
       $(".blockEndProcess").find('[data-url-download]').attr('href', res.data.url);
       $(".blockEndProcess").find('iframe').attr('src', $(".blockEndProcess").find('iframe').attr('src') + '?refresh');
-//      $(".blockEndProcess").find('[data-url-download-seace]').attr('href', res.data.url_seace);
+//    $(".blockEndProcess").find('[data-url-download-seace]').attr('href', res.data.url_seace);
       $(".blockEndProcess").find('.doc').attr('src', res.data.url_seace);
 
     } else {

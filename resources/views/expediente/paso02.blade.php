@@ -95,7 +95,7 @@
   @parent
 <script>
 function visualizar(e){
-   let url = e.dataset.url
+   let url = encodeURIComponent(e.dataset.url);
    let contairner_iframe= document.getElementById('iframe_container');
    contairner_iframe.innerHTML = '';
    let html = `<iframe class="doc" src='https://view.officeapps.live.com/op/embed.aspx?src=${url}' width='1366px' frameborder='0' style="height:600px">

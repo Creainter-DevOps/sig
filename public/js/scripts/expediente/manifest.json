@@ -1,0 +1,14 @@
+{
+  "description": "Demostrar webRequests",
+  "manifest_version": 2,
+  "name": "webRequest-demo",
+  "version": "1.0",
+
+  "permissions": [
+    "webRequest"
+  ],
+
+  "background": {
+    "scripts": ["background.js"]
+  }
+}

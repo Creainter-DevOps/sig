@@ -1001,7 +1001,11 @@ function render_editable() {
                   box.text(data.value);
                 }
                 selected = tt;
-                toastSuccess()
+                //toastSuccess()
+                if(window.fn_trigger){
+                  console.log("llamando funcion trigger")
+                  fn_trigger();
+                }
               } else {
                 if(is_html) {
                   box.html(selected);
