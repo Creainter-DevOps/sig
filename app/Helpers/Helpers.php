@@ -173,7 +173,20 @@ class Helper
     @unlink(static::json_path($x, $path));
     return true;
   }
-
+public static function array_delete_keys($n, $m) {
+  foreach($m as $k) {
+    unset($n[$k]);
+  }
+  return $n;
+}
+public static function array_only_keys($n, $m) {
+  $rp = array();
+  foreach($m as $k) {
+    $rp[$k] = isset($n[$k]) ? $n[$k] : null;
+  }
+  unset($n);
+  return $rp;
+}
   public static function array_group_by($a, $b){
     $_temp = array();
     $f = array_shift($b);
@@ -183,18 +196,18 @@ class Helper
         $_temp[$n[$indice]][] = $n;
       } else {
         if(!isset($_temp[$n[$indice]])) {
-          $_temp[$n[$indice]] = !empty($f['only']) ? array_only_keys($n, $f['only']) : array();
+          $_temp[$n[$indice]] = !empty($f['only']) ? static::array_only_keys($n, $f['only']) : array();
           $_temp[$n[$indice]]['children'] = array();
         }
-        $_temp[$n[$indice]]['children'][] = array_delete_keys($n, $f['only']);
+        $_temp[$n[$indice]]['children'][] = static::array_delete_keys($n, $f['only']);
       }
     }
     if(!empty($b)) {
       foreach($_temp as $n) {
         if(!is_array($f)) {
-          $_temp[$n[$indice]] = array_group_by($_temp[$n[$indice]], $b);
+          $_temp[$n[$indice]] = static::array_group_by($_temp[$n[$indice]], $b);
         } else {
-          $_temp[$n[$indice]]['children'] = array_group_by($_temp[$n[$indice]]['children'], $b);
+          $_temp[$n[$indice]]['children'] = static::array_group_by($_temp[$n[$indice]]['children'], $b);
         }
       }
     }

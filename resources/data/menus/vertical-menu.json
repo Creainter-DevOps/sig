@@ -119,6 +119,12 @@
       "icon": "calendar"
     },
     {
+      "url": "usuarios",
+      "name": "Usuarios",
+      "i18n": "Usuarios",
+      "icon": "user"
+    },
+    {
       "navheader": "Pages"
     },
     {

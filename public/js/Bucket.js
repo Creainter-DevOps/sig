@@ -62,10 +62,10 @@ function Bucketjs () {
       if (ajax.readyState === 4) {
         if (ajax.status === 200) {
           goPath(bucket_path);
-          pullBucket();
+          //pullBucket();
         } else {
           alert("Ha ocurrido un error inesperado");
-          pullBucket();
+          //pullBucket();
         }
       }
     };
@@ -96,10 +96,24 @@ function Bucketjs () {
     can_upload = can_upload === 'true';
     if (typeof _element !== "undefined") {
       if (!$(_element).is(":visible")) {
-        $(_element).remove();
+        //$(_element).remove();
       }
     }
-
+    let preventDefaults = function (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    };
+    let dropArea = box;
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, preventDefaults, false)   
+      document.body.addEventListener(eventName, preventDefaults, false)
+    });
+    box.addEventListener('drop', function(e) {
+      console.log('drop', e);
+      var dt = e.dataTransfer;
+      var files = dt.files;
+      handleFiles(files);
+    }, false);
     $(box).addClass("bucket bucket-initial");
     $(box).append($("<div>").addClass('bucket-navigation').append($('<div>').text('/').addClass('bar')).append($('<div>').addClass('goto').text('Ir')));
     $(box).append($("<div>").addClass('bucket-options')
@@ -109,7 +123,7 @@ function Bucketjs () {
     );
 //    $(box).append($("<div>").addClass('bucket-space-upload').text('Subir Archivo'));
     $(box).append($('<div>').addClass('bucket-table-content').html($("<table>").addClass('table table-sm').css({width: '100%'})
-      .append($("<thead>").html("<tr><th colspan='2'>Archivo</th><th>Descripción</th><th>Tamaño</th><th>Propietario</th><th>Subido el</th><th></th></tr>"))
+      .append($("<thead>").html("<tr><th colspan='2'>Archivo</th><th>Descripción</th><th>Páginas</th><th>Tamaño</th><th>Propietario</th><th>Subido el</th><th></th></tr>"))
       .append($("<tbody>").addClass('StackedListDrag').attr('data-container', 'repository').attr('data-dropzone', 'draw'))));
     box.bucket_path = bucket_path;
 //    $(box).removeAttr("data-path");
@@ -231,6 +245,7 @@ function Bucketjs () {
             }
             }))
           .append($("<td>").addClass('rotulo').text(file.rotulo))
+          .append($("<td>").addClass("foliox").text(file.folio))
           .append($("<td>").addClass("size").text(file.size))
           .append($("<td>").addClass("uploaded").text(file.created_by))
           .append($("<td>").addClass("uploaded").text(file.created_on).attr('title','Subido el:'))
@@ -260,19 +275,17 @@ function Bucketjs () {
           .attr("data-download", file.download)
           .append($("<td>").html('<i style="font-size:11px;" class="bx bxs-file"></i>'))
           .append($("<td>").addClass('text-left rotulo').html('<span style="color: #0c7200;">En desarrollo</span>').on('click', function() {
-            let url = '/documentos/' + file.id + '/expediente/paso01';
+            let url = '/documentos/' + file.id + '/expediente/inicio';
             window.open(url, '_blank').focus();
           }))
           .append($("<td>").addClass('rotulo').text(file.rotulo))
+          .append($("<td>").addClass("foliox").text(file.folio))
           .append($("<td>").addClass("size").text('...'))
           .append($("<td>").addClass("uploaded").text(file.created_by))
           .append($("<td>").addClass("uploaded").text(file.created_on).attr('title','Subido el:'))
           .append($("<td>").addClass("delete"))
       );
     }
-  };
-  var pullBucket = function (bucket_id) {
-    requestPull.push(elements[bucket_id]);
   };
   var pullFiles = function () {
       $(_element)

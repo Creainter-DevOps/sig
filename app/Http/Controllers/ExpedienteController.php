@@ -440,9 +440,10 @@ echo "<pre>";
       $cotizacion->save();
 
       $documento->archivo       = 'tenant-' . Auth::user()->tenant_id . '/' . $filename;
+      $documento->filename      = Helper::replace_extension($documento->rotulo, 'pdf');
       $documento->documentos_id = '{' . implode(',', $documentos_ids) . '}';
       $documento->folio         = $folios;
-      $documento->directorio    = trim($cotizacion->folder(true), '/');
+//      $documento->directorio    = trim($cotizacion->folder(true), '/');
       $documento->filesize      = 10000;#filesize($output_final);
       $documento->elaborado_por    = Auth::user()->id;
       $documento->elaborado_hasta = DB::raw('now()');
@@ -492,6 +493,10 @@ echo "<pre>";
           'url' => $workspace['documento_final'],
         ]
       ]);
+    }
+    public function descargarTemporal2(Request $request, Cotizacion $cotizacion, $file) {
+      $request->file = $file;
+      return $this->descargarTemporal($request, $cotizacion);
     }
     public function descargarTemporal(Request $request, Cotizacion $cotizacion) {
       /*

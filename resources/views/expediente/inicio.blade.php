@@ -22,6 +22,29 @@
                           </div>
                           <form class="form" action="{{ route('expediente.inicio', ['cotizacion' => $cotizacion->id])}}" method="post">
                             @csrf
+                            <div class="card-body px-0 py-1" style="display:flex;justify-content:center; ">
+                            <ul class="widget-todo-list-wrapper" id="list-anexos">
+                                <li style="display:flex;" >
+                                  <i class="font-medium-3 mr-50" style="font-size:15px;"></i>
+                                  <p>Logos de empresa</p>
+                                </li>
+                                <li style="display:flex;" >
+                                  <i class="font-medium-3 mr-50" style="font-size:15px;"></i>
+                                  <p>Sellos y firmas</p>
+                                </li>
+                                <li style="display:flex;" >
+                                  <i class="font-medium-3 mr-50" style="font-size:15px;"></i>
+                                  <p> Datos de representante</p>
+                                </li>
+                                <li style="display:flex;">
+                                  <i class="font-medium-3 mr-50" style="font-size:15px;"></i>
+                                  <p>Costos y montos de cotizacion</p>
+                                </li>
+                             </ul>
+                          </div>
+                          <div style="display:flex;justify-content:center;" >
+                              <button class="btn btn-primary text-white" type="submit">Iniciar Expediente</button>
+                          </div>
                           </form>
                         </div>
                       </div>
@@ -42,31 +65,6 @@
                         @endif
                       </div>
                       @endif
-                      <template id="template-validaciones" >
-                          <div class="card-body px-0 py-1" style="display:flex;justify-content:center; ">
-                            <ul class="widget-todo-list-wrapper" id="list-anexos">
-                                <li style="display:flex;" > 
-                                  <i class="font-medium-3 mr-50" style="font-size:15px;"></i>
-                                  <p>Logos de empresa</p>
-                                </li>
-                                <li style="display:flex;" > 
-                                  <i class="font-medium-3 mr-50" style="font-size:15px;"></i>
-                                  <p>Sellos y firmas</p>
-                                </li>
-                                <li style="display:flex;" > 
-                                  <i class="font-medium-3 mr-50" style="font-size:15px;"></i>
-                                  <p> Datos de representante</p>
-                                </li>
-                                <li style="display:flex;"> 
-                                  <i class="font-medium-3 mr-50" style="font-size:15px;"></i>
-                                  <p>Costos y montos de cotizacion</p>
-                                </li>
-                             </ul>
-                          </div>
-                          <div style="display:flex;justify-content:center;" >
-                              <button class="btn btn-primary text-white" style = "display:none;" type="submit"  id="save">Iniciar Expediente</button>
-                          </div>
-                      </template>
                 </div>
             </div>
           </div>
@@ -97,6 +95,7 @@ $(".checkbox__input").on('click', verify_check_widget);
    actualizar_validaciones();  
  }
  function  actualizar_validaciones (){
+return;
   let container = document.querySelector("form.form");
   //container.classList.add("loader");
   container.innerHTML = '';

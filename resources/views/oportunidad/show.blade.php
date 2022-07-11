@@ -128,10 +128,16 @@
                 </div>
             </div>
             <div class="col-12 col-sm-5 px-0 d-flex justify-content-end align-items-center px-1 mb-2">
-                @if (!empty($oportunidad->rechazado_el))
+              @if($oportunidad->estado()['timeout'] && !empty($oportunidad->aprobado_el) && empty($oportunidad->archivado_el))
+                <a data-confirm-input="¿Por qué desea Archivarlo?"
+                        href="/oportunidades/{{ $oportunidad->id }}/archivar"
+                        class="btn btn-sm btn-danger mr-25">Archivar</a>
+                @elseif (!empty($oportunidad->rechazado_el))
                     <div class="text-center">Rechazado el {{ Helper::fecha($oportunidad->rechazado_el, true) }}</div>
+
                 @elseif(!empty($oportunidad->archivado_el))
                     <div class="text-center">Archivado el {{ Helper::fecha($oportunidad->archivado_el, true) }}</div>
+
                 @elseif(empty($oportunidad->aprobado_el))
                     <a href="/oportunidades/{{ $oportunidad->id }}/aprobar"
                         class="btn btn-sm btn-success mr-25">Aprobar</a>
@@ -389,38 +395,42 @@
                                                     <div class="text-center mb-1">
                                                         <span
                                                             class="{{ $e->cotizacion->estado_participacion()['class'] }}">{{ $e->cotizacion->estado_participacion()['message'] }}</span>
-                                                            @if (!empty($e->cotizacion->participacion_por))
+                                                            @if (empty($e->cotizacion->participacion_el))
+                                                              @if (!$e->cotizacion->estado()['timeout'])
                                                                 <div style="text-align: center;margin-top: 5px;font-size:10px;">
-                                                                  por {{ $e->cotizacion->participacion_por }}
+                                                                @if(!empty($e->cotizacion->seace_participacion_log))
+                                                                  Se ha intentado realizar el registro automático sin éxito. Debe hacerlo manualmente en el SEACE y posteriormente hacer click abajo.<br/>
+                                                                @endif
+                                                                <a href="/cotizaciones/{{ $e->cotizacion->id }}/registrarParticipacion">Registrar Participación</a>
                                                                 </div>
-                                                            @endif
-                                                            @if (!$e->cotizacion->estado()['timeout'])
-                                                              @if (empty($e->cotizacion->participacion_el))
-                                                                <a href="/cotizaciones/{{ $e->cotizacion->id }}/registrarParticipacion"
-                                                                  class="btn btn-sm btn-info mr-25">Registrar
-                                                                  Participación</a>
                                                               @endif
+                                                            @else
+                                                              <div style="text-align: center;margin-top: 5px;font-size:10px;">
+                                                                Registrado por {{ $e->cotizacion->participacion_por }} el {{ Helper::fecha($e->cotizacion->participacion_el, true) }}
+                                                              </div>
                                                             @endif
+
                                                     </div>
                                             </li>
                                             <li class="StepProgress-item is-done">
                                                 <strong>Propuesta</strong>
+                                                <div class="text-center mb-1">
                                                 @if (!empty($e->cotizacion))
-                                                    <div class="text-center mb-1">
                                                         <span
                                                             class="{{ $e->cotizacion->estado_propuesta()['class'] }}">{{ $e->cotizacion->estado_propuesta()['message'] }}</span>
-                                                    </div>
                                                 @endif
-                                                    <div class="text-center" style="margin-bottom:10px;">
-                                                        <a href="/expediente/{{ $e->cotizacion->id }}/inicio">Expediente</a>
-                                                        {{ $e->cotizacion->elaborado_por }}
-                                                    </div>
                                                 @if (!$e->cotizacion->estado()['timeout'])
-                                                    @if (empty($e->cotizacion->propuesta_el))
-                                                        <a href="/cotizaciones/{{ $e->cotizacion->id }}/registrarPropuesta"
-                                                            class="btn btn-sm btn-dark">Enviar Propuesta</a>
-                                                    @endif
+                                                    <div style="text-align: center;margin-top: 5px;font-size:10px;">
+                                                      Puede hacer uso de nuestra Mesa de trabajo para desarrollar sus expediente como su propuesta comercia, debe hacer click abajo.<br/>
+                                                      <a href="/expediente/{{ $e->cotizacion->id }}/inicio">Elaborar Expediente</a>
+                                                      @if(!empty($e->cotizacion->elaborado_por))
+                                                        <div>
+                                                        por {{ $e->cotizacion->elaborado_por }}
+                                                        </div>
+                                                      @endif
+                                                    </div>
                                                 @endif
+                                                </div>
                                             </li>
                                         </ul>
                                     </div>

@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Actividad;
+use App\Reporte;
+use App\Empresa;
 use App\Helpers\Helper;
+
 class ReporteController extends Controller
 {
     protected $viewBag; 
@@ -22,7 +25,15 @@ class ReporteController extends Controller
     public function index(){
       return view('reportes.index' ,$this->viewBag);
     }
-
+    public function licitacion_participaciones() {
+      $empresas = Empresa::propias();
+      $listado  = Reporte::participaciones();
+      $listado  = Helper::array_group_by($listado, [
+        ['key' => 'id', 'only' => array('id','aprobado_el','aprobado_por','codigo','rotulo','institucion','fecha_participacion_hasta','fecha_propuesta_hasta','fecha_buena_hasta')],
+        ['key' => 'empresa', 'only' => array('empresa','participacion_el','participacion_por','propuesta_el','propuesta_por','monto','ganadores')]
+      ]);
+      return Helper::pdf('reportes.licitacion_participaciones', compact('empresas','listado'));
+    }
     public function usuarios(){
      $licitacion = Helper::array_group_by( Actividad::aprobadas_desaprobadas()->toArray(), ['key'=> 'tipo'] ) ;
 

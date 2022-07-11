@@ -20,7 +20,7 @@
                               </li>
                             </ul>
                           </div>
-                          <form class="form" action="{{ route('documento.expediente_inicio', ['documento' => $documento->id])}}" method="post">
+                          <form class="form" action="{{ route('documento.expediente_inicio_store', ['documento' => $documento->id])}}" method="post">
                             @csrf
                           <div class="card-body px-0 py-1" style="display:flex;justify-content:center; ">
                             <ul class="widget-todo-list-wrapper" id="list-anexos">
@@ -59,9 +59,7 @@
                              </ul>
                           </div>
                           <div style="display:flex;justify-content:center;" >
-                            @if ( sizeof($validaciones ) >= 4 )
-                              <button class="btn btn-primary text-white" type="submit"  id="save">Iniciar Expediente</button>
-                            @endif
+                            <button class="btn btn-primary text-white" type="submit"  id="save">Iniciar Expediente</button>
                           </div>
                           </form>
                         </div>

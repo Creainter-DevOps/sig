@@ -134,6 +134,7 @@ Route::resource('cartas', 'CartaController')->parameters([
 
 Route::get('reportes', 'ReporteController@index');
 
+Route::get('reportes/licitacion/participaciones', 'ReporteController@licitacion_participaciones');
 Route::get('reportes/usuarios', 'ReporteController@usuarios');
 Route::get('reportes/usuarios/descargar', 'ReporteController@descargar_reporte');
 //Route::get('reportes/usuarios', 'ReporteController@index');
@@ -167,6 +168,8 @@ Route::post('expediente/{cotizacion}/paso04','ExpedienteController@paso04_store'
 Route::get('expediente/{cotizacion}/visualizar', 'ExpedienteController@visualizar_documento');
 
 Route::get('expediente/{cotizacion}/temporal', 'ExpedienteController@descargarTemporal');
+Route::get('expediente/{cotizacion}/temporal/uri/{file}', 'ExpedienteController@descargarTemporal2');
+
 
 Route::post('expediente/{cotizacion}/estampar', 'ExpedienteController@estamparDocumento');
 
@@ -202,9 +205,12 @@ Route::get('documentos/nuevo','DocumentoController@form_nuevo');
 
 //Route::get('documentos/{documento}/expediente/inicio','DocumentoController@expediente_inicio');
 //Route::post('documentos/{documento}/expediente/inicio','DocumentoController@expediente_inicio')->name("documento.expediente_inicio");
+Route::get('documentos/{documento}/expediente/inicio','DocumentoController@expediente_inicio')->name("documento.expediente_inicio");
+Route::post('documentos/{documento}/expediente/inicio','DocumentoController@expediente_inicio_store')->name("documento.expediente_inicio_store");
 Route::get('documentos/{documento}/expediente/paso01','DocumentoController@expediente_paso01')->name("documento.expediente_paso01");
-Route::get('documentos/{documento}/expediente/paso02','DocumentoController@expediente_paso02')->name("documento.expediente_paso02");
 Route::post('documentos/{documento}/expediente/paso01','DocumentoController@expediente_paso01_store')->name("documento.expediente_paso01_store");
+Route::get('documentos/{documento}/expediente/paso02','DocumentoController@expediente_paso02')->name("documento.expediente_paso02");
+
 Route::get('documentos/{documento}/generarImagenTemporal','DocumentoController@generarImagenTemporal');
 Route::get('documentos/{documento}/generarImagen','DocumentoController@generarImagen');
 Route::get('documentos/{documento}/descargarParte','DocumentoController@descargarParte');

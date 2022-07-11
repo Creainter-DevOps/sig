@@ -8,6 +8,8 @@
 <link rel="stylesheet" type="text/css" href="{{asset('vendors/css/pickers/daterange/daterangepicker.css')}}">
 <link rel="stylesheet" type="text/css" href="{{asset('vendors/css/extensions/swiper.min.css')}}">
 <link rel="stylesheet" type="text/css" href="{{asset('css/plugins/forms/wizard.css')}}">
+<link rel="stylesheet" type="text/css" href="{{ asset('css/Bucket.css') }}">
+
 <style>
   .SortAnimation{
     width:100%;
@@ -310,6 +312,7 @@ position: absolute;
           </div>
       </div>
       @endif
+      @if(!empty($documento->oportunidad_id))
       <div class="col-6">
     <div class="card">
       <div class="card-content">
@@ -319,6 +322,7 @@ position: absolute;
       </div>
     </div>
     </div>
+    @endif
     @if ( null !== $documento->cotizacion() ) 
     <div class="col-6">
     <div class="card">
@@ -340,5 +344,5 @@ position: absolute;
 <!-- Widgets Charts End -->
 @endsection
 @section('page-scripts')
-<!-- JS -->
+  <script src="{{ asset('js/Bucket.js') }}"></script>
 @endsection

@@ -15,6 +15,7 @@ return [
   "Empresas" => "Empresas",
   "Proyectos" => "Proyectos",
   "Proveedores" => "Proveedores",
+  "Usuarios" => "Usuarios",
   "Productos" => "Productos",
   "Callerids" => "Callerids",
   "Nuevas" => "Nuevas",

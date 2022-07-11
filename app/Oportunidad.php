@@ -279,7 +279,7 @@ AND L.fecha_participacion_hasta + INTERVAL '12' HOUR >= NOW()
       return static::hydrate($rp); 
     }
    static function listado_participanes_por_vencer() {
-     $rp = DB::cache(60, "
+     $rp = DB::select("
      SELECT
   z.*,
   CONCAT(
@@ -634,6 +634,19 @@ ORDER BY L.buenapro_fecha ASC, L.fecha_buena_hasta ASC, O.id ASC");
         ];
       }
     }
+    public function participantes() {
+      $rp = DB::select("
+        SELECT osce.empresa_rotulo(C.tenant_id, C.empresa_id) empresa, osce.moneda_formato_humano(C.monto) monto
+        FROM osce.cotizacion C
+        WHERE C.oportunidad_id = {$this->id} AND C.participacion_el IS NOT NULL AND C.propuesta_el IS NOT NULL
+        ORDER BY C.empresa_id ASC
+        LIMIT 10");
+      $out = [];
+      foreach($rp as $n) {
+        $out[] = $n->empresa . ' con ' . $n->monto;
+      }
+      return implode('<br/>', $out);
+    }
     public function ganadora() {
       if(isset($this->inx_ganadores)) {
         return $this->licitacion()->ganadora($this->inx_ganadores);
@@ -642,10 +655,10 @@ ORDER BY L.buenapro_fecha ASC, L.fecha_buena_hasta ASC, O.id ASC");
     }
     public function estado() {
       $ahora = time();
-      $participacion_desde =  null !==   $this->licitacion()  ?  strtotime($this->licitacion()->fecha_participacion_desde) : '' ;
-      $participacion_hasta =   null !== $this->licitacion()  ?strtotime($this->licitacion()->fecha_participacion_hasta) : '';
-      $propuesta_desde =  null !==  $this->licitacion() ? strtotime($this->licitacion()->fecha_propuesta_desde) : '' ;
-      $propuesta_hasta =   null !== $this->licitacion()  ?  strtotime($this->licitacion()->fecha_propuesta_hasta) :'' ;
+      $participacion_desde =  strtotime($this->fecha_participacion_desde);
+      $participacion_hasta =  strtotime($this->fecha_participacion_hasta);
+      $propuesta_desde =  strtotime($this->fecha_propuesta_desde);
+      $propuesta_hasta =  strtotime($this->fecha_propuesta_hasta);
 
       if($ahora >= $propuesta_hasta) {
         if(!empty($this->fecha_propuesta)) {
@@ -800,9 +813,9 @@ GROUP BY 1
     }
 
     public function json_load() {
-      return Helper::json_load('oportunidad_' . $this->id . '.json', '/var/www/html/sig.creainter.com.pe/public/temporales/');
+      return Helper::json_load('oportunidad_' . $this->id);
     }
     public function json_save($x) {
-      return Helper::json_save('oportunidad_' . $this->id . '.json', $x, '/var/www/html/sig.creainter.com.pe/public/temporales/');
+      return Helper::json_save('oportunidad_' . $this->id);
     }
 }

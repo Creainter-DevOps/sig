@@ -50,6 +50,7 @@ class Empresa extends Model
       }
       return substr($this->razon_social, 0, 100);
     }
+
     public function cliente() {
       return Cliente::where('empresa_id', $this->id)->where('tenant_id', Auth::user()->tenant_id)->first();
     }
@@ -74,7 +75,7 @@ class Empresa extends Model
         return static::TipoCategorias()[$this->categoria_id];
     }
 
-    public static function search($term){
+    public static function search($term) {
       $term = strtolower(trim($term));
         return static::leftJoin('osce.cliente', 'osce.cliente.empresa_id', 'osce.empresa.id')->where(function($query) use($term) {
             $query->WhereRaw("LOWER(osce.empresa.razon_social) LIKE ?",["%{$term}%"])
@@ -82,4 +83,7 @@ class Empresa extends Model
             ;
         })->select('osce.empresa.*')->orderBy('osce.cliente.id', 'ASC');
     } 
+    public static function propias() {
+      return static::where('tenant_id', Auth::user()->tenant_id)->get();
+    }
 }

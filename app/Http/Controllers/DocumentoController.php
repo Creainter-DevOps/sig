@@ -115,8 +115,6 @@ class DocumentoController extends Controller {
 
       $licitacion = $documento->licitacion();
       $validaciones = [];   
-      $empresa = $documento->oportunidad()->empresa();
-dd($empresa);
       /*$logo_header = config('constants.ruta_storage') . $empresa->logo_header;
       $logo_central = config('constants.ruta_storage') . $empresa->logo_central;
 
@@ -141,13 +139,11 @@ dd($empresa);
   }
   public function expediente_inicio_store(Request $request, Documento $documento ){
          
-      $workspace = $documento->json_load();
-      $cotizacion->elaborado_por   = Auth::user()->id;
-      $cotizacion->elaborado_desde = DB::raw('now()');
-      //$cotizacion->elaborado_step  = 1;
-      $cotizacion->json_save($workspace);
-      //$cotizacion->log('EXPEDIENTE/INICIO', 'Se inició la elaboración del Expediente');
-      return redirect('/documento/'. $cotizacion->id . '/expediente/paso01');
+      $documento->elaborado_por   = Auth::user()->id;
+      $documento->elaborado_desde = DB::raw('now()');
+      $documento->save();
+
+      return redirect('/documentos/'. $documento->id . '/expediente/paso01');
   }
   
   /*public function expediente( Request $request, Documento $documento ) {
@@ -165,11 +161,10 @@ dd($empresa);
     return view('documento.paso02', compact('workspace','documento'));
   }
   public function expediente_paso01_store( Documento $documento, Request $request) {
-
       $workspace = $documento->json_load();
 
       $folios = 0;
-      $commands = []; 
+      $commands = [];
       $commands[] = 'sleep 2';
       $commands[] = 'echo "Se ha iniciado el proceso..."';
 
@@ -188,7 +183,7 @@ dd($empresa);
         }, $temp);
         $estampados['visado_original'] = $temp;
       }
-      $pedir_estampado = function($tipo) use(&$estampados) {
+      $pedir_estampado = function($tipo, $empresa_id) use(&$estampados) {
         if(empty($estampados[$tipo . '_original'])) {
           return null;
         }
@@ -243,7 +238,7 @@ dd($empresa);
             //$input  = config('constants.ruta_storage') . Helper::replace_extension($file['archivo'], 'pdf', '-' . ($pp + 1));
             $input  = $documento->folder_workspace() . $file['hash'] . '-' . ($pp + 1) . '.pdf';
             $output = $documento->folder_workspace() . $file['hash'] . '-' . ($pp + 1) . '.pdf';
-            $sello  = $pedir_estampado('firma');
+            $sello  = $pedir_estampado('firma', 1);
             if(file_exists($input) || true) {
               $commands[] = 'echo "Proceso de estampado de pdf"';
               $commands[] = '/bin/estampar ' . $input . ' ' . $sello . ' ' . $ff['x'] . ' ' . $ff['y'] . " '" . $output . "'";
@@ -261,7 +256,7 @@ dd($empresa);
           foreach($file['estampados']['visado'] as $pp => $ff) {
             $input  = $documento->folder_workspace() . $file['hash'] . '-' . ($pp + 1) . '.pdf';
             $output = $documento->folder_workspace() . $file['hash'] . '-' . ($pp + 1) . '.pdf';
-            $sello  = $pedir_estampado('visado');
+            $sello  = $pedir_estampado('visado', 1);
             if(file_exists($input) || true) {
               $commands[] = 'echo "Proceso de estampado de pdf"';
               $commands[] = '/bin/estampar ' . $input . ' ' . $sello . ' ' . $ff['x'] . ' ' . $ff['y'] . " '" . $output . "'";
@@ -341,11 +336,9 @@ echo "<pre>";
         'pids'   => $pid,
       ];
 
-      //$cotizacion->elaborado_por = Auth::user()->id;
-      //$cotizacion->elaborado_step  = 4;
-      //$cotizacion->save();
 
       $documento->archivo       = 'tenant-' . Auth::user()->tenant_id . '/' . $filename;
+      $documento->filename      = Helper::replace_extension($documento->rotulo, 'pdf');
       $documento->documentos_id = '{' . implode(',', $documentos_ids) . '}';
       $documento->folio         = $folios;
       //$documento->directorio    = trim($documento->folder(true), '/');
@@ -538,7 +531,7 @@ echo "<pre>";
 
       $cid = Helper::workspace_get_id($doc->id, 'n');
 
-      $orden = !empty($orden) ? $orden : sizeof($workspace['paso03']);
+      $orden = !empty($orden) ? $orden : (!empty($workspace['paso03']) ? sizeof($workspace['paso03']) : 0);
       $append = [];
       $hash = uniqid();
 
@@ -787,6 +780,7 @@ echo "<pre>";
         'name'       => $n->filename,
         'rotulo'     => $n->rotulo,
         'created_by' => $n->created_by,
+        'folio'      => $n->folio,
         'created_on' => Helper::fecha($n->created_on, true),
         'plantilla'  => $n->plantilla,
         'size'       => $n->filesize,
@@ -804,18 +798,29 @@ echo "<pre>";
     $files = $request->file('files');
     foreach($files as $file) {
       $size = $file->getSize();
+
+      if(strtolower($file->getClientOriginalExtension()) == 'pdf') {
+        $meta = Helper::metadata($file->getRealPath());
+        $pages = $meta['Pages'];
+      } else {
+        $pages = 0;
+      }
+
       $archivo = $request->gsutil($file, 'tenant-' . Auth::user()->tenant_id);
+
       $destinos[] = $archivo;
+
       Documento::create([
         'tenant_id'  => Auth::user()->tenant_id,
         'tipo'       => 'OPEN',
+        'formato'    => strtoupper(file_ext($archivo)),
         'directorio' => $path,
         'archivo'    => $archivo,
         'rotulo'     => $file->getClientOriginalName(),
         'filesize'   => $size,
         'filename'   => $file->getClientOriginalName(),
         'created_by' => Auth::user()->id,
-        'folio'      => 0,
+        'folio'      => $pages,
       ]);
     }
     return response()->json([

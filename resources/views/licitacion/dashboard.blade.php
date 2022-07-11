@@ -387,7 +387,7 @@ var $primary = '#5A8DEE',
               <thead>
                 <tr>
                   <th>Nomenclatura</th>
-                  <th style="width:120px;">Estado</th>
+                  <th>Participación</th>
                   <th>Ganadora</th>
                   <th>Elaborado por</th>
                   <th style="width:20px;"></th>
@@ -396,11 +396,12 @@ var $primary = '#5A8DEE',
               <tbody>
 @foreach($propuestas_en_pro as $v)
                 <tr>
-                  <td title="{{ $v->rotulo() }}">
-                    {!! $v->nomenclatura !!}
+                  <td title="{{ $v->rotulo() }}" class="text-center">
+                    <div>{!! $v->nomenclatura !!}</div>
+                    <div><span class="{{ $v->estado_pro()['class'] }}">{{ $v->estado_pro()['message'] }}</span></div>
                   </td>
-                  <td class="text-center" style="width:120px;">
-                    <span class="{{ $v->estado_pro()['class'] }}">{{ $v->estado_pro()['message'] }}</span>
+                  <td class="text-center">
+                    {{ $v->participantes() }}
                   </td>
                   <td>
                     {!! $v->ganadora() !!}
@@ -441,11 +442,28 @@ var $primary = '#5A8DEE',
 @foreach($propuestas_por_vencer as $v)
                 @if(!empty($v->correo_id))
                   <tr style="background: #fff9dc;">
-                @else
-                  <tr>
-                @endif
-                  <td class="">
-                    <div style="font-size:11px;">{!! $v->inx_rotulo !!}</div>
+                  <td class="" style="max-width:200px;">
+                    <div style="font-size:11px;"><i class="bx bx-envelope" style="font-size:12px"></i> {!! $v->inx_rotulo !!}</div>
+                    <div style="font-size:9px;">Recibido el {{ Helper::fecha($v->aprobado_el, true) }} por {{ $v->aprobado_por }}</div>
+                  </td>
+                  <td class="text-center" style="width:100px;">
+                    <span>{{ Helper::money($v->monto_base) }}</span>
+                  </td>
+                  <td class="text-center" style="width:120px;">
+                    <span class="{{ $v->estado_propuesta()['class'] }}">{{ $v->estado_propuesta()['message'] }}</span>
+                    <div style="font-size:11px;">{{ Helper::fecha($v->fecha_propuesta_hasta, true) }}</div>
+                    <div style="font-size:10px;">{{ $v->etiquetas }}</div>
+                  </td>
+                  <td class="text-center" style="width:20px;">
+                    <a href="/oportunidades/{{ $v->id }}/">
+                      <i class="bx bx-show-alt"></i>
+                    </a>
+                  </td>
+                </tr>
+              @else
+              <tr>
+                  <td class="" style="max-width:200px;">
+                    <div style="font-size:11px;"><i class="bx bx-buildings" style="font-size:12px"></i> {!! $v->inx_rotulo !!}</div>
                     <div style="font-size:9px;">Aprobado el {{ Helper::fecha($v->aprobado_el, true) }} por {{ $v->aprobado_por }}</div>
                   </td>
                   <td class="text-center" style="width:100px;">
@@ -462,6 +480,7 @@ var $primary = '#5A8DEE',
                     </a>
                   </td>
                 </tr>
+              @endif
 @endforeach
               </tbody>
             </table>

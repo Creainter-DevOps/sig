@@ -38,6 +38,13 @@
 <div style="background: #6e00ff;color: #fff;">
   <div style="padding: 5px;background: #bd8efb;margin: 8px;border-radius: 5px;text-align: center;">{{ $card['rotulo'] }}</div>
   <div style="padding-bottom: 8px;">
+    <div style="display: inline-block;width: 200px;padding-left: 10px;">
+      <select id="selectEmpresa" class="form-control" data-value="{{ !empty($documento->cotizacion_id) ? $documento->cotizacion()->empresa_id : '' }}">
+        @foreach(App\Empresa::propias() as $e)
+        <option value="{{ $e->id }}">{{ $e->razon_social }}</option>
+        @endforeach
+      </select>
+    </div>
     <div data-tools="firma">Firma</div>
     <div data-tools="visado">Visado</div>
     <div data-remove="" data-cid="">Limpiar</div>

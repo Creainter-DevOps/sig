@@ -9,7 +9,7 @@
                           <button class="btn btn-primary btn-sm" data-popup="/documentos/nuevo">Subir Documento</button>
                         </div>
                       </header>
-                      <div id="drawRepositorio" style="padding: 5px 15px;">
+                      <div id="drawRepositorio" style="padding: 5px 15px;display:none;">
                         <div id="BucketRepositorio" data-bucket="1" data-path="{{ $documento->directorio }}" data-upload="true" style="border:3px dashed #ff9900!important;"></div>
                       </div>
                       <ul class="StackedListDrag StackedList" data-container="draw" data-dropzone="draw">
@@ -55,6 +55,22 @@
                   </section>
                 </div>
             </div>
+            <template id="template-icon-firma">
+              <span class="text-white" style="text-align:center; padding:3px;border-radius:4px; background-color:#ff7600;"><i class="bx bxs-edit-alt"></i> </span>'
+            </template>
+            <template id="template-icon-visado">
+              <span class="text-white" style="margin-left:2px;text-align:center; padding:3px;border-radius:4px; background-color:#188aff;" > <i class="bx bx-check-circle"></i> </span>
+            </template>
+            <template id="template-documento" >
+              <li class="boxDraggable StackedListItem--isDraggable" data-id="" data-plantilla="" data-tipo="" data-folio="" data-es-ordenable="">
+                  <div class="CardContent">
+                    <div class="CardContentTitulo"></div>
+                    <div class="CardContentDesc01"></div>
+                    <div class="CardContentDesc02"></div>
+                    <div class="CardContentDesc03"></div>
+                  </div>
+                </li>
+            </template>
 @section('page-scripts')
 @parent
 <script src="{{asset('js/scripts/forms/wizard-steps.js')}}"></script>
@@ -102,8 +118,6 @@ $(document).on('click', '[data-remove]', function(e) {
    });
 
 });
-
-
 
 $(document).on('mousemove', '.contentPoint', function(e) {
   var x = e.pageX - $(this).offset().left;
@@ -157,13 +171,18 @@ $(document).on('click', '.contentPoint', function(e) {
 
       current_tool = null;
       element.dataset.firma = "true"  
-      element.querySelector('.Pattern--typeHalftone').insertAdjacentHTML('afterbegin','<span class="text-white" style="text-align:center; padding:3px;border-radius:4px; background-color:#ff7600;"><i class="bx bxs-edit-alt"></i> </span>');
-       
+      let clon_firma = document.getElementById("template-icon-firma").content.cloneNode(true).children[0];
+      element.querySelector('.Pattern--typeHalftone').insertAdjacentElement('afterbegin',clon_firma);
+      //'<span class="text-white" style="text-align:center; padding:3px;border-radius:4px; background-color:#ff7600;"><i class="bx bxs-edit-alt"></i> </span>');
+      //element.querySelector('.Pattern--typeHalftone').append(template_firma.cloneNode(true));
     } else if ( current_tool == "visado" && (element.dataset.visado != "true" || element.dataset.visado == 'undefined' ) ){
 
       current_tool = null;
       element.dataset.visado = "true"  
-      element.querySelector('.Pattern--typeHalftone').insertAdjacentHTML('beforeend',' <span class="text-white" style="margin-left:2px;text-align:center; padding:3px;border-radius:4px; background-color:#188aff ;" > <i class="bx bx-check-circle"></i> </span>')
+      let clon_visado = document.getElementById("template-icon-visado").content.cloneNode(true).children[0];
+      element.querySelector('.Pattern--typeHalftone').insertAdjacentElement('beforeend',clon_visado );
+      //element.querySelector('.Pattern--typeHalftone').insertAdjacentHTML('beforeend',
+      //' <span class="text-white" style="margin-left:2px;text-align:center; padding:3px;border-radius:4px; background-color:#188aff ;" > <i class="bx bx-check-circle"></i> </span>')
     }
 
   });
@@ -209,20 +228,36 @@ function realizar_busqueda( query ) {
   .then( data => {
     let box = $('.BloqueBusqueda') ;
     box.html("");
-    data.forEach(n => {
-      box.append(`<li class="boxDraggable StackedListItem--isDraggable" data-id="${n.id}" data-plantilla="${n.es_plantilla}" data-tipo="${n.tipo}" data-folio="${n.folio}" data-es-ordenable="${n.es_ordenable}">
+    let template = document.getElementById("template-documento").content;
+    data.forEach( n => {
+      let clone = template.cloneNode(true);
+      console.log(clone);
+      let li =  clone.querySelector("li");
+      li.setAttribute("id", n.id);
+      li.setAttribute("plantilla", n.es_plantilla);
+      li.setAttribute("tipo", n.tipo );
+      li.setAttribute("folio",n.folio);
+      li.setAttribute("es-ordenable", n.es_ordenable );
+      li.querySelector(".CardContentTitulo").textContent = n.rotulo ? n.rotulo : '';
+      li.querySelector(".CardContentDesc01").textContent = (typeof n.desc01 !== 'undefined') ? n.desc01 : '';
+      li.querySelector(".CardContentDesc02").textContent = (typeof n.desc02 !== 'undefined') ? n.desc02 : '';
+      li.querySelector(".CardContentDesc03").textContent = (typeof n.desc03 !== 'undefined') ? n.desc03 : '';
+      box.append(clone);
+
+    /*  box.append(`<li class="boxDraggable StackedListItem--isDraggable" data-id="${n.id}" data-plantilla="${n.es_plantilla}" data-tipo="${n.tipo}" data-folio="${n.folio}" data-es-ordenable="${n.es_ordenable}">
                   <div class="CardContent">
                     <div class="CardContentTitulo">${ n.rotulo }</div>
                     <div class="CardContentDesc01">${ n.desc01 }</div>
                     <div class="CardContentDesc02">${ n.desc02 }</div>
                     <div class="CardContentDesc03">${ n.desc03 }</div>
                   </div>
-                </li>`);
+                </li>`);*/
+
+
     })
   });
 }
 realizar_busqueda('');
-
 
 var bucket = new Bucketjs();
 bucket.capture(document.getElementById('BucketRepositorio'));

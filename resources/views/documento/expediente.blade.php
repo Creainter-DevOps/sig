@@ -32,10 +32,12 @@
       </div>
     </div>
   </div>
+
 </section>
 @endsection
 
 @section('vendor-scripts')
+@parent
 <script src="{{asset('vendors/js/charts/apexcharts.min.js')}}"></script>
 <script src="{{asset('vendors/js/extensions/dragula.min.js')}}"></script>
 <script src="{{asset('vendors/js/extensions/swiper.min.js')}}"></script>
