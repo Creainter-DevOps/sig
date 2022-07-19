@@ -1,17 +1,18 @@
 @extends('layouts.pdf')
 @section('content')
-  <table class="w-100">
+  <table class="w-100" style="position:relative;top:-10px;">
     <tr>
       <td>
-        <b>RUC: 20602497519</b><br />
-        AV. 13 DE ENERO NRO. 1629 (OF. 2 PISO) LIMA - LIMA - SAN JUAN DE LURIGANCHO<br />
-        Lima - Perú<br />
-        Teléfono: 01 633-6883 (Anexo 103)<br />
-        Web: www.creainter.com.pe<br>
+        <div style="width:85%">
+        <b>{{ $cotizacion->empresa()->razon_social }}</b><br/>
+        <b>RUC: {{ $cotizacion->empresa()->ruc }}</b><br />
+        {{ strtoupper($cotizacion->empresa()->direccion) }}<br />
+        TELÉFONO: {{ $cotizacion->empresa()->telefono }}<br />
+        </div><br/>
       </td>
-      <td style="width:250px;">
-        <div style="text-align:center;font-size:18px;padding:5px;border:2px solid #ff9354;margin-bottom:10px;">
-          <h1 style="text-align:center;font-size:25px;margin-top:3px;margin-bottom:2px;">COTIZACIÓN</h1>
+      <td style="width:250px;vertical-align:top;" rowspan="2">
+        <div style="text-align:center;font-size:18px;padding:5px;border:2px solid {{ $cotizacion->empresa()->color_primario }};margin-bottom:10px;">
+          <h1 style="text-align:center;font-size:25px;margin-top:3px;margin-bottom:2px;">DETALLE DE PRECIOS</h1>
           <?= $cotizacion->nomenclatura() ?>
         </div>
         <table class="w-100">
@@ -19,53 +20,59 @@
             <th>FECHA</th>
             <td><?= Helper::fecha($cotizacion->fecha) ?></td>
           </tr>
+          @if(!empty($cotizacion->validez))
           <tr>
             <th>VENCIMIENTO</th>
             <td><?= Helper::fecha($cotizacion->validez) ?></td>
+          </tr>
+          @endif
+          <tr>
+            <th>MONEDA</th>
+            <td><?= $cotizacion->moneda_id == 1 ? 'SOLES' : 'DOLARES' ?></td>
           </tr>
         </table>
       </td>
     </tr>
     <tr>
-      <th style="background:#ff9354;color:#ffffff;">CLIENTE</th>
-      <td></td>
-    </tr>
-    <tr>
       <td>
+        <div style="background:{{ $cotizacion->empresa()->color_primario }};color:#ffffff;padding:2px;text-align:center;"><b>CLIENTE</b></div>
         <b>{{  $cotizacion->oportunidad()->empresa()->razon_social }}</b><br/>
         RUC: {{ $cotizacion->oportunidad()->empresa()->ruc }} <br />
         {{ $cotizacion->oportunidad()->empresa()->direccion }}.<br />
+        <br/>
       </td>
-      <td></td>
     </tr>
-  </table><br />
-
+    <tr>
+      <td colspan="2">
+        <div style="background:{{ $cotizacion->empresa()->color_primario }};color:#ffffff;padding:2px;text-align:center;"><b>PROYECTO / LICITACIÓN</b></div>
+        <b>{{  strtoupper($cotizacion->oportunidad()->rotulo) }}</b><br/>
+        @if(!empty($cotizacion->oportunidad()->licitacion_id))
+        Nomenclatura: {{ $cotizacion->oportunidad()->licitacion()->nomenclatura }}<br/>
+        @endif
+        @if(!empty($cotizacion->oportunidad()->correo_id))
+          Remitente: {{ $cotizacion->oportunidad()->correo()->correo_desde }}<br/>
+        @endif
+      </td>
+    </tr>
+  </table>
   <table class="w-100">
     <thead>
-      <tr style="background:#ff9354;color:#ffffff;">
+      <tr style="background:{{ $cotizacion->empresa()->color_primario }};color:#ffffff;">
+        <th style="width:40px;">ORDEN</th>
         <th>DESCRIPCIÓN</th>
-        <th style="width:120px;">PRECIO UNIT.</th>
-        <th style="width:80px;">CANTIDAD</th>
-        <th style="width:80px;">TOTAL</th>
+        <th style="width:50px;">UNID.</th>
+        <th style="width:80px;">V.UNIT.</th>
+        <th style="width:50px;">CANT.</th>
+        <th style="width:80px;">SUB.</th>
       </tr>
     </thead>
     <tbody>
-     @if(!empty($cotizacion->oportunidad()->licitacion_id))
-      <tr>
-        <td>
-          <b>{{ $cotizacion->oportunidad()->licitacion()->nomenclatura }}</b><br />
-          {{ strtoupper($cotizacion->oportunidad()->licitacion()->rotulo) }}<br />
-          @if(!empty($cotizacion->oportunidad()->licitacion()->descripcion))
-            {{ strtoupper($cotizacion->oportunidad()->licitacion()->descripcion) }}<br />
-          @endif
-        </td>
-      </tr>
-      @endif
       @if(count($cotizacion->items()) == 0)
-        <tr>
+      <tr>
+          <td class="texto-centrado">1</td>
           <td>
-            @if(empty($cotizacion->oportunidad()->licitacion_id))
-              {{ $cotizacion->oportunidad()->rotulo }}<br />
+            @if(!empty($cotizacion->oportunidad()->licitacion_id))
+              {{ strtoupper($cotizacion->oportunidad()->rotulo) }}<br />
             @endif
             @if(!empty($cotizacion->plazo_instalacion) || !empty($cotizacion->plazo_servicio) || !empty($cotizacion->plazo_garantia))
             @if(!empty($cotizacion->plazo_instalacion))
@@ -86,9 +93,10 @@
                 {!! nl2br($cotizacion->observacion) !!}<br />
             @endif
             @else
-              MONTO SUMA ALZADA
+              <b>MONTO SUMA ALZADA</b>
             @endif
           </td>
+          <td>UN</td>
           <td class="texto-centrado">{{ Helper::money($cotizacion->monto, $cotizacion->moneda_id) }}</td>
           <td class="texto-centrado">1</td>
           <td class="texto-centrado">{{ Helper::money($cotizacion->monto, $cotizacion->moneda_id) }}</td>
@@ -96,8 +104,9 @@
       @else
         @foreach($cotizacion->items() as $k => $p)
       <tr>
+        <td class="texto-centrado">{{ $k + 1 }}</td>
         <td>
-          <b>ITEM {{ $k + 1 }}:</b> {{ $p->productor()->nombre }}: {{ $p->productor()->descripcion }}<br />
+          <b>{{ $p->productor()->nombre }}:</b><br/> {!! nl2br($p->descripcion) !!}<br />
           @if(!empty($p->productor()->marca))
             <b>MARCA/FABRICANTE:</b> {{ $p->productor()->marca }}<br />
           @endif
@@ -105,33 +114,11 @@
             <b>MODELO/SERIE:</b> {{ $p->productor()->modelo }}<br />
           @endif
         </td>
-        <td class="texto-centrado">{{  $p->monto / $p->cantidad }}</td>
+        <td clasS="texto-centrado">{{ $p->unidad ?? 'UN' }}</td>
+        <td class="texto-centrado">{{  Helper::money($p->monto) }}</td>
         <td class="texto-centrado">{{  $p->cantidad }}</td>
-        <td class="texto-centrado">{{ Helper::money( $p->monto) }}</td>
-                  
+        <td class="texto-centrado">{{ Helper::money( $p->monto * $p->cantidad) }}</td>
       </tr>
-      </tr>
-          <td>
-            @if(empty($cotizacion->oportunidad()->licitacion_id))
-              {{ $cotizacion->oportunidad()->rotulo }}<br />
-            @endif
-            @if(!empty($cotizacion->plazo_instalacion) || !empty($cotizacion->plazo_servicio) || !empty($cotizacion->plazo_garantia))
-            @if(!empty($cotizacion->plazo_instalacion))
-            <!-- INSTALACION -->
-            <b>PLAZO DE ENTREGA:</b> {{ $cotizacion->plazo_instalacion }}<br />
-            @endif
-            @if(!empty($cotizacion->plazo_servicio))
-            <b>PLAZO DE SERVICIO:</b> {{ $cotizacion->plazo_servicio }}<br/>
-            @endif
-            @if(!empty($cotizacion->plazo_garantia))
-            <b>GARANTÍA:</b> {{ $cotizacion->plazo_garantia }}<br />
-            @endif
-            @if(!empty($cotizacion->observacion))
-                <b>OBS.:</b>
-                {!! nl2br($cotizacion->observacion) !!}<br />
-            @endif
-          @endif
-        </tr>
         @endforeach
         @endif
     </tbody>
@@ -139,31 +126,7 @@
   <table>
     <tr>
       <td style="width:450px;">
-        <!--<table>
-          <thead>
-            <tr style="background:#ff9354;color:#ffffff;"  >
-              <th> Descripcion </th>
-              <th> Precio Trimestral S/. </th>
-              <th> Precio Total S/. </th>
-             </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Prestación principal - <br/>Primer pago</td>
-              <td class="texto-centrado" > -  </td>
-              <td class="texto-centrado" ><?= Helper::money(80000)?> </td>
-            </tr>
-            <tr>
-              <td>Prestación accesoria : <br/>Pagos trimestrales fijos</td>
-              <td class="texto-centrado" ><?= Helper::money(8499.990)?> </td>
-              <td class="texto-centrado" ><?= Helper::money(102000)?>  </td>
-            </tr>
-              <td colspan="2" class="texto-centrado" > </td>
-              <td colspan="2" class="texto-centrado" ><?= Helper::money(182000)?>  </td>
-          </tbody>
-        </table>--> 
-
-            @if(false && (!empty($cotizacion->plazo_instalacion) || !empty($cotizacion->plazo_servicio) || !empty($cotizacion->plazo_garantia)))
+            @if((!empty($cotizacion->plazo_instalacion) || !empty($cotizacion->plazo_servicio) || !empty($cotizacion->plazo_garantia)))
             @if(!empty($cotizacion->plazo_instalacion))
             <!-- INSTALACION -->
             <b>PLAZO DE ENTREGA:</b> {{ $cotizacion->plazo_instalacion }}<br />
@@ -181,15 +144,15 @@
       <td>
         <table>
           <tr>
-            <th style="background:#ff9354;color:#ffffff;width:100px;">SubTotal</th>
-            <td style="width:100px;text-align:right;"><?= Helper::money($cotizacion->monto / 1.18, $cotizacion->moneda_id) ?></td>
+            <th style="background:{{ $cotizacion->empresa()->color_primario }};color:#ffffff;width:100px;">SUBTOTAL</th>
+            <td style="width:100px;text-align:right;"><?= Helper::money($cotizacion->subtotal, $cotizacion->moneda_id) ?></td>
           </tr>
           <tr>
-            <th style="background:#ff9354;color:#ffffff;">I.G.V.</th>
-            <td style="width:100px;text-align:right;"><?= Helper::money($cotizacion->monto * 0.18/ 1.18 , $cotizacion->moneda_id) ?></td>
+            <th style="background:{{ $cotizacion->empresa()->color_primario }};color:#ffffff;">I.G.V.</th>
+            <td style="width:100px;text-align:right;"><?= Helper::money($cotizacion->igv, $cotizacion->moneda_id) ?></td>
           </tr>
           <tr>
-            <th style="background:#ff9354;color:#ffffff;">Total</th>
+            <th style="background:{{ $cotizacion->empresa()->color_primario }};color:#ffffff;">TOTAL</th>
             <td style="width:100px;text-align:right;"><?= Helper::money($cotizacion->monto, $cotizacion->moneda_id) ?></td>
           </tr>
         </table>
@@ -200,7 +163,7 @@
   <br />
   <table class="w-100">
     <tr>
-      <th style="background:#ff9354;color:#ffffff;">TÉRMINOS Y CONDICIONES</th>
+      <th style="background:{{ $cotizacion->empresa()->color_primario }};color:#ffffff;">TÉRMINOS Y CONDICIONES</th>
     </tr>
     <tr>
       <td>
@@ -212,18 +175,4 @@
       </td>
     </tr>
   </table>
-  <table style="margin: 0 auto;" >
-   <tr>
-    <td style="text-align:center;">
-    <img height="80" src="https://interno.creainter.com.pe/temp/firma_l.jpeg"/>
-    </td>
-   </tr> 
-   <tfoot>
-      <tr style="border-top: 1px solid black;">
-      <td style="text-align:center">
-      <hr style="color: black; background-color: black;"  />
-        Lizbeth Marcos Pacheco <br/> Area Comercial </td>
-      </tr>
-  </tfoot> 
-  </table>  
 @endsection

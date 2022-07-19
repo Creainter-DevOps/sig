@@ -19,7 +19,7 @@
             </ul>
           </div>
           <div class="card-content collapse show">
-            <ul class="widget-timeline" id="timeline" style="overflow: auto;"></ul>
+            <ul class="widget-timeline" id="timeline" style="height: 415px;overflow: auto;"></ul>
           </div>
         </div>
       </div>
@@ -27,6 +27,7 @@
   </div>
 </div>
 @section('page-styles')
+@parent
 <style>
 .timeline-item {
     font-family: "IBM Plex Sans", Helvetica, Arial, serif !important;

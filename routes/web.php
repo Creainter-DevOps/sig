@@ -11,7 +11,6 @@ use App\Http\Controllers\LanguageController;
 |
  */
 
-
 Route::get('/', 'Auth\LoginController@index');
 Route::get('identificacion', 'Auth\LoginController@login');
 Route::post('identificacion', 'Auth\LoginController@login_check')->name('login');
@@ -55,15 +54,24 @@ Route::resource('proyectos', 'ProyectoController')->parameters([
   ]);
 
 Route::get('empresas/fast','EmpresaController@fast');
+Route::get('misempresas','EmpresaController@mis_empresas');
+Route::get('misempresas/{empresa}','EmpresaController@datos');
 Route::get('empresas/autocomplete', 'EmpresaController@autocomplete'); 
 Route::get('empresas/tags','EmpresaController@tags');
+
+Route::post('empresas/{empresa}/imagen', 'EmpresaController@actualizar_imagen'); 
 Route::get('empresas/{empresa}/tags','EmpresaController@tags_empresa');
 Route::post('empresas/tag/nuevo','EmpresaController@tagCreate');
 Route::post('empresas/tag/eliminar','EmpresaController@tagDelete');
+Route::post('empresas/{empresa}/firmas/procesar','EmpresaController@firmas_sellos_procesar');
+Route::post('empresas/{empresa}/sellos/procesar','EmpresaController@firmas_sellos_procesar');
 Route::resource('empresas','EmpresaController')->parameters([ 
   'empresas' => 'empresa'
 ]);
+
 Route::get('usuarios/autocomplete', 'UsuarioController@autocomplete'); 
+
+
 Route::resource('usuarios','UsuarioController')->parameters([ 
   'usuarios' => 'usuario'
 ]);
@@ -193,7 +201,10 @@ Route::resource('expediente', 'ExpedienteController')->parameters([
   'expediente' => 'expediente'
 ]);
 
-Route::get('etiquetas/mini','EtiquetaController@mini')->name('expediente.custom');
+Route::get('etiquetas/{etiqueta}/aprobar','EtiquetaController@aprobar')->name('etiqueta.aprobar');
+
+Route::get('etiquetas/{etiqueta}/rechazar','EtiquetaController@rechazar')->name('etiqueta.rechazar');
+
 Route::resource('etiquetas', 'EtiquetaController')->parameters([
   'etiquetas' => 'etiqueta'
 ]);
@@ -234,6 +245,8 @@ Route::resource('personales', 'PersonalController')->parameters([
   'personales' => 'personal'
 ]);
 
+Route::post('cotizaciones/{cotizacion}/registrar', 'CotizacionController@registrar_store')->name('cotizacion.registrar_store');
+Route::get('cotizaciones/{cotizacion}/registrar', 'CotizacionController@registrar')->name('cotizacion.registrar');
 
 Route::get('cotizaciones/autocomplete', 'CotizacionController@autocomplete');
 Route::get('cotizaciones/{cotizacion}/registrarParticipacion','CotizacionController@registrarParticipacion');
@@ -242,12 +255,14 @@ Route::get('cotizaciones/{cotizacion}/proyecto','CotizacionController@proyecto')
 Route::post('cotizaciones/{cotizacion}/observacion', 'CotizacionController@observacion');
 Route::get('cotizaciones/{cotizacion}/proyecto', 'CotizacionController@proyecto')->name('cotizaciones.proyecto');
 Route::get('cotizaciones/{cotizacion}/exportar', 'CotizacionController@exportar')->name('cotizacion.exportar');
+Route::post('cotizaciones/{cotizacion}/exportar_repositorio', 'CotizacionController@exportar_repositorio')->name('cotizacion.exportar_repositorio');
 Route::get('cotizaciones/{cotizacion}/detalle', 'CotizacionController@detalle')->name('cotizacion.detalle');
 Route::post('cotizaciones/{cotizacion}/detalle', 'CotizacionController@detallesave');
 Route::get('cotizaciones/{cotizacion}/enviar', 'CotizacionController@enviar')->name('cotizacion.enviar');
 Route::resource('cotizaciones', 'CotizacionController')->parameters([
   'cotizaciones' => 'cotizacion'
 ]);
+
 
 
 Route::get('oportunidades/{oportunidad}/aprobar','OportunidadController@aprobar');
@@ -266,7 +281,6 @@ Route::resource('oportunidades', 'OportunidadController')->parameters([
 Route::get('licitaciones/autocomplete','LicitacionController@autocomplete');
 Route::post('licitaciones/actualizar/{oportunidad}','LicitacionController@update')->name("licitacion.update");
 Route::get('licitaciones/calendario','LicitacionController@calendario');
-Route::get('licitaciones/mini','LicitacionController@mini');
 Route::get('licitaciones/nuevas','LicitacionController@listNuevas');
 Route::get('licitaciones/archivadas','LicitacionController@listArchivadas');
 Route::get('licitaciones/eliminadas','LicitacionController@listEliminadas');
@@ -280,6 +294,11 @@ Route::resource('licitaciones', 'LicitacionController')->parameters([
   'licitaciones' => 'licitacion'
 ]);
 
+Route::get('mini','MiniController@index');
+Route::get('mini/licitaciones','MiniController@licitaciones');
+Route::get('mini/etiquetas/nuevas','MiniController@etiquetas_nuevas');
+Route::get('mini/etiquetas/solicitadas','MiniController@etiquetas_solicitadas');
+Route::get('mini/oportunidades','MiniController@oportunidades');
 
 Route::get('correos/{correo}/ver','CorreoController@ver')->name('correos.ver');
 Route::resource('correos', 'CorreoController')->parameters([

@@ -4,13 +4,15 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Http\UploadedFile;
+use App\Http\Requests\StoreFileRequest;
 use App\Cliente;
 use App\Contacto;
 use App\Empresa;
 use App\Etiqueta;
 use App\Persona;
 use App\Ubigeo;
+use App\Helpers\Helper;
 use App\Actividad;
 use App\EmpresaEtiqueta;
 use Auth;
@@ -40,7 +42,7 @@ class EmpresaController extends Controller {
     public function create(Request $request, Empresa $empresa )
     {
       $this->viewBag['breadcrumbs'][]  = [ 'name' => 'Nueva Empresa' ];
-      $this->viewBab['empresa'] = $empresa;
+      $this->viewBag['empresa'] = $empresa;
       return view( $request->ajax() ? 'empresas.fast' : 'empresas.create ', $this->viewBag )  ;
     }
 
@@ -54,7 +56,9 @@ class EmpresaController extends Controller {
     public function store(Request $request, Empresa $empresa )
     {
       $empresa->fill($request->all());
+      dd($request->all());
       $empresa->save();
+      
       $empresa->log('creado');
       return response()->json([
         'status' => "success",
@@ -111,12 +115,111 @@ class EmpresaController extends Controller {
      * @param  \DummyFullModelClass  $DummyModelVariable
      * @return \Illuminate\Http\Response
      */
+    public function actualizar_imagen( StoreFileRequest $request, Empresa $empresa){
+    }
+    public function firmas_sellos_procesar( StoreFileRequest $request, Empresa $empresa ){
 
-    public function update(Request $request, Empresa $empresa )
+      if($request->hasFile("file") ){
+      
+        $extension = $request->file->extension();
+        $fileName = auth()->id() . '_' . time() . '.'. $extension;
+        $folderName =  auth()->id() . '_' . time(); 
+        $destino = public_path('storage') . '/' . $fileName;
+        $request->file->move(public_path('storage'), $fileName);
+        exec("/bin/pdf-split-sellos " . $destino . " ".$folderName );
+        //$request->gsutil($request->file, $dirName, $fileName);
+        //$request->gsutil( )
+        $files = [];
+        if($handler = opendir( "/tmp/".$folderName )){
+          $index = 1;
+          while (false !== ($file = readdir($handler))) {
+            if (strpos($file ,'jpg')  || strpos($file,'png')){
+              
+              //$destino_cloud = "FIRMAS/Firmas_" .$empresa->id . "_". $index. ".png" ; 
+              $files[] ="https://sig.creainter.com.pe/static/temporal/".$folderName ."/". $file ;
+
+            //Helper::gsutil_cp( "/tmp/".$folderName ."/" . $file, config('constants.ruta_storage') . $destino_cloud);
+$index++;
+            }
+          }
+          closedir($handler);
+        }  
+        return response()->json( [ 'status' =>  true, "data" => $destino , "folder" => $folderName, "files" => $files ] );
+
+      }
+    }
+     
+    public function update(  StoreFileRequest   $request, Empresa $empresa )
     {
-      // Session::flash('message_success', 'Se ha realizado la modificación con éxito.');
-      //$cliente->empresa()->update($request->all());
-      $empresa->es_agente_retencion = $request->boolean('es_agente_retencion');
+      if( isset($_GET["_update"]) ){
+        if($request->hasFile("value")){
+          
+
+          if ( $request->_update == "logo_head" ){
+            $fileName = "LogoHead_" . $empresa->seudonimo . "_" . $empresa->id . ".png" ;     
+            $destino_cloud ="GRAFICOS/".$fileName; 
+            
+            $request->value->move(public_path('storage') , $fileName);
+
+            Helper::gsutil_cp( public_path('storage') . "/" . $fileName, config('constants.ruta_storage') . $destino_cloud);
+            $empresa->logo_head = $destino_cloud;
+            $empresa->save();
+            //unlink("/tmp/".$fileName);
+            return response()->json([ "status" =>true, "ruta" => public_path('storage'). "/" . $fileName, "ruta_cloud" =>  config('constants.ruta_storage') . $destino_cloud ]);  
+          }  
+
+          if( $request->_update == "logo_central" ){
+            $fileName = "LogoCentral_" . $empresa->seudonimo . "_" .$empresa->id . ".png" ;     
+            $destino_cloud = "GRAFICOS/". $fileName; 
+            $request->value->move( public_path('storage'),  $fileName);
+            Helper::gsutil_cp( public_path('storage') ."/" . $fileName, config('constants.ruta_storage') .  $destino_cloud);
+            $empresa->logo_central = $destino_cloud;
+            $empresa->save();
+            //unlink("/tmp/".$fileName);
+            return response()->json([ "status" =>true]   );  
+          }
+        }
+      }
+
+      if ( isset($request->folder_firmas) &&  !empty($request->folder_firmas)  ) {
+        
+        $request->merge( [
+          'nombre' => "Firma " . $empresa->seudonimo,
+          'archivo'  => $request->archivo_firmas,
+          'tipo' => "FIRMA",
+          'folder' =>  $request->folder_firmas,
+          'empresa_id' =>  $empresa->id
+        ]);
+
+        app( DocumentoController::class )->store(
+          $request    
+        );  
+
+        unset($request->folder_firmas);
+
+      }
+      
+      if (isset($request->folder_sellos)) {
+
+        $request_doc = $request;
+        $request->merge([
+          'nombre' => "Visado " . $empresa->seudonimo,
+          'archivo'  => $request->archivo_sellos,
+          'tipo' => "VISADO",
+          'folder' =>  $request->folder_sellos,
+          'empresa_id' =>  $empresa->id
+        ]) ;
+
+        app( DocumentoController::class )->store(
+          $request_doc    
+        );  
+
+        unset( $request->folder_sellos);
+      }
+      if( isset($empresa->es_agente_retencion ) ) {
+        $empresa->es_agente_retencion = $request->boolean('es_agente_retencion');
+      }
+
       $empresa->update($request->all());
       $empresa->log( 'editado', null );
       return response()->json([
@@ -140,8 +243,25 @@ class EmpresaController extends Controller {
       $empresa->log('eliminado');
       return response()->json(['status'=> true , 'refresh' => true  ]); 
     }
+
+    public function mis_empresas(){
+      $empresas = Empresa::where('tenant_id',Auth::user()->tenant_id )->orderBy('id','asc')->get();
+      $this->viewBag['empresas'] = $empresas;
+      return view('empresas.misempresas',$this->viewBag );
+    }
+
+    public function datos(Empresa $empresa ){
+       
+      $etiquetas = EmpresaEtiqueta::with('etiqueta','empresa')->where('empresa_id',$empresa->id)->get();   
+      $this->viewBag['breadcrumbs'][] = [ 'name' =>  $empresa->razon_social ];
+      $this->viewBag['empresa'] = $empresa;
+      $this->viewBag['etiquetas'] = $etiquetas;
+      // dd($etiquetas);
+      return view('empresas.ficha',$this->viewBag );  
+    }
+
     public function addRepresentante(Request $request, Cliente $cliente)
-     {
+    {
         $persona = Persona::updateOrCreate([
             'tipo_documento_id' => $request->input('tipo_documento_id'),
             'numero_documento' => $request->input('numero_documento'),

@@ -163,20 +163,23 @@ class DocumentoController extends Controller {
   public function expediente_paso01_store( Documento $documento, Request $request) {
       $workspace = $documento->json_load();
 
+      Helper::mkdir_p($documento->folder_workspace());
       $folios = 0;
       $commands = [];
       $commands[] = 'sleep 2';
       $commands[] = 'echo "Se ha iniciado el proceso..."';
 
       $estampados = [];
-      $temp = EmpresaFirma::porEmpresa($documento->empresa_id, 'FIRMA');
+
+      $empresa_id = $documento->empresa_id ?? 1;
+      $temp = EmpresaFirma::porEmpresa($empresa_id, 'FIRMA');
       if(!empty($temp)) {
         $temp = array_map(function($n) {
           return gs(config('constants.ruta_storage') . $n['archivo']);
         }, $temp);
         $estampados['firma_original'] = $temp;
       }
-      $temp = EmpresaFirma::porEmpresa($documento->empresa_id, 'VISADO');
+      $temp = EmpresaFirma::porEmpresa($empresa_id, 'VISADO');
       if(!empty($temp)) {
         $temp = array_map(function($n) {
           return gs(config('constants.ruta_storage') . $n['archivo']);
@@ -314,8 +317,8 @@ class DocumentoController extends Controller {
 
       $commands[] = 'export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"';
 
-      $filename = gs_file('pdf');
-      $destino  = config('constants.ruta_storage') . 'tenant-' . Auth::user()->tenant_id . '/' . $filename;
+//      $filename = gs_file('pdf');
+      $destino  = config('constants.ruta_storage') . $documento->archivo;
       $commands[] = "/snap/bin/gsutil cp '" . $output_final . "' '" . $destino . "'";
 
       $workspace['paso03'] = $workspace['paso04'];
@@ -337,7 +340,7 @@ echo "<pre>";
       ];
 
 
-      $documento->archivo       = 'tenant-' . Auth::user()->tenant_id . '/' . $filename;
+//      $documento->archivo       = 'tenant-' . Auth::user()->tenant_id . '/' . $filename;
       $documento->filename      = Helper::replace_extension($documento->rotulo, 'pdf');
       $documento->documentos_id = '{' . implode(',', $documentos_ids) . '}';
       $documento->folio         = $folios;
@@ -346,7 +349,7 @@ echo "<pre>";
       $documento->elaborado_por    = Auth::user()->id;
       $documento->elaborado_hasta = DB::raw('now()');
 
-      $workspace['documento_final'] = 'https://storage.googleapis.com/creainter-peru/storage/' . $documento->archivo . '?t=' . time();
+      $workspace['documento_final'] = 'https://sig.creainter.com.pe/static/cloud/' . $documento->archivo . '?t=' . time();
 
       $documento->json_save($workspace);
 
@@ -388,6 +391,7 @@ echo "<pre>";
          $data['filename']       = Helper::file_name($filename);
          $data['directorio']     = $plantilla->directorio;
          $data['folio']          = $meta['Pages'];
+         $data['formato']        = 'PDF';
 
          $doc = Documento::nuevo($data);
 
@@ -419,14 +423,20 @@ echo "<pre>";
       $doc = Documento::nuevo($data);
 
       if(in_array($doc->tipo, ['VISADO','FIRMA'])) {
-        $carpeta = uniqid();
-        exec("/bin/pdf-split-sellos '" . $destino . "' '" . $carpeta . "'");
+        if( isset( $request->folder )){
+          $carpeta = $request->folder;
+        }else {
+          $carpeta = uniqid();
+          exec("/bin/pdf-split-sellos '" . $destino . "' '" . $carpeta . "'");
+        }
+
         $path = '/tmp/' . $carpeta . '/';
         $files = array_diff(scandir($path), array('.', '..'));
-
+        
         foreach($files as $k => $f) {
           $output = 'FIRMAS/' . strtolower($doc->tipo) . '_' . $doc->empresa_id . '_' . $k . '.png';
           Helper::gsutil_mv($path . $f, config('constants.ruta_storage') . $output);
+          //dd($output);
           EmpresaFirma::create([
             'empresa_id' => $doc->empresa_id,
             'tipo'       => $doc->tipo,
@@ -500,15 +510,17 @@ echo "<pre>";
     ]);
   }
 
-  public function update(Request $request, Documento $documento) {
+  public function update(StoreFileRequest $request, Documento $documento) {
     $data = $request->all();
     if($request->hasFile('archivo')) {
-      $pathFile = config('constants.ruta_storage') . $documento->archivo;
-      $pathinfo = pathinfo($pathFile);
+      $pathinfo = pathinfo($documento->archivo);
       $fileName = $pathinfo['basename'];
       $dirName  = $pathinfo['dirname'];
-      $request->archivo->move($dirName, $fileName);
-      $meta = Helper::metadata($pathFile);
+
+      $meta = Helper::metadata($request->archivo->getPathName());
+      $request->gsutil($request->archivo, $dirName, $fileName);
+
+//      $request->archivo->move($dirName, $fileName);
       $data['folio']   = $meta['Pages'] ?? 1;
       unset($data['archivo']);
     }
@@ -527,18 +539,17 @@ echo "<pre>";
   
   public function agregarDocumento(Documento $documento, Documento  $doc, Request $request) {
       $workspace = $documento->json_load();
-      $orden = $request->get('orden');
+      $orden = $request->input('orden');
 
       $cid = Helper::workspace_get_id($doc->id, 'n');
 
-      $orden = !empty($orden) ? $orden : (!empty($workspace['paso03']) ? sizeof($workspace['paso03']) : 0);
+      $orden = (int) (!empty($orden) ? $orden : (!empty($workspace['paso03']) ? sizeof($workspace['paso03']) : 0));
+
       $append = [];
       $hash = uniqid();
 
       $ruta = config('constants.ruta_storage') . $doc->archivo;
       $ruta = gs($ruta);
-
-
 
       if(!in_array($doc->formato, ['PDF','DOC','DOCX','XLS','XLSX'])) {
         return response()->json([
@@ -556,10 +567,9 @@ echo "<pre>";
         $meta = Helper::metadata($ruta);
         $doc->id = null;
         $doc->folio = $meta['Pages'];
-
       }
 
-
+      $doc->visitar();
 
       if(!empty($doc->es_ordenable)) {
         $workspace['paso03'] = Helper::workspace_space($workspace['paso03'], $orden, $doc->folio);
@@ -615,12 +625,14 @@ echo "<pre>";
           $workspace['paso03'][$cid] = $v;
         }
 
+        $workspace['paso03'] = Helper::workspace_ordenar($workspace['paso03']);
+
         $documento->json_save($workspace);
 
         return response()->json([
           'status' => true , 
-          'orden' => $orden,
-          'data' => array_values($append),
+          'orden'  => $orden,
+          'data'   => array_values($append),
         ]);
     }
    
@@ -697,7 +709,7 @@ echo "<pre>";
       exit;
     }
     if(!file_exists($output)) {
-      exec("/usr/bin/convert -density 150 '" . $input . "[" . $page . "]' -quality 70 -resize x400 -alpha remove '" . $output . "'");
+      exec("/usr/bin/convert -density 150 '" . $input . "[" . $page . "]' -quality 90 -resize x800 -alpha remove '" . $output . "'");
     }
     $headers = [
       'Content-Description' => 'Imagen de Documento',
@@ -740,7 +752,7 @@ echo "<pre>";
         exit;
       }
       if(!file_exists($output)) {
-        exec("/usr/bin/convert -density 150 '" . $input . "[" . $page . "]' -quality 100 -alpha remove '" . $output . "'");
+        exec("/usr/bin/convert -density 150 '" . $input . "[" . $page . "]' -quality 90 -resize x800 -alpha remove '" . $output . "'");
       }
       $headers = [
         'Content-Description' => 'Imagen de Documento',
@@ -773,18 +785,62 @@ echo "<pre>";
     $path = trim($path, '/');
     $data = Documento::obtenerArchivos($path);
     $data = array_map(function($n) use($path) {
-      return [
-        'id'         => $n->id,
-        'is_file'    => !empty($n->es_archivo),
-        'download'   => !empty($n->es_archivo) ? $n->archivo : ($path . '/' . $n->filename),
-        'name'       => $n->filename,
-        'rotulo'     => $n->rotulo,
-        'created_by' => $n->created_by,
-        'folio'      => $n->folio,
-        'created_on' => Helper::fecha($n->created_on, true),
-        'plantilla'  => $n->plantilla,
-        'size'       => $n->filesize,
-      ];
+      if($n->tipo == 1)  { //Carpeta
+        return [
+          'tipo'       => $n->tipo,
+          'is_file'    => false,
+          'download'   => $path . '/' . $n->filename,
+          'name'       => $n->filename,
+          'rotulo'     => $n->rotulo,
+          'created_by' => $n->created_by,
+          'folio'      => $n->folio,
+          'created_on' => Helper::fecha($n->created_on, true),
+          'plantilla'  => false,
+          'size'       => '--',
+        ];
+      } elseif($n->tipo == 2) { //Archivos
+        return [
+          'tipo'       => $n->tipo,
+          'id'         => $n->id,
+          'is_file'    => true,
+          'download'   => config('constants.static_cloud') . $n->archivo,
+          'name'       => $n->filename,
+          'rotulo'     => $n->rotulo,
+          'created_by' => $n->created_by,
+          'folio'      => $n->folio,
+          'created_on' => Helper::fecha($n->created_on, true),
+          'plantilla'  => $n->plantilla,
+          'size'       => $n->filesize,
+        ];
+      } elseif($n->tipo == 3) { //Modificación de Expediente
+        return [
+          'tipo'       => $n->tipo,
+          'id'         => $n->id,
+          'is_file'    => true,
+          'download'   => config('constants.static_cloud') . $n->archivo,
+          'name'       => $n->filename,
+          'rotulo'     => $n->rotulo,
+          'created_by' => $n->created_by,
+          'folio'      => $n->folio,
+          'created_on' => Helper::fecha($n->created_on, true),
+          'plantilla'  => $n->plantilla,
+          'size'       => $n->filesize,
+        ];
+      } elseif($n->tipo == 4) { //Link Publico
+        return [
+          'tipo'       => $n->tipo,
+          'id'         => $n->id,
+          'is_file'    => true,
+          'download'   => config('constants.static_seace') . $n->archivo,
+          'name'       => $n->filename,
+          'rotulo'     => $n->rotulo,
+          'created_by' => $n->created_by,
+          'folio'      => $n->folio,
+          'created_on' => Helper::fecha($n->created_on, true),
+          'plantilla'  => $n->plantilla,
+          'size'       => $n->filesize,
+        ];
+      }
     }, $data);
     return response()->json([
       'status' => true,

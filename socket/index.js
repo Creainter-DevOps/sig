@@ -65,24 +65,54 @@ function sip_asignar_libre(user_id) {
   }
   return false;
 }
+function fell_get_list(tenant_id, user_id, with_client) {
+  with_client = with_client || false;
+  var rp = [];
+  for (var uid in ls) {
+    if(ls.hasOwnProperty(uid)) {
+      if (uid != user_id) {
+        for (var did in ls[uid].devices) {
+          if(ls[uid].devices.hasOwnProperty(did)) {
+            if(with_client) {
+              rp.push(ls[uid].devices[did]);
+            } else {
+              var tempo = ls[uid].devices[did];
+              rp.push({
+                user: ls[uid].name,
+                uid: uid,
+                sid: tempo.client.id,
+                link: tempo.link,
+              });
+            }
+          }
+        }
+      }
+    }
+  }
+  return rp;
+}
 
 io.on('connection', function(client) {
   var device = {
     id: client.id,
     user_id: null,
+    name: null,
   };
   client.on('register', function(data) {
     console.log('Registrer', data);
-    if(device.user_id !== null) {
+    if(device.user_id !== null && false) {
       return client.emit('registred', {
         status: false,
         message: 'ya estás registrado: ' + device.user_id
       });
     }
     device.user_id = data.user_id;
+    device.name    = data.user_name;
+
     if(typeof ls[device.user_id] == 'undefined') {
       ls[device.user_id] = {
         user_id: device.user_id,
+        name: device.name,
         devices: {},
       }
     }
@@ -90,11 +120,27 @@ io.on('connection', function(client) {
       client: client,
       sip_blocked: false,
       sip_current: false,
+      link: data.link,
     };
+
+    var ll = fell_get_list(1, device.user_id, true);
+    for(var ii in  ll) {
+      if (ll[ii].client) {
+        ll[ii].client.emit('fell_change', {
+          type: 'add',
+          sid:  client.id,
+          uid:  device.user_id,
+          link: data.link,
+          name: device.name,
+        });
+      }
+    }
     client.emit('registred', {
       type: 'register',
       status: true,
+      id: device.id,
       sip: user_navs(data.user_id) == 1,
+      fell: fell_get_list(1, data.user_id, false),
     });
   });
   client.on('sip_start', function() {
@@ -153,6 +199,16 @@ io.on('connection', function(client) {
         sip: true,
         heredado: true,
       });
+    }
+    var ll = fell_get_list(1, device.user_id, true);
+    for(var ii in  ll) {
+      if (ll[ii].client) {
+        ll[ii].client.emit('fell_change', {
+          type: 'del',
+          uid: device.user_id,
+          sid: client.id,
+        });
+      }
     }
   });
 });

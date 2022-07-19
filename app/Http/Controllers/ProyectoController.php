@@ -29,7 +29,7 @@ class ProyectoController extends Controller {
       if(!empty($search)) {
           $listado = Proyecto::search($search)->paginate(15)->appends(request()->query());
       } else {
-          $listado = Proyecto::where( 'eliminado', false )->orderBy('fecha_desde', 'desc')->paginate(15)->appends(request()->query());
+          $listado = Proyecto::where( 'eliminado', false )->orderBy('created_on', 'desc')->paginate(15)->appends(request()->query());
       }
       $this->viewBag['listado'] = $listado;
       return view('proyectos.index',  $this->viewBag );

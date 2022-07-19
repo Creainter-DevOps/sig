@@ -30,7 +30,7 @@
             <div class="wizard-horizontal">
                 <div class="row">
                       <div class="col-6" id="iframe_container" >
-                      <iframe  class="doc" src='https://view.officeapps.live.com/op/embed.aspx?src=https://sig.creainter.com.pe/expediente/{{ $cotizacion->id }}/temporal?file={{ reset($workspace['paso02'])['uri'] }}&t={{time()}}' width='1366px' frameborder='0'  style="height:600px">
+                      <iframe  class="doc" src='https://view.officeapps.live.com/op/embed.aspx?src=https://sig.creainter.com.pe/static/temporal/{{ reset($workspace['paso02'])['uri'] }}?t={{time()}}' width='1366px' frameborder='0'  style="height:600px">
                       This is an embedded <a target='_blank' href='http://office.com'>Microsoft Office</a> document, powered by <a target='_blank' href='http://office.com/webapps'>Office Online</a>.</iframe>
                       </div>
                       <div class="col-6">
@@ -57,8 +57,8 @@
                                     <span class="widget-todo-title ml-50">{{$anexo['rotulo'] }}</span>
                                   </div>
                                   <div class="widget-todo-item-action d-flex align-items-center">
-                                    <div class="badge badge-pill badge-light-success mr-1" onclick="visualizar(this)" style="cursor:pointer;" data-url="{{'https://sig.creainter.com.pe/expediente/' . $cotizacion->id . '/temporal?file=' . $anexo['uri'] }}&t={{time()}}"><i class="bx bx-show"></i> </div>
-                                    <a class="avatar bg-rgba-secondary  m-0 mr-50" href="/expediente/{{ $cotizacion->id }}/temporal?file={{$anexo['uri']}}&t={{time()}}" download="documento.docx" rel="noopener noreferrer">
+                                    <div class="badge badge-pill badge-light-success mr-1" onclick="visualizar(this)" style="cursor:pointer;" data-url="{{'https://sig.creainter.com.pe/static/temporal/' . $anexo['uri'] }}?t={{time()}}"><i class="bx bx-show"></i> </div>
+                                    <a class="avatar bg-rgba-secondary  m-0 mr-50" href="/static/temporal/{{$anexo['uri']}}?t={{time()}}" download rel="noopener noreferrer">
                                       <div class="avatar-content">
                                         <span class="font-size-base text-primary"></span>
                                           <i class="bx bxs-download"></i>

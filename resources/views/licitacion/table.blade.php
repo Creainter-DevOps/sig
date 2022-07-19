@@ -33,7 +33,7 @@
                   <ul>
                   @foreach($licitacion->adjuntos() as $a)
                     <li>
-                      <a target="_blank" href="http://prodapp.seace.gob.pe/SeaceWeb-PRO/SdescargarArchivoAlfresco?fileCode={{ $a->codigoAlfresco }}">
+                      <a target="_blank" href="{{ config('constants.static_seace') . $a->codigoAlfresco }}">
                         {{ $a->tipoDocumento }}
                       </a>
                     </li>

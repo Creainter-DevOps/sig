@@ -106,15 +106,6 @@ class LicitacionController extends Controller {
     return view('licitacion.movil');  
   }
 
-  public function mini(Request $request ){
-    if($request->ajax() ){
-      $licitaciones = Licitacion::listado_por_aprobar();
-      return response()->json([ 'status'=> true, 'data' => $licitaciones ] );   
-    }
-    
-    return view('licitacion.prueba');   
-  }
-
   public function show(Request $request, Licitacion $licitacion) {
     $oportunidad = $licitacion->oportunidad();
     if(!empty($oportunidad->id)) {
@@ -198,14 +189,25 @@ public function rechazar(Request $request, Licitacion $licitacion)
   }
 }
 
-public function update(Request $request, Oportunidad $oportunidad) {
-  $dato =  $request->input("field");
-  $value = $request->input($dato);
-  $oportunidad->update($request->all());
-  $oportunidad->log($dato,$value);
+public function update(Request $request, Licitacion $licitacion ) {
+
+  //$dato =  $request->input("field");
+  //$value = $request->input($dato);
+  $data = $request->all();
+  $value = 0;
+  if(!empty($data['_update'])){
+    $data[$data['_update']] = $data['value'];
+    $value = $data['value'];
+    unset($data['value']);
+    unset($data['_update']);
+  }
+  
+  //$value = Helper::money($value);
+  //$oportunidad->log($dato,$value)
   if(is_numeric($value)) {
     $value = Helper::money($value);
   } 
+  $licitacion->update($data);
   return response()->json(['status' => true , 'value' => $value ]);
 }
 

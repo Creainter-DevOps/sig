@@ -25,7 +25,7 @@ class Documento extends Model
     protected $fillable = [
       'tipo','archivo','folio','es_plantilla', 'es_ordenable','rotulo','portada','created_by','formato','generado_de_id','documentos_id',
       'empresa_id','personal_id','vinculo_empresa_id','fecha_firma','fecha_desde','fecha_hasta','plazo_servicio','monto_texto','monto','fecha_acta','filename','es_reusable','tenant_id',
-      'filesize','filename','directorio','oportunidad_id','cotizacion_id','licitacion_id','elaborado_json','elaborado_por','elaborado_desde','elaborado_hasta'
+      'filesize','filename','directorio','oportunidad_id','cotizacion_id','licitacion_id','elaborado_json','elaborado_por','elaborado_desde','elaborado_hasta','usado'
     ];
     protected $casts = [
       'es_reusable'  => 'boolean',
@@ -71,6 +71,11 @@ class Documento extends Model
         'referencia' => $this->id
       ]));
     }
+    public function visitar() {
+      $this->update([
+        'usado' => DB::raw('usado + 1'),
+      ]);
+    }
     public function busqueda($query) {
       $query = strtoupper($query);
       return static::hydrate(DB::select("SELECT * FROM osce.fn_documento_busqueda(:tenant, :referencia, :texto)", [
@@ -79,7 +84,30 @@ class Documento extends Model
         'texto'      => $query,
       ]));
     }
-
+    static function variables() {
+      return [
+        'ROTULO' => '',
+        'COTIZACION.ROTULO' => '',
+        'COTIZACION.NOMENCLATURA' => '',
+        'COTIZACION.FECHA' =>  '',
+        'COTIZACION.NOMENCLATURA' => '',
+        'COTIZACION.ENTIDAD'      => '',
+        'COTIZACION.DIRECCION'    => '',
+        'COTIZACION.MONTO_NETO'   => '',
+        'COTIZACION.DESCUENTO'    => '',
+        'COTIZACION.IGV'          => '',
+        'COTIZACION.MONTO_PLAZO'  => '',
+        'COTIZACION.PLAZO_INSTALACION' => '',
+        'COTIZACION.PLAZO_GARANTIA'    => '',
+        'PERSONAL.ID'                  => '',
+        'PERSONAL.DOCUMENTO'           => '',
+        'PERSONAL.DIRECCION'           => '',
+        'LICITACION.ID'                => '',
+        'LICITACION.NOMENCLATURA'      => '',
+        'LICITACION.ENTIDAD'           => '',
+        'LICITACION.TIPO'              => '',
+      ];
+    }
     public function generar_documento( $cotizacion, $data , $destino) {
 
      $documento = new Documento(); 
@@ -182,11 +210,20 @@ class Documento extends Model
      //$empresa = Empresa::find( $cotizacion->empresa_id );   
 
      //$inputs = array_merge($empresa->toArray(),$inputs); 
-     $plantilla = config('constants.ruta_storage') . $this->archivo;
+     $plantilla = gs(config('constants.ruta_storage') . $this->archivo);
      //dd($plantilla);
      Helper::docx_fill_template($plantilla, $inputs, $destino);
 
      return $documento;
+    }
+    public static  function search($term){
+         
+      $term = strtolower(trim($term));
+        return static::where(function($query) use($term) {
+            $query->WhereRaw("LOWER(osce.documento.tipo) LIKE ?",["%{$term}%"])
+              ->orWhereRaw("LOWER(osce.documento.rotulo) LIKE ?",["%{$term}%"])
+            ;
+        })->select('osce.documento.*')->orderBy('osce.documento.id', 'ASC');
     }
     public function folder_workspace() {
       return config('constants.ruta_temporal') . 'workspace-' . $this->id . '/';

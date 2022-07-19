@@ -29,7 +29,7 @@ class Licitacion extends Model
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password','buenapro_revision','bases_integradas','eliminado'
+        'name', 'email', 'password','buenapro_revision','bases_integradas','eliminado','monto'
     ];
 
     /**
@@ -52,12 +52,15 @@ class Licitacion extends Model
     public function rotulo() {
       return $this->rotulo;
     }
+
     public function aprobar() {
       DB::select('SELECT osce.fn_licitacion_accion_aprobar(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ')');
     }
+
     public function rechazar() {
       DB::select('SELECT osce.fn_licitacion_accion_rechazar(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ')');
     }
+
     public function etiquetas() {
       $rp = collect(DB::select('SELECT osce.fn_etiquetas_a_rotulo(L.etiquetas_id) ee
       FROM osce.licitacion L WHERE id = ' . $this->id))->first();
@@ -150,12 +153,13 @@ class Licitacion extends Model
       return static::hydrate($rp);
     }
     
-   public  static function listado_por_aprobar() {
+   public  static function listado_por_aprobar($ids = "0" ) {
       $rp = DB::select("
-            SELECT L.*, osce.fn_empresa_rotulo(". Auth::user()->tenant_id . ", coalesce(L.empresa_id,O.empresa_id )) empresa, O.licitacion_id
+            SELECT L.*, osce.fn_empresa_rotulo(". Auth::user()->tenant_id . ", coalesce(L.empresa_id,O.empresa_id )) empresa, coalesce(L.monto,O.monto_base ) monto, O.licitacion_id
             FROM osce.licitacion L
             LEFT JOIN osce.oportunidad O ON L.id = O.licitacion_id AND L.eliminado IS NULL
             WHERE L.buenapro_fecha IS NULL AND L.eliminado IS NULL AND O.licitacion_id IS NULL AND L.created_on >= NOW() - INTERVAL '30' DAY AND L.procedimiento_id IS NOT NULL AND L.fecha_participacion_hasta >= NOW()
+            and L.id not in (" .$ids. ")
             ORDER BY L.id DESC
             LIMIT 15");
       return static::hydrate($rp);

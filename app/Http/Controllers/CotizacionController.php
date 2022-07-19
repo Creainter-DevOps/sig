@@ -10,7 +10,9 @@ use App\Contacto;
 use App\Cotizacion;
 use App\CotizacionDetalle;
 use App\Proyecto;
+use App\Documento;
 use App\Helpers\Helper;
+use Auth;
 
 class CotizacionController extends Controller {
 
@@ -122,7 +124,8 @@ class CotizacionController extends Controller {
     return redirect()->route( 'proyectos.show', [ 'proyecto' => $id ]);
   }
   public function exportar(Request $request, Cotizacion $cotizacion) {
-    return Helper::pdf('cotizacion.pdf', compact('cotizacion'), 'P', $cotizacion->nomenclatura() . '.pdf');
+    $empresa = $cotizacion->empresa();
+    return Helper::pdf('cotizacion.pdf', compact('cotizacion','empresa'), 'P')->stream($cotizacion->nomenclatura() . '.pdf');
   }
 
   public function detalle( $id ){
@@ -164,4 +167,61 @@ class CotizacionController extends Controller {
     }
     return response()->json( [ 'status' => true ]);
   } 
+  public function registrar(Request $request, Cotizacion $cotizacion) {
+    return view('cotizacion.registrar', compact('cotizacion'));
+  }
+  public function registrar_store(Request $request, Cotizacion $cotizacion) {
+    $data  = $request->input();
+    $items = $request->input('item');
+    $cotizacion->saveItems($items, $cotizacion->empresa_id);
+    $cotizacion->update($data);
+    return response()->json([
+      'status'  => true,
+      'message' => 'Se ha registrado correctamente.',
+    ]);
+  }
+  public function exportar_repositorio(Request $request, Cotizacion $cotizacion) {
+    $empresa = $cotizacion->empresa();
+    $pdf = Helper::pdf('cotizacion.pdf', compact('cotizacion','empresa'), 'P');
+    $temporal = gs_file('pdf');
+    $filename = 'COT-' . $cotizacion->codigo() . '-' . date('H') . '.pdf';
+    $destino  = 'tenant-' . Auth::user()->tenant_id . '/' . $temporal;
+    $pdf->save($temporal);
+
+    $meta = Helper::metadata($temporal);
+
+    $documento = Documento::where('filename', '=', $filename)->first();
+    if(!empty($documento)) {
+      $documento->update([
+        'folio'          => $meta['Pages'],
+        'rotulo'         => $cotizacion->codigo(),
+        'filename'       => $filename,
+        'filesize'       => filesize($temporal),
+        'cotizacion_id'  => $cotizacion->id,
+        'oportunidad_id' => $cotizacion->oportunidad_id,
+        'licitacion_id'  => $cotizacion->oportunidad()->licitacion_id,
+      ]);
+      Helper::gsutil_mv($temporal, config('constants.ruta_storage') . $documento->archivo);
+    } else {
+      Documento::nuevo([
+        'formato'        => 'PDF',
+        'tipo'           => 'COTIZACION',
+        'directorio'     => trim($cotizacion->folder(true), '/'),
+        'archivo'        => $destino, 
+        'folio'          => $meta['Pages'],
+        'rotulo'         => $cotizacion->codigo(),
+        'filename'       => $filename,
+        'filesize'       => filesize($temporal),
+        'cotizacion_id'  => $cotizacion->id,
+        'oportunidad_id' => $cotizacion->oportunidad_id,
+        'licitacion_id'  => $cotizacion->oportunidad()->licitacion_id,
+      ]);
+      Helper::gsutil_mv($temporal, config('constants.ruta_storage') . $destino);
+    }
+    return response()->json([
+      'status'  => true,
+      'message' => 'Se ha exportado correctamente.',
+      'from'    => $temporal,
+    ]);
+  }
 }

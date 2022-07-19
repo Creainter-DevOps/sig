@@ -10,6 +10,7 @@ use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use App\Oportunidad;
+use App\Producto;
 use App\Helpers\Helper;
 use Auth;
 
@@ -56,7 +57,7 @@ class Cotizacion extends Model
     protected $fillable = [
       'id','empresa_id','fecha','monto','numero','duracion_meses','oportunidad_id','interes_el','interes_por','participacion_el','participacion_por','propuesta_el','propuesta_por',
       'plazo_servicio','plazo_garantia','plazo_instalacion','validez','moneda_id','observacion','terminos','seace_participacion_log','seace_participacion_fecha','seace_participacion_html','documento_id',
-      'elaborado_por','elaborado_desde','elaborado_hasta','elaborado_step','elaborado_json','rotulo',
+      'elaborado_por','elaborado_desde','elaborado_hasta','elaborado_step','elaborado_json','rotulo','notas','subtotal','igv'
     ];
 
     /**
@@ -84,12 +85,13 @@ class Cotizacion extends Model
       return $this->oportunidad()->codigo . '-' . $this->numero;
     }
     public function codigo() {
-      return $this->oportunidad()->codigo . '-' . $this->numero . ': ' . substr($this->oportunidad()->rotulo(), 0, 20);
+      return $this->oportunidad()->codigo . '-' . $this->numero;
+#. ': ' . substr($this->oportunidad()->rotulo(), 0, 20);
     }
     public function items() {
       return $this->hasMany('App\CotizacionDetalle','cotizacion_id')
         ->where('eliminado',false)
-        ->orderBy('id', 'desc')->get();
+        ->orderBy('orden', 'asc')->get();
     }
     public function monto() {
       if(in_array(Auth::user()->id, [12,3,15])) {
@@ -279,13 +281,68 @@ class Cotizacion extends Model
           ->orWhereRaw("LOWER(licitacion.descripcion) LIKE ? ", ["%{$query}%" ]);
       });
     }
-    public function folder_workspace() {
-      return config('constants.ruta_temporal') . 'workspace-' . $this->id . '/';
+    public function folder_workspace($relative = false) {
+      if($relative) {
+        return 'workspace-' . $this->id . '/';
+      } else {
+        return config('constants.ruta_temporal') . 'workspace-' . $this->id . '/';
+      }
     }
     public function json_load() {
       return Helper::json_load('cotz-' . $this->id);
     }
     public function json_save($x) {
       return Helper::json_save('cotz-' . $this->id, $x);
+    }
+    public function saveItems(&$items, $empresa_id) {
+      $items = array_filter($items, function($n) {
+        $n['producto'] = trim($n['producto']);
+        return !empty($n['producto']);
+      });
+      $items = array_values($items);
+      if(empty($items)) {
+        return false;
+      }
+      $subtotal = 0;
+      foreach($items as $ii => $n) {
+        $producto = Producto::where('nombre', '=', $n['producto'])->first();
+        if(empty($producto)) {
+          $producto = Producto::create([
+            'nombre'      => $n['producto'],
+            'empresa_id'  => $empresa_id,
+            'tipo'        => 'BIEN',
+            'descripcion' => $n['descripcion'],
+            'moneda_id'   => 1,
+          ]);
+        }
+        $item = CotizacionDetalle::where([
+          ['cotizacion_id', '=', $this->id],
+          ['orden', '=', $ii],
+        ])->first();
+        if(empty($item)) {
+          CotizacionDetalle::create([
+            'cotizacion_id' => $this->id,
+            'orden'         => $ii,
+            'producto_id'   => $producto->id,
+            'cantidad'      => $n['cantidad'],
+            'monto'         => $n['costo'],
+            'descripcion'   => $n['descripcion'],
+          ]);
+        } else {
+          $item->update([
+            'producto_id'   => $producto->id,
+            'cantidad'      => $n['cantidad'],
+            'monto'         => $n['costo'],
+            'descripcion'   => $n['descripcion'],
+          ]);
+        }
+        $subtotal += $n['costo'] * $n['cantidad'];
+      }
+      static::update([
+        'subtotal' => $subtotal,
+        'igv'      => $subtotal * 0.18,
+        'monto'    => $subtotal * 1.18
+      ]);
+      return true;
     }
 }

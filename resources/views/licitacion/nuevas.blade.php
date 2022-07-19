@@ -94,7 +94,7 @@ tr.block_details>td>div {
                   <td>
 <ul>
             @foreach ($oportunidad->adjuntos() as $a)
-              <li><a target="_blank" href="http://prodapp.seace.gob.pe/SeaceWeb-PRO/SdescargarArchivoAlfresco?fileCode={{ $a->codigoAlfresco }}">{{ $a->tipoDocumento }}</a></li>
+              <li><a target="_blank" href="{{ config('constants.static_seace') . $a->codigoAlfresco }}">{{ $a->tipoDocumento }}</a></li>
             @endforeach
           </ul>
                   </td>

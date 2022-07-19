@@ -147,9 +147,9 @@
     <div class="col-md-6 col-12">
       <div class="form-label-group">
           <input type="file" class="form-control" name="archivo"  accept=".doc,.docx,.pdf">
-          <label for="">Archivo</label>
+          <label for="">Archivo2</label>
           @if(!empty($documento->id))
-            <a href="/storage/{{ $documento->archivo }}?t={{ time() }}" target="_blank" download>Descargar Archivo</a>
+            <a href="{{ config('constants.static_cloud') . $documento->archivo }}?t={{ time() }}" target="_blank" download>Descargar Archivo</a>
           @endif
       </div>
     </div>

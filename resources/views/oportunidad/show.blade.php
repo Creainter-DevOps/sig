@@ -226,8 +226,7 @@
                     </div>
                   </div>
                   <div class="col-6">
-
-@include('actividad.create', [
+                @include('actividad.create', [
                     'into' => [
                         'licitacion_id' => $oportunidad->licitacion_id,
                         'oportunidad_id' => $oportunidad->id,
@@ -359,12 +358,31 @@
                 <div class="col-2 col-sm-2">
                     <div class="card">
                         <div class="card-header">
-                          @if(!empty($e->cotizacion))
-                            <div style="position: relative;top: -5px;font-size: 11px;background: #ffb16e;color: #fff;padding: 2px;text-align: center;border-radius: 3px;">
-                            <a href="javascript:void(0);" data-popup="/documentos/visor?path={{ $e->cotizacion->folder(true) }}&oid={{ $oportunidad->id }}&cid={{ $e->cotizacion->id }}" style="color:#fff;">{{ $e->cotizacion->nomenclatura() }}</a>
-                            </div>
-                            @endif
-                            <h6 class="card-title" style="font-size: 15px;">{{ $e->razon_social }}<br /><span class="small">{{ $e->ruc }}</span></h6>
+                            <h6 class="card-title" style="font-size: 15px;">
+                              {{ $e->razon_social }}<br />
+                              @if(!empty($e->cotizacion))
+                              <span class="small">{{ $e->cotizacion->nomenclatura() }}</span>
+                              @else
+                              <span class="small">{{ $e->ruc }}</span>
+                              @endif
+                            </h6>
+                            @if(!empty($e->cotizacion))
+          <div class="heading-elements">
+            <ul class="list-inline mb-0">
+              <li>
+                <i class="bx bx-dots-vertical-rounded" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></i>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                  <a class="dropdown-item" href="javascript:void(0);" data-popup="/documentos/visor?path={{ $e->cotizacion->folder(true) }}&oid={{ $oportunidad->id }}&cid={{ $e->cotizacion->id }}">Mi Carpeta</a>
+                  <a class="dropdown-item" href="/cotizaciones/{{ $e->cotizacion->id }}/registrar" target="_blank">Cotización por Items</a>
+                  <a class="dropdown-item" href="/cotizaciones/{{ $e->cotizacion->id }}/exportar" target="_blank">Descargar PDF</a>
+                  <a class="dropdown-item" href="/expediente/{{ $e->cotizacion->id }}/inicio" target="_blank">Abrir Expediente de Propuesta</a>
+                  <a class="dropdown-item" href="/cotizaciones/{{ $e->cotizacion->id }}/enviar" data-confirm>Marcar como enviado</a>
+                  <a class="dropdown-item" href="/cotizaciones/{{ $e->cotizacion->id }}/proyecto" data-confirm>Convertir a Proyecto</a>
+                </div>
+              </li>
+            </ul>
+          </div>
+                          @endif
                         </div>
                         <div class="card-content">
                             <div class="card-body">
@@ -429,6 +447,10 @@
                                                         </div>
                                                       @endif
                                                     </div>
+                                                @else
+                                                  <div style="text-align: center;margin-top: 5px;font-size:10px;">
+                                                      El plazo ha vencido, si ha enviado manualmente al seace haga click abajo.<br/>
+                                                      <a href="/cotizaciones/{{ $e->cotizacion->id }}/enviar" data-confirm>Sí he enviado</a>
                                                 @endif
                                                 </div>
                                             </li>

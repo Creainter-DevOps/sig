@@ -13,7 +13,9 @@ $(document).ready(function () {
   // init date picker
   if ($(".pickadate").length) {
     $(".pickadate").pickadate({
-      format: "mm/dd/yyyy"
+      formatSubmit: 'yyyy-mm-dd',
+      format: "dd/mm/yyyy",
+      hiddenName: true
     });
   }
 

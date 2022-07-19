@@ -65,6 +65,7 @@ class Etiqueta extends Model {
       ->leftJoin('osce.empresa_etiqueta','empresa_etiqueta.etiqueta_id','etiqueta.id') 
       ->leftJoin('osce.empresa', 'empresa.id', 'empresa_etiqueta.empresa_id')
       ->where('empresa.tenant_id', Auth::user()->tenant_id );
+
     }
     public function ultima_comunicacion() {
       return '';
@@ -101,19 +102,40 @@ class Etiqueta extends Model {
       $this->rechazado_por = Auth::user()->id;
     }
 
-    public  function etiquetas_por_verificar(){
-        $rpta = Etiqueta::select("select E.id, E.nombre, U1.usuario solicitada_por, U2.usuario verificado_por, U3.usuario rechazado_por, P.razon_social from osce.etiqueta E
+    public static function etiquetas_solicitadas($ids = "0" ){
+        $rpta = DB::select("
+        select E.id,E.repetidas,E.nombre,EM.tipo,U1.usuario solicitada_por, E.solicitado_el, U2.usuario verificado_por, U3.usuario rechazado_por, P.razon_social,E.repetidas from osce.etiqueta E
                 left join osce.empresa_etiqueta EM on EM.etiqueta_id = E.id
                 left join osce.empresa P on P.id = EM.empresa_id
                 left join public.usuario U1 on U1.id = E.solicitado_por
                 left join public.usuario U2 on U2.id = E.verificada_por
                 left join public.usuario U3 on U3.id = E.rechazado_por
+                where E.rechazado_el is null 
+                and E.aprobado_el is null
+                and E.solicitado_por is not null
+                and E.id not in (". $ids . " )
+                
+                order by E.id DESC
+                limit 15
+                ");
+        return static::hydrate($rpta);
+      }  
+    public static function etiquetas_nuevas( $ids = "0" ){
+        $rpta = DB::select("select E.id,E.repetidas,E.nombre,EM.tipo, P.razon_social,E.repetidas from osce.etiqueta E
+                left join osce.empresa_etiqueta EM on EM.etiqueta_id = E.id
+                left join osce.empresa P on P.id = EM.empresa_id
                 where E.verificada_el is  null 
                 and E.rechazado_el is null 
-                and EM.empresa_id is not null ")->get();
-        return $rpta;
+                and E.aprobado_el is null
+                and E.solicitado_por is null
+                and EM.empresa_id is null
+                and E.id not in (". $ids . " )
+                order by E.repetidas DESC
+                limit 15
+                ");
+        return static::hydrate($rpta);
       }  
-    public function verificar(){
+    public function aprobar(){
       $this->aprobado_el = now();
       $this->aprobado_por = Auth::user()->id;
     }

@@ -108,6 +108,15 @@ function Bucketjs () {
       dropArea.addEventListener(eventName, preventDefaults, false)   
       document.body.addEventListener(eventName, preventDefaults, false)
     });
+    box.addEventListener('dragenter', function(e) {
+      $(box).addClass('ready_for_upload');
+    });
+    box.addEventListener('dragleave', function(e) {
+      $(box).removeClass('ready_for_upload');
+    });
+    box.addEventListener('dragover', function(e) {
+      $(box).addClass('ready_for_upload');
+    });
     box.addEventListener('drop', function(e) {
       console.log('drop', e);
       var dt = e.dataTransfer;
@@ -149,7 +158,7 @@ function Bucketjs () {
         if(!dir) {
           return false;
         }
-        if(!(/^[a-zA-Z0-9\-]+$/.test(dir))) {
+        if(!(/^[a-zA-Z0-9\-\ ]+$/.test(dir))) {
           alert('Ingrese un nombre correcto.(Numeros, letras, Guión)');
           return $(this).click();
         }
@@ -178,7 +187,7 @@ function Bucketjs () {
         if(!dir) {
           return false;
         }
-        if(!(/^[a-zA-Z0-9\-]+$/.test(dir))) {
+        if(!(/^[a-zA-Z0-9\-\ ]+$/.test(dir))) {
           alert('Ingrese un nombre correcto.(Numeros, letras, Guión)');
           return $(this).click();
         }
@@ -226,10 +235,10 @@ function Bucketjs () {
   };
   var fillFile = function (file) {
     var ul = $(_element).find("tbody");
-    if(file.download) {
+    if(file.tipo == 1 || file.tipo == 2 || file.tipo == 4) {
       ul.append(
         $("<tr>")
-          .addClass(file.is_file ? 'StackedListItem--isDraggable' : 'es_directorio')
+          .addClass(file.id ? 'StackedListItem--isDraggable' : 'es_directorio')
           .attr('data-id', file.id)
           .attr('data-plantilla', file.plantilla ? 'true' : 'false')
           .attr("data-download", file.download)
@@ -238,10 +247,10 @@ function Bucketjs () {
             if(!file.download) {
               return false;
             }
-            if(!file.is_file) {
+            if(file.tipo == 1) {
               goPath(file.download);
             } else {
-              window.open('https://storage.googleapis.com/creainter-peru/storage/' + $(this).closest('tr').attr("data-download"));
+              window.open($(this).closest('tr').attr("data-download"));
             }
             }))
           .append($("<td>").addClass('rotulo').text(file.rotulo))

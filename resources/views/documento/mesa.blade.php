@@ -1,4 +1,15 @@
-            <div class="wizard-horizontal" style="padding: 0 15px;">
+<style>
+.StackedListItem {
+  background-image: url('/images/loading.gif')!important;
+  background-size: 50px!important;
+  background-repeat: no-repeat!important;
+  background-position: center!important;
+}
+.StackedList.ready_for_upload {
+  background: #cfffb1!important;
+}
+</style>
+<div class="wizard-horizontal" style="padding: 0 15px;">
                 <div class="row">
                   <section id="MultipleContainers" >
                     <article id="ContainerOne" class="StackedListWrapper StackedListWrapper--sizeLarge StackedListWrapper--axisHorizontal Container" style="position:relative;">
@@ -14,7 +25,7 @@
                       </div>
                       <ul class="StackedListDrag StackedList" data-container="draw" data-dropzone="draw">
                       @if(!empty($workspace['paso03']))
-                      @foreach ($workspace['paso03'] as $k => $file)
+                      @foreach (Helper::workspace_ordenar($workspace['paso03']) as $k => $file)
                       <li class="boxDraggable StackedListItem StackedListItem--isDraggable StackedListItem--item1" data-id="{{ $k }}" data-orden="{{$file['orden'] }}" data-firma="{{ !empty($file['estampados']['firma']) ? "true" : '' }}" data-tipo="{{ $file['tipo'] }}"  data-visado="{{ !empty($file['estampados']['visado']) ? "true" : '' }}" data-tipo="{{ $file['tipo'] }}">
                         <img class="background_image" src="/documentos/{{ $documento->id }}/generarImagenTemporal?page=0&cid={{$k}}&t={{time()}}"/>
                         <div class="StackedListContent">
@@ -76,6 +87,32 @@
 <script src="{{asset('js/scripts/forms/wizard-steps.js')}}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/draggable/1.0.0-beta.12/draggable.bundle.js" integrity="sha512-CY+c7SEffH9ZOj1B9SmTrJa/ulG0I6K/6cr45tCcLh8/jYqsNZ6kqvTFbc8VQA/rl9c2r4QBOx2Eur+2vkVWsA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
+let preventDefaults = function (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    };
+    let dropArea = document.querySelector('[data-container="draw"]');
+    console.log('dropArea', dropArea);
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, preventDefaults, false)
+      document.body.addEventListener(eventName, preventDefaults, false)
+    });
+    dropArea.addEventListener('dragenter', function(e) {
+      $(dropArea).addClass('ready_for_upload');
+    });
+    dropArea.addEventListener('dragleave', function(e) {
+      $(dropArea).removeClass('ready_for_upload');
+    });
+    dropArea.addEventListener('dragover', function(e) {
+      $(dropArea).addClass('ready_for_upload');
+    });
+    dropArea.addEventListener('drop', function(e) {
+      console.log('drop', e);
+      var dt = e.dataTransfer;
+      var files = dt.files;
+      handleFiles(files);
+    }, false);
+
 var current_tool = null;
 $('#btnRepositorio').on('click', function() {
   $('#drawRepositorio').toggle();
@@ -230,28 +267,28 @@ function realizar_busqueda( query ) {
     box.html("");
     let template = document.getElementById("template-documento").content;
     data.forEach( n => {
-      let clone = template.cloneNode(true);
+      /*let clone = template.cloneNode(true);
       console.log(clone);
       let li =  clone.querySelector("li");
-      li.setAttribute("id", n.id);
-      li.setAttribute("plantilla", n.es_plantilla);
-      li.setAttribute("tipo", n.tipo );
-      li.setAttribute("folio",n.folio);
+      li.dataset.plantilla = n.es_plantilla;
+      li.dataset.tipo =  n.tipo ;
+      li.dataset.folio = n.folio;
+      li.dataset.id = n.id;
       li.setAttribute("es-ordenable", n.es_ordenable );
       li.querySelector(".CardContentTitulo").textContent = n.rotulo ? n.rotulo : '';
       li.querySelector(".CardContentDesc01").textContent = (typeof n.desc01 !== 'undefined') ? n.desc01 : '';
       li.querySelector(".CardContentDesc02").textContent = (typeof n.desc02 !== 'undefined') ? n.desc02 : '';
       li.querySelector(".CardContentDesc03").textContent = (typeof n.desc03 !== 'undefined') ? n.desc03 : '';
-      box.append(clone);
+      box.append(clone);*/
 
-    /*  box.append(`<li class="boxDraggable StackedListItem--isDraggable" data-id="${n.id}" data-plantilla="${n.es_plantilla}" data-tipo="${n.tipo}" data-folio="${n.folio}" data-es-ordenable="${n.es_ordenable}">
+    box.append(`<li class="boxDraggable StackedListItem--isDraggable" data-id="${n.id}" data-plantilla="${n.es_plantilla}" data-tipo="${n.tipo}" data-folio="${n.folio}" data-es-ordenable="${n.es_ordenable}">
                   <div class="CardContent">
                     <div class="CardContentTitulo">${ n.rotulo }</div>
                     <div class="CardContentDesc01">${ n.desc01 }</div>
                     <div class="CardContentDesc02">${ n.desc02 }</div>
                     <div class="CardContentDesc03">${ n.desc03 }</div>
                   </div>
-                </li>`);*/
+                </li>`);
 
 
     })
@@ -345,7 +382,7 @@ bucket.capture(document.getElementById('BucketRepositorio'));
         button.click();
         return 0;
       }
-      console.log('agregarDocumento');
+      console.log('agregarDocumento', evt.data.newIndex);
       agregarDocumento(box.dataset.id, evt.data.newIndex, true, evt.data.dragEvent.data.originalSource);
       return 0;
 
@@ -412,7 +449,7 @@ bucket.capture(document.getElementById('BucketRepositorio'));
          "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute('content') 
       },
       type: 'post',
-      data: { orden: orden }, 
+      data: { orden: orden - 1 }, 
       success: function(res) {
         $(reemplazar).remove();
         if(!res.status) {
@@ -438,6 +475,7 @@ bucket.capture(document.getElementById('BucketRepositorio'));
                         </div>
                         </div>
                       </li>`, orden);
+            orden++;
           });
         }
         render_dom_popup();

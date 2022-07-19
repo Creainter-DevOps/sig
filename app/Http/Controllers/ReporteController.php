@@ -32,7 +32,7 @@ class ReporteController extends Controller
         ['key' => 'id', 'only' => array('id','aprobado_el','aprobado_por','codigo','rotulo','institucion','fecha_participacion_hasta','fecha_propuesta_hasta','fecha_buena_hasta')],
         ['key' => 'empresa', 'only' => array('empresa','participacion_el','participacion_por','propuesta_el','propuesta_por','monto','ganadores')]
       ]);
-      return Helper::pdf('reportes.licitacion_participaciones', compact('empresas','listado'));
+      return Helper::pdf('reportes.licitacion_participaciones', compact('empresas','listado'))->stream('exportado.pdf');
     }
     public function usuarios(){
      $licitacion = Helper::array_group_by( Actividad::aprobadas_desaprobadas()->toArray(), ['key'=> 'tipo'] ) ;
@@ -102,7 +102,7 @@ class ReporteController extends Controller
                 ];
        }, $fecha );
       }, $actividades );
-      return Helper::pdf('reportes.usuario',compact('actividades') ,'P', "Reportes.pdf" );
+      return Helper::pdf('reportes.usuario',compact('actividades') ,'P')->stream('exportado.pdf');
     }
 
 

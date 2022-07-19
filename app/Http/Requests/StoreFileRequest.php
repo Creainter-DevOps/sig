@@ -30,12 +30,13 @@ class StoreFileRequest extends FormRequest
     public function gsutil($file, $path, $name = null) {
       $temporal_dir  = config('constants.ruta_temporal');
       if($name === null) {
-        $name = uniqid() . '.' . strtolower($file->extension());
+        $name = date('Y_m_d') . uniqid() . '.' . strtolower($file->extension());
       }
-      $file->move($temporal_dir, $name);
+      //$file->move($temporal_dir, $name);
       $destino = trim($path, '/') . '/' . $name;
 
-      Helper::gsutil_mv($temporal_dir . $name, 'gs://creainter-peru/storage/' . $destino);
+      //Helper::gsutil_mv($temporal_dir . $name, 'gs://creainter-peru/storage/' . $destino);
+      Helper::gsutil_mv($file->getPathName(), 'gs://creainter-peru/storage/' . $destino);
       return $destino;
     }
 }

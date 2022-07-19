@@ -39,7 +39,9 @@ table.tabla td, table.tabla th { padding: 5px 3px; }
 </head>
 <body>
 <div id="header">
-    <img src="https://www.creainter.com.pe/assets/images/logo/logo-dark.png" style="width:150px;" />
+@if(!empty($empresa->logo_head))
+  <img src="{{ 'https://storage.googleapis.com/creainter-peru/storage/' . $empresa->logo_head }}" style="max-height:150px;max-width:300px;" />
+@endif
 </div>
 @yield('content')
 <script type="text/php">

@@ -17,9 +17,9 @@ class ContableController extends Controller {
     return view('contable.index');
   }
   public function facturas_por_cobrar() {
-    return Helper::pdf('contable.reporte_facturas_por_cobrar', []);
+    return Helper::pdf('contable.reporte_facturas_por_cobrar', [])->stream('exportado.pdf');
   }
   public function licitaciones_semanal() {
-    return Helper::pdf('contable.reporte_licitaciones_semanal', []);
+    return Helper::pdf('contable.reporte_licitaciones_semanal', [])->stream('exportado.pdf');
   }
 }

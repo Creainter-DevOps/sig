@@ -245,7 +245,7 @@ public static function array_only_keys($n, $m) {
     }
     return $_out;
   }
-  public static function pdf($theme, $input, $type = 'landscape', $output = 'exportado.pdf')
+  public static function pdf($theme, $input, $type = 'landscape')
   {
     if($type == 'L') {
       $type = 'landscape';
@@ -255,7 +255,7 @@ public static function array_only_keys($n, $m) {
     $pdf = \PDF::loadView($theme, $input);
     $pdf->setPaper('A4', $type);
     $pdf->getDomPDF()->set_option("enable_php", true);
-    return $pdf->stream($output);
+    return $pdf;
   }
   public static function dinero_a_texto($n, $moneda_id) {
     $n = number_format($n, 2, '.', '');
@@ -285,7 +285,7 @@ public static function array_only_keys($n, $m) {
   }  
 
   public static function docx_fill_template($input, $data, $output) {
-    $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor(gs($input));
+    $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($input);
     if(!empty($data['EMPRESA.IMAGEN_HEADER'])) {
       $templateProcessor->setImageValue('EMPRESA.IMAGEN_HEADER',
         [

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Auth;
 use App\Etiqueta;
+use App\EmpresaEtiqueta;
 class EtiquetaController extends Controller
 {
     /**
@@ -24,11 +26,11 @@ class EtiquetaController extends Controller
     public function create( )
     {
        $etiqueta = Etiqueta::nuevo($request->nombre);
-       $etiqueta->solicitado_el = DB::raw('now()');
+       $etiqueta->solicitado_el = now();
        $etiqueta->solicitado_por = Auth::user()->id;
-       $etiqueta->aprobado_el = DB::raw('now()');
+       $etiqueta->aprobado_el = now();
        $etiqueta->aprobado_por = Auth::user()->id;
-       EmpresaEtiqueta::create([ 'tenant_id' => Auth::user()->tenant_id, 'empresa_id' => $request->input('empresa_id'), 'etiqueta_id' => $etiqueta->id , 'tipo' => $request->input('tipo') ]);
+       //EmpresaEtiqueta::create([ 'tenant_id' => Auth::user()->tenant_id, 'empresa_id' => $request->input('empresa_id'), 'etiqueta_id' => $etiqueta->id , 'tipo' => $request->input('tipo') ]);
        return response()->json([ 'success'=> true , 'id' => $etiqueta->id ]);
     }
 
@@ -41,12 +43,21 @@ class EtiquetaController extends Controller
     public function store( Request $request, Etiqueta $etiqueta )
     {
        $etiqueta = Etiqueta::nuevo($request->nombre);
-       $etiqueta->solicitado_el = DB::raw('now()');
+       $etiqueta->solicitado_el = now();
        $etiqueta->solicitado_por = Auth::user()->id;
-       $etiqueta->aprobado_el = DB::raw('now()');
+       $etiqueta->aprobado_el = now();
        $etiqueta->aprobado_por = Auth::user()->id;
-       EmpresaEtiqueta::create([ 'tenant_id' => Auth::user()->tenant_id, 'empresa_id' => $request->input('empresa_id'), 'etiqueta_id' => $etiqueta->id , 'tipo' => $request->input('tipo') ]);
-       return response()->json([ 'success'=> true , 'id' => $etiqueta->id ]);
+       $etiqueta->save();
+       $emp  = EmpresaEtiqueta::where('etiqueta_id', $etiqueta->id )->where('empresa_id',$request->input('empresa_id') )->first();
+
+       if(empty( $emp )){
+
+         EmpresaEtiqueta::create([ 'tenant_id' => Auth::user()->tenant_id, 'empresa_id' => $request->input('empresa_id'), 'etiqueta_id' => $etiqueta->id , 'tipo' => $request->input('tipo') ]);
+         return response()->json([ 'success'=> true , 'id' => $etiqueta->id ]);
+
+       } else {
+         return response()->json([ 'success'=> false , 'message' =>'La etiqueta ya fue creada anteriormente' ]);
+       } 
     }
     public function mini(){
       $etiqueta = Etiqueta::whereNull('verificada_el')->whereNull('rechazado_el')->first();
@@ -85,15 +96,32 @@ class EtiquetaController extends Controller
     {
         //
     }
-    public function verificar( Request $request, Licitacion $licitacion ){
-      $licitacion->verificar();
-      $licitacion->save();
+    public function aprobar( Request $request, Etiqueta $etiqueta ){
+
+      $etiqueta->aprobar();
+
+      if(!empty( $request->input("empresa_id")) && !empty( $request->input("tipo")) ){
+        $emp = EmpresaEtiqueta::where('etiqueta_id', $etiqueta->id )->where('empresa_id',$request->input('empresa_id') )->first();
+        if(empty( $emp )){
+          EmpresaEtiqueta::create([ 'tenant_id' => Auth::user()->tenant_id, 'empresa_id' => $request->input('empresa_id'), 'etiqueta_id' => $etiqueta->id , 'tipo' => $request->input('tipo') ]);
+           return response()->json([ 'success'=> true , 'id' => $etiqueta->id ]);
+        }
+      }
+      $etiqueta->save();
       return response()->json(['status' => true, 'refresh' => true ]);
     }
 
-    public function rechazar( Request $request, Licitacion $licitacion ){
-      $licitacion->recharzar();
-      $licitacion->save();
+    public function rechazar( Request $request, Etiqueta $etiqueta ){
+      $etiqueta->rechazar();
+
+      if(!empty( $request->input("empresa_id")) && !empty( $request->input("tipo")) ){
+
+        $emp = EmpresaEtiqueta::where('etiqueta_id', $etiqueta->id )->where('empresa_id',$request->input('empresa_id') )->first();
+        if(empty( $emp )){
+          EmpresaEtiqueta::create([ 'tenant_id' => Auth::user()->tenant_id, 'empresa_id' => $request->input('empresa_id'), 'etiqueta_id' => $etiqueta->id , 'tipo' => $request->input('tipo') ]);
+        }
+      }
+      $etiqueta->save();
       return response()->json(['status' => true, 'refresh' => true ]);
     }
     /**
@@ -105,8 +133,8 @@ class EtiquetaController extends Controller
     public function destroy($id)
     {
        $etiqueta = EmpresaEtiqueta::where('empresa_id',$request->input('empresa_id') )->where( 'etiqueta_id', $request->input('etiqueta_id') )->delete();  
-      //$etiqueta->delete(); 
-      return response()->json([ 'success'=> true  ]);
+       //$etiqueta->delete(); 
+       return response()->json([ 'success'=> true  ]);
         //
     }
 }

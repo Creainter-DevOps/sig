@@ -101,6 +101,7 @@ class OportunidadController extends Controller {
   public function update(Request $request, Oportunidad $oportunidad )
   {
     $data = $request->all();
+
     if($oportunidad->estado == 3) {
       if(!empty($data['_update'])) {
         if(!empty($oportunidad->{$data['_update']})) {

@@ -108,6 +108,16 @@ class Oportunidad extends Model
     public function comentarios() {
       return 0;
     }
+    public function correo() {
+      return $this->belongsTo('App\Correo', 'correo_id')->first();
+    }
+    public function correosRelacionados() {
+      $rp = null;
+      if(!empty($this->correo_id)) {
+        $rp = DB::select("SELECT * FROM osce.correo WHERE id = :id OR id IN (SELECT correo_id FROM osce.correo_hilo WHERE token_id = (SELECT token_id FROM osce.correo_hilo WHERE correo_id = :id LIMIT 1))", ['id' => $this->correo_id]);
+      }
+      return Correo::hydrate($rp);
+    }
     public static function list() {
       return Oportunidad::whereNull('oportunidad.licitacion_id')
         ->whereNull('oportunidad.eliminado')
@@ -374,10 +384,10 @@ FROM (
     FROM (
       SELECT O.tenant_id, O.id, O.licitacion_id, O.aprobado_el, O.etiquetas_id, O.aprobado_por, O.rotulo, O.fecha_propuesta_hasta, O.correo_id
       FROM osce.oportunidad O
-      WHERE O.fecha_propuesta_hasta >= NOW() - INTERVAL '10' DAY AND O.fecha_propuesta_hasta <= NOW() + INTERVAL '20' DAY
+      WHERE O.fecha_propuesta_hasta >= NOW() - INTERVAL '1' DAY AND O.fecha_propuesta_hasta <= NOW() + INTERVAL '20' DAY
 		AND O.tenant_id = 1 AND O.estado = 1 AND O.aprobado_el IS NOT NULL
 		AND O.rechazado_el IS NULL AND O.archivado_el IS NULL
-		AND O.fecha_participacion IS NOT NULL
+--		AND O.fecha_participacion IS NOT NULL
     ) O
   ) x
   WHERE x.empresas_interes = 0 OR x.aprobado_el::date = NOW()::date
@@ -411,6 +421,18 @@ AND
 -- WHERE x.cantidad_propuestas = 0 OR x.cantidad_propuestas <> x.cantidad_participadas
 ORDER BY L.fecha_propuesta_hasta ASC, id DESC");*/
       return static::hydrate($rp);
+    }
+    static function listado_por_aprobar($ids = "0" ){
+      $rpta = DB::select("select O.id, O.licitacion_id, osce.fn_empresa_rotulo(".Auth::user()->tenant_id." , O.empresa_id ) entidad, O.empresa_id,  O.rotulo, coalesce( L.nomenclatura, O.codigo ) nomenclatura, O.correo_id,L.bases_integradas,coalesce( O.monto_base, L.monto ) monto, O.estado, L.moneda
+from osce.oportunidad O
+left join osce.licitacion L on L.id = O.licitacion_id
+where rechazado_el is null
+and aprobado_por is null
+and O.id not in (" . $ids . ")
+order by O.id DESC
+limit 15
+");
+      return static::hydrate($rpta);  
     }
     static function listado_propuestas_buenas_pro() {
       $rp = DB::cache(20, "
@@ -469,13 +491,6 @@ ORDER BY L.buenapro_fecha ASC, L.fecha_buena_hasta ASC, O.id ASC");
     }
     public function timeline() {
       return $this->hasMany('App\Actividad','oportunidad_id')->orderBy('id', 'desc')->get();
-    }
-    public function correosRelacionados() {
-      $rp = null;
-      if(!empty($this->correo_id)) {
-        $rp = DB::select("SELECT * FROM osce.correo WHERE id = :id OR id IN (SELECT correo_id FROM osce.correo_hilo WHERE token_id = (SELECT token_id FROM osce.correo_hilo WHERE correo_id = :id LIMIT 1))", ['id' => $this->correo_id]);
-      } 
-      return Correo::hydrate($rp);
     }
     public function similares() {
       return DB::select("

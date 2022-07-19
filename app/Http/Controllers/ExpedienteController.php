@@ -127,7 +127,7 @@ class ExpedienteController extends Controller
           'rotulo'         => $doc->rotulo,
           'filename'       => $doc->filename,
           'root'           => $destino,
-          'uri'            => $doc->filename,
+          'uri'            => $cotizacion->folder_workspace(true) . $doc->filename,
           'timestamp'      => time(),
         ];
       }
@@ -448,7 +448,7 @@ echo "<pre>";
       $documento->elaborado_por    = Auth::user()->id;
       $documento->elaborado_hasta = DB::raw('now()');
 
-      $workspace['documento_final'] = 'https://storage.googleapis.com/creainter-peru/storage/' . $documento->archivo . '?t=' . time();
+      $workspace['documento_final'] = 'https://sig.creainter.com.pe/static/cloud/' . $documento->archivo . '?t=' . time();
 
       $documento->json_save($workspace);
 
@@ -478,6 +478,7 @@ echo "<pre>";
       $documento->json_save($workspace);
       return redirect('/expediente/' . $cotizacion->id . '/paso04');
     }
+
     public function parallelStatus(Request $request, Cotizacion $cotizacion) {
       $documento = $cotizacion->documento();
       $workspace = $documento->json_load();

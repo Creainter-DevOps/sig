@@ -14,7 +14,7 @@ class Empresa extends Model
     const UPDATED_AT = null;
     const CREATED_AT = null;
     protected $fillable = [
-        'id', 'ruc', 'razon_social', 'seudonimo', 'direccion', 'referencia','representante_nombres', 'telefono', 'correo_electronico', 'web', 'aniversario', 'sector_id', 'categoria_id', 'es_agente_retencion','ubigeo_id','privada','logo_head','logo_central','sunarp_registro'
+        'id', 'ruc', 'razon_social', 'seudonimo', 'direccion', 'referencia','representante_nombres', 'telefono', 'correo_electronico', 'web', 'aniversario', 'sector_id', 'categoria_id', 'es_agente_retencion','ubigeo_id','privada','logo_head','logo_central','sunarp_registro','color_primario'
     ];
     protected $hidden = [
         'password', 'remember_token',
