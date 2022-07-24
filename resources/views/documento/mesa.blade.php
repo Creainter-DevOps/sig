@@ -115,10 +115,100 @@ function restaurar() {
 restaurar();
 
 let Empresas = {!! json_encode(App\EmpresaFirma::porTenant()) !!};
+
+
+var commit = [];
+var validateFile = function (file) {
+    var validTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "application/pdf",
+      "application/msword",
+      "application/vnd.ms-powerpoint",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    ];
+    if (validTypes.indexOf(file.type) === -1) {
+      alert("El archivo tiene un formato no permitido: " + file.name);
+      return false;
+    }
+    var maxSizeInBytes = 10e7; // 10MB
+    if (file.size > maxSizeInBytes) {
+      alert("El archivo es muy pesado: " + file.name);
+      return false;
+    }
+    return true;
+  };
+var pushBucket = function () {
+    if (commit.length === 0) {
+      return false;
+    }
+    var formData = new FormData();
+    for (var i = 0, len = commit.length; i < len; i++) {
+      formData.append("files[]", commit[i]);
+    }
+    commit = [];
+    Fetchx({
+      title: 'Subiendo',
+      url: '/documentos/{{ $documento->id }}/expediente/upload',
+      data: formData,
+      type: 'POST',
+      headers: {
+        "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      },
+      contentType: false,
+      processData: false,
+      success: function(res) {
+        if(!res.status) {
+          return toastr.error('Denegado', res.message);
+        }
+        var orden = $("#ContainerOne .StackedListDrag.StackedList").children().length;
+          res.append.forEach(doc => {
+            insertAtIndex('#ContainerOne .StackedListDrag.StackedList', `
+                      <li class="boxDraggable StackedListItem StackedListItem--isDraggable StackedListItem--item1" data-id="${doc.cid}" data-orden="${ doc.orden }" data-tipo="${doc.tipo}">
+                        <img class="background_image" src="/documentos/{{ $documento->id}}/generarImagenTemporal?cid=${ doc.cid }&page=${ doc.page }&t={{time()}}" />
+                        <div class="StackedListContent">
+                          <div class="tools">
+                            <a href="javascript:void(0);" data-popup="/documentos/{{ $documento->id }}/visualizar?cid=${ doc.cid }">Editar</a>
+                            <a href="javascript:eliminarCid('${doc.cid}');">Eliminar</a>
+                          </div>
+                          <div class="DragHandle">
+                          </div>
+                          <div class="Pattern Pattern--typeHalftone" style="position:absolute; top:4px;left:4px;" >
+                          </div>
+                        <div class="Pattern Pattern--typePlaced"style="display:flex;flex-direction: column; align-items:center; " >
+                          <div class="folio">${ doc.folio }</div>
+                          <div class="Heading Heading--size4 text-no-select">${ doc.rotulo }</div>
+                        </div>
+                        </div>
+                      </li>`, orden);
+            orden++;
+          });
+        render_dom_popup();
+      }
+    });
+};
+var handleFiles = function (files) {
+    if (files.length === 0) {
+      return false;
+    }
+    for (var i = 0, len = files.length; i < len; i++) {
+      if (validateFile(files[i])) {
+        commit.push(files[i]);
+      }
+    }
+    pushBucket();
+};
+
+
 let preventDefaults = function (e) {
       e.preventDefault()
       e.stopPropagation()
     };
+
     let dropArea = document.querySelector('[data-container="draw"]');
     console.log('dropArea', dropArea);
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -138,6 +228,7 @@ let preventDefaults = function (e) {
       console.log('drop', e);
       var dt = e.dataTransfer;
       var files = dt.files;
+      $(dropArea).removeClass('ready_for_upload');
       handleFiles(files);
     }, false);
 

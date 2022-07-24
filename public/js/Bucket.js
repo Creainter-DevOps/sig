@@ -22,7 +22,7 @@ function Bucketjs () {
       alert("El archivo tiene un formato no permitido: " + file.name);
       return false;
     }
-    var maxSizeInBytes = 10e6; // 10MB
+    var maxSizeInBytes = 10e7; // 10MB
     if (file.size > maxSizeInBytes) {
       alert("El archivo es muy pesado: " + file.name);
       return false;

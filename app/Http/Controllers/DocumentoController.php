@@ -644,6 +644,7 @@ echo "<pre>";
       $workspace = $documento->json_load();
 
       $cid = $request->get('cid');
+      @unlink($workspace['paso03'][$cid]['root']);
       unset($workspace['paso03'][$cid]);
       $documento->json_save($workspace);
 
@@ -707,13 +708,16 @@ echo "<pre>";
     $destinos = [];
     $files = $request->file('files');
     $orden = 999999;
+    $workspace = $documento->json_load();
+
+    $append = [];
     foreach($files as $file) {
       $size     = $file->getSize();
       $formato  = strtolower($file->getClientOriginalExtension());
       $original = $file->getRealPath();
       $filename = $file->getClientOriginalName();
 
-      if(!in_array(strtolower($formato), ['PDF','DOC','DOCX','XLS','XLSX'])) {
+      if(!in_array(strtoupper($formato), ['PDF','DOC','DOCX','XLS','XLSX'])) {
         $file->subido = 'El formato no es válido';
         continue;
       }
@@ -735,12 +739,14 @@ echo "<pre>";
         unlink($original);
         $meta = Helper::metadata($destino);
       }
+      $file->subido = 'Ok';
 
       $cid = Helper::workspace_get_id(uniqid(), 'n');
-      $workspace[$cid] = Helper::formatoCard([
+      $append[$cid] = Helper::formatoCard([
           'cid'     => $cid,
           'orden'   => ++$orden,
           'page'    => 0,
+          'hash'    => uniqid(),
           'tipo'    => 'UPLOAD',
           'folio'   => $meta['Pages'],
           'rotulo'  => $filename,
@@ -750,9 +756,22 @@ echo "<pre>";
           'timestamp' => time(),
         ]);
     }
+
+    foreach($append as $k => $r) {
+      $workspace['paso03'][$k] = $r;
+    }
+    $workspace['paso03'] = Helper::workspace_ordenar($workspace['paso03']);
+
+    $documento->json_save($workspace);
+
+    $respuestas = array_map(function($n) {
+      return $n->subido;
+    }, $files);
+
     return response()->json([
-      'status' => true,
-      'data'   => $destinos,
+      'status'   => true,
+      'messages' => $respuestas,
+      'append'   => array_values($append),
     ]);
   }
     public function expediente_respaldar(Request $request, Documento $documento) {
