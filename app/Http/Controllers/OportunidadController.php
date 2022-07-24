@@ -49,11 +49,11 @@ class OportunidadController extends Controller {
   }
   public function store(Request $request)
   {
-    $data = $request->all();
-    $data['tenant_id'] = Auth::user()->tenant_id;
-    $data['aprobado_el'] = DB::raw('now');
-    $data['aprobado_por'] = Auth::user()->id;
-    $oportunidad = Oportunidad::create($data)->fresh();
+    $data        = $request->all();
+    $separacion  = Oportunidad::crearLibre($data['empresa_id']);
+    $oportunidad = Oportunidad::find($separacion->id);
+    $oportunidad->update($data);
+
     if($request->ajax()) {
       return response()->json([ 'status' => true , 'data' => [
         'id'    => $oportunidad->id,

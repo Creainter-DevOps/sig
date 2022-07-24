@@ -29,16 +29,16 @@
             </ul>
             <div class="wizard-horizontal">
                 <div class="row">
-                      <div class="col-6" id="iframe_container" >
+                      <div class="col-8" id="iframe_container" >
                       <iframe  class="doc" src='https://view.officeapps.live.com/op/embed.aspx?src=https://sig.creainter.com.pe/static/temporal/{{ reset($workspace['paso02'])['uri'] }}?t={{time()}}' width='1366px' frameborder='0'  style="height:600px">
                       This is an embedded <a target='_blank' href='http://office.com'>Microsoft Office</a> document, powered by <a target='_blank' href='http://office.com/webapps'>Office Online</a>.</iframe>
                       </div>
-                      <div class="col-6">
+                      <div class="col-4">
                         <div class="card widget-todo">
-                          <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+                          <div class="card-header border-bottom">
                             <h4 class="card-title d-flex">
-                              <i class='bx bx-check font-medium-5 pl-25 pr-75'></i>Documentos
-                            </h4>
+                              <i class='bx bx-check font-medium-5 pl-25 pr-75'></i>Documentos Iniciales
+                            </h4><br />
                             <ul class="list-inline d-flex mb-0">
                               <li class="d-flex align-items-center">
                                 <i class='bx bx-check-circle font-medium-3 mr-50'></i>

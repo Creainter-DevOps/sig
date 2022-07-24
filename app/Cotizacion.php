@@ -283,10 +283,13 @@ class Cotizacion extends Model
     }
     public function folder_workspace($relative = false) {
       if($relative) {
-        return 'workspace-' . $this->id . '/';
+        return 'cot-workspace-' . $this->id . '/';
       } else {
-        return config('constants.ruta_temporal') . 'workspace-' . $this->id . '/';
+        return config('constants.ruta_temporal') . 'cot-workspace-' . $this->id . '/';
       }
+    }
+    public function CompressWorkspace() {
+      return 'cot-workspace-' . $this->id . '.tar.gz';
     }
     public function json_load() {
       return Helper::json_load('cotz-' . $this->id);

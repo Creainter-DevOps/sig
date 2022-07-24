@@ -54,12 +54,14 @@ class Empresa extends Model
     public function cliente() {
       return Cliente::where('empresa_id', $this->id)->where('tenant_id', Auth::user()->tenant_id)->first();
     }
+
     static function TipoSectores() {
-        return [
-            1 => 'Público',
-            2 => 'Privado',
-        ];
+      return [
+          1 => 'Público',
+          2 => 'Privado',
+      ];
     }
+
     public function getSector() {
         return static::TipoSectores()[$this->sector_id];
     }

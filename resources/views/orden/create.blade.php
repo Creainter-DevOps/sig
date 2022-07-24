@@ -1,6 +1,6 @@
 @extends('layouts.contentLayoutMaster')
 {{-- page title --}}
-@section('title', $operacion ?? 'Nuevo gasto' )
+@section('title', $operacion ?? 'Nuevo orden' )
 {{-- vendor style --}}
 @section('vendor-styles')
 <link rel="stylesheet" type="text/css" href="{{asset('vendors/css/vendors.min.css')}} ">
@@ -43,8 +43,8 @@ tr.block_details > td > div {
           <div class="card-header">
           </div> 
           <div class="card-body">
-            <form class="form" action="{{ route('gastos.store')}}" method="post" id="form-data" >
-              @include('gasto.form')
+            <form class="form" action="{{ route('ordenes.store')}}" method="post" id="form-data" >
+              @include('orden.form')
             </form>
           </div>
         </div>

@@ -130,10 +130,10 @@ class EtiquetaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
        $etiqueta = EmpresaEtiqueta::where('empresa_id',$request->input('empresa_id') )->where( 'etiqueta_id', $request->input('etiqueta_id') )->delete();  
-       //$etiqueta->delete(); 
+      //$etiqueta->delete(); 
        return response()->json([ 'success'=> true  ]);
         //
     }

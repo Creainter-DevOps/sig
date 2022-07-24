@@ -21,6 +21,13 @@ class Helper
     exec($cmd);
     return true;
   }
+
+  public static function gsutil_rm($from) {
+    $cmd = 'export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"';
+    $cmd .= ";/snap/bin/gsutil rm '" . $from . "'"; 
+    exec($cmd);
+    return true;
+  }
   public static function gsutil_mv($from, $to) {
     $cmd = 'export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"';
     $cmd .= ";/snap/bin/gsutil mv '" . $from . "' '" . $to . "'";
@@ -704,7 +711,21 @@ public static function subir_documento( $archivo, $name ){
         }
       });
      return array_keys($matrix);
-    }
+   }
+   public static function unique_multidim_array ($array, $key){
+      $temp_array = array();
+      $i = 0;
+      $key_array = array();
+
+      foreach($array as $val) {
+          if (!in_array($val[$key], $key_array)) {
+              $key_array[$i] = $val[$key];
+              $temp_array[$i] = $val;
+          }
+          $i++;
+      }
+      return $temp_array;
+   }
 
 }
 

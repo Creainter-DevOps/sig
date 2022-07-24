@@ -9,6 +9,7 @@ use App\Empresa;
 use App\Cliente;
 use App\Persona;
 use App\Ubigeo;
+use App\Helpers\Helper;
 
 class ProyectoController extends Controller {
  
@@ -159,5 +160,9 @@ class ProyectoController extends Controller {
      public function observacion(Request $request, Proyecto $proyecto) {
          $proyecto->log('texto',$request->input('texto'));
          return back();
+     }
+     public function financiero(Request $request, Proyecto $proyecto) {
+       $empresa = $proyecto->cotizacion()->empresa();
+       return Helper::pdf('proyectos.financiero', compact('proyecto','empresa'), 'L')->stream('demo.pdf');
      }
 }

@@ -48,5 +48,11 @@
     <div data-tools="firma">Firma</div>
     <div data-tools="visado">Visado</div>
     <div data-remove="" data-cid="">Limpiar</div>
+<br/>
+    <div style="background: #ff8d2b;padding-bottom: 8px;">
+      Sección en desarrollo:<br />
+      <div data-tools2="firma">Firma</div>
+      <div data-tools2="visado">Visado</div>
+    </div>
   </div>
   </div>

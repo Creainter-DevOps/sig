@@ -243,7 +243,13 @@ position: absolute;
 }
 
 .contentPoint {
-  position:relative;
+    position: relative;
+    background-color: #fff;
+    background-image: url('/images/loading.gif');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 50px;
+    min-height: 200px;
 }
 .contentPoint.activePoint .puntero {
   display:block!important;

@@ -4,11 +4,11 @@
   <div class="row">
     <div class="col-md-6 col-12">
       <div class="form-label-group">
-          @if (empty($gasto->proyecto_id))
+          @if (empty($orden->proyecto_id))
           <input type="text" data-ajax="/proyectos/autocomplete" class="form-control autocomplete" name="proyecto_id" placeholder="Proyecto">
           @else
-            <input type="hidden" name="proyecto_id" value="{{ $gasto->proyecto_id }}">
-            {!! $gasto->proyecto()->rotulo() !!}
+            <input type="hidden" name="proyecto_id" value="{{ $orden->proyecto_id }}">
+            {!! $orden->proyecto()->rotulo() !!}
           @endif
         <label for="">Proyecto</label>
       </div>
@@ -17,8 +17,8 @@
     </div>
     <div class="col-md-6 col-12">
       <div class="form-label-group">
-        <select name="estado_id" data-value="{{ old('estado_id', @$gasto->estado_id) }}" placeholder="Estado" required class="form-control">
-          @foreach ($gasto->fillEstados() as $k => $v)
+        <select name="estado_id" data-value="{{ old('estado_id', @$orden->estado_id) }}" placeholder="Estado" required class="form-control">
+          @foreach ($orden->fillEstados() as $k => $v)
           <option value="{{ $k }}">{{ $v }}</option>
           @endforeach
         </select>
@@ -27,14 +27,14 @@
     </div>
     <div class="col-md-6 col-12">
       <div class="form-label-group">
-        <input type="date" class="form-control" name="fecha" value="{{  old ( 'fecha', $gasto->fecha ) }}"  placeholder="Fecha" />
+        <input type="date" class="form-control" name="fecha" value="{{  old ( 'fecha', $orden->fecha ) }}"  placeholder="Fecha" />
         <label for="fecha">Fecha</label>
       </div>
     </div>
     <div class="col-md-6 col-12">
       <div class="form-label-group">
-        <select name="moneda_id" data-value="{{ old('moneda_id', @$gasto->moneda_id) }}" required class="form-control">
-          @foreach (App\Gasto::selectMonedas() as $k => $v)
+        <select name="moneda_id" data-value="{{ old('moneda_id', @$orden->moneda_id) }}" required class="form-control">
+          @foreach (App\Orden::selectMonedas() as $k => $v)
           <option value="{{ $k }}">{{ $v }}</option>
           @endforeach
         </select>
@@ -43,8 +43,8 @@
     </div>
     <div class="col-md-6 col-12">
       <div class="form-label-group">
-        <select name="tipo" data-value="{{ old('tipo', @$gasto->tipo) }}" required class="form-control">
-          @foreach (App\Gasto::selectTipos() as $k => $v)
+        <select name="tipo" data-value="{{ old('tipo', @$orden->tipo) }}" required class="form-control">
+          @foreach (App\Orden::selectTipos() as $k => $v)
           <option value="{{ $k }}">{{ $v }}</option>
           @endforeach
         </select>
@@ -53,13 +53,13 @@
     </div>
     <div class="col-md-6  col-12">
       <div class="form-label-group" >
-         <input type="text" class="form-control" placeholder="Descripción" value="{{ old ( 'descripcion', $gasto->descripcion ) }}" name="descripcion">
+         <input type="text" class="form-control" placeholder="Descripción" value="{{ old ( 'descripcion', $orden->descripcion ) }}" name="descripcion">
          <label for="">Descripción</label>
       </div>
     </div>
     <div class="col-md-6 col-12">
       <div class="form-label-group">
-        <input type="number" class="form-control" name="monto" value="{{ old ('monto', $gasto->monto )  }}" placeholder="Monto" min="1" max="100000" step="0.01" required>
+        <input type="number" class="form-control" name="monto" value="{{ old ('monto', $orden->monto )  }}" placeholder="Monto" min="1" max="100000" step="0.01" required>
         <label for="plazo-servicio">Monto</label>
       </div>
     </div>

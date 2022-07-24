@@ -110,14 +110,14 @@ class Proyecto extends Model
       return $this->hasMany('App\Entregable','proyecto_id')->orderBy('numero', 'ASC')->get();
     }
     public function pagos() {
-      if(in_array(Auth::user()->id, [1,3])) {
+      if(in_array(Auth::user()->id, [12,3])) {
         return $this->hasMany('App\Pago','proyecto_id')->orderBy('numero', 'ASC')->get();
       }
       return [];
     }
-    public function gastos() {
-      if(in_array(Auth::user()->id, [1,3])) {
-        return $this->hasMany('App\Gasto','proyecto_id')->orderBy('fecha', 'ASC')->get();
+    public function ordenes() {
+      if(in_array(Auth::user()->id, [12,3])) {
+        return $this->hasMany('App\Orden','proyecto_id')->orderBy('fecha', 'ASC')->get();
       }
       return [];
     }

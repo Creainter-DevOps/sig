@@ -177,17 +177,10 @@ function fell_delete(sid, uid) {
     circle.find('.fell_count').text(Object.keys(rp.currents[uid]).length);
   }
 
-  var circle = box.find(".others > [data-uid='" + uid + "']");
-  if(typeof rp.others[uid] === 'undefined') {
-    circle.attr('data-uid', 0).slideUp(800, function() {
+  var circle = box.find(".others > [data-kid='" + sid + "']");
+    circle.attr('data-kid', 0).slideUp(800, function() {
       $(this).remove();
     });
-  } else {
-    if(Object.keys(rp.others[uid]).length == 1) {
-      circle.find('.fell_count').slideUp();
-    }
-    circle.find('.fell_count').text(Object.keys(rp.others[uid]).length);
-  }
 }
 function fell_active(id) {
 }
@@ -263,7 +256,7 @@ function fell_render() {
             box.find('.others').append(
               $('<a>').hide()
               .attr('data-kid', kid)
-              .attr('title', rp.others[uid][kid])
+              .attr('title', '@' + fell_get_name(uid) + ' => ' + rp.others[uid][kid])
               .attr('href', rp.others[uid][kid])
               .append($('<div>').addClass('fell_name').attr('data-name', fell_get_name(uid)).text(fell_get_name(uid).substr(0,1)))
               .slideDown()

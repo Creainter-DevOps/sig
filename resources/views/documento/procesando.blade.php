@@ -1,5 +1,3 @@
-@extends('expediente.theme')
-@section('contenedor')
 <style>
 .blockProcess {
   display: none;
@@ -19,33 +17,6 @@
   display: none;
 }
 </style>
-  <div class="row">
-    <div class="col-12">
-      <div class="card">
-        <div class="card-content mt-2">
-          <div class="card-body">
-            <ul class="nav nav-tabs justify-content-center" role="tablist">
-              <li class="nav-item">
-                <a class="nav-link" href="/expediente/{{ $cotizacion->id }}/paso01">
-                  Anexos
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/expediente/{{ $cotizacion->id }}/paso02">
-                  Modificación
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/expediente/{{ $cotizacion->id }}/paso03">
-                  Mesa de Trabajo
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link active" href="/expediente/{{ $cotizacion->id }}/paso04">
-                  Magia
-                </a>
-              </li>
-            </ul>
             <div class="blockProcess">
               <div style="font-size: 30px;text-align: center;color: #8b5bff;">Se está procesando {{ $documento->folio }} páginas...</div>
               <div class="blockLog"></div>
@@ -78,23 +49,19 @@
                     </div>
                   </div>
                   <div class="col-3">
+                  @if(!empty($cotizacion))
                   @if(empty($cotizacion->propuesta_el))
                     <a class="btn btn-secondary text-white" data-confirm href="/cotizaciones/{{ $cotizacion->id }}/enviar" class="btn btn-sm btn-dark">Enviar Propuesta</a>
                   @else
                     Ya se ha registrado el Envio:<br /> {{ Helper::fecha($cotizacion->propuesta_el, true) }}
                   @endif
+                  @endif
                   </div>
                 </div>
               </div>
-</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-@endsection
+            </div>
 @section('page-scripts')
-  @parent
+@parent
 <script>
 function descargar_pagina(box) {
   let page = $(box).closest('.input-group').find('input').val();

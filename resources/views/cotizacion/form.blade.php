@@ -5,7 +5,7 @@
     <div class="form-label-group container-autocomplete" >
       <input type="text" class="form-control autocomplete" name="oportunidad_id" value="{{ old('cotizacion_id', $cotizacion->oportunidad_id) }}" required
          data-ajax="/oportunidades/autocomplete?directas"
-       
+         data-register="/oportunidades/crear"
         @if( !empty($cotizacion->oportunidad_id ))
          data-value="{{ old ( 'oportunidad', null != $cotizacion->oportunidad() ?  $cotizacion->oportunidad()->rotulo() : '' ) }}"
         @endif
@@ -19,8 +19,9 @@
           @if (!empty($cotizacion->empresa_id))
              data-value="{{ $cotizacion->empresa()->razon_social }}" 
           @endif
-             data-ajax="/empresas/autocomplete?propias" name="empresa_id">
-          <label for="">Empresa</label>
+             data-ajax="/empresas/autocomplete?propias"
+             name="empresa_id">
+          <label for="">Cotizar Con:</label>
       </div>
     </div>
   <div class="col-md-12 col-12">

@@ -217,7 +217,7 @@ class Oportunidad extends Model
         FROM osce.empresa E
         LEFT JOIN osce.cotizacion C ON C.oportunidad_id = " . $this->id . " AND C.empresa_id = E.id
         WHERE E.tenant_id = " . $this->tenant_id . "
-        ORDER BY E.id ASC
+        ORDER BY E.id ASC, C.numero ASC
         LIMIT 10");
       return array_map(function($n) {
         return new Empresa((array) $n);
@@ -469,6 +469,9 @@ ORDER BY L.buenapro_fecha ASC, L.fecha_buena_hasta ASC, O.id ASC");
     ORDER BY O.aprobado_el DESC, O.id ASC
     LIMIT 100");
       return static::hydrate($rp);
+    }
+    public static function crearLibre($empresa_id) {
+      return collect(DB::select('SELECT osce.fn_registrar_oportunidad_libre(' . Auth::user()->tenant_id . ',' . Auth::user()->id . ',' . $empresa_id . ') id'))->first();
     }
     public function aprobar() {
       DB::select('SELECT osce.fn_oportunidad_accion_aprobar(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ')');

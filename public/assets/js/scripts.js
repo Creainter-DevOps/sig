@@ -78,6 +78,10 @@ function Fetchx(params, inmediate) {
     } else {
         params.success = function ($x) {
             ocultar($x, params);
+            if(typeof params.title !== 'undefined') {
+              toastr.clear(idToast);
+              toastr.success('Se ha realizado con éxito', params.title, { positionClass: 'toast-top-right', containerId: 'toast-top-right', 'timeOut': 2000 });
+            }
         };
     }
     params.error = function ($x) {

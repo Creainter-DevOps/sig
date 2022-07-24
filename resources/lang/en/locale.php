@@ -13,6 +13,7 @@ return [
   "Licitaciones" => "Licitaciones",
   "Clientes" => "Clientes",
   "Empresas" => "Empresas",
+  "Mis Empresas" => "Mis Empresas",
   "Proyectos" => "Proyectos",
   "Proveedores" => "Proveedores",
   "Usuarios" => "Usuarios",

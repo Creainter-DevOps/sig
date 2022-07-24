@@ -140,7 +140,7 @@
             <div class="badge-circle badge-circle-lg badge-circle-light-danger mx-auto my-0">
               <i class="bx bx-shopping-bag font-medium-5"></i>
             </div>
-            <p class="text-muted mb-0 line-ellipsis">Gasto</p>
+            <p class="text-muted mb-0 line-ellipsis">Orden</p>
             <h3 class="mb-0">{{ Helper::money($proyecto->meta()->gasto_efectuado, 1) }}</h3>
             <h6 class="mb-0">Pend. {{ Helper::money($proyecto->meta()->gasto_pendiente, 1) }}</h6>
           </div>
@@ -195,7 +195,7 @@
     <div class="col-6">
         <div class="card">
           <div class="card-body">
-            @include('proyectos.gastos')
+            @include('proyectos.ordenes')
           </div>
         </div>
       </div>

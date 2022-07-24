@@ -15,12 +15,12 @@ use App\CandidatoOportunidad;
 use App\Actividad;
 use Auth;
 
-class Gasto extends Model
+class Orden extends Model
 {
   use Notifiable,HasApiTokens,HasRoles;
 
     protected $connection = 'interno';
-    protected $table = 'osce.gasto';
+    protected $table = 'osce.orden';
     const UPDATED_AT = null;
     const CREATED_AT = null;
     /**
@@ -49,7 +49,7 @@ class Gasto extends Model
     protected $casts = [
     ];
     public function monto() {
-      if(in_array(Auth::user()->id, [1,3,15])) {
+      if(in_array(Auth::user()->id, [12,3,15])) {
         $m = $this->monto;
       } else {
         $m = 1;
@@ -67,7 +67,7 @@ class Gasto extends Model
       ]);
     }
     public function rotulo() {
-      return 'Gasto ' . $this->numero;
+      return 'Orden ' . $this->numero;
     }
     public function proyecto() {
       return $this->belongsTo('App\Proyecto', 'proyecto_id')->first();
@@ -111,15 +111,12 @@ class Gasto extends Model
       ];
     }
     public function render_tipo() {
-      return static::selectTipos()[$this->tipo];
+      return @static::selectTipos()[$this->tipo];
     }
     static function selectTipos() {
       return [
-        'ORDENCOMPRA' => 'ORDEN DE COMPRA',
-        'RRHH' => 'RRHH',
-        'CLOUD' => 'CLOUD',
-        'TRANSPORTE' => 'TRANSPORTE',
-        'VARIOS'     => 'VARIOS',
+        'OC' => 'ORDEN DE COMPRA',
+        'OS' => 'ORDEN DE SERVICIO',
       ];
     }
 }

@@ -1,6 +1,6 @@
 @extends('layouts.contentLayoutMaster')
 {{-- page title --}}
-@section('title','Account Settings')
+@section('title',$empresa->razon_social )
 {{-- vendor styles --}}
 @section('vendor-styles')
 <link rel="stylesheet" type="text/css" href="{{asset('vendors/css/forms/select/select2.min.css')}}">
@@ -49,10 +49,19 @@
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link d-flex align-items-center" id="" data-toggle="pill" href="#firmas-sellos" aria-expanded="false">
-                                <!--<i class="bx bx-lock"></i>-->
+                            <a class="nav-link d-flex align-items-center" id="" data-toggle="pill" href="#sellos" aria-expanded="false">
                                 <i class='bx bxs-image-alt' ></i>
-                                <span>Firmas y sellos</span>
+                                <span>Sellos</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center" id="" data-toggle="pill" href="#firmas" aria-expanded="false">
+                                <!--<i class="bx bx-lock"></i>-->
+
+                                <i class='bx bxs-edit-alt'></i>
+                                <!--<i class='bx bxs-image-alt' ></i>-->
+                                <span>Firmas</span>
                             </a>
                         </li>
                         <!--<li class="nav-item">
@@ -358,7 +367,7 @@
                                         </form>
                                     </div>
 
-                                    <div class="tab-pane fade " id="firmas-sellos" role="tabpanel"
+                                    <div class="tab-pane fade " id="sellos" role="tabpanel"
                                         aria-labelledby="account-pill-password" aria-expanded="false">
                                        <!--<form novalidate id="form-graficos" enctype="multipart/form-data" >-->
                                             @csrf
@@ -368,64 +377,105 @@
                                               <div class="col-12">
                                                  <div class="form-group">
                                                         <div class="controls">
-                                                            <label>Firmas y Sellos</label>
-                                                            <p class="tex-muted description">La firmas y sellos seran utilizados en los documentos, expedientes y anexos .</p>
-                                                            <p>Para ello debera realiza los siguientes pasos</p>
-                                                            <ul>
-                                                               <li>Descargar la plantilla.<a href="/static/cloud/PlantillaFirmaSello.pdf" target="_blank" > Aqui</a> </li>  
-                                                               <li>Cargar el documento escaneado con las firmas o sellos  en cada recuadro.</li>  
-                                                               <li>Procesar y guardar.</li>  
-                                                            </ul>
+                                                              <label>Sellos</label>
+                                                              <p class="tex-muted description">Los sellos seran utilizados en los documentos, expedientes y anexos .</p>
+
+                                                            <div style="" >
+                                                              <p>Para ello debera realiza los siguientes pasos</p>
+                                                              <ul>
+                                                                 <li>Descargar la plantilla.<a href="/static/cloud/FORMATO-SELLOS.pdf" target="_blank" > Aqui</a> </li>  
+                                                                 <li>Cargar el documento escaneado con las firmas o sellos  en cada recuadro.</li>  
+                                                                 <li>Procesar y guardar.</li>  
+                                                              </ul>
+
+                                                              <p class="text-muted ml-1 mt-50" ><small>Solo documentos  PDF. Tamaño maximo 4 mb </small></p>
+                                                            </div>
                                                             <div class="media">
                                                               <div class="media-body mt-25">
-                                                                  <div class="col-12 px-0 d-flex flex-sm-row flex-column justify-content-start">
-                                                                        <label for="select-files-firma" class="btn btn-sm btn-light-primary ml-50 mb-50 mb-sm-0">
-                                                                          <span>Cargar firmas</span>
-                                                                          <input id="select-files-firma" name="firmas"  accept="*.jpg,*.png" type="file" >
-                                                                        </label>
-                                                                        <input type="hidden" id="folder_firmas" name="folder_firmas"> 
-                                                                        <button class="btn btn-sm btn-light-secondary ml-50"  >Quitar</button>
-                                                                        <button class="btn btn-sm btn-light-secondary ml-50"  id="btn_procesar"  >Procesar</button>
-                                                                  </div>
-
-
-                                                                  <p class="text-muted ml-1 mt-50"><small>Solo imagenes JPG, GIF or PNG. Tamaño maximo 4 mb </small></p>
-                                                                  <div class="container-firmas" style=" display: none;
-grid-template: repeat(5,1fr)/repeat(3,1fr);grip-gap:10px;margin-bottom: 20px;
-width: 100%; " >
-
-                                                                  @if (  @get_headers("https://sig.creainter.com.pe/static/cloud/FIRMAS/firma_" . $empresa->id . "_2.png"  ))        
-                                                                  @endif
-                                                                    <!--<img src="/storage/Creainter_head.jpg" class="rounded mr-75" alt="profile image" height="64">-->
-                                                                  </div>
-
-                                                                  <div class="col-12 px-0 d-flex flex-sm-row flex-column justify-content-start">
-                                                                        <label for="select-files-sello" class="btn btn-sm btn-light-primary ml-50 mb-50 mb-sm-0">
+                                                                  <div class="col-12 px-0 d-flex flex-sm-row flex-column justify-content-start" style="margin-bottom:15px;">
+                                                                        <label for="select-files-sello" class="btn btn-sm btn-light-primary ml-50 mb-sm-0" style=";display: {{ empty($sellos)? 'block': 'none' }};" >
                                                                           <span>Cargar Sellos</span>
-                                                                          <input id="select-files-sello" name="sellos" accept="*.jpg,*.png" type="file" >
+                                                                          <input id="select-files-sello" name="sellos"    accept="*.pdf" type="file" style=""  >
                                                                         </label>
                                                                         <input type="hidden" id="folder_sellos" name="folder_sellos"> 
-                                                                        <button class="btn btn-sm btn-light-secondary ml-50" >Quitar</button>
-                                                                        <button class="btn btn-sm btn-light-secondary ml-50"  id="btn_procesar_sellos"  >Procesar</button>
+                                                                        <button class="btn btn-sm btn-light-danger ml-50" style="display: {{ !empty( $sellos )? 'block' : 'none' }};"   onclick="removeFile('sellos')">Quitar</button>
+                                                                        <button class="btn btn-sm btn-light-secondary ml-50" style="display: none "   id="btn_procesar_sellos"  >Procesar</button>
                                                                   </div>
-                                                                          
-                                                                  <p class="text-muted ml-1 mt-50"><small>Solo imagenes JPG, GIF or PNG. Tamaño maximo 4 mb </small></p>
-                                                                  <div class="container-sellos" style=" display: none;grid-template: repeat(5,1fr)/repeat(3,1fr);grip-gap:10px;margin-bottom: 20px;width: 100%; "></div>
+                                                                  <div class="container-sellos" style=";display: {{ isset($sellos)? 'grid': 'none' }}; grid-template: repeat(5,1fr)/repeat(3,180px);grid-gap:15px;margin-bottom: 20px;width: 100%; ">
+                                                                    @foreach ($sellos as $firma )        
+                                                                        <div class="" style="display:grid;place-items:center;border: 1px solid var(--primary);width:100%; padding: 10px;"> <img src="https://sig.creainter.com.pe/static/cloud/{{$firma['archivo']}}" style="max-width:100%;"  class="rounded "  alt="profile image" height="64"> </div>
+                                                                    @endforeach    
+</div>
+
                                                             </div>
                                                           </div>
                                                         </div>
                                                  </div>
                                               </div>
                                               <div class="col-12 d-flex flex-sm-row flex-column justify-content-end">
-                                                <button type="submit" id="btn-sellos-firmas" class="btn btn-primary glow mr-sm-1 mb-1">Guardar</button>
+                                                <button type="submit" id="btn-sellos-firmas" class="btn btn-primary glow mr-sm-1 mb-1" onclick="guardar_sellos(event)" >Guardar</button>
                                                 <button type="reset" class="btn btn-light mb-1">Cancelar</button>
                                               </div>
                                             </div>
                                        <!-- </form>-->
                                     </div>
-                                    <div class="tab-pane fade " id="recursos-graficos" role="tabpanel"
+
+                                    <div class="tab-pane fade " id="firmas" role="tabpanel"
                                         aria-labelledby="account-pill-password" aria-expanded="false">
-                                        <!--<form novalidate id="form-graficos" enctype="multipart/form-data" >-->
+                                       <!--<form novalidate id="form-graficos" enctype="multipart/form-data" >-->
+                                            @csrf
+                                            {!! method_field('PUT') !!}
+                                            <div class="row">
+                                                
+                                              <div class="col-12">
+                                                 <div class="form-group">
+                                                        <div class="controls">
+                                                            <label>Firmas</label>
+                                                            <p class="tex-muted description">La firmas seran utilizados en los documentos, expedientes y anexos .</p>
+                                                            <p>Para ello debera realiza los siguientes pasos</p>
+                                                            <ul>
+                                                               <li>Descargar la plantilla.<a href="/static/cloud/FORMATO-SELLOS.pdf" target="_blank" > Aqui</a> </li>  
+                                                               <li>Cargar el documento escaneado con las firmas o sellos  en cada recuadro.</li>  
+                                                               <li>Procesar y guardar.</li>  
+                                                            </ul>
+
+                                                            <p class="text-muted ml-1 mt-50"><small>Solo documentos  PDF. Tamaño maximo 4 mb </small></p>
+
+                                                            <div class="media">
+                                                              <div class="media-body mt-25">
+                                                                  <div class="col-12 px-0 d-flex flex-sm-row flex-column justify-content-start" style="margin-bottom:15px;" >
+
+                                                                        <label for="select-files-firma" style="display: {{ empty($firmas)? 'block': 'none' }};"   class="btn btn-sm btn-light-primary ml-50 mb-50 mb-sm-0">
+                                                                          <span>Cargar firmas</span>
+                                                                          <input id="select-files-firma" name="firmas" accept="*.pdf" type="file" >
+                                                                        </label>
+                                                                        <input type="hidden" id="folder_firmas" name="folder_firmas"> 
+                                                                        <button class="btn btn-sm btn-light-danger ml-50" style="display: {{ !empty($firmas) ? 'block': 'none' }}"   onclick="removeFile('firmas')" >Quitar</button>
+                                                                        <button class="btn btn-sm btn-light-secondary ml-50" style="display:none" id="btn_procesar">Procesar</button>
+                                                                  </div>
+
+                                                                  <div class="container-firmas" style="display: {{ isset($firmas)? 'grid': 'none' }}  ;
+grid-template: repeat(5,1fr)/repeat(3,180px);grip-gap:10px;margin-bottom: 20px;
+width: 100%;grid-gap: 15px;justify-items: start;  " >
+                                                                    @foreach ($firmas as $firma )        
+
+                                                                        <div class="" style="display:grid;place-items:center;border: 1px solid var(--primary);width:100%; padding: 10px;" ><img src="https://sig.creainter.com.pe/static/cloud/{{ $firma['archivo'] }}" style="max-width: 100%;" class="rounded" alt="profile image" height="64"></div>
+                                                                    @endforeach    
+                                                                  </div>
+                                                            </div>
+                                                          </div>
+                                                        </div>
+                                                 </div>
+                                              </div>
+                                              <div class="col-12 d-flex flex-sm-row flex-column justify-content-end">
+                                                <button type="submit" id="btn-sellos-firmas" class="btn btn-primary glow mr-sm-1 mb-1" onclick="guardar_firmas(event)">Guardar</button>
+                                                <button type="reset" class="btn btn-light mb-1">Cancelar</button>
+                                              </div>
+                                            </div>
+                                       <!-- </form>-->
+                                    </div>
+                                    <div class="tab-pane fade " id="recursos-graficos" role="tabpanel" aria-labelledby="account-pill-password" aria-expanded="false">
+                                        <form novalidate id="form-graficos" method="post" enctype="multipart/form-data" >
                                             @csrf
                                             {!! method_field('PUT') !!}
                                             <div class="row">
@@ -433,9 +483,10 @@ width: 100%; " >
                                                  <div class="form-group">
                                                         <div class="controls">
                                                             <label>Logo</label>
-                                                            <p class="tex-muted description">La imagen sera utilizada en los documentos, expedientes. </p>
+                                                            <p class="tex-muted description">La imagen sera utilizada en los documentos, expedientes.</p>
                                                             <div class="media">
-                                                              <a href="javascript: void(0);">
+                                                              <a href="javascript: void(0);" style="display: {{ !empty($empresa->logo_head) ? 'block' : 'none' }} "  >
+
                                                               <img src="{{ config("constants.ruta_cloud") . $empresa->logo_head}}" class="rounded mr-75" alt="profile image" height="64"></a>
                                                               <div class="media-body mt-25">
                                                                   <div class="col-12 px-0 d-flex flex-sm-row flex-column justify-content-start">
@@ -443,7 +494,7 @@ width: 100%; " >
                                                                         <span>Cargar Imagen</span>
                                                                         <input id="input-logo"name="logo_head" data-campo="logo_head" accept="image/*" type="file" hidden="" onChange="cargar_imagen(event)" >
                                                                       </label>
-                                                                      <button class="btn btn-sm btn-light-secondary ml-50">Quitar</button>
+                                                                      <button class="btn btn-sm btn-light-secondary ml-50" onClick="quitar('logo_head')"  >Quitar</button>
                                                                   </div>
                                                                   <p class="text-muted ml-1 mt-50"><small>Solo imagenes JPG, GIF or PNG. Max tamaño maximo 8 mb </small></p>
                                                               </div>
@@ -458,17 +509,16 @@ width: 100%; " >
                                                             <label>Logo Principal</label>
                                                             <p class="tex-muted description">La imagen sera utilizada como portada en los documentos, expedientes.Por ellos se recomienda contar con la siguientes medidas( 200 x 300  ) </p>
                                                             <div class="media">
-                                                              <a href="javascript: void(0);">
-                                                              <img src="{{ config("constants.ruta_cloud") . $empresa->logo_head }}" class="rounded mr-75" alt="profile image" height="64">
+                                                              <a href="javascript: void(0);" style="display:{{ !empty($empresa->logo_central) ? 'block' : 'none' }}">
+                                                              <img src="{{ config("constants.ruta_cloud") . $empresa->logo_central }}" class="rounded mr-75" alt="profile image" height="64">
                                                                                              </a>
                                                               <div class="media-body mt-25">
                                                                   <div class="col-12 px-0 d-flex flex-sm-row flex-column justify-content-start">
-                                                                    <label for="input-logo-principal" class="btn btn-sm btn-light-primary ml-50 mb-50 mb-sm-0">
-                                                                      Cargar Imagen
+                                                                    <label for="input-logo-principal" class="btn btn-sm btn-light-primary ml-50 mb-50 mb-sm-0">Cargar Imagen
                                                                     </label>
 
-                                                                    <input type="file" id="input-logo-principal" data-campo="logo_central" onChange="cargar_imagen(event)" accept="image/*" style="display: none;" >
-                                                                    <button class="btn btn-sm btn-light-secondary ml-50">Quitar</button>
+                                                                    <input type="file" id="input-logo-principal" name="logo_central" data-campo="logo_central" onChange="cargar_imagen(event)" accept="image/*" style="display: none;" >
+                                                                   <button class="btn btn-sm btn-light-secondary ml-50" onClick="quitar('logo_central')" >Quitar</button>-->
                                                                   </div>
                                                                   <p class="text-muted ml-1 mt-50"><small>Solo imagenes JPG, GIF or PNG. Max tamaño maximo 8 mb </small></p>
                                                               </div>
@@ -477,17 +527,18 @@ width: 100%; " >
                                                  </div>
                                               </div>
 
-                                             <!--<div class="col-12 d-flex flex-sm-row flex-column justify-content-end">
+                                             <div class="col-12 d-flex flex-sm-row flex-column justify-content-end">
                                                 <button type="submit" class="btn btn-primary glow mr-sm-1 mb-1">Guardar</button>
                                                 <button type="reset" class="btn btn-light mb-1">Cancelar</button>
-                                              </div>-->
+                                              </div>
+
                                             </div>
-                                        <!--</form>-->
+
+                                        </form>
                                     </div>
                                     <div class="tab-pane fade" id="account-vertical-info" role="tabpanel"
                                         aria-labelledby="account-pill-info" aria-expanded="false">
                                             <div class="row">
-
                                               <div class="col-12">
                                                    <label>A favor</label>   
                                                    <div class="form-control" style="display:flex; flex-wrap:wrap; height:max-content;"> 
@@ -502,7 +553,7 @@ width: 100%; " >
                                                        {!! csrf_field() !!}
                                                       <input type="hidden" value="1" name="tipo"> 
                                                       <input type="hidden" value="<?= $empresa->id; ?>" name="empresa_id"> 
-                                                      <input type="text" name="nombre" id="favor"  style="padding:4px; margin-left:2px; margin-top:4px; min-width: 50px; outline:none; overflow: auto; outline: none;border:none; border-radius: 0; box-shadow: none; box-sizing:content-box;" contenteditable="true"> 
+                                                      <input type="text" name="nombre" id="favor"  style="padding:4px; margin-left:2px; margin-top:4px; min-width: 50px; outline:none; overflow: auto; outline: none;border:none; border-radius: 0; box-shadow: none; box-sizing:content-box;text-transform: uppercase; "    contenteditable="true"> 
                                                       </form>
                                                     </div>
                                               </div>  
@@ -519,7 +570,7 @@ width: 100%; " >
                                                        {!! csrf_field() !!}
                                                       <input type="hidden" value="2" name="tipo"> 
                                                       <input type="hidden" value="<?= $empresa->id ?>" name="empresa_id"> 
-                                                      <input type="text"name="nombre"  id="contra" style="padding:4px; margin-left:2px; margin-top:4px; min-width:50px; outline:none; overflow: auto; outline: none;border:none; border-radius: 0; box-shadow: none; box-sizing:content-box;" contenteditable="true"   > 
+                                                      <input type="text"name="nombre"  id="contra" style="padding:4px; margin-left:2px; margin-top:4px; min-width:50px; outline:none; overflow: auto; outline: none;border:none; border-radius: 0; box-shadow: none; box-sizing:content-box;text-transform: uppercase;" contenteditable="true"   > 
                                                       </form>
                                                     </div>
                                                 </div>
@@ -809,16 +860,53 @@ width: 100%; " >
     const frmContra = document.getElementById('frmContra');
     const formEmpresa = document.getElementById('form-empresa');
     const formRepresentante = document.getElementById('form-representante');
+    const formGraficos = document.getElementById('form-graficos');
     const btnSellosFirmas = document.getElementById("btn-sellos-firmas");
 
+    let file_firma = document.getElementById("select-files-firma");
+    let file_sello = document.getElementById("select-files-sello");
+
+    let containerImgFirmas = document.querySelector(".container-firmas")
+    let containerImgSellos = document.querySelector(".container-sellos")
+
+    file_sello.addEventListener("change", function(e){
+      console.log("change");
+      btn_procesar_sellos.style.display = "block"; 
+    })
+
+    file_firma.addEventListener("change", function(e){
+      console.log("change");
+      btn_procesar.style.display = 'block'; 
+    })
+
+    formGraficos.addEventListener("submit",function (e){
+      e.preventDefault();
+      let formdata = new FormData(formGraficos);
+      let url = "/empresas/" + {{ $empresa->id }};       
+      Fetchx({
+              title: "Guardando",
+              url: url,
+              type: "POST",
+              processData: false,
+              contentType: false,
+              headers : {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+              },
+              data: formdata, 
+              success: function(response){
+                console.log();
+              }
+        })
+    })
+
     btn_procesar.addEventListener("click", function (e) {
+
       let file = document.getElementById("select-files-firma").files[0];
       let url = "/empresas/" + {{ $empresa->id }}+ "/firmas/procesar"
       let formData = new FormData();
       formData.append("file",file);
       formData.append("MAX_FILE_SIZE", "8388608");
       var title = "Cargando...";
-      let containerImgFirmas =  document.querySelector(".container-firmas")
 
       Fetchx({
               title: title,
@@ -830,10 +918,15 @@ width: 100%; " >
                   'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
               },
               data: formData, 
-              success: function (response) {
+              success: function(response) {
                console.log(response);
+
+               containerImgFirmas.innerHTML = '';
+
                response.files.forEach((image) => {
-                  containerImgFirmas.insertAdjacentHTML('beforeend',`<img src="${image}" class="rounded mr-75" alt="profile image" height="64">`)
+                  containerImgFirmas.insertAdjacentHTML('beforeend',`
+                  <div class="" style="display:grid;place-items:center;border: 1px solid var(--primary);width:100%; padding: 10px;" ><img src="https://sig.creainter.com.pe/static/temporal/${image}" class="rounded " style="max-width:100%;"  alt="profile image" height="64"> </div>
+                  `)
                 })  
 
                let folder_firmas = document.querySelector("#folder_firmas");
@@ -843,25 +936,68 @@ width: 100%; " >
                //containerImgFirmas.slideDown() 
               }
             })
-      
     })
-    btnSellosFirmas.addEventListener("click", function (e) {
-      let formdata = new FormData() ;
-      let folder_firmas = document.querySelector("#folder_firmas");
-      let folder_sellos = document.querySelector("#folder_sellos");
-      let file_firma = document.getElementById("select-files-firma").files[0];
-      let file_sello = document.getElementById("select-files-sello").files[0];
-      formdata.append("folder_firmas", folder_firmas.value )
-      formdata.append("archivo_firmas", file_firma )
+    function removeFile(tipo){
 
-      formdata.append("folder_sellos", folder_sellos.value )
-      formdata.append("archivo_sellos", file_sello )
+      let formdata = new FormData();
+      toastr.info("<br/><button type='button' id='confirmationButtonYes' class='btn btn-secondary clear'>Si</button> <button type='button' id='confirmationButtonCancel' class='btn btn-primary clear'>Cancelar</button> ",'¿ Esta seguro de eliminar los sellos y registros guardados ?',
+        {
+            closeButton: false,
+            preventDuplicates: true,
+            allowHtml: true,
+            onShown: function (toast) {
+                $("#confirmationButtonYes").click(function(){
 
-      formdata.append("_method", "PUT")
+                  console.log('clicked yes');
 
-      let url = "/empresas/" + {{$empresa->id }};
+                  let url = "/empresas/" + {{ $empresa->id }} + "/" + tipo + "/eliminar?tipo=" + tipo ;
+                    Fetchx({
+                        title: "Guardando",
+                        url: url,
+                        type: "get",
+                        processData: false,
+                        contentType: false,
+                        headers : {
+                          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+                        },
+                        success: function (response) {
+                          console.log("Tipo", tipo);
+                          if (tipo == "sellos" ){
+                            containerImgSellos.innerHTML = ''; 
+                            containerImgSellos.style.display = 'none';
+                            file_sello.closest('.btn').style.display = 'block';
 
-      Fetchx({
+                          } else if( tipo == "firmas" ){
+                            containerImgFirmas.innerHTML = ''; 
+                            containerImgFirmas.style.display = 'none';
+                            file_firma.closest('.btn').style.display = 'block';
+                          }
+
+                          //containerImgFirmas.slideDown() 
+                        }
+                      })
+                  })
+                }
+              })
+        }
+
+      //let containerImgFirmas  = document.querySelector(".container-firmas")
+      //container.style.display = 'none';
+      //let containerImgSellos  = document.querySelector(".container-sellos")
+
+      function guardar_firmas(e) {
+        let formdata = new FormData();
+        let folder_firmas = document.querySelector("#folder_firmas");
+        let file_firma = document.getElementById("select-files-firma").files[0];
+
+        formdata.append("folder_firmas", folder_firmas.value )
+        formdata.append("archivo_firmas", file_firma )
+
+        formdata.append("_method", "PUT")
+
+        let url = "/empresas/" + {{$empresa->id }};
+
+        Fetchx({
               title: "Guardando",
               url: url,
               type: "post",
@@ -873,42 +1009,73 @@ width: 100%; " >
               data: formdata, 
               success: function (response) {
                //containerImgFirmas.slideDown() 
+                file_firma.closest(".btn").style.display = 'none';
+                btn_procesar.style.display = 'none';
               }
             })
-    })
+    }
 
-    btn_procesar_sellos.addEventListener('click',function(e){
-      e.preventDefault() 
-      let file = document.getElementById("select-files-sello").files[0];
-      let url = "/empresas/" + {{ $empresa->id }}+ "/sellos/procesar"
-      let formData = new FormData();
-      formData.append("file",file);
-      formData.append("MAX_FILE_SIZE", "8388608");
-      var title = "Cargando...";
-      let containerImgSellos=  document.querySelector(".container-sellos")
+    function guardar_sellos(e){
+      let formdata = new FormData() ;
+      let folder_sellos = document.querySelector("#folder_sellos");
+      let file_sello = document.getElementById("select-files-sello").files[0];
+      formdata.append("folder_sellos", folder_sellos.value )
+      formdata.append("archivo_sellos", file_sello )
+
+      formdata.append("_method", "PUT")
+
+      let url = "/empresas/" + {{$empresa->id }};
+
       Fetchx({
-              title: title,
-              url: url,
-              type: "POST",
-              processData: false,
-              contentType: false,
-              headers : {
-                  'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
-              },
-              data: formData, 
-              success: function (response) {
-               console.log(response);
-               response.files.forEach((image) => {
-                  containerImgSellos.insertAdjacentHTML('beforeend',`<img src="${image}" class="rounded mr-75" alt="profile image" >`)
-                })  
-               let folder_sellos = document.querySelector("#folder_sellos");
-               folder_sellos.value = response.folder;
-               containerImgSellos.style.display = "grid"; 
-               //containerImgFirmas.slideDown() 
-              }
-            })
+            title: "Guardando",
+            url: url,
+            type: "post",
+            processData: false,
+            contentType: false,
+            headers : {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+            },
+            data: formdata, 
+            success: function (response) {
+              file_firma.closest(".btn").style.display = 'none';
+              btn_procesar_sellos.style.display = 'none';
+             //containerImgFirmas.slideDown() 
+            }
+          })
+  }
+  btn_procesar_sellos.addEventListener('click',function(e){
+    e.preventDefault() 
+    let file = document.getElementById("select-files-sello").files[0];
+    let url = "/empresas/" + {{ $empresa->id }}+ "/sellos/procesar"
+    let formData = new FormData();
+    formData.append("file",file);
+    formData.append("MAX_FILE_SIZE", "8388608");
+    var title = "Cargando...";
 
+    Fetchx({
+            title: title,
+            url: url,
+            type: "POST",
+            processData: false,
+            contentType: false,
+            headers : {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+            },
+            data: formData, 
+            success: function (response) {
+             console.log(response);
+             containerImgSellos.innerHTML = '';
+             response.files.forEach((image) => {
+                containerImgSellos.insertAdjacentHTML('beforeend',`<div class=""  data-filename="" data-folder=""  style="border: 1px solid var(--primary) ;padding: 10px; display:grid;place-items:center; width: 100%; gap: 15px; justify-items: start;" ><img src="https://sig.creainter.com.pe/static/temporal/${image}" class="rounded mr-75" style="max-width:100%; " alt="profile image" height="64"></div>`)
+             })  
+             let folder_sellos = document.querySelector("#folder_sellos");
+             folder_sellos.value = response.folder;
+             containerImgSellos.style.display = "grid"; 
+             //containerImgFirmas.slideDown() 
+            }
+          })
     })
+
     function cargar_imagen(evt){
       console.log("IMAGEN", evt.target.files[0].name);
       var file =  evt.target.files[0];
@@ -916,11 +1083,13 @@ width: 100%; " >
         var reader = new FileReader();
         reader.onload = function() {
           evt.target.closest(".media").querySelector("a > img.rounded").src = reader.result  
+          evt.target.closest(".media").querySelector("a").style.display = 'block'  
 
           let url = `/empresas/{{$empresa->id}}?_update=${evt.target.dataset.campo}`
           let formdata = new FormData();
           formdata.append( "value", file )
           formdata.append("_method", "PUT")
+
           Fetchx({
                   title: "Guardando",
                   url: url,
@@ -928,7 +1097,7 @@ width: 100%; " >
                   processData: false,
                   contentType: false,
                   headers : {
-                      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
                   },
                   data: formdata, 
                   success: function (response) {
@@ -966,21 +1135,21 @@ width: 100%; " >
         e.preventDefault();
         let formData  = new FormData(formRepresentante);
         let url = `/empresas/{{$empresa->id}}` 
-         Fetchx({
-                  title: "Guardando",
-                  url: url,
-                  type: "post",
-                  processData: false,
-                  contentType: false,
-                  headers : {
-                      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
-                  },
-                  data: formData,
-                  success: function (response) {
-                   //containerImgFirmas.slideDown()
-                   console.log(response)
-                  }
-                })
+        Fetchx({
+                title: "Guardando",
+                url: url,
+                type: "post",
+                processData: false,
+                contentType: false,
+                headers : {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+                },
+                data: formData,
+                success: function (response) {
+                 //containerImgFirmas.slideDown()
+                 console.log(response)
+                }
+              })
     }) 
 
     frmFavor.addEventListener('submit',(e) => {
@@ -991,65 +1160,90 @@ width: 100%; " >
         return "";
       }
 
-      fetch('/etiquetas',{
-        method: 'post',
-        body : formData  
-      }).then(response => response.json())
-        .then( data => {
-           if(data.success){
-             addTagFavor(tagFavor.value.toUpperCase(), data.id );
-             tagFavor.value = '';  
-           }else if(data.success == false ){
-             toastInfo(data.message)    
-           }
-      });
+      Fetchx({
+              title: "Guardando",
+              url: "/etiquetas" ,
+              type: "post",
+              processData: false,
+              contentType: false,
+              headers : {
+                  'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+              },
+              data: formData,
+              success: function (data) {
+               //containerImgFirmas.slideDown()
+                 if(data.success){
+                   addTagFavor(tagFavor.value.toUpperCase(), data.id );
+                   tagFavor.value = '';  
+                 }else if(data.success == false ){
+                   toastr.info(data.message)    
+                 }
+              }
+            })
     })
     
     frmContra.addEventListener('submit',(e) => {
       e.preventDefault();
-       let formData = new FormData(frmContra);
-      fetch('/etiquetas',{
-        method: 'post',
-        body : formData
-      }).then( response => response.json() )
-        .then( data => {
-           if ( data.success ) {
-             addTagContra(tagContra.value, data.id);
-             tagContra.value = '';  
-           
-           }else if(data.success == false ){
-             toastInfo(data.message)    
-           }
-        });
+      let formData = new FormData(frmContra);
+      
+      Fetchx({
+              title: "Guardando",
+              url: "/etiquetas",
+              type: "post",
+              processData: false,
+              contentType: false,
+              headers : {
+                  'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+              },
+              data: formData,
+              success: function (data) {
+
+               if ( data.success ) {
+                 addTagContra(tagContra.value, data.id);
+                 tagContra.value = '';  
+               
+               }else if(data.success == false ){
+                 toasr.info(data.message)    
+               }
+              }
+            })
+
     })
     
     function addTagFavor( tag, id ){
-      var html = `<span class="bg-primary text-white" style="padding:4px;border-radius:3px;margin-left:2px; margin-top:4px;"> ${tag}<i class='bx bx-x' style="color:white;cursor:pointer;" data-tag="${id}"></i></span>`;
+      var html = `<span class="bg-primary text-white" style="padding:4px;border-radius:3px;margin-left:2px; margin-top:4px;"> ${tag.toUpperCase()}<i class='bx bx-x' style="color:white;cursor:pointer;" data-tag="${id}"></i></span>`;
       frmFavor.insertAdjacentHTML('beforeBegin', html);
     }
 
     function addTagContra( tag, id  ){
-      var html = `<span class="bg-danger text-white" style="padding:4px;border-radius:3px;margin-left:2px; margin-top:4px;">${ tag } <i class='bx bx-x' data-tag="${id}" style="color:white;cursor:pointer;" onclick="removeTag(this)"  ></i></span>`;
+      var html = `<span class="bg-danger text-white" style="padding:4px;border-radius:3px;margin-left:2px; margin-top:4px;">${ tag.toUpperCase()}<i class='bx bx-x' data-tag="${id}" style="color:white;cursor:pointer;" onclick="removeTag(this)"  ></i></span>`;
       frmContra.insertAdjacentHTML( 'beforeBegin', html );
     }
     
     function removeTag(element) {
+
       let formData = new FormData();
       formData.append('etiqueta_id', element.dataset.tag );
       formData.append('empresa_id', <?= $empresa->id ?> );   
-      fetch('/etiquetas/' + element.dataset.tag  ,{
-        headers: {
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-         },
-        method: 'put',
-        body: formData
-      }).then( response => response.json() )
-        .then( data => {
-           if( data.success) {
-             element.parentElement.remove();
-             toastSuccess()
-           }
-        });
+
+      Fetchx({
+              title: "Guardando",
+              url: "/etiquetas/" + element.dataset.tag  ,
+              type: "delete",
+              processData: false,
+              contentType: false,
+              headers : {
+                  'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+              },
+              data: formData,
+              success: function (data) {
+               
+               if( data.success ) {
+                 element.parentElement.remove();
+                 //toastSuccess()
+               }
+              }
+            })
     }
           
   </script>

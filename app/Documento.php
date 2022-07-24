@@ -25,10 +25,12 @@ class Documento extends Model
     protected $fillable = [
       'tipo','archivo','folio','es_plantilla', 'es_ordenable','rotulo','portada','created_by','formato','generado_de_id','documentos_id',
       'empresa_id','personal_id','vinculo_empresa_id','fecha_firma','fecha_desde','fecha_hasta','plazo_servicio','monto_texto','monto','fecha_acta','filename','es_reusable','tenant_id',
-      'filesize','filename','directorio','oportunidad_id','cotizacion_id','licitacion_id','elaborado_json','elaborado_por','elaborado_desde','elaborado_hasta','usado'
+      'filesize','filename','directorio','oportunidad_id','cotizacion_id','licitacion_id','elaborado_json','elaborado_por','elaborado_desde','elaborado_hasta','usado',
+      'es_mesa','respaldado_el',
     ];
     protected $casts = [
       'es_reusable'  => 'boolean',
+      'es_mesa'      => 'boolean',
     ];
 
     public static function nuevo($data) {
@@ -225,8 +227,26 @@ class Documento extends Model
             ;
         })->select('osce.documento.*')->orderBy('osce.documento.id', 'ASC');
     }
-    public function folder_workspace() {
-      return config('constants.ruta_temporal') . 'workspace-' . $this->id . '/';
+    public function folder_workspace($relative = false) {
+      if($relative) {
+        return 'doc-workspace-' . $this->id . '/';
+      } else {
+        return config('constants.ruta_temporal') . 'doc-workspace-' . $this->id . '/';
+      }
+    }
+    public function CompressWorkspace() {
+      return 'doc-workspace-' . $this->id . '.tar.gz';
+    }
+    public function respaldarFolder() {
+      $destino  = config('constants.ruta_storage') . 'workspace/' . $this->CompressWorkspace();
+      $commands[] = 'export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"';
+      $commands[] = "cd " . config('constants.ruta_temporal');
+      $commands[] = "tar -zcvf '" . $this->CompressWorkspace() . "' '" . $this->folder_workspace(true) . "'";
+      $commands[] = "/snap/bin/gsutil mv '" . $this->CompressWorkspace() . "' '" . $destino . "'";
+      $pid = Helper::parallel_command($commands);
+      $this->update([
+        'respaldado_el' => DB::raw('now()'),
+      ]);
     }
     public function json_load() {
       return json_decode($this->elaborado_json, true);

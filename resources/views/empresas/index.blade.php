@@ -6,7 +6,7 @@
             <a class="btn btn-primary" href="/empresas/crear">
                + Nuevo
              </a>
-            <a class="btn btn-primary" href="/empresas/tags"> <i class='bx bxs-purchase-tag'></i> Etiquetas </a>
+            <!--<a class="btn btn-primary" href="/empresas/tags"> <i class='bx bxs-purchase-tag'></i> Etiquetas </a>-->
         </div>
     </div>
     <div class="card">

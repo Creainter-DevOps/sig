@@ -1,4 +1,7 @@
 <div style="margin-top: -25px;text-align: right;">
+  <a class="btn btn-sm m-0" href="/proyectos/{{ $proyecto->id }}/financiero">
+    <i class="bx bx-printer"></i> Reporte
+  </a>
   <button type="button" class="btn btn-sm m-0" data-popup="/pagos/crear?proyecto_id={{ $proyecto->id }}">
     <i class="bx bx-plus"></i>Nuevo Pago
   </button>

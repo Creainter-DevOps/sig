@@ -87,6 +87,34 @@
 <script src="{{asset('js/scripts/forms/wizard-steps.js')}}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/draggable/1.0.0-beta.12/draggable.bundle.js" integrity="sha512-CY+c7SEffH9ZOj1B9SmTrJa/ulG0I6K/6cr45tCcLh8/jYqsNZ6kqvTFbc8VQA/rl9c2r4QBOx2Eur+2vkVWsA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
+function respaldar() {
+  let url = '/documentos/{{ $documento->id }}/expediente/respaldar';
+  Fetchx({
+    id: 'respaldo',
+    title: 'Respaldando',
+    url: url,
+    headers: {
+       "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    },
+    type: 'POST',
+  });
+}
+setInterval(respaldar, 1000 * 60 * 5);
+function restaurar() {
+  let url = '/documentos/{{ $documento->id }}/expediente/restaurar';
+  Fetchx({
+    id: 'restauracion',
+    title: 'Restaurando Archivos',
+    url: url,
+    headers: {
+       "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    },
+    type: 'POST',
+  });
+}
+restaurar();
+
+let Empresas = {!! json_encode(App\EmpresaFirma::porTenant()) !!};
 let preventDefaults = function (e) {
       e.preventDefault()
       e.stopPropagation()
@@ -120,6 +148,24 @@ $('#btnRepositorio').on('click', function() {
 $(document).on('click', '[data-tools]', function() {
   current_tool = $(this).attr('data-tools');
   $('.contentPoint').addClass('activePoint');
+});
+$(document).on('click', '[data-tools2]', function() {
+  let tool = $(this).attr('data-tools2');
+  let eid  = $('#selectEmpresa').val();
+  if(typeof Empresas[eid] === 'undefined') {
+    return alert('La empresa no existe');
+  }
+  if(tool == 'firma') {
+    if(!Empresas[eid].imagen_firma) {
+      return alert('No se ha encontrado una Imagen registrada.(1)');
+    }
+  } else if(tool == 'visado') {
+    if(!Empresas[eid].imagen_visado) {
+      return alert('No se ha encontrado una Imagen registrada.(2)');
+    }
+  } else {
+    return alert('(3)');
+  }
 });
 
 $(document).on('click', '[data-remove]', function(e) {
@@ -157,15 +203,16 @@ $(document).on('click', '[data-remove]', function(e) {
 });
 
 $(document).on('mousemove', '.contentPoint', function(e) {
-  var x = e.pageX - $(this).offset().left;
-  var y = e.pageY - $(this).offset().top;
-  console.log('mousemove', '.contentPoint', x, y);
-  if(x >= 50 && x <= $(this).width() - 75
-    && y >= 50 && y <= $(this).height() - 75) {
-    $(this).find('.puntero').css({
-      left: x,
-      top: y,
-    });
+  if(current_tool) {
+    var x = e.pageX - $(this).offset().left;
+    var y = e.pageY - $(this).offset().top;
+    if(x >= 50 && x <= $(this).width() - 75
+      && y >= 50 && y <= $(this).height() - 75) {
+      $(this).find('.puntero').css({
+        left: x,
+        top: y,
+      });
+    }
   }
 });
 

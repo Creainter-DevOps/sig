@@ -29,7 +29,7 @@
             </ul>
             <div class="wizard-horizontal">
                 <div class="row">
-                      <div class="col-6">
+                      <div class="col-8">
                         <div style="background: #efefef;border: 1px solid #d5d5d5;border-radius: 5px;padding: 5px;">
                           @if(!empty($cotizacion->oportunidad()->licitacion_id))
                           <iframe class="doc" src="https://docs.google.com/gview?embedded=true&url={{ ('https://sig.creainter.com.pe/static/seace/' . $licitacion->bases_integradas) }}" frameborder='0' style="height:600px"></iframe>
@@ -38,12 +38,12 @@
                           @endif
                         </div>
                       </div>
-                      <div class="col-6">
+                      <div class="col-4">
                         <div class="card widget-todo">
-                          <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+                          <div class="card-header border-bottom">
                             <h4 class="card-title d-flex">
                               <i class='bx bx-check font-medium-5 pl-25 pr-75'></i>Plantillas
-                            </h4>
+                            </h4><br />
                             <ul class="list-inline d-flex mb-0">
                               <li class="d-flex align-items-center">
                                 <i class='bx bx-check-circle font-medium-3 mr-50'></i>

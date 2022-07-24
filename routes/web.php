@@ -43,12 +43,15 @@ Route::resource('entregables', 'EntregableController');
 Route::get('pagos/autocomplete', 'PagoController@autocomplete');
 Route::resource('pagos', 'PagoController');
 
-Route::get('gastos/autocomplete', 'GastoController@autocomplete');
-Route::resource('gastos', 'GastoController');
+Route::get('ordenes/autocomplete', 'OrdenController@autocomplete');
+Route::resource('ordenes', 'OrdenController')->parameters([
+  'ordenes' => 'orden'
+]);
 
 //Route::resource('proyectos', 'ProyectoController');
 Route::get('proyectos/autocomplete', 'ProyectoController@autocomplete'); 
 Route::post('proyectos/{proyecto}/observacion', 'ProyectoController@observacion'); 
+Route::get('proyectos/{proyecto}/financiero', 'ProyectoController@financiero');
 Route::resource('proyectos', 'ProyectoController')->parameters([
     'proyectos' => 'proyecto'
   ]);
@@ -62,6 +65,8 @@ Route::get('empresas/tags','EmpresaController@tags');
 Route::post('empresas/{empresa}/imagen', 'EmpresaController@actualizar_imagen'); 
 Route::get('empresas/{empresa}/tags','EmpresaController@tags_empresa');
 Route::post('empresas/tag/nuevo','EmpresaController@tagCreate');
+Route::get('empresas/{empresa}/firmas/eliminar','EmpresaController@firmas_eliminar');
+Route::get('empresas/{empresa}/sellos/eliminar','EmpresaController@sellos_eliminar');
 Route::post('empresas/tag/eliminar','EmpresaController@tagDelete');
 Route::post('empresas/{empresa}/firmas/procesar','EmpresaController@firmas_sellos_procesar');
 Route::post('empresas/{empresa}/sellos/procesar','EmpresaController@firmas_sellos_procesar');
@@ -221,6 +226,9 @@ Route::post('documentos/{documento}/expediente/inicio','DocumentoController@expe
 Route::get('documentos/{documento}/expediente/paso01','DocumentoController@expediente_paso01')->name("documento.expediente_paso01");
 Route::post('documentos/{documento}/expediente/paso01','DocumentoController@expediente_paso01_store')->name("documento.expediente_paso01_store");
 Route::get('documentos/{documento}/expediente/paso02','DocumentoController@expediente_paso02')->name("documento.expediente_paso02");
+Route::post('documentos/{documento}/expediente/respaldar','DocumentoController@expediente_respaldar')->name("documento.expediente_reslpaldar");
+Route::post('documentos/{documento}/expediente/restaurar','DocumentoController@expediente_restaurar')->name("documento.expediente_restaurar");
+Route::post('documentos/{documento}/expediente/upload', 'DocumentoController@expediente_upload')->name('documentos.expediente_upload');
 
 Route::get('documentos/{documento}/generarImagenTemporal','DocumentoController@generarImagenTemporal');
 Route::get('documentos/{documento}/generarImagen','DocumentoController@generarImagen');

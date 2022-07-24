@@ -26,7 +26,7 @@ class ProductoController extends Controller
     public function index()
     {
 
-      $listado = Producto::where('eliminado',false)->paginate(15); 
+      $listado = Producto::where('eliminado',false)->orderBy('id','desc')->paginate(15); 
       $this->viewBag['listado'] = $listado; 
       return view( 'productos.index', $this->viewBag );
     }

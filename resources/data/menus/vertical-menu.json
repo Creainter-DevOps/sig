@@ -101,6 +101,12 @@
       "icon": "file-export"
     },
     {
+      "url": "misempresas",
+      "name": "Mis Empresas",
+      "i18n": "Mis Empresas",
+      "icon": "building"
+    },
+    {
       "url": "actividades",
       "name": "Actividades",
       "i18n": "Actividades",

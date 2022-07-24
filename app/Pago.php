@@ -48,9 +48,9 @@ class Pago extends Model
      */
     protected $casts = [
     ];
-    public function monto() {
-      if(in_array(Auth::user()->id, [1,3,15])) {
-        $m = $this->monto;
+    public function monto($field = 'monto') {
+      if(in_array(Auth::user()->id, [12,3,15])) {
+        $m = $this->{$field};
       } else {
         $m = 1;
       }

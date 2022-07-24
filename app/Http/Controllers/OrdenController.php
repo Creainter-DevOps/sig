@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Gasto;
+use App\Orden;
 use App\Entregable;
 use Auth;
-class GastoController extends Controller
+class OrdenController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -17,11 +17,11 @@ class GastoController extends Controller
     {
          $search = $request->input('search');
         if(!empty($search)) {
-            $listado = Gasto::search($search)->paginate(15)->appends(request()->query());
+            $listado = Orden::search($search)->paginate(15)->appends(request()->query());
         } else {
-            $listado = Gasto::orderBy('created_on', 'desc')->paginate(15)->appends(request()->query());
+            $listado = Orden::orderBy('created_on', 'desc')->paginate(15)->appends(request()->query());
         }
-        return view('gasto.index', ['listado' => $listado]); 
+        return view('orden.index', ['listado' => $listado]); 
     }
 
     /**
@@ -32,13 +32,13 @@ class GastoController extends Controller
     public function create(Request $request)
     { 
       $proyecto_id = $request->input('proyecto_id');
-      $gasto = new Gasto;
-      $gasto->fecha = date('Y-m-d');
-      $gasto->monto = 0;
+      $orden = new Orden;
+      $orden->fecha = date('Y-m-d');
+      $orden->monto = 0;
       if(!empty($proyecto_id)) {
-        $gasto->proyecto_id = $proyecto_id;
+        $orden->proyecto_id = $proyecto_id;
       }
-      return view($request->ajax() ? 'gasto.fast' : 'gasto.create', compact('gasto'));
+      return view($request->ajax() ? 'orden.fast' : 'orden.create', compact('orden'));
     }
 
     /**
@@ -50,10 +50,10 @@ class GastoController extends Controller
     public function store(Request $request)
     {
       $data = $request->all();
-      if(!empty($data['auto_cantidad']) && !empty($data['auto_gasto'])) {
+      if(!empty($data['auto_cantidad']) && !empty($data['auto_orden'])) {
         Entregable::registrar($data);
       } else {
-        Gasto::registrar($data);
+        Orden::registrar($data);
       }
       return response()->json(['status' => true , 'refresh' => true ]);
     }
@@ -75,9 +75,9 @@ class GastoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Request $request, Gasto $gasto)
+    public function edit(Request $request, Orden $orden)
     {
-        return view($request->ajax() ? 'gasto.fast_edit' : 'gasto.edit', compact('gasto'));
+        return view($request->ajax() ? 'orden.fast_edit' : 'orden.edit', compact('orden'));
     }
 
     /**
@@ -87,7 +87,7 @@ class GastoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Gasto $gasto)
+    public function update(Request $request, Orden $orden)
     {
       $data = $request->all();
     if(!empty($data['_update'])) {
@@ -96,7 +96,7 @@ class GastoController extends Controller
       unset($data['_update']);
     }
 
-      $gasto->update($data);
+      $orden->update($data);
       return response()->json(['status' => true , 'refresh' => true ]);
     }
 
@@ -106,16 +106,16 @@ class GastoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Gasto $gasto)
+    public function destroy(Orden $orden)
     {
-      $gasto->delete();
+      $orden->delete();
       return response()->json(['status' => true , 'refresh' => true ]);
     }
 
     public function autocomplete(Request  $request  ) {
       $query = strtolower($request->input('query'));
-      $data = Gasto::search($query)
-        ->selectRaw("osce.gasto.id, CONCAT('GASTO ', osce.gasto.numero) as value");
+      $data = Orden::search($query)
+        ->selectRaw("osce.orden.id, CONCAT('GASTO ', osce.orden.numero) as value");
       if($request->input('proyecto_id') != null) {
         $data->where('proyecto_id', '=', $request->input('proyecto_id'));
       }

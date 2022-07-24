@@ -18,14 +18,22 @@ function gs_exists($file) {
   }
   return false;
 }
-function gs($file) {
+function gs($file, $folder = null) {
+  $path_basic    = config('constants.ruta_temporal');
+  $path_temporal = $folder ?? config('constants.ruta_temporal');
+
   if(strpos($file, 'gs://') !== false) {
-    $temporal = '/tmp/' . md5($file) . '.' . strtolower(pathinfo($file, PATHINFO_EXTENSION));
+    $filename = md5($file) . '.' . strtolower(pathinfo($file, PATHINFO_EXTENSION));
+    $temporal = $path_temporal . $filename;
     if(file_exists($temporal)) {
       return $temporal;
     }
     Helper::gsutil_cp($file, $temporal);
+    if($path_basic != $path_temporal) {
+      symlink($temporal, $path_basic . $filename);
+    }
     return $temporal;
+
   } else if(file_exists($file)) {
     return $file;
   }

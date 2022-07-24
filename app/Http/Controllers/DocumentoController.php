@@ -93,7 +93,7 @@ class DocumentoController extends Controller {
     $oid  = $request->input('oid');
 
     $data['es_plantilla'] = false;
-    $data['archivo']      = null;
+    $data['archivo']      = 'tenant-' . Auth::user()->tenant_id . '/' . gs_file('pdf');
     $data['formato']      = 'PDF';
     $data['folio']        = 0;
     $data['rotulo']       = $name;
@@ -103,6 +103,7 @@ class DocumentoController extends Controller {
     $data['tipo']         = 'EXPEDIENTE';
     $data['oportunidad_id'] = $oid;
     $data['elaborado_desde'] = DB::raw('now()');
+    $data['es_mesa']         = true;
 
     Documento::nuevo($data);
 
@@ -138,7 +139,9 @@ class DocumentoController extends Controller {
 
   }
   public function expediente_inicio_store(Request $request, Documento $documento ){
-         
+      if(empty($documento->archivo)) {
+        $documento->archivo = 'tenant-' . Auth::user()->tenant_id . '/' . gs_file('pdf');
+      }   
       $documento->elaborado_por   = Auth::user()->id;
       $documento->elaborado_desde = DB::raw('now()');
       $documento->save();
@@ -423,7 +426,7 @@ echo "<pre>";
       $doc = Documento::nuevo($data);
 
       if(in_array($doc->tipo, ['VISADO','FIRMA'])) {
-        if( isset( $request->folder )){
+        if( !empty($request->folder)){
           $carpeta = $request->folder;
         }else {
           $carpeta = uniqid();
@@ -436,7 +439,6 @@ echo "<pre>";
         foreach($files as $k => $f) {
           $output = 'FIRMAS/' . strtolower($doc->tipo) . '_' . $doc->empresa_id . '_' . $k . '.png';
           Helper::gsutil_mv($path . $f, config('constants.ruta_storage') . $output);
-          //dd($output);
           EmpresaFirma::create([
             'empresa_id' => $doc->empresa_id,
             'tipo'       => $doc->tipo,
@@ -505,7 +507,8 @@ echo "<pre>";
       'finished' => $finished,
       'log'      => $log,
       'data'     => [
-        'url' => $workspace['documento_final'],
+        'url_original' => config('constants.static_cloud') . $documento->original,
+        'url_archivo'  => config('constants.static_cloud') . $documento->archivo
       ]
     ]);
   }
@@ -549,7 +552,7 @@ echo "<pre>";
       $hash = uniqid();
 
       $ruta = config('constants.ruta_storage') . $doc->archivo;
-      $ruta = gs($ruta);
+      $ruta = gs($ruta, $documento->folder_workspace());
 
       if(!in_array($doc->formato, ['PDF','DOC','DOCX','XLS','XLSX'])) {
         return response()->json([
@@ -698,6 +701,113 @@ echo "<pre>";
       return response()->json(['status' => true ]);
     }
 
+  public function expediente_upload(StoreFileRequest $request, Documento $documento) {
+    $path = $request->input('path');
+    $path = trim($path, '/');
+    $destinos = [];
+    $files = $request->file('files');
+    $orden = 999999;
+    foreach($files as $file) {
+      $size     = $file->getSize();
+      $formato  = strtolower($file->getClientOriginalExtension());
+      $original = $file->getRealPath();
+      $filename = $file->getClientOriginalName();
+
+      if(!in_array(strtolower($formato), ['PDF','DOC','DOCX','XLS','XLSX'])) {
+        $file->subido = 'El formato no es válido';
+        continue;
+      }
+      if($formato == 'pdf') {
+        $meta = Helper::metadata($original);
+        $archivo = gs_file('pdf');
+        $file->move($documento->folder_workspace(), $archivo);
+        $destino = $documento->folder_workspace() . $archivo;
+
+      } else {
+        $archivo  = gs_file($formato);
+        $file->move($documento->folder_workspace(), $archivo);
+        $original = $documento->folder_workspace() . $archivo;
+
+        $destino  = Helper::replace_extension($original, 'pdf');
+
+        exec("/usr/bin/libreoffice --convert-to pdf '" . $original . "' --outdir " . $documento->folder_workspace());
+        $meta = Helper::metadata($destino);
+        unlink($original);
+        $meta = Helper::metadata($destino);
+      }
+
+      $cid = Helper::workspace_get_id(uniqid(), 'n');
+      $workspace[$cid] = Helper::formatoCard([
+          'cid'     => $cid,
+          'orden'   => ++$orden,
+          'page'    => 0,
+          'tipo'    => 'UPLOAD',
+          'folio'   => $meta['Pages'],
+          'rotulo'  => $filename,
+          'archivo' => $destino,
+          'root'    => $destino,
+          'is_part' => false,
+          'timestamp' => time(),
+        ]);
+    }
+    return response()->json([
+      'status' => true,
+      'data'   => $destinos,
+    ]);
+  }
+    public function expediente_respaldar(Request $request, Documento $documento) {
+      $destino  = config('constants.ruta_storage') . 'workspace/' . $documento->CompressWorkspace();
+      if(file_exists($documento->folder_workspace())) {
+        if(empty($documento->respaldado_el) || ((time() - strtotime($documento->respaldado_el)) > 60*2)) {
+          $documento->respaldarFolder();
+          return response()->json([
+            'status'  => true,
+            'message' => 'Respaldado en la Nube!',
+          ]);
+        } else {
+          return response()->json([
+            'status'  => false,
+            'message' => 'No es posible.',
+          ]);
+        }
+      } else {
+        return response()->json([
+          'status'  => false,
+          'message' => 'No existe el Folder.',
+        ]);
+      }
+    }
+    public function expediente_restaurar(Request $request, Documento $documento) {
+      if(!file_exists($documento->folder_workspace())) {
+        if(!empty($documento->respaldado_el)) {
+          $commands[] = "cd " . config('constants.ruta_temporal');
+          $commands[] = 'export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"';
+          $destino = config('constants.ruta_temporal') . $documento->CompressWorkspace();
+          $commands[] = "/snap/bin/gsutil cp '" . config('constants.ruta_storage') . 'workspace/' . $documento->CompressWorkspace() . "' '" . $destino . "'";
+          $commands[] = "tar -zxvf '" . $destino . "'";
+          $commands[] = "/bin/rm '" . $destino . "'";
+
+          $pid = Helper::parallel_command($commands);
+
+          return response()->json([
+            'status'  => true,
+            'message' => 'Restaurando...',
+            'pid'     => $pid,
+          ]);
+        } else {
+          return response()->json([
+            'status'  => false,
+            'message' => 'Sin respaldo',
+          ]);
+        }
+      } else {
+        return response()->json([
+          'status'  => false,
+          'message' => 'Ya existe una versión local.',
+        ]);
+      }
+    }
+
   public function generarImagen(Request $request, Documento $documento) {
     $page   = $request->page;
     $input  = gs(config('constants.ruta_storage') . $documento->archivo);
@@ -762,6 +872,10 @@ echo "<pre>";
     }
   public function descargarParte(Request $request, Documento $documento) {
     $page   = $request->page;
+    if(!(preg_match("/^[\d]+\-[\d]+$/", $page) || preg_match("/^[\d]+$/", $page))) {
+      echo "404";
+      exit;
+    }
     $input  = gs(config('constants.ruta_storage') . $documento->archivo);
     $name   = 'part_' . md5($documento->id . '-' . $page) . '.pdf';
     $output = config('constants.ruta_temporal') . $name;
@@ -771,7 +885,8 @@ echo "<pre>";
       exit;
     }
     if(!file_exists($output)) {
-      exec("/usr/bin/pdfseparate '" . $input . "' -f " . $page . " -l " . $page . " '" . $output . "'");
+      $cmd = "/usr/bin/qpdf --empty --pages '" . $input . "' " . $page . " -- '" . $output . "'";
+      exec($cmd);
     }
     $headers = [
       'Content-Description' => 'Parte del Documento: ' . $name,
@@ -817,7 +932,7 @@ echo "<pre>";
           'tipo'       => $n->tipo,
           'id'         => $n->id,
           'is_file'    => true,
-          'download'   => config('constants.static_cloud') . $n->archivo,
+          'download'   => !empty($n->fecha_hasta) ? config('constants.static_cloud') . $n->archivo : null,
           'name'       => $n->filename,
           'rotulo'     => $n->rotulo,
           'created_by' => $n->created_by,
@@ -831,7 +946,7 @@ echo "<pre>";
           'tipo'       => $n->tipo,
           'id'         => $n->id,
           'is_file'    => true,
-          'download'   => config('constants.static_seace') . $n->archivo,
+          'download'   => $n->archivo,
           'name'       => $n->filename,
           'rotulo'     => $n->rotulo,
           'created_by' => $n->created_by,
