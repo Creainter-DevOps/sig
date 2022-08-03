@@ -296,6 +296,9 @@ class ExpedienteController extends Controller
       $documento = $cotizacion->documento();
       $workspace = $documento->json_load();
 
+      if($cotizacion->elaborado_step == 4) {
+        return redirect('/expediente/' . $cotizacion->id . '/paso04?verror=ya-esta-procesando');
+      }
       /*if(empty($documento->respaldado_el)) {
         return redirect('/expediente/' . $cotizacion->id . '/paso03?merror=sin-respaldo');
       }

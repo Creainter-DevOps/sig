@@ -442,17 +442,22 @@ echo "<pre>";
 
         $path = '/tmp/' . $carpeta . '/';
         $files = array_diff(scandir($path), array('.', '..'));
+
+        $commands[] = 'export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"';
         
+        $i = 0;
         foreach($files as $k => $f) {
-          $output = 'FIRMAS/' . strtolower($doc->tipo) . '_' . $doc->empresa_id . '_' . $k . '.png';
-          Helper::gsutil_mv($path . $f, config('constants.ruta_storage') . $output);
+          $output = 'FIRMAS/' . strtolower($doc->tipo) . '_' . $doc->empresa_id . '_' . $i . '.png';
+          $commands[] = "/snap/bin/gsutil mv '" . $path . $f . "' '" . config('constants.ruta_storage') . $output. "'";
           EmpresaFirma::create([
             'empresa_id' => $doc->empresa_id,
             'tipo'       => $doc->tipo,
             'archivo'    => $output,
             'documento_id' => $doc->id,
           ]);
+          $i++;
         }
+        $pid = Helper::parallel_command($commands);
       }
 
       if($request->ajax()){

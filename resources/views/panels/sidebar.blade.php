@@ -181,7 +181,7 @@
                             </li>
                                                         <li class="navigation-header"><span>Apps</span></li>
                                                     <li class="nav-item {{(request()->is('proyectos'.'*')) ? 'active' : '' }}   ">
-              <a href="https://sig.creainter.com.pe/proyectos ">
+              <a href="https://sig.creainter.com.pe/proyectos">
                                         <i class="menu-livicon livicon-evo-holder" data-icon="desktop" style="visibility: visible; width: 60px;"><div class="lievo-svg-wrapper"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 60 60" xml:space="preserve" data-animoptions="{'duration':'2', 'repeat':'0', 'repeatDelay':'0.5'}" preserveAspectRatio="xMinYMin meet" style="left: 0px; top: 0.40625px;"><g class="lievo-setrotation"><g class="lievo-setsharp" style="transform-origin: 0px 0px 0px;" data-svg-origin="30.625 30" transform="matrix(1,0,0,1,-0.625,-0.625)"><g class="lievo-setflip"><g class="lievo-main">
 
 
@@ -432,8 +432,40 @@
                                                           <span class="menu-title">Documentos</span>
                                                   </a>
                             </li>
-                                                    <li class="nav-item {{(request()->is('empresas/misempresas'.'*')) ? 'active' : '' }}   ">
-              <a href="https://sig.creainter.com.pe/misempresas ">
+
+           <li class="nav-item {{(request()->is('documentos/filestore'.'*')) ? 'active' : '' }}   ">
+             <a href="https://sig.creainter.com.pe/documentos/filestore">
+
+                                        <i class="menu-livicon livicon-evo-holder" data-icon="box" style="visibility: visible; width: 60px;"><div class="lievo-svg-wrapper"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 60 60" xml:space="preserve" data-animoptions="{'duration':'2', 'repeat':'0', 'repeatDelay':'0.5'}" preserveAspectRatio="xMinYMin meet" style="left: 0px; top: 0.203125px;"><g class="lievo-setrotation"><g class="lievo-setsharp" style="transform-origin: 0px 0px 0px;" data-svg-origin="30.625 30" transform="matrix(1,0,0,1,-0.625,-0.625)"><g class="lievo-setflip"><g class="lievo-main">
+
+
+		<g class="lievo-lineicon">
+			<g>
+				<defs>
+					<clipPath id="livicon_box_line_6">
+						<rect class="lievo-donotdraw lievo-nohovercolor" fill="none" stroke="none" x="10" y="-17" width="40" height="40" style=""></rect>
+					</clipPath>
+				</defs>
+				<g clip-path="url(#livicon_box_line_6)">
+					<rect class="lievo-donotdraw lievo-likestroke lievo-altstroke" x="16" y="23" fill="#8494a7" stroke="none" width="32" height="26" opacity="0.8" style=""></rect>
+					<rect class="lievo-donotdraw lievo-likestroke lievo-altstroke" x="14" y="23" fill="#8494a7" stroke="none" width="32" height="26" opacity="0.9" style=""></rect>
+					<rect class="lievo-donotdraw lievo-likestroke lievo-altstroke" x="12" y="23" fill="#8494a7" stroke="none" width="32" height="26" opacity="1" style=""></rect>
+				</g>
+			</g>
+			<path fill="none" stroke="#8494a7" stroke-width="3.25px" stroke-linecap="square" stroke-miterlimit="10" d="M30,23h21v23c0,1.66-1.34,3-3,3H12c-1.66,0-3-1.34-3-3V23H30" style=""></path>
+			<line class="lievo-altstroke" fill="none" stroke="#8494a7" stroke-width="3.25px" stroke-linecap="square" stroke-miterlimit="10" x1="35" y1="29" x2="25" y2="29" style=""></line>
+			<path fill="none" stroke="#8494a7" stroke-width="3.25px" stroke-linecap="square" stroke-miterlimit="10" d="M30,11h20c1.66,0,3,1.34,3,3v9H7v-9c0-1.66,1.34-3,3-3H30" style="" data-svg-origin="7 23" transform="matrix(1,0,0,1,0,0)"></path>
+		</g>
+
+
+	<rect x="-19" y="-19" width="4" height="4" fill="none" stroke="#8494a7" style="stroke-width: 2; stroke-linecap: butt; stroke-linejoin: round; opacity: 0;" class="lievo-checkshift lievo-donotdraw lievo-nohoverstroke lievo-nohovercolor" stroke-width="3.25px"></rect></g></g></g></g>
+
+<desc>LivIcons Evolution</desc></svg></div></i>
+                                                          <span class="menu-title">Filestore</span>
+                                                  </a>
+                            </li>
+           <li class="nav-item {{(request()->is('empresas/misempresas'.'*')) ? 'active' : '' }}   ">
+             <a href="https://sig.creainter.com.pe/misempresas ">
                                         <i class="menu-livicon livicon-evo-holder" data-icon="building" style="visibility: visible; width: 60px;"><div class="lievo-svg-wrapper"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 60 60" xml:space="preserve" data-animoptions="{'duration':'2', 'repeat':'0', 'repeatDelay':'0.5'}" preserveAspectRatio="xMinYMin meet" style="left: 0px; top: 0.40625px;"><g class="lievo-setrotation"><g class="lievo-setsharp" style="transform-origin: 0px 0px 0px;" data-svg-origin="30.625 30" transform="matrix(1,0,0,1,-0.625,-0.625)"><g class="lievo-setflip"><g class="lievo-main">
 		<g class="lievo-filledicon lievo-lineicon">
 			<defs>
