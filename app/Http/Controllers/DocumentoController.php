@@ -83,6 +83,13 @@ class DocumentoController extends Controller {
       $workspace = $documento->json_load();
       $cid = $request->get('cid');
       $card = $workspace['paso03'][$cid];
+      if($card['folio'] == '#') {
+        $meta = Helper::metadata($card['root']);
+        $workspace['paso03'][$cid]['folio'] = $meta['Pages'];
+        $card = $workspace['paso03'][$cid];
+        $documento->json_save($workspace);
+      }
+
       return view('documento.imagen', compact('documento', 'card', 'cid'));   
   }
 
@@ -644,13 +651,20 @@ echo "<pre>";
       $workspace = $documento->json_load();
 
       $cid = $request->get('cid');
-      @unlink($workspace['paso03'][$cid]['root']);
-      unset($workspace['paso03'][$cid]);
+      //Elimina el documento cuando sea unico o sea la ultima pagina que se encuentre en la mesa de trabajo
+      if(( $workspace['paso03'][$cid]['is_part'] == false) || ( $workspace['paso03'][$cid]['is_part'] == true &&  (sizeof( preg_grep( '/' . ( explode('/', $cid)[0] ) . '\/\d/i', array_keys($workspace['paso03']))) == 1)   ) ){
+       @unlink($workspace['paso03'][$cid]['root']);
+      } 
+      
+      unset( $workspace['paso03'][$cid] );
+
       $documento->json_save($workspace);
 
        return response()->json([
          'status' => true ,
+         'datos' => preg_grep( '/'.( explode('/', $cid)[0] ) . '\/\d/i', array_keys($workspace['paso03']) )
        ]);
+
     }
 
   public  function destroy(Documento $documento  ){
@@ -676,30 +690,67 @@ echo "<pre>";
   public function estamparDocumento(Request $request, Documento $documento) {
       $workspace = $documento->json_load();
       $cid  = $request->get('cid');
+      $eid  = $request->get('eid');
       $page = $request->get('page');
       $tool = $request->get('tool');
       $pos_x = $request->get('pos_x');
       $pos_y = $request->get('pos_y');
 
-      $workspace['paso03'][$cid]['estampados'][$tool][$page] = [
-        'x' => $pos_x,
-        'y' => $pos_y
+      if(!isset($workspace['paso03'][$cid]['addons'][$page])) {
+        $workspace['paso03'][$cid]['addons'][$page] = [];
+      }
+      $fid = uniqid();
+      $workspace['paso03'][$cid]['addons'][$page][$fid] = [
+        'id'   => $fid,
+        'tool' => $tool,
+        'eid'  => $eid,
+        'x'    => $pos_x,
+        'y'    => $pos_y
       ];
+
+      if(!isset($workspace['addons'][$tool])) {
+        $workspace['addons'][$tool] = [];
+      }
+      if(!isset($workspace['addons'][$tool][$eid])) {
+        $workspace['addons'][$tool][$eid] = 0;
+      }
+
+      $workspace['addons'][$tool][$eid]++;
 
       $documento->json_save($workspace);
 
       return response()->json([
         'status' => true ,
+        'id'     => $fid,
       ]);
     }
     public function eliminarFirmas( Request $request, Documento $documento){
       $workspace = $documento->json_load();
 
-      $cid = $request->get('cid');
-      $workspace['paso03'][$cid]['estampados'] = [];
+      $cid  = $request->get('cid');
+      $fid  = $request->get('fid');
+      $page = $request->get('page');
+
+      $card = $workspace['paso03'][$cid]['addons'][$page][$fid];
+      $tool = $card['tool'];
+      $eid  = $card['eid'];
+
+      if(!isset($workspace['addons'][$tool])) {
+        $workspace['addons'][$tool] = [];
+      }
+      if(!isset($workspace['addons'][$tool][$eid])) {
+        $workspace['addons'][$tool][$eid] = 0;
+      }
+      $workspace['addons'][$tool][$eid]--;
+
+      if($workspace['addons'][$tool][$eid] < 0) {
+        $workspace['addons'][$tool][$eid] = 0;
+      }
+
+      unset($workspace['paso03'][$cid]['addons'][$page][$fid]);
 
       $documento->json_save($workspace);
-      return response()->json(['status' => true ]);
+      return response()->json(['status' => true]);
     }
 
   public function expediente_upload(StoreFileRequest $request, Documento $documento) {
@@ -778,10 +829,12 @@ echo "<pre>";
       $destino  = config('constants.ruta_storage') . 'workspace/' . $documento->CompressWorkspace();
       if(file_exists($documento->folder_workspace())) {
         if(empty($documento->respaldado_el) || ((time() - strtotime($documento->respaldado_el)) > 60*2)) {
-          $documento->respaldarFolder();
+          $res = $documento->respaldarFolder();
           return response()->json([
-            'status'  => true,
-            'message' => 'Respaldado en la Nube!',
+            'status'   => true,
+            'response' => $res,
+            'path'     => $documento->folder_workspace(),
+            'message'  => 'Respaldado en la Nube!',
           ]);
         } else {
           return response()->json([
@@ -799,19 +852,13 @@ echo "<pre>";
     public function expediente_restaurar(Request $request, Documento $documento) {
       if(!file_exists($documento->folder_workspace())) {
         if(!empty($documento->respaldado_el)) {
-          $commands[] = "cd " . config('constants.ruta_temporal');
-          $commands[] = 'export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"';
-          $destino = config('constants.ruta_temporal') . $documento->CompressWorkspace();
-          $commands[] = "/snap/bin/gsutil cp '" . config('constants.ruta_storage') . 'workspace/' . $documento->CompressWorkspace() . "' '" . $destino . "'";
-          $commands[] = "tar -zxvf '" . $destino . "'";
-          $commands[] = "/bin/rm '" . $destino . "'";
 
-          $pid = Helper::parallel_command($commands);
+          $res = $documento->restaurarFolder();
 
           return response()->json([
             'status'  => true,
             'message' => 'Restaurando...',
-            'pid'     => $pid,
+            'pid'     => $res,
           ]);
         } else {
           return response()->json([
@@ -822,16 +869,17 @@ echo "<pre>";
       } else {
         return response()->json([
           'status'  => false,
-          'message' => 'Ya existe una versión local.',
+          'message' => 'Ya existe una versión local: ' . $documento->CompressWorkspace(),
         ]);
       }
     }
 
-  public function generarImagen(Request $request, Documento $documento) {
+  public function generarImagen(Request $request, Documento $documento, $path = null) {
     $page   = $request->page;
     $input  = gs(config('constants.ruta_storage') . $documento->archivo);
-    $name   = 'thumb_' . md5($documento->id . '-' . $page) . '.jpg';
-    $output = config('constants.ruta_temporal') . $name;
+    $name   = 'temp_thumb02_' . md5($documento->id . '-' . $page) . '.jpg';
+    $path   = $path ?? config('constants.ruta_temporal');
+    $output = $path . $name;
 
     if(!file_exists($input)) {
       echo "404:" . $input;
@@ -847,10 +895,12 @@ echo "<pre>";
     return \Response::download($output, $name, $headers);
   }
 
-   public function generarImagenTemporal(Documento $documento,  Request $request) {
+   public function generarImagenTemporal(Documento $documento, Request $request) {
 
       $page = $request->get('page');
       $cid  = $request->get("cid");
+
+      $path = $documento->folder_workspace();
 
       //$documento = $cotizacion->documento();
       $workspace = $documento->json_load();
@@ -865,21 +915,21 @@ echo "<pre>";
       }
       
       if(!empty($card['id'])) {
-        return $this->generarImagen($request, Documento::find($card['id']));
+        return $this->generarImagen($request, Documento::find($card['id']), $path);
       } 
       $input  = $card['root'];
 
-      $name   = 'thumb_' . md5($documento->id . '-' . $cid . '-' . $page . '-' . $card['timestamp']) . '.jpg';
-      $dir_tmp = Helper::mkdir_p($documento->folder_workspace());
-      $output = $dir_tmp . $name;
+      $name   = 'temp_thumb01_' . md5($documento->id . '-' . $cid . '-' . $page . '-' . $card['timestamp']) . '.jpg';
 
       if(!file_exists($input)) {
-        sleep(5);
+        sleep(15);
       }
       if(!file_exists($input)) {
         echo "404";
         exit;
       }
+      $output = $path . $name;
+
       if(!file_exists($output)) {
         exec("/usr/bin/convert -density 150 '" . $input . "[" . $page . "]' -quality 90 -resize x800 -alpha remove '" . $output . "'");
       }
@@ -1021,5 +1071,8 @@ echo "<pre>";
   public function visor(Request $request) {
     $path = $request->input('path');
     return view('documento.visor', compact('path','request'));
+  }
+  public function filestore(Request $request) {
+    return view('documento.filestore', compact('request'));
   }
 }

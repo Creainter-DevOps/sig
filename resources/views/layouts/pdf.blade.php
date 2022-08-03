@@ -68,6 +68,9 @@ table.style01 > tbody tr td {
   border-bottom: 1px solid #f2f2f2;  
   padding-bottom: 2px;
 }
+.page-break {
+    page-break-after: always;
+}
 </style>
 </head>
 <body>

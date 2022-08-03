@@ -1,3 +1,14 @@
+function toHHMMSS(text) {
+    var sec_num = parseInt(text, 10); // don't forget the second param
+    var hours   = Math.floor(sec_num / 3600);
+    var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+    var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+    if (hours   < 10) {hours   = "0"+hours;}
+    if (minutes < 10) {minutes = "0"+minutes;}
+    if (seconds < 10) {seconds = "0"+seconds;}
+    return hours+':'+minutes+':'+seconds;
+}
 var requestId = 0;
 var timeFetchx = {};
 function navigate(href, newTab) {
@@ -84,7 +95,9 @@ function Fetchx(params, inmediate) {
             }
         };
     }
+    var temp_error = params.error;
     params.error = function ($x) {
+      typeof temp_error !== 'undefined' && temp_error();
       ocultar($x, params);
       if(typeof params.title !== 'undefined') {
         toastr.clear(idToast);
@@ -675,14 +688,33 @@ function render_input_time() {
         }
     });
 }
+function render_time_left() {
+  $("[data-time-left]").each(function() {
+    var box  = this;
+    var text = $(box).attr("data-time-left") || '0';
+    text     = parseInt(text);
+    var restar = function(domi, seconds) {
+      if(seconds <= 0) {
+        $(domi).text('En breve Instantes...');
+      } else {
+        setTimeout(function() {
+          restar(domi, seconds - 1);
+        }, 1000);
+        $(domi).text(toHHMMSS(seconds));
+      }
+    };
+    restar(box, text);
+  });
+}
 function render_confirm_input() {
   $("[data-confirm-input]").each(function () {
-    var box = this;
-    var text = $(box).attr("data-confirm-input") || "¿Cual fue el motivo?";
+    var box  = this;
+    var text = $(box).attr("data-confirm-input") || '¿Cual fue el motivo?';
     var url  = $(box).attr('href');
-    console.log("CONFIRM ", box);
     $(this).on("click", function (e) {
-      e.preventDefault();
+      if(typeof $(box).attr('data-skip2') === 'undefined' && typeof $(box).attr('disabled') === 'undefined') {
+        e.preventDefault();
+        e.stopImmediatePropagation();
             var modal = $("<div>")
                 .addClass("modal fade")
                 .attr("role", "dialog")
@@ -697,31 +729,41 @@ function render_confirm_input() {
             $("body").append(modal);
             modal.modal("show");
             modal.find("button.btn-primary").on("click", function () {
-              Fetchx({
-                url: url,
-                type: 'POST',
-                headers : {
-                  'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+              if($(box).data('fn_dinamic') === 1) {
+                modal.modal('hide');
+                $(box).attr('data-skip2', true);
+                $(box).attr('data-pass-value', modal.find('input.form-control').val());
+                $(box).click();
+              } else {
+                Fetchx({
+                  url: url,
+                  type: 'POST',
+                  headers : {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+                    },
+                  data: {
+                    value: modal.find('input.form-control').val(),
                   },
-                data: {
-                  value: modal.find('input.form-control').val(),
-                },
-                dataType: 'json',
-                success: function(res) {
-                  if(!res.status) {
-                    modal.find('.text-start').text(res.message);
-                  } else {
-                    $(box).slideUp();
-                    console.log('MODAL', modal);
-                    modal.modal("hide");
-                    modal.remove();
-                    $('body').removeClass('modal-open');
-                    $(".modal-backdrop").remove();
+                  dataType: 'json',
+                  success: function(res) {
+                    if(!res.status) {
+                      modal.find('.text-start').text(res.message);
+                    } else {
+                      $(box).slideUp();
+                      console.log('MODAL', modal);
+                      modal.modal("hide");
+                      modal.remove();
+                      $('body').removeClass('modal-open');
+                      $(".modal-backdrop").remove();
+                    }
                   }
-                }
-              });
+                });
+              }
             });
             return false;
+      } else {
+        $(box).removeAttr('data-skip2');
+      }
     });
   });
 }
@@ -729,9 +771,10 @@ function render_link_confirm() {
     $("[data-confirm]").each(function () {
         var box = this;
         var text = $(box).attr("data-confirm") || "Realizar";
-        console.log("CONFIRM ", box);
         $(this).on("click", function (e) {
+          if(typeof $(box).attr('data-skip') === 'undefined' && typeof $(box).attr('disabled') === 'undefined') {
             e.preventDefault();
+            e.stopImmediatePropagation();
             var modal = $("<div>")
                 .addClass("modal fade")
                 .attr("role", "dialog")
@@ -744,10 +787,15 @@ function render_link_confirm() {
             );
             $("body").append(modal);
             modal.find("button.btn-primary").on("click", function () {
-                window.location.href = $(box).attr("href");
+              modal.modal('hide');
+              $(box).attr('data-skip', true);
+              $(box).click();
             });
             modal.modal("show");
             return false;
+          } else {
+            $(box).removeAttr('data-skip');
+          }
         });
     });
 }
@@ -906,6 +954,76 @@ function render_confirm_remove() {
         });
     });
 }
+function render_button_dinamic() {
+  var n = Swal.mixin({
+    buttonsStyling: false,
+    customClass: {
+      confirmButton: "btn btn-alt-success m-5",
+      cancelButton: "btn btn-alt-danger m-5",
+      input: "form-control",
+    },
+  });
+  $('[data-button-dinamic]').each(function() {
+    $(this).data('fn_dinamic', 1).removeAttr('data-button-dinamic').on('click', function(e) {
+      e.preventDefault();
+      if(typeof $(this).attr('disabled') !== 'undefined') {
+        return;
+      }
+      var href  = $(this).attr('href');
+      var box   = $(this);
+      var boxes = $("[href='" + href + "']");
+      Fetchx({
+        url: href,
+        type: 'POST',
+        dataType: 'json',
+        headers : {
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+        },
+        data: {
+          value: $(this).attr('data-pass-value'),
+        },
+        beforeSend: function() {
+          boxes.attr('disabled', true).addClass('disabled');
+        },
+        success: function(res) {
+          if(typeof res.disabled !== 'undefined') {
+            if(res.disabled) {
+              $(boxes).attr('disabled', true).addClass('disabled');
+              $(boxes).removeAttr('data-confirm');
+            } else {
+              $(boxes).removeAttr('disabled').removeClass('disabled');
+            }
+          } else {
+            $(boxes).removeAttr('disabled').removeClass('disabled')
+          }
+          if(typeof res.class !== 'undefined') {
+            $(boxes).addClass(res.class);
+          }
+          if(typeof res.redirect !== 'undefined') {
+            window.location.href = res.redirect;
+          }
+          if(typeof res.refresh !== 'undefined') {
+            if(res.refresh) {
+              window.location.reload();
+            }
+          }
+          if(typeof res.label !== 'undefined') {
+            $(boxes).text(res.label);
+          }
+          if(!res.status) {
+            return n.fire("Denegado", res.message, "error");
+          } else {
+            toastr.success(res.message, res.label, { positionClass: 'toast-top-right', containerId: 'toast-top-right', 'timeOut': 2000 });
+          }
+          return res;
+        },
+        error: function() {
+          toastr.error('Ocurrió un problema durante la ejecución', 'Ops!', { positionClass: 'toast-top-right', containerId: 'toast-top-right', 'timeOut': 2000 });
+        }
+      });
+    });
+  });
+}
 function render_outgoing() {
   $('[data-outgoing]').each(function() {
     var num = $(this).attr('data-outgoing');
@@ -1050,6 +1168,8 @@ function micro_ready() {
   render_select_default();
   render_outgoing();
   render_editable();
+  render_button_dinamic();
+  render_time_left();
 //  combo();
 }
 $(document).ready(function () {

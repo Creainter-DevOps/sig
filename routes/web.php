@@ -36,6 +36,8 @@ Route::get('/dashboard-analytics','DashboardController@dashboardAnalytics');
 Route::get('/contable','ContableController@index');
 Route::get('/contable/pdf/facturas_por_cobrar','ContableController@facturas_por_cobrar');
 Route::get('/contable/pdf/licitaciones_semanal','ContableController@licitaciones_semanal');
+Route::get('/contable/pdf/proyectos_activos','ContableController@proyectos_activos');
+Route::get('/contable/pdf/licitaciones_fechas','ContableController@licitaciones_fechas');
 
 Route::get('entregables/autocomplete', 'EntregableController@autocomplete');
 Route::resource('entregables', 'EntregableController');
@@ -207,7 +209,6 @@ Route::resource('expediente', 'ExpedienteController')->parameters([
 ]);
 
 Route::get('etiquetas/{etiqueta}/aprobar','EtiquetaController@aprobar')->name('etiqueta.aprobar');
-
 Route::get('etiquetas/{etiqueta}/rechazar','EtiquetaController@rechazar')->name('etiqueta.rechazar');
 
 Route::resource('etiquetas', 'EtiquetaController')->parameters([
@@ -234,10 +235,12 @@ Route::get('documentos/{documento}/generarImagenTemporal','DocumentoController@g
 Route::get('documentos/{documento}/generarImagen','DocumentoController@generarImagen');
 Route::get('documentos/{documento}/descargarParte','DocumentoController@descargarParte');
 
+
 Route::post('documentos/{documento}/ordenar','DocumentoController@actualizar_orden');
-Route::post('documentos/{documento}/eliminarFirmas', 'DocumentoController@eliminarFirmas');
 Route::post('documentos/{documento}/estampar', 'DocumentoController@estamparDocumento');
+Route::post('documentos/{documento}/eliminarEstampa', 'DocumentoController@eliminarFirmas');
 Route::post('documentos/{documento}/eliminarDocumento','DocumentoController@eliminarDocumento')->name('documento.eliminarDocumento');
+Route::get('documentos/filestore', 'DocumentoController@filestore')->name('documentos.filestore');
 Route::post('documentos/crearExpediente', 'DocumentoController@crearExpediente')->name('documentos.crearExpediente');
 Route::get('documentos/{documento}/expediente', 'DocumentoController@expediente')->name('documentos.expediente');
 Route::get('documentos/visor', 'DocumentoController@visor')->name('documentos.visor');
@@ -257,8 +260,8 @@ Route::post('cotizaciones/{cotizacion}/registrar', 'CotizacionController@registr
 Route::get('cotizaciones/{cotizacion}/registrar', 'CotizacionController@registrar')->name('cotizacion.registrar');
 
 Route::get('cotizaciones/autocomplete', 'CotizacionController@autocomplete');
-Route::get('cotizaciones/{cotizacion}/registrarParticipacion','CotizacionController@registrarParticipacion');
-Route::get('cotizaciones/{cotizacion}/registrarPropuesta','CotizacionController@registrarPropuesta');
+Route::post('cotizaciones/{cotizacion}/registrarParticipacion','CotizacionController@registrarParticipacion');
+Route::post('cotizaciones/{cotizacion}/registrarPropuesta','CotizacionController@registrarPropuesta');
 Route::get('cotizaciones/{cotizacion}/proyecto','CotizacionController@proyecto')->name( 'oportunidad.proyecto' );
 Route::post('cotizaciones/{cotizacion}/observacion', 'CotizacionController@observacion');
 Route::get('cotizaciones/{cotizacion}/proyecto', 'CotizacionController@proyecto')->name('cotizaciones.proyecto');
@@ -272,12 +275,12 @@ Route::resource('cotizaciones', 'CotizacionController')->parameters([
 ]);
 
 
-
-Route::get('oportunidades/{oportunidad}/aprobar','OportunidadController@aprobar');
+Route::post('oportunidades/{oportunidad}/favorito','OportunidadController@favorito');
+Route::post('oportunidades/{oportunidad}/aprobar','OportunidadController@aprobar');
 Route::post('oportunidades/{oportunidad}/rechazar','OportunidadController@rechazar');
 Route::post('oportunidades/{oportunidad}/archivar','OportunidadController@archivar');
-Route::get('oportunidades/{oportunidad}/revisar','OportunidadController@revisar');
-Route::get('oportunidades/{oportunidad}/interes/{empresa}','OportunidadController@interes');
+Route::post('oportunidades/{oportunidad}/revisar','OportunidadController@revisar');
+Route::post('oportunidades/{oportunidad}/interes/{empresa}','OportunidadController@interes');
 Route::get('oportunidades/autocomplete','OportunidadController@autocomplete');
 Route::get('oportunidades/autocomplete_codigo','OportunidadController@search_codigo');
 Route::get('oportunidades/{oportunidad}/cerrar','OportunidadController@cerrar')->name('oportunidades.cerrar');
@@ -295,7 +298,7 @@ Route::get('licitaciones/eliminadas','LicitacionController@listEliminadas');
 Route::get('licitaciones/aprobadas','LicitacionController@listAprobadas');
 Route::get('licitaciones/{licitacion}/detalles','LicitacionController@show');
 Route::get('licitaciones/{licitacion}/actualizar','LicitacionController@actualizar')->name('licitacion.actualizar');
-Route::get('licitaciones/{licitacion}/aprobar','LicitacionController@aprobar');
+Route::post('licitaciones/{licitacion}/aprobar','LicitacionController@aprobar');
 Route::post('licitaciones/{licitacion}/rechazar','LicitacionController@rechazar');
 Route::post('licitaciones/{licitacion}/observacion','LicitacionController@observacion');
 Route::resource('licitaciones', 'LicitacionController')->parameters([

@@ -12,6 +12,7 @@
       </td>
       <td style="width:250px;vertical-align:top;" rowspan="2">
         <div style="text-align:center;font-size:18px;padding:5px;border:2px solid {{ $cotizacion->empresa()->color_primario }};margin-bottom:10px;">
+          <!--<h1 style="text-align:center;font-size:25px;margin-top:3px;margin-bottom:2px;">COTIZACIÓN</h1>-->
           <h1 style="text-align:center;font-size:25px;margin-top:3px;margin-bottom:2px;">COTIZACIÓN</h1>
           <?= $cotizacion->nomenclatura() ?>
         </div>

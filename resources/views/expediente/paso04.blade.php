@@ -47,7 +47,10 @@
               </li>
             </ul>
             <div class="blockProcess">
-              <div style="font-size: 30px;text-align: center;color: #8b5bff;">Se está procesando {{ $documento->folio }} páginas...</div>
+              <div style="font-size: 30px;text-align: center;color: #8b5bff;">
+                Se está procesando {{ $documento->folio }} páginas, tiempo estimado:
+                <div data-time-left="{{ strtotime($documento->procesado_desde) + ((int) ($documento->folio * 9.78)) - time() }}"></div>
+              </div>
               <div class="blockLog"></div>
             </div>
             <div class="blockEndProcess">
@@ -79,7 +82,7 @@
                   </div>
                   <div class="col-3">
                   @if(empty($cotizacion->propuesta_el))
-                    <a class="btn btn-secondary text-white" data-confirm href="/cotizaciones/{{ $cotizacion->id }}/enviar" class="btn btn-sm btn-dark">Enviar Propuesta</a>
+                    <a class="btn btn-secondary text-white" data-confim data-button-dinamic href="/cotizaciones/{{ $cotizacion->id }}/registrarPropuesta" class="btn btn-sm btn-dark">Enviar Propuesta</a>
                   @else
                     Ya se ha registrado el Envio:<br /> {{ Helper::fecha($cotizacion->propuesta_el, true) }}
                   @endif

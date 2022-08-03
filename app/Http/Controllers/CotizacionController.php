@@ -136,12 +136,50 @@ class CotizacionController extends Controller {
     return response()->json( [ 'cotizacion' =>  $cotizacion, 'detalle' => $detalle ]);
   }
   public function registrarParticipacion(Request $request, Cotizacion $cotizacion) {
-    $cotizacion->registrar_participacion();
-    return redirect('/oportunidades/' . $cotizacion->oportunidad_id . '/');
+    if(empty($cotizacion->participacion_el)) {
+      $cotizacion->registrar_participacion();
+      return response()->json([
+        'status'   => true,
+        'disabled' => true,
+        'label'    => 'Participando!',
+        'message'  => 'Participación registrada',
+        'refresh'  => false,
+        'class'    => 'success',
+      ]);
+    } else {
+      return response()->json([
+        'status'   => true,
+        'disabled' => true,
+        'label'    => 'Ya participando!',
+        'message'  => 'Participación ya se encuentra registrada',
+        'refresh'  => false,
+        'class'    => 'warning',
+      ]);
+    }
+//    return redirect('/oportunidades/' . $cotizacion->oportunidad_id . '/');
   }
   public function registrarPropuesta(Request $request, Cotizacion $cotizacion) {
-    $cotizacion->registrar_propuesta();
-    return redirect('/oportunidades/' . $cotizacion->oportunidad_id . '/');
+    if(empty($cotizacion->propuesta_el)) {
+      $cotizacion->registrar_propuesta();
+      return response()->json([
+        'status'   => true,
+        'disabled' => true,
+        'label'    => 'Propuesta Enviada!',
+        'message'  => 'Propuesta ha sido registrada como enviada',
+        'refresh'  => false,
+        'class'    => 'success',
+      ]);
+    } else {
+      return response()->json([
+        'status'   => false,
+        'disabled' => true,
+        'label'    => 'Propuesta ya existe',
+        'message'  => 'Propuesta ya fue enviada',
+        'refresh'  => false,
+        'class'    => 'warning',
+      ]);
+    }
+    //return redirect('/oportunidades/' . $cotizacion->oportunidad_id . '/');
   }
 
   public function detalleSave( Request $request , $id){

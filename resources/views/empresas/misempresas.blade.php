@@ -1,6 +1,6 @@
 @extends('layouts.contentLayoutMaster')
 {{-- title --}}
-@section('title','Knowledge-base')
+@section('title','Mis empresas')
 {{-- page-styles --}}
 @section('page-styles')
 <link rel="stylesheet" type="text/css" href="{{asset('css/pages/page-knowledge-base.css')}}">
@@ -50,7 +50,7 @@
                     <i class="livicon-evo"
                       data-options="name: users.svg; size: 50px; strokeColorAlt: #FDAC41; strokeColor: #5A8DEE; style: lines-alt; eventOn: .kb-hover-1;"></i>
                    @else 
-                      <img src="{{ config('constants.ruta_cloud') .  $empresa->logo_head }}" height="50"  />
+                      <img src="{{ config('constants.ruta_cloud') .  $empresa->logo_head }}" style="max-width:100%; max-height:60px; "/>
                    @endif   
                   </div>
                   <h5>{{ $empresa->razon_social }}</h5>

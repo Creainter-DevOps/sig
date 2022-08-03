@@ -49,20 +49,20 @@ tr.block_details>td>div {
           <th>Acciones</th>
         </tr>
       </thead>
-      @foreach ($list as $oportunidad)
-      <tbody class="block" data-licitacion-id="{{ $oportunidad->id }}" data-oportunidad-id="{{ $oportunidad->id }}">
+      @foreach ($list as $licitacion)
+      <tbody class="block" data-licitacion-id="{{ $licitacion->id }}" data-licitacion-id="{{ $licitacion->id }}">
         <tr class="block_header">
           <td>
-            <div style="font-size: 11px;color: #64aafb;">{{ Helper::fecha($oportunidad->created_on, true) }}</div>
-            {{ $oportunidad->empresa()->rotulo() }}
+            <div style="font-size: 11px;color: #64aafb;">{{ Helper::fecha($licitacion->created_on, true) }}</div>
+            {{ $licitacion->empresa()->rotulo() }}
           </td>
-          <td style="width:200px;">{{ $oportunidad->tipo_proceso }} <br /> {{ Helper::money($oportunidad->monto) }}</td>
-          <td>{{ $oportunidad->tipo_objeto }}</td>
-          <td>{{ $oportunidad->rotulo }}</td>
-          <td>{{ Helper::fecha($oportunidad->fecha_participacion_hasta) }}<br /><span class="{{ $oportunidad->estado()['class'] }}">{{ $oportunidad->estado()['message'] }}</span></td>
+          <td style="width:200px;">{{ $licitacion->tipo_proceso }} <br /> {{ Helper::money($licitacion->monto) }}</td>
+          <td>{{ $licitacion->tipo_objeto }}</td>
+          <td>{{ $licitacion->rotulo }}</td>
+          <td>{{ Helper::fecha($licitacion->fecha_participacion_hasta) }}<br /><span class="{{ $licitacion->estado()['class'] }}">{{ $licitacion->estado()['message'] }}</span></td>
           <td style="vertical-align: top;">
-            <a href="javascript:void(0);" class="btn btn-sm btn-success shadow mr-1 mb-1">Aprobar</a>
-            <a href="javascript:void(0);" class="btn btn-sm btn-danger glow mr-1 mb-1">Rechazar</a>
+            <a href="/licitaciones/{{ $licitacion->id }}/aprobar" class="btn btn-sm btn-success shadow mr-1 mb-1" data-button-dinamic>Aprobar</a>
+            <a data-confirm-input="¿Por qué desea Rechazarlo?" href="/licitaciones/{{ $licitacion->id }}/rechazar" class="btn btn-sm btn-danger glow mr-1 mb-1" data-button-dinamic>Rechazar</a>
           </td>
         </tr>
         <tr class="block_details">
@@ -71,29 +71,29 @@ tr.block_details>td>div {
               <tbody>
                 <tr>
                   <td>Nomenclatura:</td>
-                  <td><a href="/licitaciones/{{ $oportunidad->id }}/detalles">{{ $oportunidad->nomenclatura }}</a></td>
+                  <td><a href="/licitaciones/{{ $licitacion->id }}/detalles">{{ $licitacion->nomenclatura }}</a></td>
                 </tr>
                 <tr>
                   <td>Registrado:</td>
-                  <td>{{ Helper::fecha($oportunidad->created_on) }}</td>
+                  <td>{{ Helper::fecha($licitacion->created_on) }}</td>
                 </tr>
                 <tr>
                   <td>Descripción:</td>
-                  <td>{{ $oportunidad->descripcion }}</td>
+                  <td>{{ $licitacion->descripcion }}</td>
                 </tr>
                 <tr>
                   <td>Participación:</td>
-                  <td>{{ $oportunidad->participacion() }}</td>
+                  <td>{{ $licitacion->participacion() }}</td>
                 </tr>
                 <tr>
                   <td>Propuesta:</td>
-                  <td>{{ $oportunidad->propuesta() }}</td>
+                  <td>{{ $licitacion->propuesta() }}</td>
                 </tr>
                 <tr>
                   <td>Adjuntos:</td>
                   <td>
 <ul>
-            @foreach ($oportunidad->adjuntos() as $a)
+            @foreach ($licitacion->adjuntos() as $a)
               <li><a target="_blank" href="{{ config('constants.static_seace') . $a->codigoAlfresco }}">{{ $a->tipoDocumento }}</a></li>
             @endforeach
           </ul>
@@ -101,78 +101,17 @@ tr.block_details>td>div {
                 </tr>
                 <tr>
                   <td>Estado:</td>
-                  <td><span class="{{ $oportunidad->estado()['class'] }}">{{ $oportunidad->estado()['message'] }}</span></td>
+                  <td><span class="{{ $licitacion->estado()['class'] }}">{{ $licitacion->estado()['message'] }}</span></td>
                 </tr>
               </tbody>
             </table>
             <div class="btns_actions">
-              <a href="javascript:void(0);" class="btn btn-success shadow mr-1 mb-1">Aprobar</a>
-              <a href="javascript:void(0);" class="btn btn-danger glow mr-1 mb-1">Rechazar</a>
+              <a href="/licitaciones/{{ $licitacion->id }}/aprobar" class="btn btn-sm btn-success shadow mr-1 mb-1" data-button-dinamic>Aprobar</a>
+              <a data-confirm-input="¿Por qué desea Rechazarlo?" href="/licitaciones/{{ $licitacion->id }}/rechazar" class="btn btn-sm btn-danger glow mr-1 mb-1" data-button-dinamic>Rechazar</a>
             </div>
           </div></td>
         </tr>
         </tbody>
- {{--
-      <!--<tbody class="block" data-licitacion-id="{{ $oportunidad->licitacion()->id }}" data-oportunidad-id="{{ $oportunidad->id }}">
-        <tr class="block_header">
-          <td>{{ $oportunidad->licitacion()->empresa()->rotulo() }}</td>
-          <td style="width:200px;">{{ $oportunidad->licitacion()->tipo_proceso }} <br /> {{ Helper::money($oportunidad->licitacion()->monto) }}</td>
-          <td>{{ $oportunidad->licitacion()->tipo_objeto }}</td>
-          <td>{{ $oportunidad->licitacion()->rotulo }}</td>
-          <td>{{ Helper::fecha($oportunidad->licitacion()->fecha_participacion_hasta) }}<br /><span class="{{ $oportunidad->estado()['class'] }}">{{ $oportunidad->estado()['message'] }}</span></td>
-          <td style="vertical-align: top;">
-            <a href="javascript:void(0);" class="btn btn-sm btn-success shadow mr-1 mb-1">Aprobar</a>
-            <a href="javascript:void(0);" class="btn btn-sm btn-danger glow mr-1 mb-1">Rechazar</a>
-          </td>
-        </tr>
-        <tr class="block_details">
-          <td colspan="7"><div>
-            <table class="table table-borderless">
-              <tbody>
-                <tr>
-                  <td>Nomenclatura:</td>
-                  <td><a href="/licitaciones/{{ $oportunidad->licitacion_id }}/detalles">{{ $oportunidad->licitacion()->nomenclatura }}</a></td>
-                </tr>
-                <tr>
-                  <td>Registrado:</td>
-                  <td>{{ Helper::fecha($oportunidad->licitacion()->created_on) }}</td>
-                </tr>
-                <tr>
-                  <td>Descripción:</td>
-                  <td>{{ $oportunidad->licitacion()->descripcion }}</td>
-                </tr>
-                <tr>
-                  <td>Participación:</td>
-                  <td>{{ $oportunidad->licitacion()->participacion() }}</td>
-                </tr>
-                <tr>
-                  <td>Propuesta:</td>
-                  <td>{{ $oportunidad->licitacion()->propuesta() }}</td>
-                </tr>
-                <tr>
-                  <td>Adjuntos:</td>
-                  <td>
-<ul>
-            @foreach($oportunidad->licitacion()->adjuntos() as $a)
-              <li><a target="_blank" href="http://prodapp.seace.gob.pe/SeaceWeb-PRO/SdescargarArchivoAlfresco?fileCode={{ $a->codigoAlfresco }}">{{ $a->tipoDocumento }}</a></li>
-            @endforeach
-          </ul>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Estado:</td>
-                  <td><span class="{{ $oportunidad->estado()['class'] }}">{{ $oportunidad->estado()['message'] }}</span></td>
-                </tr>
-              </tbody>
-            </table>
-            <div class="btns_actions">
-              <a href="javascript:void(0);" class="btn btn-success shadow mr-1 mb-1">Aprobar</a>
-              <a href="javascript:void(0);" class="btn btn-danger glow mr-1 mb-1">Rechazar</a>
-            </div>
-          </div></td>
-        </tr>
-        </tbody>-->
- --}}
         @endforeach
     </table>
   </div>
@@ -191,20 +130,6 @@ tr.block_details>td>div {
 @section('page-scripts')
 <script src="{{asset('js/scripts/pages/app-invoice.js')}}"></script>
 <script>
-$(document).on('click', '.block .btn-success', function(e) {
-  e.stopPropagation();
-  var id = $(this).closest('tbody').attr('data-licitacion-id');
-  $(this).closest('tbody').remove();
-  $.ajax({ url: '/licitaciones/' + id + '/aprobar'});
-  console.log('Aprobar', id);
-});
-$(document).on('click', '.block .btn-danger', function(e) {
-  e.stopPropagation();
-  var id = $(this).closest('tbody').attr('data-licitacion-id');
-  $(this).closest('tbody').remove();
-  $.ajax({ url: '/licitaciones/' + id + '/rechazar'});
-  console.log('Eliminar', id);
-});
 $(document).on('click', '.block_header', function() {
   $(this).parent().find('.block_details').toggle();
 });

@@ -8,6 +8,25 @@
 .StackedList.ready_for_upload {
   background: #cfffb1!important;
 }
+
+.contentPoint {
+
+}
+.contentPoint > .addons {
+}
+.contentPoint > .addons > div {
+  text-align:center;
+  width: 120px;
+  height: 70px;
+  position: absolute;
+}
+.contentPoint > .addons > div:hover {
+  border: 2px solid red;
+}
+.contentPoint > .addons > div > img {
+  max-width: 100%;
+  max-height: 100%;
+}
 </style>
 <div class="wizard-horizontal" style="padding: 0 15px;">
                 <div class="row">
@@ -30,8 +49,12 @@
                         <img class="background_image" src="/documentos/{{ $documento->id }}/generarImagenTemporal?page=0&cid={{$k}}&t={{time()}}"/>
                         <div class="StackedListContent">
                           <div class="tools">
+                            <a href="/static/temporal/{{ str_replace('/tmp/', '', $file['root']) }}?t={{time()}}" download>Descargar</a>
                             <a href="javascript:void(0);" data-popup="/documentos/{{ $documento->id }}/visualizar?cid={{ $k }}">Editar</a>
                             <a href="javascript:eliminarCid('{{ $k }}');">Eliminar</a>
+                            @if(!file_exists($file['root']))
+                            <div style="width: 8px;height: 8px;background: red;display: inline-block;border-radius: 6px;"></div>
+                            @endif
                           </div>
                           <div class="DragHandle">
                           </div>
@@ -73,7 +96,7 @@
               <span class="text-white" style="margin-left:2px;text-align:center; padding:3px;border-radius:4px; background-color:#188aff;" > <i class="bx bx-check-circle"></i> </span>
             </template>
             <template id="template-documento" >
-              <li class="boxDraggable StackedListItem--isDraggable" data-id="" data-plantilla="" data-tipo="" data-folio="" data-es-ordenable="">
+              <li class="boxDraggable StackedListItem--isDraggable" data-id="" data-plantilla="" data-tipo="" data-part="" data-folio="" data-es-ordenable="">
                   <div class="CardContent">
                     <div class="CardContentTitulo"></div>
                     <div class="CardContentDesc01"></div>
@@ -87,6 +110,11 @@
 <script src="{{asset('js/scripts/forms/wizard-steps.js')}}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/draggable/1.0.0-beta.12/draggable.bundle.js" integrity="sha512-CY+c7SEffH9ZOj1B9SmTrJa/ulG0I6K/6cr45tCcLh8/jYqsNZ6kqvTFbc8VQA/rl9c2r4QBOx2Eur+2vkVWsA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
+<?php if(!empty($_GET['verror'])) { ?>
+setTimeout(function() {
+  $(".StackedListItem[data-id='<?= $_GET['verror'] ?>']").find('.tools>[data-url]').click();
+}, 1500);
+<?php } ?>
 function respaldar() {
   let url = '/documentos/{{ $documento->id }}/expediente/respaldar';
   Fetchx({
@@ -99,7 +127,9 @@ function respaldar() {
     type: 'POST',
   });
 }
-setInterval(respaldar, 1000 * 60 * 5);
+
+setInterval( respaldar, 1000 * 60 * 5 );
+
 function restaurar() {
   let url = '/documentos/{{ $documento->id }}/expediente/restaurar';
   Fetchx({
@@ -115,7 +145,6 @@ function restaurar() {
 restaurar();
 
 let Empresas = {!! json_encode(App\EmpresaFirma::porTenant()) !!};
-
 
 var commit = [];
 var validateFile = function (file) {
@@ -237,60 +266,16 @@ $('#btnRepositorio').on('click', function() {
   $('#drawRepositorio').toggle();
 });
 $(document).on('click', '[data-tools]', function() {
-  current_tool = $(this).attr('data-tools');
+  let tool = $(this).attr('data-tools');
+  let eid  = $(this).closest('.modal-content').find('#selectEmpresa').val();
+
+  current_tool = {
+    type: 'image',
+    eid: eid,
+    tool: $(this).attr('data-tools'),
+  };
+
   $('.contentPoint').addClass('activePoint');
-});
-$(document).on('click', '[data-tools2]', function() {
-  let tool = $(this).attr('data-tools2');
-  let eid  = $('#selectEmpresa').val();
-  if(typeof Empresas[eid] === 'undefined') {
-    return alert('La empresa no existe');
-  }
-  if(tool == 'firma') {
-    if(!Empresas[eid].imagen_firma) {
-      return alert('No se ha encontrado una Imagen registrada.(1)');
-    }
-  } else if(tool == 'visado') {
-    if(!Empresas[eid].imagen_visado) {
-      return alert('No se ha encontrado una Imagen registrada.(2)');
-    }
-  } else {
-    return alert('(3)');
-  }
-});
-
-$(document).on('click', '[data-remove]', function(e) {
-  current_tool = $(this).attr('data-tools');
-  let url = '/documentos/{{ $documento->id }}/eliminarFirmas';
-  let bodyModal =  e.target.parentNode.parentNode.parentNode;
-  var cid = e.target.parentNode.parentNode.parentNode.querySelector('.imagePoint').dataset.cid;
-  console.log(cid);
-
-  let formdata = new FormData();
-
-  formdata.append('cid', cid );
-
-   fetch( url, {
-      method: 'post',
-      headers: {
-        "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-      },
-      body : formdata
-   })
-   .then( response => response.json() )
-   .then( data => {
-      console.log(data)
-
-       let element = document.querySelector( `[data-id="${cid}"]` );  
-       element.querySelector('.Pattern--typeHalftone').innerHTML = '';
-       let estampados = bodyModal.querySelectorAll('.estampado')
-       estampados.forEach( (estampado) => {
-        if(estampado.dataset.tipo != "null" ){
-          estampado.parentNode.removeChild(estampado);  
-        }  
-       }) 
-   });
-
 });
 
 $(document).on('mousemove', '.contentPoint', function(e) {
@@ -306,64 +291,123 @@ $(document).on('mousemove', '.contentPoint', function(e) {
     }
   }
 });
-
 $(document).on('click', '.contentPoint', function(e) {
-  var x = e.pageX - $(this).offset().left;
-  var y = e.pageY - $(this).offset().top;
+  if(!current_tool) {
+    return;
+  }
+  var x = (e.pageX - $(this).offset().left) / $(this).width();
+  var y = (e.pageY - $(this).offset().top) / $(this).height();
 
   var cid = $(this).find('img').attr('data-cid');
   var page = $(this).find('img').attr('data-page');
 
-  $(this).find(".estampado[data-tipo='" + current_tool + "']").remove();
-
-  $(this).append('<div class="estampado" data-tipo="' + current_tool + '" style="left:' + x + 'px;top:' + y + 'px;"></div>');
+  var el = pasteSign(this, current_tool, x, y);
 
   $('.contentPoint').removeClass('activePoint');
 
   let url = '/documentos/{{ $documento->id }}/estampar';
-  let formdata = new FormData();
-  
-  formdata.append('cid', cid);
-  formdata.append('tool', current_tool);
-  formdata.append('page', page);
-  formdata.append('pos_x', x / $(this).width());
-  formdata.append('pos_y', y / $(this).height());
-  fetch(url, {
-    method: 'post',
+
+  Fetchx({
+    title: 'Estampado',
+    url: url,
+    type: 'post',
     headers: {
       "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
     },
-    body: formdata
-  })
-  .then( response => response.json() )
-  .then( data => {
-    console.log(data);
-    let element = document.querySelector( `[data-id="${cid}"]` );  
-    console.log(element);
-    console.log(current_tool );
-    console.log ( element.dataset.firma )
-    if ( current_tool == "firma" && ( element.dataset.firma != "true" || element.dataset.firma == 'undefined' ) ){
-
+    data: {
+      cid:   cid,
+      eid:   current_tool.eid,
+      tool:  current_tool.tool,
+      page:  page,
+      pos_x: x,
+      pos_y: y,
+    },
+    dataType: 'json',
+    beforeSend: function() {
       current_tool = null;
-      element.dataset.firma = "true"  
-      let clon_firma = document.getElementById("template-icon-firma").content.cloneNode(true).children[0];
-      element.querySelector('.Pattern--typeHalftone').insertAdjacentElement('afterbegin',clon_firma);
-      //'<span class="text-white" style="text-align:center; padding:3px;border-radius:4px; background-color:#ff7600;"><i class="bx bxs-edit-alt"></i> </span>');
-      //element.querySelector('.Pattern--typeHalftone').append(template_firma.cloneNode(true));
-    } else if ( current_tool == "visado" && (element.dataset.visado != "true" || element.dataset.visado == 'undefined' ) ){
-
-      current_tool = null;
-      element.dataset.visado = "true"  
-      let clon_visado = document.getElementById("template-icon-visado").content.cloneNode(true).children[0];
-      element.querySelector('.Pattern--typeHalftone').insertAdjacentElement('beforeend',clon_visado );
-      //element.querySelector('.Pattern--typeHalftone').insertAdjacentHTML('beforeend',
-      //' <span class="text-white" style="margin-left:2px;text-align:center; padding:3px;border-radius:4px; background-color:#188aff ;" > <i class="bx bx-check-circle"></i> </span>')
-    }
-
+    },
+    success: function(data) {
+      $(el).attr('data-id', data.id);
+    },
   });
-
 });
+$(document).on('click', '.addons>div[data-id]', function(e) {
+  let url  = '/documentos/{{ $documento->id }}/eliminarEstampa';
+  var cid  = $(this).closest('.contentPoint').find('.imagePoint').attr('data-cid');
+  var fid  = $(this).attr('data-id');
+  var page = $(this).closest('.contentPoint').find('.imagePoint').attr('data-page');
 
+  $(this).closest('div').remove();
+  
+  Fetchx({
+    url: url,
+    type: 'post',
+    headers: {
+      "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    },
+    data: {
+      cid: cid,
+      fid: $(this).attr('data-id'),
+      page: page,
+    },
+   })
+});
+function pasteSign(box, current, x, y) {
+  if(typeof Empresas[current.eid] === 'undefined') {
+//    return alert('La empresa no existe');
+    return;
+  }
+  var image = null;
+  if(current.tool == 'firma') {
+    if(!Empresas[current.eid].imagen_firma) {
+      return alert('No se ha encontrado una Imagen registrada.(1)');
+    }
+    image = '/static/cloud/' + Empresas[current.eid].imagen_firma;
+  } else if(current.tool == 'visado') {
+    if(!Empresas[current.eid].imagen_visado) {
+      return alert('No se ha encontrado una Imagen registrada.(2)');
+    }
+    image = '/static/cloud/' + Empresas[current.eid].imagen_visado;
+  } else {
+    return alert('(3)');
+  }
+
+  var el = null;
+  if(current.tool == 'firma') {
+    el = $('<div>').css({
+      left: (x*100 - 5) + '%',
+      top: (y*100 - 5) + '%',
+    }).html($('<img>').attr('src', image));
+
+  } else if(current.tool == 'visado') {
+    el = $('<div>').css({
+      left: (x*100 - 5) + '%',
+      top: (y*100 - 5) + '%',
+    }).html($('<img>').attr('src', image));
+  }
+  console.log('AÑADIENDO', el, 'en', box);
+  el.attr('data-tool', current.tool);
+  if(typeof current.id !== 'undefined') {
+    el.attr('data-id', current.id);
+  }
+
+  $(box).find(".addons").append(el);
+  return el;
+}
+function fn_estamparCard(ContextId, relacion) {
+  console.log('fn_estamparCard');
+  for(var page in relacion) {
+    if(relacion.hasOwnProperty(page)) {
+      for(var fid in relacion[page]) {
+        if(relacion[page].hasOwnProperty(fid)) {
+          let fcard = relacion[page][fid];
+          console.log('estampar', fcard);
+          pasteSign($("#" + ContextId).find(".imagePoint[data-page='" + page + "']").closest('.contentPoint'), fcard, fcard.x, fcard.y);
+        }
+      }
+    }
+  }
+}
 let buscador = document.getElementById('buscar');
 
 buscador.addEventListener('keyup', (e) => {
@@ -385,6 +429,7 @@ function eliminarCid(cid) {
   })
   .then( response => response.json() )
   .then( data => {
+    respaldar();
   });
 }
 
@@ -405,29 +450,30 @@ function realizar_busqueda( query ) {
     box.html("");
     let template = document.getElementById("template-documento").content;
     data.forEach( n => {
-      /*let clone = template.cloneNode(true);
-      console.log(clone);
+
+      let clone = template.cloneNode(true);
+      //console.log(clone);
+
       let li =  clone.querySelector("li");
       li.dataset.plantilla = n.es_plantilla;
       li.dataset.tipo =  n.tipo ;
       li.dataset.folio = n.folio;
       li.dataset.id = n.id;
-      li.setAttribute("es-ordenable", n.es_ordenable );
+      li.setAttribute( "es-ordenable", n.es_ordenable );
       li.querySelector(".CardContentTitulo").textContent = n.rotulo ? n.rotulo : '';
       li.querySelector(".CardContentDesc01").textContent = (typeof n.desc01 !== 'undefined') ? n.desc01 : '';
       li.querySelector(".CardContentDesc02").textContent = (typeof n.desc02 !== 'undefined') ? n.desc02 : '';
       li.querySelector(".CardContentDesc03").textContent = (typeof n.desc03 !== 'undefined') ? n.desc03 : '';
-      box.append(clone);*/
+      box.append(clone);
 
-    box.append(`<li class="boxDraggable StackedListItem--isDraggable" data-id="${n.id}" data-plantilla="${n.es_plantilla}" data-tipo="${n.tipo}" data-folio="${n.folio}" data-es-ordenable="${n.es_ordenable}">
+    /* box.append(`<li class="boxDraggable StackedListItem--isDraggable" data-id="${n.id}" data-plantilla="${n.es_plantilla}" data-tipo="${n.tipo}" data-folio="${n.folio}" data-es-ordenable="${n.es_ordenable}">
                   <div class="CardContent">
                     <div class="CardContentTitulo">${ n.rotulo }</div>
                     <div class="CardContentDesc01">${ n.desc01 }</div>
                     <div class="CardContentDesc02">${ n.desc02 }</div>
                     <div class="CardContentDesc03">${ n.desc03 }</div>
                   </div>
-                </li>`);
-
+                </li>`);*/
 
     })
   });
@@ -521,6 +567,7 @@ bucket.capture(document.getElementById('BucketRepositorio'));
         return 0;
       }
       console.log('agregarDocumento', evt.data.newIndex);
+      box.remove();
       agregarDocumento(box.dataset.id, evt.data.newIndex, true, evt.data.dragEvent.data.originalSource);
       return 0;
 

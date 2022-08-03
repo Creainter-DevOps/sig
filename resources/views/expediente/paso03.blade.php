@@ -29,7 +29,7 @@
               </li>
             </ul>
             @include('documento.mesa', compact('documento','workspace'))
-            <div style="position: absolute;bottom: 15px;right: 20px;">
+            <div style="position: fixed;bottom: 140px;right: 393px;z-index: 99999;background: rgb(0 0 0 / 20%);padding: 10px;border-radius: 5px;">
               <form method="post" action="{{ route('expediente.paso03',['cotizacion' => $cotizacion->id ]) }}"  >
                @csrf
                <button class="btn btn-primary" type="submit">Procesar</a>

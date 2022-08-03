@@ -40,7 +40,15 @@ class OportunidadController extends Controller {
 
       return view('oportunidad.index', $this->viewBag );
   }
-
+  public function pruebas(Request $request, Oportunidad $oportunidad) {
+    return response()->json([
+      'status'   => false,
+      'disabled' => true,
+      'message'  => 'No es posible registrar',
+      'label'    => 'No es posible eso..',
+      'refresh'  => true,
+    ]);
+  }
   public function create(Request $request)
   {
     $oportunidad = new Oportunidad;
@@ -153,26 +161,79 @@ class OportunidadController extends Controller {
      return Response()->json( $data->get() );
    
    }
-  public function aprobar(Request $request, Oportunidad $oportunidad)
+  public function favorito(Request $request, Oportunidad $oportunidad)
   {
-    $oportunidad->aprobar();
-    if(!$request->ajax()) {
-      return redirect('/oportunidades/' . $oportunidad->id . '/');
+    if(empty($oportunidad->es_favorito)) {
+      $oportunidad->favorito();
+      return response()->json([
+        'status'   => true,
+        'disabled' => true,
+        'label'    => 'Oportunidad en Favoritos!',
+        'message'  => 'Oportunidad ha sido registrada como favorito',
+        'refresh'  => false,
+        'class'    => 'success',
+      ]);
     } else {
       return response()->json([
-        'status'  => 'success',
-        'message' => 'Se ha realizado registro con éxito.',
-        'data' => $oportunidad
+        'status'   => false,
+        'disabled' => true,
+        'label'    => 'Oportunidad ya es favorita',
+        'message'  => 'Ya está en Favoritos anteriormente.',
+        'refresh'  => true,
+        'class'    => 'warning',
+      ]);
+    }
+  }
+  public function aprobar(Request $request, Oportunidad $oportunidad)
+  {
+    if(!empty($oportunidad->aprobado_el)) {
+      $oportunidad->aprobar();
+      return response()->json([
+        'status'   => true,
+        'disabled' => true,
+        'label'    => 'Oportunidad Aprobada!',
+        'message'  => 'Oportunidad ha sido registrada como aprobada',
+        'refresh'  => true,
+        'class'    => 'success',
+      ]);
+    } else {
+      return response()->json([
+        'status'   => false,
+        'disabled' => true,
+        'label'    => 'Oportunidad ya aprobada',
+        'message'  => 'Ya fue aprobada anteriormente.',
+        'refresh'  => false,
+        'class'    => 'warning',
       ]);
     }
   }
   public function revisar(Request $request, Oportunidad $oportunidad)
   {
     if(empty($oportunidad->revisado_el)) {
+      if(empty($oportunidad->montos_variacion())) {
+        return response()->json([
+          'status'  => false,
+          'message' => 'Debe cotizar la Oportunidad',
+        ]);
+      }
       $oportunidad->revisar();
-      return redirect('/oportunidades/' . $oportunidad->id . '/');
+      return response()->json([
+        'status'   => true,
+        'disabled' => true,
+        'label'    => 'Oportunidad Revisada!',
+        'message'  => 'Oportunidad ha sido registrada como revisada',
+        'refresh'  => false,
+        'class'    => 'success',
+      ]);
     } else {
-      return redirect('/oportunidades/');
+      return response()->json([
+        'status'   => false,
+        'disabled' => true,
+        'label'    => 'Oportunidad ya revisada',
+        'message'  => 'Ya fue revisada anteriormente.',
+        'refresh'  => false,
+        'class'    => 'warning',
+      ]);
     }
   }
   public function rechazar(Request $request, Oportunidad $oportunidad)
@@ -186,15 +247,12 @@ class OportunidadController extends Controller {
       ]);
     }
     $oportunidad->rechazar($motivo);
-    if($request->ajax()) {
       return response()->json([
-        'status'  => true,
-        'message' => 'Se ha realizado registro con éxito.',
-        'data' => $oportunidad
+        'status'   => true,
+        'disabled' => true,
+        'label'    => 'Rechazado!',
+        'message'  => 'Se ha rechazado correctamente.',
       ]);
-    } else {
-      return redirect('/oportunidades');
-    }
   }
 
   public function archivar(Request $request, Oportunidad $oportunidad)
@@ -209,9 +267,11 @@ class OportunidadController extends Controller {
     $oportunidad->archivar($motivo);
     if($request->ajax()) {
       return response()->json([
-        'status'  => true,
-        'message' => 'Se ha realizado registro con éxito.',
-        'data' => $oportunidad
+        'status'   => true,
+        'disabled' => true,
+        'label'    => 'Archivado!',
+        'message'  => 'Se ha realizado registro con éxito.',
+        'data'     => $oportunidad
       ]);
     } else {
       return redirect('/oportunidades');
@@ -219,6 +279,12 @@ class OportunidadController extends Controller {
   }
   public function interes(Request $request, Oportunidad $oportunidad, Empresa $empresa) {
     $oportunidad->registrar_interes($empresa);
-    return redirect('/oportunidades/' . $oportunidad->id . '/');
+    return response()->json([
+        'status'   => true,
+        'disabled' => true,
+        'label'    => 'Interesante!',
+        'message'  => 'Se ha realizado registro con éxito.',
+        'refresh'  => true,
+      ]);
   }
 }

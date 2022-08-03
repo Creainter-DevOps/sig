@@ -20,7 +20,9 @@ License: You must have a valid license purchased only from themeforest(the above
   $configData = Helper::applClasses();
 @endphp
 
-<html class="loading" lang="@if(session()->has('locale')){{session()->get('locale')}}@else{{$configData['defaultLanguage']}}@endif"
+<html class="loading" 
+ {{--lang="@if(session()->has('locale')){{session()->get('locale')}}@else{{$configData['defaultLanguage']}}@endif" --}}
+lang="es"
  data-textdirection="{{$configData['direction'] == 'rtl' ? 'rtl' : 'ltr' }}">
   <!-- BEGIN: Head-->
 

@@ -26,7 +26,7 @@ class Documento extends Model
       'tipo','archivo','folio','es_plantilla', 'es_ordenable','rotulo','portada','created_by','formato','generado_de_id','documentos_id',
       'empresa_id','personal_id','vinculo_empresa_id','fecha_firma','fecha_desde','fecha_hasta','plazo_servicio','monto_texto','monto','fecha_acta','filename','es_reusable','tenant_id',
       'filesize','filename','directorio','oportunidad_id','cotizacion_id','licitacion_id','elaborado_json','elaborado_por','elaborado_desde','elaborado_hasta','usado',
-      'es_mesa','respaldado_el',
+      'es_mesa','respaldado_el','original','procesado_desde',
     ];
     protected $casts = [
       'es_reusable'  => 'boolean',
@@ -237,20 +237,40 @@ class Documento extends Model
     public function CompressWorkspace() {
       return 'doc-workspace-' . $this->id . '.tar.gz';
     }
-    public function respaldarFolder() {
+    public function respaldarFolder(&$commands = null) {
+      if(!file_exists($this->folder_workspace())) {
+        return false;
+      }
       $destino  = config('constants.ruta_storage') . 'workspace/' . $this->CompressWorkspace();
       $commands[] = 'export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"';
       $commands[] = "cd " . config('constants.ruta_temporal');
-      $commands[] = "tar -zcvf '" . $this->CompressWorkspace() . "' '" . $this->folder_workspace(true) . "'";
+      $commands[] = "tar -zchvf '" . $this->CompressWorkspace() . "' '" . $this->folder_workspace(true) . "'";
       $commands[] = "/snap/bin/gsutil mv '" . $this->CompressWorkspace() . "' '" . $destino . "'";
-      $pid = Helper::parallel_command($commands);
+
+      if(is_null($commands)) {
+        $pid = Helper::parallel_command($commands);
+      }
       $this->update([
         'respaldado_el' => DB::raw('now()'),
       ]);
+      return true;
+    }
+    public function restaurarFolder(&$commands = null) {
+      if(file_exists($this->folder_workspace())) {
+        return false;
+      }
+      $destino = config('constants.ruta_temporal') . $this->CompressWorkspace();
+      $commands[] = "cd " . config('constants.ruta_temporal');
+      $commands[] = 'export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"';
+      $commands[] = "/snap/bin/gsutil cp '" . config('constants.ruta_storage') . 'workspace/' . $this->CompressWorkspace() . "' '" . $destino . "'";
+      $commands[] = "tar -zxvf '" . $destino . "'";
+      $commands[] = "/bin/rm '" . $destino . "'";
+      $pid = Helper::parallel_command($commands);
     }
     public function json_load() {
       return json_decode($this->elaborado_json, true);
     }
+
     public function json_save($x) {
       $this->elaborado_json = json_encode($x);
       return $this->save();

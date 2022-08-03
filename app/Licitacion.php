@@ -57,8 +57,10 @@ class Licitacion extends Model
       DB::select('SELECT osce.fn_licitacion_accion_aprobar(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ')');
     }
 
-    public function rechazar() {
-      DB::select('SELECT osce.fn_licitacion_accion_rechazar(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ')');
+    public function rechazar($texto) {
+      DB::select('SELECT osce.fn_licitacion_accion_rechazar(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ',:motivo)', [
+        'motivo' => $texto,
+      ]);
     }
 
     public function etiquetas() {

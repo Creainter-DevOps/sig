@@ -126,4 +126,83 @@ WHERE O.aprobado_el IS NOT NULL
 ORDER BY L.fecha_propuesta_hasta ASC");
       return Oportunidad::hydrate($rp);
     }
+    static function proyectos_activos() {
+      $rp = DB::select("
+SELECT
+	*,
+	(monto_registrado - gasto_registrado) utilidad_contrato,
+	(monto_efectuado - gasto_efectuado) utilidad_actual
+FROM (
+	SELECT
+		P.nomenclatura,
+		P.codigo,
+		P.rotulo,
+		L.buenapro_fecha,
+		P.fecha_firma,
+		P.fecha_desde,
+		P.fecha_hasta,
+		C.moneda_id,
+		osce.fn_moneda_convertir(C.moneda_id, 1, L.buenapro_fecha::date, C.monto) monto,
+		(
+			SELECT
+				SUM(osce.fn_moneda_convertir(PP.moneda_id, 1, PP.fecha, PP.monto))
+			FROM osce.pago PP
+			WHERE PP.proyecto_id = P.id
+		) monto_registrado,
+		(
+			SELECT
+				SUM(osce.fn_moneda_convertir(PP.moneda_id, 1, PP.fecha, PP.monto_depositado + PP.monto_detraccion))
+			FROM osce.pago PP
+			WHERE PP.proyecto_id = P.id AND PP.estado_id IN (3)
+		) monto_efectuado,
+		(
+			SELECT
+				SUM(osce.fn_moneda_convertir(PP.moneda_id, 1, PP.fecha, PP.monto))
+			FROM osce.pago PP
+			WHERE PP.proyecto_id = P.id AND PP.estado_id IN (1,2)
+		) monto_pendiente,
+		(
+			SELECT
+				SUM(osce.fn_moneda_convertir(PP.moneda_id, 1, PP.fecha, PP.monto))
+			FROM osce.orden PP
+			WHERE PP.proyecto_id = P.id
+		) gasto_registrado,
+		(
+			SELECT
+				SUM(osce.fn_moneda_convertir(PP.moneda_id, 1, PP.fecha, PP.monto))
+			FROM osce.orden PP
+			WHERE PP.proyecto_id = P.id AND PP.estado_id IN (3)
+		) gasto_efectuado,
+		(
+			SELECT
+				SUM(osce.fn_moneda_convertir(PP.moneda_id, 1, PP.fecha, PP.monto))
+			FROM osce.orden PP
+			WHERE PP.proyecto_id = P.id AND PP.estado_id IN (1,2)
+		) gasto_pendiente
+	FROM osce.proyecto P
+	LEFT JOIN osce.cotizacion C ON C.id = P.cotizacion_id
+	LEFT JOIN osce.oportunidad O ON O.id = C.oportunidad_id
+	LEFT JOIN osce.licitacion L ON L.id = O.licitacion_id
+	WHERE P.eliminado IS FALSE) x
+  ORDER BY x.codigo DESC;
+      ");
+      return Oportunidad::hydrate($rp);
+    }
+    static function licitaciones_fechas() {
+      $rp = DB::select("
+SELECT
+	P.codigo,
+	L.nomenclatura,
+	L.buenapro_fecha::date buenapro,
+	osce.fn_sumar_dias_habiles(L.buenapro_fecha::date, 5) consentimiento,
+	osce.fn_sumar_dias_habiles(L.buenapro_fecha::date, 13) perfeccionamiento
+FROM osce.proyecto P
+JOIN osce.cotizacion C ON C.id = P.cotizacion_id
+JOIN osce.oportunidad O ON O.id = C.oportunidad_id
+JOIN osce.licitacion L ON L.id = O.licitacion_id
+WHERE P.estado <> 'concluido'
+ORDER BY 1 DESC
+");
+      return Oportunidad::hydrate($rp);
+    }
 }

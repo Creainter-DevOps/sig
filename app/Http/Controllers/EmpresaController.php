@@ -133,7 +133,7 @@ class EmpresaController extends Controller {
 
     public function sellos_eliminar(Request $request, Empresa $empresa ){
         
-        $sellos = EmpresaFirma::porEmpresa($empresa->id, 'VISADO');
+        $sellos = EmpresaFirma::porEmpresa($empresa->id, 'VISADO', 100);
         //dd($firmas);
         foreach( $sellos as $sello ){ 
           //Helper::gsutil_rm( config('constants.ruta_storage') . $firma['archivo'] );
@@ -218,13 +218,11 @@ $index++;
           'empresa_id' =>  $empresa->id
         ]);
 
-        app( DocumentoController::class )->store(
-          $request    
-        );  
+        app( DocumentoController::class )->store( $request );  
 
       }
       
-      if (isset($request->folder_sellos)) {
+      if (isset($request->folder_sellos) && empty( $request->folder_sellos )) {
 
         $request_doc = $request;
         $request->merge([
@@ -244,7 +242,7 @@ $index++;
         $empresa->es_agente_retencion = $request->boolean('es_agente_retencion');
       }
 
-      $empresa->update($request->except('logo_head','logo_centra'));
+      $empresa->update($request->except('logo_head','logo_central'));
       $empresa->log( 'editado', null );
       return response()->json([
         'status' => "success",

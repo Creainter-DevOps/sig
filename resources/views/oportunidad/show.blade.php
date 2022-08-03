@@ -131,7 +131,7 @@
               @if($oportunidad->estado()['timeout'] && !empty($oportunidad->aprobado_el) && empty($oportunidad->archivado_el))
                 <a data-confirm-input="¿Por qué desea Archivarlo?"
                         href="/oportunidades/{{ $oportunidad->id }}/archivar"
-                        class="btn btn-sm btn-danger mr-25">Archivar</a>
+                        class="btn btn-sm btn-danger mr-25" data-button-dinamic>Archivar</a>
                 @elseif (!empty($oportunidad->rechazado_el))
                     <div class="text-center">Rechazado el {{ Helper::fecha($oportunidad->rechazado_el, true) }}</div>
 
@@ -140,24 +140,28 @@
 
                 @elseif(empty($oportunidad->aprobado_el))
                     <a href="/oportunidades/{{ $oportunidad->id }}/aprobar"
-                        class="btn btn-sm btn-success mr-25">Aprobar</a>
+                        class="btn btn-sm btn-success mr-25" data-button-dinamic>Aprobar</a>
                     <a data-confirm-input="¿Por qué desea Rechazarlo?"
                         href="/oportunidades/{{ $oportunidad->id }}/rechazar"
-                        class="btn btn-sm btn-danger mr-25">Rechazar</a>
+                        class="btn btn-sm btn-danger mr-25" data-button-dinamic>Rechazar</a>
                 @elseif(empty($oportunidad->revisado_el))
-                    <a href="/oportunidades/{{ $oportunidad->id }}/revisar"
-                        class="btn btn-sm btn-success mr-25">Revisar</a>
+                  @if(empty($oportunidad->es_favorito))
+                    <a href="/oportunidades/{{ $oportunidad->id }}/favorito" data-confirm
+                        class="btn btn-sm btn-warning mr-25" data-button-dinamic>Convertir a Favorito</a>
+                        @endif
+                    <a href="/oportunidades/{{ $oportunidad->id }}/revisar" data-confirm
+                        class="btn btn-sm btn-success mr-25" data-button-dinamic>Revisar</a>
                     <a data-confirm-input="¿Por qué desea Rechazarlo?"
                         href="/oportunidades/{{ $oportunidad->id }}/rechazar"
-                        class="btn btn-sm btn-danger mr-25">Rechazar</a>
-                @elseif($oportunidad->estado == 'PENDIENTE')
-                    <a data-confirm-input="¿Por qué desea Rechazarlo?"
-                        href="/oportunidades/{{ $oportunidad->id }}/rechazar"
-                        class="btn btn-sm btn-danger mr-25">Rechazar</a>
+                        class="btn btn-sm btn-danger mr-25" data-button-dinamic>Rechazar</a>
                 @else
-                    <a data-confirm-input="¿Por qué desea Archivarlo?"
-                        href="/oportunidades/{{ $oportunidad->id }}/archivar"
-                        class="btn btn-sm btn-danger mr-25">Archivar</a>
+                  @if(empty($oportunidad->es_favorito))
+                    <a href="/oportunidades/{{ $oportunidad->id }}/favorito" data-confirm
+                        class="btn btn-sm btn-warning mr-25" data-button-dinamic>Convertir a Favorito</a>
+                        @endif
+                    <a data-confirm-input="¿Por qué desea Rechazarlo?"
+                        href="/oportunidades/{{ $oportunidad->id }}/rechazar"
+                        class="btn btn-sm btn-danger mr-25" data-button-dinamic>Rechazar</a>
                 @endif
             </div>
         </div>
@@ -355,7 +359,7 @@
         <h5>Elaboración de Propuestas</h5>
         <div class="row">
             @foreach ($oportunidad->empresas() as $e)
-                <div class="col-2 col-sm-2">
+                <div class="col-2 col-sm-2" style="min-width: 250px;">
                     <div class="card">
                         <div class="card-header">
                             <h6 class="card-title" style="font-size: 15px;">
@@ -376,7 +380,8 @@
                   <a class="dropdown-item" href="/cotizaciones/{{ $e->cotizacion->id }}/registrar" target="_blank">Cotización por Items</a>
                   <a class="dropdown-item" href="/cotizaciones/{{ $e->cotizacion->id }}/exportar" target="_blank">Descargar PDF</a>
                   <a class="dropdown-item" href="/expediente/{{ $e->cotizacion->id }}/inicio" target="_blank">Abrir Expediente de Propuesta</a>
-                  <a class="dropdown-item" href="/cotizaciones/{{ $e->cotizacion->id }}/enviar" data-confirm>Marcar como enviado</a>
+                  <a class="dropdown-item" href="/cotizaciones/{{ $e->cotizacion->id }}/registrarParticipacion" data-confirm data-button-dinamic>Registrar Participación</a>
+                  <a class="dropdown-item" href="/cotizaciones/{{ $e->cotizacion->id }}/registrarPropuesta" data-confirm data-button-dinamic>Registrar Propuesta</a>
                   <a class="dropdown-item" href="/cotizaciones/{{ $e->cotizacion->id }}/proyecto" data-confirm>Convertir a Proyecto</a>
                 </div>
               </li>
@@ -392,7 +397,7 @@
                                 @elseif(empty($e->cotizacion) && strtotime($oportunidad->fecha_participacion_hasta) > time())
                                     <div class="text-center">
                                         <a class="btn btn-sm btn-success"
-                                            href="/oportunidades/{{ $oportunidad->id }}/interes/{{ $e->id }}">Interés</a>
+                                            href="/oportunidades/{{ $oportunidad->id }}/interes/{{ $e->id }}" data-confirm data-button-dinamic>Interés</a>
                                     </div>
                                 @elseif(empty($e->cotizacion) && strtotime($oportunidad->fecha_participacion_hasta) <= time())
                                     <div>Fuera de plazo</div>
@@ -419,7 +424,7 @@
                                                                 @if(!empty($e->cotizacion->seace_participacion_log))
                                                                   Se ha intentado realizar el registro automático sin éxito. Debe hacerlo manualmente en el SEACE y posteriormente hacer click abajo.<br/>
                                                                 @endif
-                                                                <a href="/cotizaciones/{{ $e->cotizacion->id }}/registrarParticipacion">Registrar Participación</a>
+                                                                <a href="/cotizaciones/{{ $e->cotizacion->id }}/registrarParticipacion" data-confirm data-button-dinamic>Registrar Participación</a>
                                                                 </div>
                                                               @endif
                                                             @else
@@ -450,7 +455,7 @@
                                                 @else
                                                   <div style="text-align: center;margin-top: 5px;font-size:10px;">
                                                       El plazo ha vencido, si ha enviado manualmente al seace haga click abajo.<br/>
-                                                      <a href="/cotizaciones/{{ $e->cotizacion->id }}/enviar" data-confirm>Sí he enviado</a>
+                                                      <a href="/cotizaciones/{{ $e->cotizacion->id }}/registrarPropuesta" data-confirm data-button-dinamic>Sí he enviado</a>
                                                 @endif
                                                 </div>
                                             </li>

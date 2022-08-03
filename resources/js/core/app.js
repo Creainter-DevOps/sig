@@ -587,7 +587,7 @@
   // main menu internationalization
 
   // init i18n and load language file
-  i18next
+  /*i18next
     .use(window.i18nextXHRBackend)
     .init({
       debug: false,
@@ -601,7 +601,7 @@
         // resources have been loaded
         jqueryI18next.init(i18next, $)
       }
-    )
+    )*/
 
   // change language according to data-language of dropdown item
   $(".dropdown-language .dropdown-item").on("click", function () {

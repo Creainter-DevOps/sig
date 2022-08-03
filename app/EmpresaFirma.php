@@ -26,8 +26,8 @@ class EmpresaFirma extends Model
     public function empresa() {
       return $this->belongsTo('App\Empresa', 'empresa_id')->first();
     }
-    public static function porEmpresa($empresa_id, $tipo) {
-      return static::where('empresa_id', '=', $empresa_id)->where('tipo','=', $tipo)->orderBy('id', 'ASC')->get()->toArray();
+    public static function porEmpresa($empresa_id, $tipo, $limit = 12) {
+      return static::where('empresa_id', '=', $empresa_id)->where('tipo','=', $tipo)->limit($limit)->orderBy('id', 'ASC')->get()->toArray();
     }
     public static function porTenant() {
       $rp = DB::select("SELECT * FROM osce.fn_empresa_obtener_firmas(:id)", ['id' => Auth::user()->tenant_id]);

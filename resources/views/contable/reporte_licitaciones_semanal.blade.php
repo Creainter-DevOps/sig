@@ -20,7 +20,7 @@
         <td style="font-size:10px;"><b><?= $p->razon_social; ?>:</b> <?= $p->rotulo; ?></td>
         <td class="texto-centrado" style="width:80px;">
           <?= Helper::fecha($p->fecha_propuesta_hasta); ?><br />
-          <span class="{{ $p->estado_propuesta()['class'] }}">{{ $p->estado_propuesta()['message'] }}</span>
+          <span class="{{ $p->estado()['class'] }}">{{ $p->estado()['message'] }}</span>
         </td>
         <td class="texto-derecha" style="width:80px;"><?= Helper::money($p->monto_base, 1); ?></td>
 <?php if(!empty($p->rechazado_el)) { ?>

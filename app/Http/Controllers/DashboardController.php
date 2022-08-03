@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Cliente;
+use App\Oportunidad;
+use App\Helpers\Chartjs;
+
 
 class DashboardController extends Controller
 {
@@ -13,7 +16,53 @@ class DashboardController extends Controller
   public function index(Request $request)
   {
     $cliente = new Cliente;
-    return view('dashboard', compact('cliente'));
+
+    $actividades = Oportunidad::actividades();
+
+    $chartjs['barras'] = Oportunidad::estadistica_barra_cantidades();
+    $chartjs['barras'] = Chartjs::line($chartjs['barras'], [
+      'APROBADAS' => array(
+        'rotulo'     => 'APROBADAS',
+        'color'      => '#ffc800',
+      ),
+      'PARTICIPACIÓN' => array(
+        'rotulo'     => 'PARTICIPACIÓN',
+        'color'      => '#5A8DEE',
+      ),
+      'PROPUESTA' => array(
+        'rotulo'     => 'PROPUESTAS',
+        'color'      => '#56DF9B',
+      ),
+      'TIMEOUT/PARTICIPACIÓN' => array(
+        'rotulo'     => 'TIMEOUT/PARTICIPACIÓN',
+        'color'      => '#DF8F28',
+      ),
+      'TIMEOUT/PROPUESTA' => array(
+        'rotulo'     => 'TIMEOUT/PROPUESTA',
+        'color'      => '#DF2001',
+      ),
+      'RECHAZADAS' => array(
+        'rotulo'     => 'RECHAZADAS',
+        'color'      => '#7824ff',
+      ),
+    ]);
+
+    $chartjs['barras2'] = Oportunidad::estadistica_cantidad_mensual();
+    $chartjs['barras2'] = Chartjs::line($chartjs['barras2'], [
+      'PARTICIPACION' => array(
+        'rotulo'     => 'PARTICIPACION',
+        'color'      => '#ffc800',
+      ),
+      'PROPUESTA' => array(
+        'rotulo'     => 'PROPUESTA',
+        'color'      => '#5A8DEE',
+      ),
+      'BUENA PRO' => array(
+        'rotulo'     => 'BUENA PRO',
+        'color'      => '#3ad385',
+      ),
+    ]);
+    return view('dashboard', compact('cliente','chartjs','actividades'));
   }
     //ecommerce
   public function dashboardEcommerce(){

@@ -30,7 +30,27 @@ function gs($file, $folder = null) {
     }
     Helper::gsutil_cp($file, $temporal);
     if($path_basic != $path_temporal) {
-      symlink($temporal, $path_basic . $filename);
+      #symlink($temporal, $path_basic . $filename);
+    }
+    return $temporal;
+
+  } else if(file_exists($file)) {
+    return $file;
+  }
+}
+function gs_async($file, $folder = null, &$commands = null) {
+  $path_basic    = config('constants.ruta_temporal');
+  $path_temporal = $folder ?? config('constants.ruta_temporal');
+
+  if(strpos($file, 'gs://') !== false) {
+    $filename = md5($file) . '.' . strtolower(pathinfo($file, PATHINFO_EXTENSION));
+    $temporal = $path_temporal . $filename;
+    if(file_exists($temporal)) {
+      return $temporal;
+    }
+    $commands[] = "/snap/bin/gsutil cp '" . $file . "' '" . $temporal . "'";
+    if($path_basic != $path_temporal && false) {
+      #symlink($temporal, $path_basic . $filename);
     }
     return $temporal;
 

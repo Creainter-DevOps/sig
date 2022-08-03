@@ -8,10 +8,7 @@
               <tbody>
                 <tr>
                   <td style="width:200px;">Entidad:</td>
-                  <td colspan="5">
-                      <a href="/clientes/{{ $licitacion->empresa_id }}">{{ $licitacion->entidad }}</a>
-                      {{ $licitacion->empresa()->rotulo() }}
-                    </td>
+                  <td colspan="5">{{ $licitacion->empresa()->rotulo() }}</td>
                 </tr>
                 <tr>
                   <td>Expediente:</td>

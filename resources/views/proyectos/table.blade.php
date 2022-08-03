@@ -7,24 +7,23 @@
               <tbody>
                 <tr>
                   <th>Código</th>
-                  <td>{{ $proyecto->codigo }}</td>
+                  <td><a href="javascript:void(0);" data-popup="/documentos/visor?path={{ $proyecto->folder(true) }}&pid={{ $proyecto->id }}">{{ $proyecto->codigo }}</a></td>
                   <th>Proveedor:</th>
                   <td>{{ $proyecto->empresa()->razon_social }}</td>
                 </tr>
                 <tr>
                   <th>Cliente</th>
-                  <td>{{ $proyecto->cliente()->rotulo() }}</td>
-                  <th>Color</th>
-                  <td><input type="color" name="color" data-editable="/proyectos/{{ $proyecto->id }}?_update=color" value="{{ $proyecto->color }}"></td>
+                  <td colspan="3">{{ $proyecto->cliente()->rotulo() }}</td>
+                </tr>
+                 <tr>
+                  <th>Fecha del Consentimiento</th>
+                  <td><input type="date" name="fecha_consentimiento" data-editable="/proyectos/{{ $proyecto->id }}?_update=fecha_consentimiento" value="{{ $proyecto->fecha_consentimiento }}"></td>
+                  <th>Firma de Contrato</th>
+                  <td><input type="date" name="fecha_firma" data-editable="/proyectos/{{ $proyecto->id }}?_update=fecha_firma" value="{{ $proyecto->fecha_firma }}"></td>
+                  <!-- <input type="color" name="color" data-editable="/proyectos/{{ $proyecto->id }}?_update=color" value="{{ $proyecto->color }}"></td>-->
                 </tr>
                 <tr>
-                  <th>Directorio:</th>
-                  <td colspan="3">
-                    <a href="javascript:void(0);" data-popup="/documentos/visor?path={{ $proyecto->folder(true) }}&pid={{ $proyecto->id }}">{{ $proyecto->folder() }}</a>
-                  </td>
-                </tr>
-                <tr>
-                  <th>Fecha de Firma:</th>
+                  <th>Inicio de Servicio</th>
                   <td>
                     <input type="date" name="fecha_desde" data-editable="/proyectos/{{ $proyecto->id }}?_update=fecha_desde" value="{{ $proyecto->fecha_desde }}">
                   </td>

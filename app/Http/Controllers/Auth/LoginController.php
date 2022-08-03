@@ -104,6 +104,7 @@ public function login(Request $request) {
 //            ->withErrors(['username'=>'Datos de acceso invalidos!'])
 //            ->withInput(request(['username']));
         }
+        exit('aqui-no-llega');
         $login = DB::select("
   SELECT u.id, u.usuario, u.clave, string_agg(g.id::TEXT, ',') AS id_grupo, string_agg(g.nombre, ',') AS grupo
     FROM public.usuario u

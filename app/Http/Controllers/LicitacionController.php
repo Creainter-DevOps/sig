@@ -36,6 +36,8 @@ class LicitacionController extends Controller {
     $propuestas_en_pro = Oportunidad::listado_propuestas_buenas_pro();
     $actividades = Oportunidad::actividades(); 
 
+    $chartjs['resumen'] = Oportunidad::estadistica_enviado_diario();
+
     $chartjs['barras'] = Oportunidad::estadistica_barra_cantidades();
     $chartjs['barras'] = Chartjs::line($chartjs['barras'], [
       'APROBADAS' => array(
@@ -139,17 +141,37 @@ class LicitacionController extends Controller {
   }
 public function aprobar(Request $request, Licitacion $licitacion)
 {
-  $licitacion->aprobar();
   $oportunidad = $licitacion->oportunidad();
-  if(!$request->ajax()) {
-    return redirect('/licitaciones/' . $licitacion->id . '/detalles');
+  if(empty($oportunidad)) {
+    $licitacion->aprobar();
+    return response()->json([
+      'status'   => true,
+      'disabled' => true,
+      'label'    => 'Oportunidad Aprobada!',
+      'message'  => 'Oportunidad ha sido registrada como aprobada',
+      'refresh'  => false,
+      'class'    => 'success',
+    ]);
   } else {
+    if(empty($oportunidad->aprobado_el)) {
       return response()->json([
-        'status'  => 'success',
-        'message' => 'Se ha realizado registro con éxito.',
-        'data' => $oportunidad,
-        'refresh' => true
+        'status'   => true,
+        'disabled' => true,
+        'label'    => 'Oportunidad Aprobada!',
+        'message'  => 'Oportunidad ha sido registrada como aprobada',
+        'refresh'  => false,
+        'class'    => 'success',
       ]);
+    } else {
+      return response()->json([
+        'status'   => false,
+        'disabled' => true,
+        'label'    => 'Oportunidad ya aprobado',
+        'message'  => 'Ya fue aprobado anteriormente.',
+        'refresh'  => false,
+        'class'    => 'warning',
+      ]);
+    }
   }
 }
 public function rechazar(Request $request, Licitacion $licitacion)
@@ -164,28 +186,34 @@ public function rechazar(Request $request, Licitacion $licitacion)
     ]);
   }
 
-  if ( !isset($oportunidad) ){
-    $licitacion->eliminado = now();
-    $licitacion->save();
-     
-      if( $request->ajax()) {
-         return response()->json([
-           'status'  => true,
-           'message' => 'Se ha realizado registro con éxito.',
-           'refresh' => true
-         ]);
-      }
-  }
-  $oportunidad->rechazar($motivo);
-  if($request->ajax()) {
+  $licitacion->rechazar($motivo);
+  if(empty($oportunidad)) {
       return response()->json([
-        'status'  => true,
-        'message' => 'Se ha realizado registro con éxito.',
-        'data' => $oportunidad,
-        'refresh' => true
+        'status'   => true,
+        'disabled' => true,
+        'label'    => 'Rechazado',
+        'message'  => 'Se ha realizado registro con éxito.',
       ]);
   } else {
-    return redirect('/licitaciones');
+    if(empty($oportunidad->rechazado_el)) {
+      return response()->json([
+        'status'   => true,
+        'disabled' => true,
+        'label'    => 'Oportunidad Rechazada!',
+        'message'  => 'Oportunidad ha sido registrada como rechazada',
+        'refresh'  => false,
+        'class'    => 'success',
+      ]);
+    } else {
+      return response()->json([
+        'status'   => false,
+        'disabled' => true,
+        'label'    => 'Oportunidad ya rechazada',
+        'message'  => 'Ya fue rechazada anteriormente.',
+        'refresh'  => false,
+        'class'    => 'warning',
+      ]);
+    }
   }
 }
 

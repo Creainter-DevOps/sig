@@ -8,6 +8,36 @@ use App\Helpers\NumeroALetras;
 
 class Helper
 {
+  public static function color($valor, $tipo, $menor, $igual, $mayor, $valor2 = 'x') {
+    if($tipo == 'date') {
+      if(!empty($valor)) {
+        if(strtotime($valor) > strtotime(date('Y-m-d'))) {
+          $color = $mayor;
+        } elseif(strtotime($valor) < strtotime(date('Y-m-d'))) {
+          $color = $menor;
+        } else {
+          $color = $igual;
+        }
+        if($valor2 === 'x') {
+          $valor = static::fecha($valor);
+        }
+      }
+    } elseif($tipo == 'numeric') {
+      if($valor > 0) {
+        $color = $mayor;
+      } elseif($valor < 0) {
+        $color = $menor;
+      } else {
+        $color = $igual;
+      }
+    } else {
+      return '[no-defined]';
+    }
+    if($valor2 !== 'x') {
+      $valor = $valor2;
+    }
+    return '<span style="color:' . ($color ?? 'inherent') . '">' . $valor . '</span>';
+  }
   public static function gsutil_exists($file) {
     $cmd = 'export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"';
     $cmd .= ";/snap/bin/gsutil -q stat '$file'; echo $?";
@@ -34,13 +64,32 @@ class Helper
     exec($cmd);
     return true;
   }
-  public static function parallel_command($cmd, $data = null) {
+  public static function parallel_command($cmd, $queue = null) {
     $stdout = static::json_path('pid_' . uniqid() . '.log');
-    if(is_array($cmd)) {
+    $cmd = !is_array($cmd) ? [$cmd] : $cmd;
+
+    if(!empty($queue)) {
+      $matrix = static::json_load('queue_' . $queue);
+      $last_pid = !empty($matrix['pids']) ? end($matrix['pids']) : null;
+
+      $file = static::json_path('queue_' . $queue);
+      $cmd[] = '/usr/bin/php /var/www/html/interno.creainter.com.pe/util/background.php "queue_delete" "' . $file . '"';
+    }
+
+    if(!empty($last_pid)) {
+      $cmd = '(/var/www/html/interno.creainter.com.pe/util/waitProcess ' . $last_pid . '; ' . implode('; ', $cmd) . ')';
+    } else {
       $cmd = '(' . implode('; ', $cmd) . ')';
     }
+
     $command =  $cmd . ' >> ' . $stdout . ' 2>&1 & echo $!; ';
+
     $pid = exec($command, $output);
+
+    if(!empty($queue)) {
+      $matrix['pids'][] = $pid;
+      static::json_save('queue_' . $queue, $matrix);
+    }
 
     static::json_save('process_' . $pid, [
       'pid'          => $pid,
@@ -48,7 +97,7 @@ class Helper
       'percent'      => 0,
       'start_time'   => time(),
       'command'      => $cmd,
-      'data'         => $data,
+      'data'         => null,
       'last_query'   => null,
       'count_query'  => 0,
       'stdout'       => $stdout,
@@ -113,7 +162,7 @@ class Helper
     static::json_save('process_' . $pid, $work);
     return $work;
   }
-  
+ 
   public static function parallel_status_pool($pid_pool) {
     if(!is_array($pid_pool)) {
       return static::parallel_status($pid_pool);
@@ -634,26 +683,38 @@ public static function subir_documento( $archivo, $name ){
       }
       return $matrix;
     }
-    public static function formatoCard($x) {
+    public static function formatoCard($x, $empresa_id = null) {
       $default = [
         'documento' => null,
         'imagen' => null,
-        'estampados' => [
-          'visado' => [],
-          'firma'  => [],
-        ],
+        'addons' => [],
       ];
-      if(!empty($x['is_part'])) {
-        $default['estampados']['visado'][$x['page']] = [
-          'x' => rand(10000, 20999) / 100000,
-          'y' => rand(85000, 92999) / 100000,
-        ];
-      } else {
-        for($i = 0; $i < $x['folio']; $i++) {
-          $default['estampados']['visado'][$i] = [
-            'x' => rand(10000, 20999) / 100000,
-            'y' => rand(85000, 92999) / 100000,
+      if(!empty($empresa_id)) {
+        if(!empty($x['is_part'])) {
+          $fid = uniqid();
+          $default['addons'][$x['page']] = [
+            $fid => [
+              'id'   => $fid,
+              'eid'  => $empresa_id,
+              'tool' => 'visado',
+              'x'    => rand(10000, 20999) / 100000,
+              'y'    => rand(85000, 92999) / 100000,
+            ]
           ];
+        } else {
+          $folio = $x['folio'] == '#' ? 1 : $x['folio'];
+          for($i = 0; $i < $folio; $i++) {
+            $fid = uniqid();
+            $default['addons'][$i] = [
+              $fid => [
+                'id'   => $fid,
+                'eid'  => $empresa_id,
+                'tool' => 'visado',
+                'x'    => rand(10000, 20999) / 100000,
+                'y'    => rand(85000, 92999) / 100000,
+              ]
+            ];
+          }
         }
       }
       return array_merge($default, $x);
