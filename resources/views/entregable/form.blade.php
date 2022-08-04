@@ -50,7 +50,7 @@
     </div>
     <div class="col-md-6  col-12">
       <div class="form-label-group" >
-         <input type="text" class="form-control" placeholder="Descripción" value="{{ old ( 'descripcion', $entregable->descripcion ) }}" name="descripcion">
+         <textarea class="form-control" placeholder="Descripción" name="descripcion">{{ old ( 'descripcion', $entregable->descripcion ) }}</textarea>
          <label for="">Descripción</label>
       </div>
     </div>

@@ -19,7 +19,7 @@
 <section id="dashboard-analytics">
     <div class="row">
       <!-- Website Analytics Starts-->
-    <div class="col-lg-4 col-md-6 col-12 mb-4">
+    <div class="col-lg-3 col-md-6 col-12 mb-3">
     <div class="card h-75">
       <div class="card-header">
         <h3 class="card-title mb-1">Bienvenido {{ '@' . Auth::user()->usuario }}!</h3>
@@ -36,6 +36,72 @@
       </div>
     </div>
   </div>
+        <!-- Sales Chart Starts-->
+      <div class="col-xl-3 col-md-6 col-12 sales-card">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="card-title-content">
+              <h4 class="card-title">Ingresos</h4>
+              <small class="text-muted">Calculado en lo que va del mes</small>
+            </div>
+            <i class="bx bx-dots-vertical-rounded font-medium-3 cursor-pointer"></i>
+          </div>
+          <div class="card-content">
+            <div class="card-body">
+              <div class="d-flex justify-content-between my-1">
+                <div class="sales-info d-flex align-items-center">
+                  <i class='bx bx-bar-chart-alt-2 text-primary font-medium-5 mr-50'></i>
+                  <div class="sales-info-content">
+                    <h6 class="mb-0">Enviados</h6>
+                    <small class="text-muted">Expedientes enviados</small>
+                  </div>
+                </div>
+                <h6 class="mb-0">{{ $chartjs['usuario']->enviados }}</h6>
+              </div>
+              <div class="d-flex justify-content-between my-1">
+                <div class="sales-info d-flex align-items-center">
+                  <i class='bx bx-check text-primary font-medium-5 mr-50'></i>
+                  <div class="sales-info-content">
+                    <h6 class="mb-0">Ganados</h6>
+                    <small class="text-muted">Oportunidades Ganadas</small>
+                  </div>
+                </div>
+                <h6 class="mb-0">{{ $chartjs['usuario']->ganados }}</h6>
+              </div>
+              <!--<div class="d-flex justify-content-between my-1">
+                <div class="sales-info d-flex align-items-center">
+                  <i class='bx bx-dollar text-primary font-medium-5 mr-50'></i>
+                  <div class="sales-info-content">
+                    <h6 class="mb-0">Recaudado por Enviados</h6>
+                    <small class="text-muted">Comisión de S/. 11</small>
+                  </div>
+                </div>
+                <h6 class="mb-0">{{ Helper::money($chartjs['usuario']->sueldo_enviados, 1) }}</h6>
+              </div>
+              <div class="d-flex justify-content-between my-1">
+                <div class="sales-info d-flex align-items-center">
+                  <i class='bx bx-dollar text-primary font-medium-5 mr-50'></i>
+                  <div class="sales-info-content">
+                    <h6 class="mb-0">Recaudado por Ganados</h6>
+                    <small class="text-muted">Comisión de S/.300</small>
+                  </div>
+                </div>
+                <h6 class="mb-0">{{ Helper::money($chartjs['usuario']->sueldo_ganados, 1) }}</h6>
+              </div>
+              <div class="d-flex justify-content-between my-1">
+                <div class="sales-info d-flex align-items-center">
+                  <i class='bx bx-dollar text-primary font-medium-5 mr-50'></i>
+                  <div class="sales-info-content">
+                    <h6 class="mb-0">Recaudado por Monto</h6>
+                    <small class="text-muted">Comisión de S/.300</small>
+                  </div>
+                </div>
+                <h6 class="mb-0">{{ Helper::money($chartjs['usuario']->sueldo_monto, 1) }}</h6>
+              </div>-->
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="col-xl-3 col-md-6 col-sm-12 dashboard-referral-impression">
         <div class="row">
           <!-- Referral Chart Starts-->
@@ -322,43 +388,6 @@
                     <div id="registration-chart"></div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- Sales Chart Starts-->
-      <div class="col-xl-3 col-md-6 col-12 sales-card">
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <div class="card-title-content">
-              <h4 class="card-title">Sales</h4>
-              <small class="text-muted">Calculated in last 7 days</small>
-            </div>
-            <i class="bx bx-dots-vertical-rounded font-medium-3 cursor-pointer"></i>
-          </div>
-          <div class="card-content">
-            <div class="card-body">
-              <div id="sales-chart" class="mb-2"></div>
-              <div class="d-flex justify-content-between my-1">
-                <div class="sales-info d-flex align-items-center">
-                  <i class='bx bx-up-arrow-circle text-primary font-medium-5 mr-50'></i>
-                  <div class="sales-info-content">
-                    <h6 class="mb-0">Best Selling</h6>
-                    <small class="text-muted">Sunday</small>
-                  </div>
-                </div>
-                <h6 class="mb-0">28.6k</h6>
-              </div>
-              <div class="d-flex justify-content-between mt-2">
-                <div class="sales-info d-flex align-items-center">
-                  <i class='bx bx-down-arrow-circle icon-light font-medium-5 mr-50'></i>
-                  <div class="sales-info-content">
-                    <h6 class="mb-0">Lowest Selling</h6>
-                    <small class="text-muted">Thursday</small>
-                  </div>
-                </div>
-                <h6 class="mb-0">986k</h6>
               </div>
             </div>
           </div>

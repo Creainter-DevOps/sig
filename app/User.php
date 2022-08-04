@@ -7,6 +7,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use App\Facades\DB;
+use Auth;
 
 class User extends Authenticatable
 {
@@ -51,6 +53,27 @@ class User extends Authenticatable
     }
     public function tenants() {
       return $this->hasMany('App\Empresa', 'tenant_id', 'tenant_id')->get();
+    }
+    public static function estadisticas($id = null) {
+      $id = $id ?? Auth::user()->id;
+      return collect(DB::select("
+      SELECT
+	x.usuario,
+	x.enviados,
+	x.ganados,
+	1100 sueldo_base,
+	(x.enviados * 11) sueldo_enviados,
+	(x.ganados * 300) sueldo_ganados,
+	(x.monto * 0.0025) sueldo_monto
+FROM (
+	SELECT U.usuario, COUNT(C.id) enviados, COUNT(P.id) ganados, SUM((CASE WHEN P.id IS NOT NULL THEN C.monto ELSE 0 END)) monto
+	FROM public.usuario U
+	LEFT JOIN osce.cotizacion C ON C.propuesta_por = U.id --AND C.propuesta_el >= DATE_TRUNC('month', NOW() - INTERVAL '1' MONTH)
+		AND C.propuesta_el >= DATE_TRUNC('month', NOW())
+	LEFT JOIN osce.proyecto P ON P.cotizacion_id = C.id
+  WHERE U.id = :id
+	GROUP BY U.usuario
+) x", ['id' => $id]))->first();
     }
     public static function search($term ) {
       $term = strtolower(trim($term));

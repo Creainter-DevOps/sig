@@ -165,4 +165,8 @@ class ProyectoController extends Controller {
        $empresa = $proyecto->cotizacion()->empresa();
        return Helper::pdf('proyectos.financiero', compact('proyecto','empresa'), 'L')->stream('demo.pdf');
      }
+     public function pdf_situacion(Request $request, Proyecto $proyecto) {
+       $empresa = $proyecto->cotizacion()->empresa();
+       return Helper::pdf('proyectos.pdf_situacion', compact('proyecto','empresa'), 'L')->stream('demo.pdf');
+     }
 }

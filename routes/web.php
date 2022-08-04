@@ -54,6 +54,7 @@ Route::resource('ordenes', 'OrdenController')->parameters([
 Route::get('proyectos/autocomplete', 'ProyectoController@autocomplete'); 
 Route::post('proyectos/{proyecto}/observacion', 'ProyectoController@observacion'); 
 Route::get('proyectos/{proyecto}/financiero', 'ProyectoController@financiero');
+Route::get('proyectos/{proyecto}/pdf/situacion', 'ProyectoController@pdf_situacion');
 Route::resource('proyectos', 'ProyectoController')->parameters([
     'proyectos' => 'proyecto'
   ]);

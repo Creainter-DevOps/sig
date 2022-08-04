@@ -346,7 +346,7 @@ FROM (
     FROM (
       SELECT O.tenant_id, O.id, O.licitacion_id, O.aprobado_el, O.etiquetas_id, O.aprobado_por, O.rotulo, O.fecha_participacion_hasta, O.correo_id, O.revisado_el, O.revisado_por, O.es_favorito
       FROM osce.oportunidad O
-      WHERE O.estado = 1 AND O.tenant_id = 1 AND O.aprobado_el IS NOT NULL AND O.rechazado_el IS NULL AND O.archivado_el IS NULL
+      WHERE O.estado = 1 AND O.tenant_id = 1 AND O.aprobado_el IS NOT NULL AND O.rechazado_el IS NULL AND O.archivado_el IS NULL AND O.correo_id IS NULL
         AND (
           (O.fecha_participacion_hasta >= NOW() - INTERVAL '2' DAY AND O.fecha_participacion_hasta <= NOW() + INTERVAL '4' DAY)
           OR O.aprobado_el::date = NOW()::date
@@ -427,7 +427,7 @@ FROM (
   WHERE x.empresas_interes = 0 OR x.aprobado_el::date = NOW()::date OR x.es_favorito IS NOT NULL
 	OR x.fecha_propuesta_hasta <= NOW() + INTERVAL '15' DAY
 ) z
-ORDER BY z.fecha_propuesta_hasta::date ASC, z.fecha_propuesta_hasta::time ASC, z.es_favorito IS NULL DESC, z.estado DESC, (z.expediente_step_min = 4) ASC, z.revisado_el IS NULL ASC, z.expediente_step_min DESC
+ORDER BY z.correo_id IS NULL ASC, z.fecha_propuesta_hasta::date ASC, z.fecha_propuesta_hasta::time ASC, z.es_favorito IS NULL DESC, z.estado DESC, (z.expediente_step_min = 4) ASC, z.revisado_el IS NULL ASC, z.expediente_step_min DESC
 LIMIT 65", ['tenant' => Auth::user()->tenant_id]);
       /*
         SELECT x.*,

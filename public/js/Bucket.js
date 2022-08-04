@@ -235,7 +235,7 @@ function Bucketjs () {
   };
   var fillFile = function (file) {
     var ul = $(_element).find("tbody");
-    if(file.tipo == 1 || file.tipo == 2 || file.tipo == 4) {
+    if(file.tipo == 1 || file.tipo == 2 || file.tipo == 4 || (file.tipo == 3 && file.download)) {
       ul.append(
         $("<tr>")
           .addClass(file.id ? 'StackedListItem--isDraggable' : 'es_directorio')

@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Cliente;
 use App\Oportunidad;
 use App\Helpers\Chartjs;
-
+use App\User;
 
 class DashboardController extends Controller
 {
@@ -19,6 +19,7 @@ class DashboardController extends Controller
 
     $actividades = Oportunidad::actividades();
 
+    $chartjs['usuario'] = User::estadisticas();
     $chartjs['barras'] = Oportunidad::estadistica_barra_cantidades();
     $chartjs['barras'] = Chartjs::line($chartjs['barras'], [
       'APROBADAS' => array(

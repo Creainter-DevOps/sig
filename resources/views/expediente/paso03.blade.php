@@ -4,6 +4,7 @@
   <div class="row">
     <div class="col-12">
       <div class="card">
+        <div style="position: absolute;top: 5px;right: 6px;font-size: 12px;color: #9d9100;">{{ ceil(((disk_total_space('/') - disk_free_space('/')) * 100) / disk_total_space('/')) }}% del disco usado</div>
         <div class="card-content mt-2">
           <div class="card-body">
             <ul class="nav nav-tabs justify-content-center" role="tablist">
