@@ -54,6 +54,28 @@ class User extends Authenticatable
     public function tenants() {
       return $this->hasMany('App\Empresa', 'tenant_id', 'tenant_id')->get();
     }
+    public static function perfiles($empresa_id = null) {
+      return collect(DB::select("SELECT * FROM osce.fn_usuario_perfiles(:tenant, :id, :empresa)", [
+        'tenant'  => Auth::user()->tenant_id,
+        'id'      => Auth::user()->id,
+        'empresa' => $empresa_id,
+      ]));
+    }
+    public static function perfil($id) {
+      return collect(DB::select("
+        SELECT
+          UE.linea, UE.anexo, UE.celular, UE.cargo, UE.correo_id,
+        	C.correo, C.usuario, C.clave, C.nombre, C.servidor_smtp, C.puerto_smtp, E.color_primario, E.logo_head logo
+        FROM public.usuario_empresa UE
+        JOIN public.usuario U ON U.id = UE.usuario_id AND U.habilitado
+        JOIN osce.empresa E ON E.id = UE.empresa_id
+        LEFT JOIN osce.credencial C ON C.id = UE.correo_id
+        WHERE UE.id = :id AND U.tenant_id = :tenant AND U.id = :user", [
+        'id'      => $id,
+        'tenant'  => Auth::user()->tenant_id,
+        'user'    => Auth::user()->id,
+      ]))->first();
+    }
     public static function estadisticas($id = null) {
       $id = $id ?? Auth::user()->id;
       return collect(DB::select("

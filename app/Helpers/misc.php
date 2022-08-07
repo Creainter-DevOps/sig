@@ -1,5 +1,24 @@
 <?php
-
+function SendMail($perfil, $data) {
+  require_once(config('constants.internal') . 'conf.php');
+  require_once(ABS_LIBRERIAS . 'xmail.php');
+  $credenciales = [
+    'servidor_smtp' => $perfil->servidor_smtp,
+    'puerto_smtp'   => $perfil->puerto_smtp,
+    'usuario'       => $perfil->usuario,
+    'clave'         => $perfil->clave,
+    'correo'        => $perfil->correo,
+    'nombre'        => $perfil->nombre,
+  ];
+  if(!empty($perfil->cargo)) {
+    $data['body'] .= '<br>';
+    $data['body'] .= '<p style="color:' . $perfil->color_primario . ';margin-bottom:0;">' . $perfil->nombre . '</p>';
+    $data['body'] .= '<p style="margin-top:0;">' . $perfil->cargo . '</p>';
+    $data['body'] .= '<p style="color:' . $perfil->color_primario . ';font-size:11px;">www.creainter.com.pe | ' . $perfil->correo . ' | Celular: ' . $perfil->celular . ' | Fijo: ' . $perfil->linea . ' Anexo ' . $perfil->anexo . '</p>';
+    $data['body'] .= '<img src="https://sig.creainter.com.pe/static/cloud/' . $perfil->logo . '" style="height: 45px;">';
+  }
+  return xMailSend(XMAIL_SEND_NOW, $credenciales, $data);
+}
 function file_ext($file) {
   return strtolower(pathinfo($file, PATHINFO_EXTENSION));
 }

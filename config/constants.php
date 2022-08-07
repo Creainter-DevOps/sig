@@ -5,5 +5,6 @@
     'static_seace'  => '/static/seace/',
     'static_temp'   => '/static/temporal/',
     'static_cloud'  => '/static/cloud/',
-    'ruta_cloud'    => 'https://sig.creainter.com.pe/static/cloud/'  
+    'ruta_cloud'    => 'https://sig.creainter.com.pe/static/cloud/',
+    'internal'      => '/var/www/html/interno.creainter.com.pe/',
   ];

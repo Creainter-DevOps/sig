@@ -13,6 +13,7 @@ use App\Proyecto;
 use App\Documento;
 use App\Helpers\Helper;
 use Auth;
+use App\User;
 
 class CotizacionController extends Controller {
 
@@ -175,6 +176,34 @@ class CotizacionController extends Controller {
     //return redirect('/oportunidades/' . $cotizacion->oportunidad_id . '/');
   }
   public function enviarPorCorreo(Cotizacion $cotizacion, Request $request) {
+    $perfil_id = $request->input('value');
+
+    if(empty($perfil_id)) {
+      return response()->json([
+        'status'   => false,
+        'message'  => 'Debe seleccionar una empresa',
+      ]);
+    }
+
+    $perfil = User::perfil($perfil_id);
+
+    $m = '<p>Buenos días, Estimado:</p>';
+    $m .= '<p>Ante todo, espero que usted y su familia se encuentre bien, en esta etapa de pandemia es necesario cuidarnos todos.</p>';
+    $m .= '<p>En relación con la oportunidad de negocio “<b>' . $cotizacion->oportunidad()->rotulo . '</b>”, ';
+    $m .= 'hacemos el envío de nuestra cotización con código <b>' . $cotizacion->codigo() . '</b>.</p>';
+    $m .= '<p>Así mismo quiero poder ayudarlo a resolver cualquier duda que pueda tener en relación con nuestro servicio, estaré para apoyarlo y brindarle la mejor atención.</p>';
+    $m .= '<p>Muchas gracias,</p>';
+
+
+    $archivo = gs(config('constants.ruta_storage') . $cotizacion->documento()->archivo);
+      SendMail($perfil, [
+        'to' => 'diego.anccas@gmail.com',
+        'subject' => 'COTIZACIÓN ' . $cotizacion->codigo() . ': ' . substr(strtoupper($cotizacion->oportunidad()->rotulo), 0, 60) . '...',
+        'body' => $m,
+        'attachments' => [
+          [$archivo, $cotizacion->codigo() . '.pdf']
+        ]
+      ]);
     if($request->ajax()) {
       return response()->json([
         'status'   => true,

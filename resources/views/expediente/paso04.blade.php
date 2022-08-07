@@ -91,7 +91,20 @@
               </div>
             </div>
             @if(!empty($cotizacion->oportunidad()->correo_id))
-            <div style="max-width: 700px;margin:0 auto;background: #ccecff;color: #000;padding: 5px;border-radius: 3px;">
+            <div class="blockSendMail" style="max-width: 700px;margin:0 auto;background: #f3f3f3;border: 1px solid #e1e1e1;color: #000;padding: 10px;border-radius: 3px;">
+              <fieldset class="form-group">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <label class="input-group-text" for="inputGroupSelect01">De:</label>
+                    </div>
+                    <select class="form-control" onchange="$(this).closest('.blockSendMail').find('a.btn').attr('data-pass-value', $(this).val());">
+                      <option>Elija el Remitente</option>
+                    @foreach(App\User::perfiles($cotizacion->empresa_id) as $r)
+                      <option value="{{ $r->id }}">{{ $r->cargo }}</option>
+                    @endforeach
+                    </select>
+                  </div>
+                </fieldset>
               <table>
                 <tr>
                   <th>Para:</th>
@@ -99,7 +112,7 @@
                 </tr>
               </table>
               <div class="text-center">
-                <i>En el correo se adjuntará este expediente recién elaborado.</i><br>
+                <i>En el correo se adjuntará este expediente recién elaborado, puede que demore un minuto en llegar a tu correo.</i><br>
                 <a class="btn btn-secondary text-white" data-confirm data-button-dinamic href="/cotizaciones/{{ $cotizacion->id }}/enviarPorCorreo" class="btn btn-sm btn-dark">Envíar por Correo Eléctronico</a>
               </div>
             </div>
