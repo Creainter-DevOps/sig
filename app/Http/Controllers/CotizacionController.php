@@ -45,13 +45,6 @@ class CotizacionController extends Controller {
     $contacto = isset($cotizacion->contacto_id) ? $cotizacion->contacto() : null; 
     return view ('cotizacion.show', compact('cotizacion', 'listado', 'breadcrumbs', 'cliente', 'timeline','contacto' )); 
   }
-  public function enviar(Cotizacion $cotizacion, Request $request){
-    $cotizacion->registrar_propuesta();
-    if($request->ajax()) {
-      return response()->json(['status' => true , 'refresh' => true ]);
-    }
-    return redirect()->route('oportunidades.show', [ 'oportunidad' => $cotizacion->oportunidad_id ]);
-  }
   public function create(Request $request) {
     
     $cotizacion = new Cotizacion;
@@ -180,6 +173,17 @@ class CotizacionController extends Controller {
       ]);
     }
     //return redirect('/oportunidades/' . $cotizacion->oportunidad_id . '/');
+  }
+  public function enviarPorCorreo(Cotizacion $cotizacion, Request $request) {
+    if($request->ajax()) {
+      return response()->json([
+        'status'   => true,
+        'refresh'  => false,
+        'disabled' => true,
+        'label'    => 'Correo enviado correctamente!',
+      ]);
+    }
+    return redirect()->route('oportunidades.show', ['oportunidad' => $cotizacion->oportunidad_id]);
   }
 
   public function detalleSave( Request $request , $id){

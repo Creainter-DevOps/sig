@@ -165,6 +165,25 @@
                 @endif
             </div>
         </div>
+        @if(empty($oportunidad->empresa_id))
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-body">
+                <div class="text-center">
+                  Antes de continuar, le recomendamos vincular la oportunidad a una empresa. Este proceso no volverá a repetirse para el mismo correo remitente.<br /><br />
+                </div>
+                <div style="max-width:400px;margin:0 auto;text-align:center;">
+                  <input type="text" class="form-control autocomplete"
+                   data-ajax="/empresas/autocomplete" name="empresa_id" autocomplete="nope"
+                   data-editable="/oportunidades/{{ $oportunidad->id }}?_update=empresa_id" placeholder="Busque la Empresa"><br /><br />
+                   <button class="btn btn-sm btn-primary">Relacionar a Empresa</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        @endif
         <div class="row">
             @if (!empty($oportunidad->cliente_id))
                 <div class="col-12">

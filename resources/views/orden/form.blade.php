@@ -63,6 +63,17 @@
         <label for="plazo-servicio">Monto</label>
       </div>
     </div>
+        <div class="col-md-6 col-12">
+      <div class="form-label-group">
+        <input type="text" data-ajax="/entregables/autocomplete?proyecto_id={{ @$entregable->proyecto_id }}" class="form-control autocomplete" name="entregable_id" placeholder="Entregable"
+value="{{ old('entregable_id', @$entregable->entregable_id) }}"
+@if(!empty($orden->entregable_id))
+data-value="{{ $orden->entregable()->rotulo()}}"
+@endif
+>
+        <label for="">Entregable</label>
+      </div>
+    </div>
     <div class="col-12 d-flex justify-content-end">
       <button type="submit" class="btn btn-primary mr-1 mb-1">Guardar </button>
       <button type="reset" class="btn btn-light-secondary mr-1 mb-1">Limpiar </button>

@@ -109,25 +109,37 @@ class OportunidadController extends Controller {
   public function update(Request $request, Oportunidad $oportunidad )
   {
     $data = $request->all();
+    $refresh = false;
 
-    if($oportunidad->estado == 3) {
-      if(!empty($data['_update'])) {
-        if(!empty($oportunidad->{$data['_update']})) {
-          return response()->json([ 'status' =>  false , 'message' => 'Oportunidad Cerrada' ]);
+    if(!empty($data['_update'])) {
+      if(!empty($oportunidad->{$data['_update']})) {
+        if($oportunidad->estado == 3) {
+          return response()->json([
+            'status' => false,
+            'message' => 'Oportunidad Cerrada'
+          ]);
         }
       }
     }
     if(!empty($data['_update'])) {
+      if($data['_update'] == 'empresa_id') {
+        $refresh = true;
+      }
       $data[$data['_update']] = $data['value'];
       unset($data['value']);
       unset($data['_update']);
     }
     
     $oportunidad->updateData($data);
-#    $oportunidad->cliente_id = $request->input('cliente_id');
-#    $oportunidad->save();
-    //dd($oportunidad);
-    return response()->json([ 'status' =>  true , 'redirect' => '/oportunidades' ]);
+
+    if($request->ajax()) {
+      return response()->json([
+        'status'  => true ,
+        'refresh' => $refresh,
+      ]);
+    } else {
+      return redirect()->route('oportunidades.show', ['oportunidad' => $oportunidad->id]);
+    }
   }
 
     /**

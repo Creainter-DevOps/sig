@@ -7,10 +7,12 @@
 </thead>
               <tbody>
                 <tr>
-                  <td style="width:200px;">Entidad:</td>
+                  <td style="width:100px;">Entidad:</td>
                   <td colspan="5">{{ $licitacion->empresa()->rotulo() }}</td>
                 </tr>
                 <tr>
+                  <td>Tipo:</td>
+                  <td>{{ $licitacion->tipo_objeto }}</td>
                   <td>Expediente:</td>
                   <td>{{ $licitacion->expediente_id }}</td>
                   <td>Procedimiento:</td>
@@ -46,12 +48,12 @@
                 @endif
                 <tr>
                   <td style="width:200px;">Fecha de Actualización:</td>
-                  <td>
+                  <td colspan="2">
                     {{ Helper::fecha($licitacion->updated_on, true) }}<br />
                     <a href="{{ route('licitacion.actualizar', ['licitacion' => $licitacion->id]) }}">[Actualizar]</a>
                   </td>
                   <td>Valor Referencial:</td>
-                  <td>{{ Helper::money($licitacion->monto) }}</td>
+                  <td colspan="2">{{ Helper::money($licitacion->monto) }}</td>
                 </tr>
 
               </tbody>

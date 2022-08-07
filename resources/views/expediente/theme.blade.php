@@ -179,7 +179,7 @@ border: solid 1px #ccc;
     right: 3px;
     background: rgb(0 0 0 / 32%);
     border-radius: 3px;
-    padding: 2px 10px;
+    padding: 5px 10px;
     font-size: 11px;
     color: #fff;
 }
@@ -311,6 +311,8 @@ position: absolute;
 <!-- Form wizard with number tabs section end -->
 <!-- Form wizard with icon tabs section start -->
 <section id="icon-tabs">
+  @yield('contenedor')
+
   <div class="row">
     @if(!empty($cotizacion->oportunidad()->licitacion_id))
     <div class="col-6">
@@ -349,10 +351,9 @@ position: absolute;
         </div>
       </div>
     </div>
-      </div>
-    </div>
+  </div>
+</div>
 
-@yield('contenedor')
 </section>
   </div>
   </div>

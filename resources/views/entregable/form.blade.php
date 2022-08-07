@@ -34,6 +34,12 @@
 @endif
     <div class="col-md-6 col-12">
       <div class="form-label-group">
+        <input type="date" class="form-control" name="fecha" value="{{  old ( 'fecha', $entregable->fecha ) }}"  placeholder="Fecha" />
+        <label for="fecha">Fecha</label>
+      </div>
+    </div>
+    <div class="col-md-6 col-12">
+      <div class="form-label-group">
         <select name="estado_id" data-value="{{ old('estado_id', @$entregable->estado_id) }}" placeholder="Estado" required class="form-control">
           @foreach ($entregable->fillEstados() as $k => $v)
           <option value="{{ $k }}">{{ $v }}</option>
@@ -44,8 +50,14 @@
     </div>
     <div class="col-md-6 col-12">
       <div class="form-label-group">
-        <input type="date" class="form-control" name="fecha" value="{{  old ( 'fecha', $entregable->fecha ) }}"  placeholder="Fecha" />
-        <label for="fecha">Fecha</label>
+        <input type="date" class="form-control" name="fecha_desde" value="{{  old ( 'fecha_desde', $entregable->fecha_desde ) }}"  placeholder="Fecha Desde" />
+        <label for="fecha">Fecha Desde</label>
+      </div>
+    </div>
+    <div class="col-md-6 col-12">
+      <div class="form-label-group">
+        <input type="date" class="form-control" name="fecha_hasta" value="{{  old ( 'fecha_hasta', $entregable->fecha_hasta) }}"  placeholder="Fecha Hasta" />
+        <label for="fecha">Fecha Hasta</label>
       </div>
     </div>
     <div class="col-md-6  col-12">

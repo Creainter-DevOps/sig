@@ -237,6 +237,13 @@ class Documento extends Model
     public function CompressWorkspace() {
       return 'doc-workspace-' . $this->id . '.tar.gz';
     }
+    public function json_load() {
+      return json_decode($this->elaborado_json, true);
+    }
+    public function json_save($x) {
+      $this->elaborado_json = json_encode($x);
+      return $this->save();
+    }
     public function respaldarFolder(&$commands = null) {
       if(!file_exists($this->folder_workspace())) {
         return false;
@@ -267,12 +274,205 @@ class Documento extends Model
       $commands[] = "/bin/rm '" . $destino . "'";
       $pid = Helper::parallel_command($commands);
     }
-    public function json_load() {
-      return json_decode($this->elaborado_json, true);
-    }
+    public function procesarFolder(&$workspace, $escanear = true, &$metrados = []) {
+      $documento = $this;
+      exec('ps -A | grep -i "ProcessExpediente/' . $documento->id . '" | grep -v grep', $pids);
+      if(!empty($pids)) {
+        ##Otro proceso lo ha iniciado
+        return false;
+      }
+      $folios = 0;
+      $commands = [];
+      $commands[] = 'echo "ProcessExpediente/' . $documento->id . '"';
+      $commands[] = 'sleep 2';
+      $commands[] = 'export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"';
+      $commands[] = 'echo "Respaldando Carpeta..."';
+      $documento->respaldarFolder($commands);
+      $commands[] = '/usr/bin/php /var/www/html/interno.creainter.com.pe/util/background.php "expediente-inicio" ' . $documento->id;
+      $commands[] = 'echo "Se ha iniciado el proceso..."';
 
-    public function json_save($x) {
-      $this->elaborado_json = json_encode($x);
-      return $this->save();
+      $estampados = [];
+
+      if(!empty($workspace['addons'])) {
+        foreach($workspace['addons'] as $tipo => $ns) {
+          if(in_array($tipo, ['firma','visado'])) {
+            foreach($ns as $ee => $cantidad) {
+              if(!empty($cantidad)) {
+                $temp = EmpresaFirma::porEmpresa($ee, strtoupper($tipo), $cantidad);
+                if(!empty($temp)) {
+                  $temp = array_map(function($n) use(&$commands, $documento) {
+                    return gs_async(config('constants.ruta_storage') . $n['archivo'], $documento->folder_workspace(), $commands);
+                  }, $temp);
+                  if(!isset($estampados[$ee])) {
+                    $estampados[$ee] = [];
+                  }
+                  $estampados[$ee][$tipo . '_original'] = $temp;
+                }
+              }
+            }
+          }
+        }
+      }
+      $pedir_estampado = function($empresa_id, $tipo) use(&$estampados) {
+        if(empty($estampados[$empresa_id][$tipo . '_original'])) {
+          return 'NO-HAY-' . $empresa_id . '-' . $tipo;
+        }
+        if(empty($estampados[$empresa_id][$tipo])) {
+          $estampados[$empresa_id][$tipo] = $estampados[$empresa_id][$tipo . '_original'];
+        }
+        return array_shift($estampados[$empresa_id][$tipo]);
+      };
+      $tiene_estampa = function($card, $tipo) {
+        if(!empty($card['addons'])) {
+          foreach($card['addons'] as $pp => $ff) {
+            foreach($ff as $nn) {
+              if($nn['tool'] == $tipo) {
+                return true;
+              }
+            }
+          }
+        }
+        return false;
+      };
+      $ant_repe = [];
+
+      $workspace['paso03'] = Helper::workspace_ordenar($workspace['paso03']);
+      $workspace['paso04']  = $workspace['paso03'];
+
+      foreach($workspace['paso03'] as $key => $file) {
+        if(!$file['is_part']) {
+          if($tiene_estampa($file, 'firma') || $tiene_estampa($file, 'visado')) {
+            $workspace['paso03'][$key] = $file;
+            $input  = $file['root'];
+            $output = $documento->folder_workspace() . $file['hash'] . '-%d.pdf';
+
+            $commands[] = 'echo "Proceso de separación de PDF"';
+            $commands[] = "/usr/bin/pdfseparate '" . $input . "' '" . $output . "'";
+
+            $workspace['paso03'][$key]['root'] = range(0, $file['folio'] - 1);
+            $workspace['paso03'][$key]['root'] = array_map(function($n) use ($file, $documento) {
+              return $documento->folder_workspace() . $file['hash'] . '-' . ($n + 1) . '.pdf';
+            }, $workspace['paso03'][$key]['root']);
+
+          } else {
+            $file['hash'] = uniqid();
+            $workspace['paso03'][$key]['root'] = $file['root'];
+            continue;
+          }
+        } else {
+
+          $file_page = Helper::file_name(Helper::replace_extension($file['hash'], 'pdf', '-' . ($file['page'] + 1)));
+//          print_r($file_page); echo "\n";
+          //if(!file_exists(config('constants.ruta_temporal') . $file_page) && !in_array($file['archivo'], $ant_repe)) {
+          if(!in_array($file['root'], $ant_repe)) {
+            $ant_repe[] = $file['root'];
+            $input  = $file['root'];
+            $output = $documento->folder_workspace() . Helper::file_name(Helper::replace_extension($file['hash'], 'pdf', '-%d'));
+            $commands[] = "/usr/bin/pdfseparate '" . $input . "' '" . $output . "'";
+          }
+          $workspace['paso03'][$key]['root'] = $documento->folder_workspace() . $file_page;
+#          continue;
+        }
+        if(!empty($file['addons'])) {
+          foreach($file['addons'] as $pp => $ff) {
+            foreach($ff as $nn) {
+              if(in_array($nn['tool'], ['firma','visado'])) {
+                $input  = $documento->folder_workspace() . $file['hash'] . '-' . ($pp + 1) . '.pdf';
+                $output = $documento->folder_workspace() . $file['hash'] . '-' . ($pp + 1) . '.pdf';
+                $sello  = $pedir_estampado($nn['eid'], $nn['tool']);
+                if(file_exists($input) || true) {
+                  $commands[] = 'echo "Proceso de estampado de pdf"';
+                  $commands[] = '/bin/estampar ' . $input . ' ' . $sello . ' ' . $nn['x'] . ' ' . $nn['y'] . " '" . $output . "'";
+                  if($file['page'] == $pp && $file['is_part']) {
+                    $workspace['paso03'][$key]['root'] = $output;
+                  } else {
+                    $workspace['paso03'][$key]['root'][$pp] = $output;
+                  }
+                } else {
+                  $commands[] = '/bin/noexiste ' . $input;
+                }
+              }
+            }
+          }
+        }
+      }
+     // echo "<pre>";
+      //print_r($workspace['paso03']);
+      //exit;
+
+      /* Hasta este paso tenemos los pdf finales, para unir */
+      $pdf_individuales = [];
+      $documentos_ids = [];
+      foreach($workspace['paso03'] as $key => $file) {
+        $folios += $file['folio'] ?? 1;
+        if(!empty($file['id'])) {
+          $documentos_ids[] = $file['id'];
+        } elseif(!empty($file['generado_de_id'])) {
+          $documentos_ids[] = $file['generado_de_id'];
+        }
+        if(is_array($file['root'])) {
+          foreach($file['root'] as $ff) {
+            $pdf_individuales[] = $ff;
+          }
+        } else {
+          $pdf_individuales[] = $file['root'];
+        }
+      }
+      $dir = $documento->folder_workspace();
+
+      $output = $dir . 'Propuesta.pdf';
+      $output_final = $dir . 'Propuesta_Seace.pdf';
+
+
+      /* Unimos los PDFs */
+      $commands[] = 'echo "Uniendo los documento en PDF"';
+      $commands[] = '/usr/bin/convert -alpha remove -density 200 -quality 100 '. implode(' ', $pdf_individuales) . ' ' . $output;
+
+      $commands[] = '/bin/cp ' . $output . ' ' . $output_final;
+
+      if($escanear) {
+        if(!empty($documento->getAttribute('original'))) {
+          $commands[] = "/snap/bin/gsutil cp '" . $output_final . "' '" . config('constants.ruta_storage') . $documento->getAttribute('original') . "'";
+        }
+        $commands[] = 'echo "Escaneando documento..."';
+        $commands[] = '/usr/bin/convert -density 140 ' . $output . ' -rotate 0.5 -attenuate 0.1 +noise Multiplicative -attenuate 0.01 +noise Multiplicative -sharpen 0x1.0 ' . $output_final;
+        $commands[] = 'echo "Proceso de foliación de PDF"';
+        $commands[] = '/bin/pdf-foliar ' . $output_final;
+        $commands[] = "/snap/bin/gsutil cp '" . $output_final . "' '" . config('constants.ruta_storage') . $documento->archivo . "'";
+      } else {
+        $commands[] = "/snap/bin/gsutil cp '" . $output_final . "' '" . config('constants.ruta_storage') . $documento->archivo . "'";
+      }
+
+      $commands[] = 'echo "Eliminando directorio de trabajo: ' . $documento->folder_workspace() . '"';
+
+      $commands[] = "/bin/rm -rf '" . $documento->folder_workspace() . "'";
+
+      $commands[] = '/usr/bin/php /var/www/html/interno.creainter.com.pe/util/background.php "expediente-fin" ' . $documento->id;
+
+      $commands[] = 'echo "Finalizó el proceso"';
+      $commands[] = "sleep 5";
+
+      $workspace['paso03'] = $workspace['paso04'];
+      unset($workspace['paso04']);
+      $documentos_ids = array_unique($documentos_ids);
+
+      $pid = Helper::parallel_command($commands, 'expediente');
+      $workspace['parallel'] = [
+        'method' => 'paso04',
+        'pids'   => $pid,
+      ];
+
+      $documento->filename      = Helper::replace_extension($documento->rotulo, 'pdf');
+      $documento->documentos_id = '{' . implode(',', $documentos_ids) . '}';
+      $documento->folio         = $folios;
+      $documento->filesize      = 10000;#filesize($output_final);
+      $documento->elaborado_por    = Auth::user()->id;
+      $documento->es_mesa         = true;
+      $documento->elaborado_hasta = DB::raw('now()');
+
+      $workspace['documento_final'] = 'https://sig.creainter.com.pe/static/cloud/' . $documento->archivo . '?t=' . time();
+
+      $documento->json_save($workspace);
+      $metrados['folios'] = $folios;
     }
 }

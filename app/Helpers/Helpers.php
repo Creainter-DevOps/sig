@@ -339,7 +339,41 @@ public static function array_only_keys($n, $m) {
       return $monedas;
     } 
   }  
+  public static function recursive_find_value($structure,$results ){
+    $iterator = new RecursiveIteratorIterator(
+      new RecursiveArrayIterator($structure),
+      RecursiveIteratorIterator::SELF_FIRST
+    );
 
+    $filters = array_flip($results);
+
+    $keys = [];
+
+    $resultsInStructure = [];
+    foreach ($iterator as $key => $value) {
+        if ($key === 'id') {
+            continue;
+        }
+        
+        // Put key to the stack, so we can get the path of results.
+        $keys[$iterator->getDepth()] = $key;
+        
+        if (!isset($filters[$key])) {
+            continue;
+        }
+        
+        // Put the result in the right place in the tree structure.
+        $tmp =& $resultsInStructure;
+        foreach (array_slice($keys, 0, $iterator->getDepth()) as $_key) {
+            if (!isset($tmp[$_key])) {
+                $tmp[$_key] = [];
+            }
+            $tmp =& $tmp[$_key];     
+        }
+        $tmp[$key] = $value;
+    }  
+    return $resultsInStructure;
+  }
   public static function docx_fill_template($input, $data, $output) {
     $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($input);
     if(!empty($data['EMPRESA.IMAGEN_HEADER'])) {

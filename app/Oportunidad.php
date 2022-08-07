@@ -56,8 +56,8 @@ class Oportunidad extends Model
       'automatica'   => 'boolean',
     ];
     public function updateData($data) {
-      $this->update($data);
       DB::select('SELECT osce.fn_oportunidad_asignar_empresa(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . (!empty($data['empresa_id']) ? $data['empresa_id'] : 'null') . ',' . Auth::user()->id . ')');
+      $this->update($data);
     }
     public function log($tipo, $texto) {
       DB::select('SELECT osce.fn_oportunidad_actividad(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ", '" . $tipo . "', :texto)", [
@@ -529,7 +529,7 @@ ORDER BY L.buenapro_fecha ASC, L.fecha_buena_hasta ASC, O.id ASC");
       ]);
     }
     public function registrar_interes(Empresa $empresa) {
-      DB::select('SELECT osce.fn_oportunidad_accion_interes(' . Auth::user()->tenant_id . ', ' . $this->id . ', ' . Auth::user()->id . ', ' . $empresa->id . ');');
+      DB::select('SELECT osce.fn_oportunidad_accion_interes(' . Auth::user()->tenant_id . ', ' . $this->id . ', ' . Auth::user()->id . ', ' . $empresa->id . ', null);');
     }
     public function timeline() {
       return $this->hasMany('App\Actividad','oportunidad_id')->orderBy('id', 'desc')->get();

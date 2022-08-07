@@ -14,7 +14,6 @@
       <th>Fecha</th>
       <th>Tipo</th>
       <th>Descripción</th>
-      <th>Folder</th>
       <th>Monto</th>
       <th>Estado</th>
       <th></th>
@@ -31,7 +30,6 @@
       <td class="text-center">{{ Helper::fecha($e->fecha) }}</td>
       <td class="text-center">{{ $e->render_tipo() }}</td>
       <td>{{ $e->descripcion }}</td>
-      <td class="text-center"><a href="#" onclick="window.location.href='odir:{!! addslashes(Auth::user()->dir_sharepoint . $e->folder()) !!}';">Folder</a></td>
       <td class="text-center">{{ $e->monto() }}</td>
       <td class="text-center">{{ $e->estado() }}</td>
       <td style="width: 55px;text-align: center;">

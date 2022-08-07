@@ -82,14 +82,28 @@
                   </div>
                   <div class="col-3">
                   @if(empty($cotizacion->propuesta_el))
-                    <a class="btn btn-secondary text-white" data-confim data-button-dinamic href="/cotizaciones/{{ $cotizacion->id }}/registrarPropuesta" class="btn btn-sm btn-dark">Enviar Propuesta</a>
+                    <a class="btn btn-secondary text-white" data-confirm data-button-dinamic href="/cotizaciones/{{ $cotizacion->id }}/registrarPropuesta" class="btn btn-sm btn-dark">Marcar como Enviado</a>
                   @else
-                    Ya se ha registrado el Envio:<br /> {{ Helper::fecha($cotizacion->propuesta_el, true) }}
+                    Ya se ha registrado el Envio:<br /> {{ Helper::fecha($cotizacion->propuesta_el, true) }} por {{ $cotizacion->propuesta_por }}
                   @endif
                   </div>
                 </div>
               </div>
-</div>
+            </div>
+            @if(!empty($cotizacion->oportunidad()->correo_id))
+            <div style="max-width: 700px;margin:0 auto;background: #ccecff;color: #000;padding: 5px;border-radius: 3px;">
+              <table>
+                <tr>
+                  <th>Para:</th>
+                  <td>{{ $cotizacion->oportunidad()->correo()->correo_desde }}</td>
+                </tr>
+              </table>
+              <div class="text-center">
+                <i>En el correo se adjuntará este expediente recién elaborado.</i><br>
+                <a class="btn btn-secondary text-white" data-confirm data-button-dinamic href="/cotizaciones/{{ $cotizacion->id }}/enviarPorCorreo" class="btn btn-sm btn-dark">Envíar por Correo Eléctronico</a>
+              </div>
+            </div>
+            @endif
           </div>
         </div>
       </div>

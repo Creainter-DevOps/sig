@@ -322,6 +322,11 @@ function render_autocomplete() {
             .attr("value", box.attr("data-value"));
         box.after(boxId);
         box.removeClass("autocomplete");
+
+        if(typeof box.attr('data-editable') !== 'undefined') {
+          boxId.attr('data-editable', box.attr('data-editable'));
+          box.removeAttr('data-editable');
+        }
         if (typeof form !== "undefined") {
             var btn = $("<button>")
                 .attr("type", "button")
@@ -488,6 +493,7 @@ function render_autocomplete() {
             }
         );
         var boxAttr = box[0].attributes;
+        console.log('ATTRS', boxAttr);
         for (var index in boxAttr) {
             if (
                 typeof boxAttr[index].name !== "undefined" &&
@@ -495,7 +501,7 @@ function render_autocomplete() {
             ) {
                 if (boxAttr[index].name === "data-disabled") {
                     box.attr("disabled", "true");
-                } else {
+                } else { 
                     boxId.attr(boxAttr[index].name, boxAttr[index].value);
                 }
             }
@@ -1085,10 +1091,11 @@ function render_editable() {
       }
     });
     var stt = null;
+    var stf = null;
+    var svv = null;
     var is_div = this.tagName == 'DIV';
     var is_html = typeof $(this).attr('data-ishtml') !== 'undefined';
     var selected = is_html ? box.html() : (is_div ? box.text() : box.val());
-    var stf = null;
     box.on((is_div ? 'input' : 'change'), function() {
       if(stt !== null) {
         clearTimeout(stt);
@@ -1099,6 +1106,11 @@ function render_editable() {
       }
       stt = setTimeout(function() {
         var tt = is_html ? box.html() : (is_div ? box.text() : box.val());
+        console.log('ENVIAR', tt);
+        if(tt === svv) {
+          return;
+        }
+        svv = tt;
           Fetchx({
             title: 'Edición',
             url: xhr,
@@ -1115,6 +1127,14 @@ function render_editable() {
               }, 1000);
             },
             success: function(data) {
+              if(typeof data.redirect !== 'undefined') {
+                window.location.href = data.redirect;
+              }
+              if(typeof data.refresh !== 'undefined') {
+                if(data.refresh) {
+                  window.location.reload();
+                }
+              }
               if(data.status) {
                 if(is_html) {
                   box.html(data.value);

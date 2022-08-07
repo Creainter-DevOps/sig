@@ -1,4 +1,7 @@
 <div style="margin-top: -25px;text-align: right;">
+  <a class="btn btn-sm m-0" href="/proyectos/{{ $proyecto->id }}/pdf/situacion" target="_blank">
+    <i class="bx bx-printer"></i> Reporte
+  </a>
   <button type="button" class="btn btn-sm m-0" data-popup="/entregables/crear?proyecto_id={{ $proyecto->id }}">
     <i class="bx bx-plus"></i>Nuevo Entregable
   </button>
@@ -15,7 +18,6 @@
       <th>Fecha</th>
       <th>Descripción</th>
       <th>Pago</th>
-      <th>Folder</th>
       <th>Estado</th>
       <th></th>
     </tr>
@@ -32,7 +34,6 @@
       <td class="text-center">{{ Helper::fecha($e->fecha) }}</td>
       <td>{{ $e->descripcion }}</td>
       <td class="text-center">{{ !empty($e->pago_id) ? $e->pago()->rotulo() : '' }}</td>
-      <td class="text-center"><a href="#" onclick="window.location.href='odir:{!! addslashes(Auth::user()->dir_sharepoint . $e->folder()) !!}';">Folder</a></td>
       <td class="text-center">{{ $e->estado() }}</td>
       <td style="width: 55px;text-align: center;">
          <a href="javascript:void(0)" data-popup="{{ route( 'entregables.edit', [ 'entregable' => $e->id ] ) }}"><i class="bx bx-edit-alt"></i></a>

@@ -270,7 +270,7 @@ Route::get('cotizaciones/{cotizacion}/exportar', 'CotizacionController@exportar'
 Route::post('cotizaciones/{cotizacion}/exportar_repositorio', 'CotizacionController@exportar_repositorio')->name('cotizacion.exportar_repositorio');
 Route::get('cotizaciones/{cotizacion}/detalle', 'CotizacionController@detalle')->name('cotizacion.detalle');
 Route::post('cotizaciones/{cotizacion}/detalle', 'CotizacionController@detallesave');
-Route::get('cotizaciones/{cotizacion}/enviar', 'CotizacionController@enviar')->name('cotizacion.enviar');
+Route::post('cotizaciones/{cotizacion}/enviarPorCorreo', 'CotizacionController@enviarPorCorreo')->name('cotizacion.enviarPorCorreo');
 Route::resource('cotizaciones', 'CotizacionController')->parameters([
   'cotizaciones' => 'cotizacion'
 ]);

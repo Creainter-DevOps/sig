@@ -18,7 +18,7 @@ class Entregable extends Model
      * @var array
      */
     protected $fillable = [
-      'fecha' ,'numero','proyecto_id','pago_id','descripcion','estado_id'
+      'fecha' ,'numero','proyecto_id','pago_id','descripcion','estado_id','fecha_desde','fecha_hasta'
     ];
 
     /**
@@ -90,8 +90,8 @@ class Entregable extends Model
     static function fillEstados() {
       return [
         1 => 'Pendiente',
-        2 => 'Progreso',
-        3 => 'Listo',
+        2 => 'Presentado',
+        3 => 'Conforme',
       ];
     }
 }

@@ -1,5 +1,5 @@
 <div style="margin-top: -25px;text-align: right;">
-  <a class="btn btn-sm m-0" href="/proyectos/{{ $proyecto->id }}/financiero">
+  <a class="btn btn-sm m-0" href="/proyectos/{{ $proyecto->id }}/financiero" target="_blank">
     <i class="bx bx-printer"></i> Reporte
   </a>
   <button type="button" class="btn btn-sm m-0" data-popup="/pagos/crear?proyecto_id={{ $proyecto->id }}">
@@ -17,7 +17,6 @@
       <th>Número</th>
       <th>Fecha</th>
       <th>Descripción</th>
-      <th>Folder</th>
       <th>Monto</th>
       <th>Estado</th>
       <th></th>
@@ -34,7 +33,6 @@
       <td class="text-center">{{ $e->numero }}</td>
       <td class="text-center">{{ Helper::fecha($e->fecha) }}</td>
       <td>{{ $e->descripcion }}</td>
-      <td class="text-center"><a href="#" onclick="window.location.href='odir:{!! addslashes(Auth::user()->dir_sharepoint . $e->folder()) !!}';">Folder</a></td>
       <td class="text-center">{{ $e->monto() }}</td>
       <td class="text-center">{{ $e->estado() }}</td>
       <td style="width: 55px;text-align: center;">

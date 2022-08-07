@@ -27,6 +27,25 @@
   max-width: 100%;
   max-height: 100%;
 }
+.tools > a {
+  box-sizing: border-box;
+  padding: 1px 4px 1px 4px;
+  border-radius: 5px;
+  /* border: 1px solid white; */
+  line-height: 0.5;
+  color: white;
+}
+
+.tools > .download{
+  background-color: #fd7e14;  
+}
+
+.tools > .edit {
+  background-color: #475F7B; 
+}
+.tools > .delete{
+  background-color: #FF5B5C;
+} 
 </style>
 <div class="wizard-horizontal" style="padding: 0 15px;">
                 <div class="row">
@@ -49,9 +68,9 @@
                         <img class="background_image" src="/documentos/{{ $documento->id }}/generarImagenTemporal?page=0&cid={{$k}}&t={{time()}}"/>
                         <div class="StackedListContent">
                           <div class="tools">
-                            <a href="/static/temporal/{{ str_replace('/tmp/', '', $file['root']) }}?t={{time()}}" download>Descargar</a>
-                            <a href="javascript:void(0);" data-popup="/documentos/{{ $documento->id }}/visualizar?cid={{ $k }}">Editar</a>
-                            <a href="javascript:eliminarCid('{{ $k }}');">Eliminar</a>
+                            <a class="download" href="/static/temporal/{{ str_replace('/tmp/', '', $file['root']) }}?t={{time()}}" download>Descargar</a>
+                            <a class="edit"  href="javascript:void(0);" data-popup="/documentos/{{ $documento->id }}/visualizar?cid={{ $k }}">Editar</a>
+                            <a class="delete" href="javascript:eliminarCid('{{ $k }}');">Eliminar</a>
                             @if(!file_exists($file['root']))
                             <div style="width: 8px;height: 8px;background: red;display: inline-block;border-radius: 6px;"></div>
                             @endif
@@ -201,6 +220,7 @@ var pushBucket = function () {
                         <img class="background_image" src="/documentos/{{ $documento->id}}/generarImagenTemporal?cid=${ doc.cid }&page=${ doc.page }&t={{time()}}" />
                         <div class="StackedListContent">
                           <div class="tools">
+                            <a href="/static/temporal/${ doc.root.replace('/tmp/', '' )}?t={{ time() }}" download >Descargar</a>
                             <a href="javascript:void(0);" data-popup="/documentos/{{ $documento->id }}/visualizar?cid=${ doc.cid }">Editar</a>
                             <a href="javascript:eliminarCid('${doc.cid}');">Eliminar</a>
                           </div>

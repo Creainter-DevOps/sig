@@ -29,7 +29,7 @@ class Orden extends Model
      * @var array
      */
     protected $fillable = [
-      'proyecto_id','numero','fecha','descripcion','monto','movimiento_id','descripcion','moneda_id','estado_id','tipo','contenido'
+      'proyecto_id','numero','fecha','descripcion','monto','movimiento_id','descripcion','moneda_id','estado_id','tipo','contenido','entregable_id'
     ];
 
     /**
