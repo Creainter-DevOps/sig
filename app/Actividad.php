@@ -26,7 +26,7 @@ class Actividad extends Model
      * @var array
      */
     protected $fillable = [
-      'usuario_id', 'oportunidad_id', 'cliente_id', 'contacto_id', 'cotizacion_id', 'entregable_id', 'proyecto_id', 'evento', 'empresa_id', 'candidato_id', 'texto', 'created_by', 'tipo', 'estado', 'importacia', 'fecha_terminado',
+      'tenant_id','tipo_id','usuario_id', 'oportunidad_id', 'cliente_id', 'contacto_id', 'cotizacion_id', 'entregable_id', 'proyecto_id', 'empresa_id','texto', 'created_by','estado', 'importancia', 'fecha_terminado',
       'fecha_limite', 'asignado_id','fecha_comienzo', 'color', 'orden', 'bloque_id' , 'nombre', 'eliminado','link','direccion','realizado','fecha','hora','importancia','contenido',
       'fecha_hasta','callerid_id',
     ];
@@ -58,7 +58,17 @@ class Actividad extends Model
         });
     }
     public function oportunidad(){
-      return $this->belongsTo('App\Oportunidad', 'oportunidad_id', 'id')->first();  
+      return $this->belongsTo('App\Oportunidad', 'oportunidad_id', 'id')->first();
+    }
+    public static function usuarios() {
+      return collect(DB::select("
+        SELECT U.id, CONCAT('@', U.usuario) usuario
+        FROM public.usuario U
+        WHERE id = ANY(osce.fn_usuario_supervisados(:tenant, :user))
+        ORDER BY 2 ASC", [
+          'tenant' => Auth::user()->tenant_id,
+          'user'   => Auth::user()->id,
+        ]));
     }
     public function crear() {
       $ff = DB::select("SELECT * FROM osce.fn_oportunidad_actividad(:in_tenant_id, :in_oportunidad_id, :in_usuario_id, :in_actividad_tipo, :i_message)", [
@@ -169,13 +179,27 @@ class Actividad extends Model
     }
     public static function kanban() {
       return DB::select("
-        SELECT id, tipo, fecha, fecha_limite, texto, created_by, asignado_id, supervisado_por, estado, importancia,color, tiempo_estimado, vinculado, link
-        FROM osce.actividad A
-        WHERE tipo <> 'log' AND (" . Auth::user()->id . " = ANY(asignado_id))
-        -- OR " . Auth::user()->id . " = ANY(supervisado_por))
-        AND fecha <= NOW()::date + INTERVAL '3' DAY
-        AND ((A.estado = 3 AND fecha_limite >= NOW()::date) OR A.estado IN (1,2))
-        ORDER BY A.vinculado ASC, fecha ASC");
+
+(
+	SELECT id, estado, fecha, fecha_limite, texto, created_by, asignado_id, estado, importancia,color, tiempo_estimado, vinculado, link
+	FROM osce.actividad A
+	WHERE A.tenant_id = 1 AND A.estado = 1 AND (A.created_by = ANY(osce.fn_usuario_supervisados(:tenant, :user)) OR A.asignado_id && osce.fn_usuario_supervisados(:tenant, :user))
+	ORDER BY A.fecha DESC
+) UNION (
+	SELECT id, estado, fecha, fecha_limite, texto, created_by, asignado_id, estado, importancia,color, tiempo_estimado, vinculado, link
+	FROM osce.actividad A
+	WHERE A.tenant_id = 1 AND A.estado = 2 AND (A.created_by = ANY(osce.fn_usuario_supervisados(:tenant, :user)) OR A.asignado_id && osce.fn_usuario_supervisados(:tenant, :user))
+	ORDER BY A.fecha DESC
+) UNION (
+	SELECT id, estado, fecha, fecha_limite, texto, created_by, asignado_id, estado, importancia,color, tiempo_estimado, vinculado, link
+	FROM osce.actividad A
+	WHERE A.tenant_id = 1 AND A.estado = 3 AND (A.created_by = ANY(osce.fn_usuario_supervisados(:tenant, :user)) OR A.asignado_id && osce.fn_usuario_supervisados(:tenant, :user))
+	ORDER BY A.fecha_terminado DESC
+	LIMIT 30
+)", [
+  'tenant' => Auth::user()->tenant_id,
+  'user'   => Auth::user()->id
+]);
     }
     public static function search($term) {
       $term = strtolower(trim($term));

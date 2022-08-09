@@ -61,6 +61,9 @@ class User extends Authenticatable
         'empresa' => $empresa_id,
       ]));
     }
+    public static function space() {
+      return ceil(((disk_total_space('/') - disk_free_space('/')) * 100) / disk_total_space('/'));
+    }
     public static function perfil($id) {
       return collect(DB::select("
         SELECT

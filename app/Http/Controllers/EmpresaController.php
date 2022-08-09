@@ -122,12 +122,12 @@ class EmpresaController extends Controller {
         $firmas = EmpresaFirma::porEmpresa($empresa->id, 'FIRMA');
         //dd($firmas);
         foreach( $firmas as $firma ){ 
-          //Helper::gsutil_rm( config('constants.ruta_storage') . $firma['archivo'] );
+          Helper::gsutil_rm( config('constants.ruta_storage') . $firma['archivo'] );
           EmpresaFirma::where('id',$firma['id'] )->delete();
           Documento::where('id', $firma['documento_id'] )->delete();  
         }   
 
-        return  response()->json(['status' => true ]);
+        return response()->json(['status' => true ]);
     }
 
 
@@ -141,7 +141,7 @@ class EmpresaController extends Controller {
           Documento::where('id', $sello['documento_id'] )->delete();  
         }   
 
-        return  response()->json(['status' => true ]);
+        return response()->json(['status' => true ]);
     }
 
     public function firmas_sellos_procesar( StoreFileRequest $request, Empresa $empresa ){
@@ -185,7 +185,7 @@ $index++;
           
           $request->value->move(public_path('storage') , $fileName);
           //Helper::gsutil_rm( config('constants.ruta_storage') . $empresa->logo_head );
-          Helper::gsutil_cp( public_path('storage') . "/" . $fileName, config('constants.ruta_storage') . $destino_cloud);
+          Helper::gsutil_cp( public_path('storage') . "/" . $fileName, config('constants.ruta_storage') . $destino_cloud, false );
 
           $empresa->logo_head = $destino_cloud;
           $empresa->save();
@@ -196,15 +196,33 @@ $index++;
           //$request->request->remove('logo_head');
       }  
 
-      if( $request->_update == "logo_central" && $request->hasFile("value") ){
+      if( $request->_delete == "logo_head" && !empty( $empresa->logo_head )) {
+        Helper::gsutil_rm( config('constants.ruta_storage') . $empresa->logo_head );   
+        $empresa->logo_head = null;
+        $empresa->save();
+        return response()->json([ 'status' => true ]);
+      } 
+
+      if( $request->_delete == "logo_central" && !empty( $empresa->logo_central )) {
+        Helper::gsutil_rm( config('constants.ruta_storage') . $empresa->logo_central );   
+        $empresa->logo_central = null;
+        $empresa->save();
+        return response()->json([ 'status' => true ]);
+      } 
+
+      if ( $request->_update == "logo_central" && $request->hasFile("value")) {
 
           $fileName = str_replace(" ","_", "LogoCentral_" . $empresa->seudonimo . "_" .$empresa->id . ".png") ;     
           $destino_cloud = "GRAFICOS/". $fileName; 
-          $request->value->move( public_path('storage'),  $fileName);
-          Helper::gsutil_cp( public_path('storage') ."/" . $fileName, config('constants.ruta_storage') .  $destino_cloud);
+          $request->value->move( public_path('storage'),  $fileName );
+          Helper::gsutil_cp( public_path('storage') ."/" . $fileName, config('constants.ruta_storage') .  $destino_cloud, false );
+
           $empresa->logo_central = $destino_cloud;
           $empresa->save();
-          return response()->json([ 'path' => public_path('storage') ]);
+
+          //$pid = Helper::parallel_command($commands);
+
+          return response()->json([ 'path' => public_path('storage')]);
 
       }
       
@@ -219,8 +237,8 @@ $index++;
         ]);
 
         app( DocumentoController::class )->store( $request );  
-
-      }
+        return response()->json(['status' => true ]); 
+     }
       
       if (isset($request->folder_sellos) && empty( $request->folder_sellos )) {
 
@@ -237,13 +255,14 @@ $index++;
           $request_doc    
         );  
 
+        return response()->json(['status' => true ]); 
       }
       if( isset($empresa->es_agente_retencion ) ) {
         $empresa->es_agente_retencion = $request->boolean('es_agente_retencion');
       }
 
       $empresa->update($request->except('logo_head','logo_central'));
-      $empresa->log( 'editado', null );
+      //$empresa->log( 'editado', null );
       return response()->json([
         'status' => "success",
         'redirect' => '/empresas'

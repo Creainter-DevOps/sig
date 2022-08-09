@@ -212,8 +212,6 @@ class ExpedienteController extends Controller
     public function paso02_store(Cotizacion $cotizacion, Request $request) {
       $documento = $cotizacion->documento();
       $workspace = $documento->json_load();
-
-
       $workspace['paso03'] = array();
       $workspace['addons'] = [
         'firma'  => [],

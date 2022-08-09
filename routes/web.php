@@ -101,6 +101,8 @@ Route::post('actividades/timeline', 'ActividadController@timeline');
 Route::get('actividades/autocomplete', 'ActividadController@autocomplete');
 
 Route::get('actividades/kanban', 'ActividadController@kanban');
+Route::post('actividades/kanban/create', 'ActividadController@kanban_create');
+Route::post('actividades/kanban/:actividad', 'ActividadController@kanban_edit');
 Route::get('actividades/kanban/json', 'ActividadController@kanban_data');
 
 Route::get('actividades/calendario','ActividadController@calendario');

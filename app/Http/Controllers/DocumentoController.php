@@ -203,7 +203,7 @@ class DocumentoController extends Controller {
          exec("/usr/bin/libreoffice --convert-to pdf '" . $destino_tmp . "' --outdir " . $path_pdf);
 
          $meta = Helper::metadata($path_pdf . $filename_tmp);
-         Helper::gsutil_mv($path_pdf . $filename_tmp, config('constants.ruta_storage') . $filename);
+         Helper::gsutil_mv($path_pdf . $filename_tmp, config('constants.ruta_storage') . $filename, false);
 
          $data['es_plantilla']   = false;
          $data['generado_de_id'] = $request->generado_de_id;
@@ -258,7 +258,7 @@ class DocumentoController extends Controller {
         $i = 0;
         foreach($files as $k => $f) {
           $output = 'FIRMAS/' . strtolower($doc->tipo) . '_' . $doc->empresa_id . '_' . $i . '.png';
-          $commands[] = "/snap/bin/gsutil mv '" . $path . $f . "' '" . config('constants.ruta_storage') . $output. "'";
+          $commands[] = "/snap/bin/gsutil -D -h Cache-Control:\"Cache-Control:private, max-age=0, no-transform\" mv '" . $path . $f . "' '" . config('constants.ruta_storage') . $output. "'";
           EmpresaFirma::create([
             'empresa_id' => $doc->empresa_id,
             'tipo'       => $doc->tipo,

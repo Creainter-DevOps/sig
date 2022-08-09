@@ -36,7 +36,7 @@ class StoreFileRequest extends FormRequest
       $destino = trim($path, '/') . '/' . $name;
 
       //Helper::gsutil_mv($temporal_dir . $name, 'gs://creainter-peru/storage/' . $destino);
-      Helper::gsutil_mv($file->getPathName(), 'gs://creainter-peru/storage/' . $destino);
+      Helper::gsutil_mv($file->getPathName(), 'gs://creainter-peru/storage/'. $destino, false);
       return $destino;
     }
 }

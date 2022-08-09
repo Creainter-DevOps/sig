@@ -22,6 +22,11 @@
   max-height: 750px;
   overflow: auto;
 }
+.itemform {
+  padding: 5px 10px;
+  border-radius: 3px;
+  background: #fafafb;
+}
 </style>
 @endsection
 
@@ -236,21 +241,40 @@ $(document).ready(function() {
       formItem.setAttribute("class", "itemform");
       formItem.innerHTML =
         '<div class="form-group">' +
-        '<textarea class="form-control add-new-item" rows="2" autofocus required></textarea>' +
+        '<textarea name="texto" class="form-control add-new-item" rows="2" autofocus required></textarea>' +
         "</div>" +
         '<div class="form-group">' +
-        '<button type="submit" class="btn btn-primary btn-sm mr-50">Submit</button>' +
-        '<button type="button" id="CancelBtn" class="btn btn-sm btn-danger">Cancel</button>' +
+        '<select class="form-control" name="asignado_id">' +
+        @foreach(App\Actividad::usuarios() as $u)
+        '<option value="{{ $u->id }}">{{ $u->usuario }}</option>' +
+        @endforeach
+        '</select>' +
+        "</div>" +
+        '<div class="form-group">' +
+        '<button type="submit" class="btn btn-primary btn-sm mr-50">Registrar</button>' +
+        '<button type="button" id="CancelBtn" class="btn btn-sm btn-danger">Cancelar</button>' +
         "</div>";
       jsKan.addForm(boardId, formItem);
       formItem.addEventListener("submit", function (e) {
         e.preventDefault();
         var text = e.target[0].value;
-        jsKan.addElement(boardId, {
-          id: 'temporal',
-          title: text
-        });
         formItem.parentNode.removeChild(formItem);
+        Fetchx({
+          title: 'Nuevo',
+          url: '/actividades',
+          type: 'POST',
+          dataType: 'JSON',
+          headers : {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+          },
+          data: $(formItem).serialize(),
+          success: function(res) {
+            jsKan.addElement(boardId, {
+              id: 'temporal',
+              title: text
+            });
+          }
+        });
       });
       $(document).on("click", "#CancelBtn", function () {
         $(this).closest(formItem).remove();

@@ -70,7 +70,7 @@ class CorreoController extends Controller {
 
   public function update( Request $request,Correo  $correo  ) {
     $correo->update($request->all());
-    $correo->log('editado');
+    #$correo->log('editado');
     return response()->json([ 
       'status' => true,
       'redirect' => '/correos',

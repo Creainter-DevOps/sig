@@ -102,7 +102,7 @@ class ProyectoController extends Controller {
         unset($data['_update']);
       }
       $proyecto->update($data);
-      $proyecto->log("editado");
+      #$proyecto->log("editado");
       return response()->json(['status'=> "success" , 'redirect' => "/proyectos" ]);
     }
 

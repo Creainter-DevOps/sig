@@ -32,16 +32,17 @@ class ActividadController extends Controller
      */
     public function create(Request $request)
     { 
-      $proyecto_id = $request->input('proyecto_id');
+      $proyecto_id    = $request->input('proyecto_id');
       $oportunidad_id = $request->input('oportunidad_id');
+      $tipo_id        = $request->input('tipo_id');
 
-      $tipo        = $request->input('tipo');
+      $tipo_id        = !empty($tipo_id) ? $tipo_id : 4;
 
       $actividad = new Actividad;
       $actividad->fecha = date('Y-m-d');
       $actividad->realizado = false;
       $actividad->importancia = 1;
-      $actividad->tipo = $tipo;
+      $actividad->tipo_id = $tipo_id;
 
       if(!empty($proyecto_id)) {
         $actividad->proyecto_id = $proyecto_id;
@@ -49,17 +50,15 @@ class ActividadController extends Controller
       if(!empty($oportunidad_id)) {
         $actividad->oportunidad_id = $oportunidad_id;
       }
-      if($tipo == 'LLAMADA') {
+      if($tipo_id == 'LLAMADA') {
         $actividad->direccion = 'SALIDA';
         $actividad->tiempo_estimado = '00:05:00';
-      } elseif($tipo == 'NOTA') {
+
+      } elseif($tipo_id == 'NOTA') {
         $actividad->estado = 3;
         $actividad->hora = date('H:i:s');
       }
-      if(!empty($proyecto_id)) {
-        $actividad->proyecto_id = $proyecto_id;
-      }
-      return view($request->ajax() ? 'actividad.fast' : 'actividad.add', compact('tipo','actividad'));
+      return view($request->ajax() ? 'actividad.fast' : 'actividad.add', compact('tipo_id','actividad'));
     }
 
     /**
@@ -71,6 +70,8 @@ class ActividadController extends Controller
     public function store(Request $request, Actividad $actividad)
     {
       $data = $request->all();
+      $data['tenant_id'] = Auth::user()->tenant_id;
+      $data['tipo_id'] = !empty($data['tipo_id']) ? $data['tipo_id'] : 4;
       if(!empty($data['fecha_desde'])) {
         $data['fecha'] = date('Y-m-d', strtotime($data['fecha_desde']));
         $data['hora']  = date('H:i:s', strtotime($data['fecha_desde']));
@@ -81,8 +82,12 @@ class ActividadController extends Controller
         $actividad->asignado_id = '{ ' . $data['asignado_id'] .  '}';
       }
       $actividad->save();
-      exec("/usr/bin/php /var/www/html/interno.creainter.com.pe/util/seace/lanzar_llamadas.php");
-      return response()->json(['status' => true , 'refresh' => true , 'redirect' => '/actividades' ]);
+//      exec("/usr/bin/php /var/www/html/interno.creainter.com.pe/util/seace/lanzar_llamadas.php");
+      return response()->json([
+        'status' => true,
+        'refresh' => true,
+        'redirect' => '/actividades'
+      ]);
     }
 
     /**
@@ -193,6 +198,10 @@ class ActividadController extends Controller
         ];
       }, $data);
       return response()->json(['status' => true , 'data' => $data]);
+    }
+    public function kanban_create(Request $request) {
+
+      return response()->json(['status' => true , 'data' => $ls]);
     }
     public function calendario() {
       return view('actividad.calendario');

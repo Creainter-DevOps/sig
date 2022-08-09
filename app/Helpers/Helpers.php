@@ -45,22 +45,32 @@ class Helper
     $out = trim($out);
     return $out === '0';
   }
-  public static function gsutil_cp($from, $to) {
+  public static function gsutil_cp($from, $to, $cache = true) {
     $cmd = 'export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"';
-    $cmd .= ";/snap/bin/gsutil cp '" . $from . "' '" . $to . "'";
+    if( $cache ){
+      $cmd .= ";/snap/bin/gsutil cp '" . $from . "' '" . $to . "'";
+    }else{
+      $cmd .= ";/snap/bin/gsutil -D -h Cache-Control:\"Cache-Control:private, max-age=0, no-transform\"  cp '" . $from . "' '" . $to . "'";
+    }
     exec($cmd);
     return true;
   }
 
   public static function gsutil_rm($from) {
     $cmd = 'export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"';
-    $cmd .= ";/snap/bin/gsutil rm '" . $from . "'"; 
+    $cmd .= ";/snap/bin/gsutil -D -h Cache-Control:\"Cache-Control:private, max-age=0, no-transform\"  rm '" . $from . "'"; 
     exec($cmd);
     return true;
   }
-  public static function gsutil_mv($from, $to) {
+  public static function gsutil_mv($from, $to, $cache = true ) {
     $cmd = 'export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"';
-    $cmd .= ";/snap/bin/gsutil mv '" . $from . "' '" . $to . "'";
+
+    if( $cache ){
+      $cmd .= ";/snap/bin/gsutil mv '" . $from . "' '" . $to . "'";
+    }else{
+      $cmd .= ";/snap/bin/gsutil -D -h Cache-Control:\"Cache-Control:private, max-age=0, no-transform\"  mv '" . $from . "' '" . $to . "'";
+    }
+    //$cmd .= ";/snap/bin/gsutil mv '" . $from . "' '" . $to . "'";
     exec($cmd);
     return true;
   }

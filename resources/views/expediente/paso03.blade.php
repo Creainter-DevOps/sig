@@ -4,7 +4,14 @@
   <div class="row">
     <div class="col-12">
       <div class="card">
-        <div style="position: absolute;top: 5px;right: 6px;font-size: 12px;color: #9d9100;">{{ ceil(((disk_total_space('/') - disk_free_space('/')) * 100) / disk_total_space('/')) }}% del disco usado</div>
+        @php
+        $space = App\User::space();
+        @endphp
+        @if($space > 93)
+        <div style="color: #ffffff;background: #f97b7b;font-size: 25px;text-align: center;padding: 15px;">{{ $space }}% del disco usado, avisar a José!</div>
+        @else
+        <div style="position: absolute;top: 5px;left: 6px;font-size: 12px;color: #000000;background: #87ff85;padding: 5px 10px;border-radius: 5px;">{{ $space }}% del disco usado</div>
+        @endif
         <div class="card-content mt-2">
           <div class="card-body">
             <ul class="nav nav-tabs justify-content-center" role="tablist">

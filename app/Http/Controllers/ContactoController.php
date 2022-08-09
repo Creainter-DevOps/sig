@@ -76,7 +76,7 @@ class ContactoController extends Controller {
 
   public function update( Request $request,Contacto  $contacto  ) {
     $contacto->update($request->all());
-    $contacto->log('editado');
+    #$contacto->log('editado');
     return response()->json([ 
       'status' => true,
       'redirect' => '/contactos',

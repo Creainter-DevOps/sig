@@ -485,7 +485,7 @@ width: 100%;grid-gap: 15px;justify-items: start;  " >
                                                             <label>Logo</label>
                                                             <p class="tex-muted description">La imagen sera utilizada en los documentos, expedientes.</p>
                                                             <div class="media">
-                                                              <a href="javascript: void(0);" style="display: {{ !empty($empresa->logo_head) ? 'block' : 'none' }} "  >
+                                                              <a href="javascript: void(0);" style="display: {{ !empty($empresa->logo_head) ? 'block' : 'none' }}">
 
                                                               <img src="{{ config("constants.ruta_cloud") . $empresa->logo_head}}" class="rounded mr-75" alt="profile image" height="64"></a>
                                                               <div class="media-body mt-25">
@@ -494,7 +494,7 @@ width: 100%;grid-gap: 15px;justify-items: start;  " >
                                                                         <span>Cargar Imagen</span>
                                                                         <input id="input-logo"name="logo_head" data-campo="logo_head" accept="image/*" type="file" hidden="" onChange="cargar_imagen(event)" >
                                                                       </label>
-                                                                      <button class="btn btn-sm btn-light-secondary ml-50" onClick="quitar('logo_head')"  >Quitar</button>
+                                                                      <button class="btn btn-sm btn-light-secondary ml-50" onClick="quitar(event)" data-tipo="logo_head" >Quitar</button>
                                                                   </div>
                                                                   <p class="text-muted ml-1 mt-50"><small>Solo imagenes JPG, GIF or PNG. Max tamaño maximo 8 mb </small></p>
                                                               </div>
@@ -518,7 +518,7 @@ width: 100%;grid-gap: 15px;justify-items: start;  " >
                                                                     </label>
 
                                                                     <input type="file" id="input-logo-principal" name="logo_central" data-campo="logo_central" onChange="cargar_imagen(event)" accept="image/*" style="display: none;" >
-                                                                   <button class="btn btn-sm btn-light-secondary ml-50" onClick="quitar('logo_central')" >Quitar</button>-->
+                                                                   <button class="btn btn-sm btn-light-secondary ml-50" onClick="quitar(event)" data-tipo="logo_central"   >Quitar</button>
                                                                   </div>
                                                                   <p class="text-muted ml-1 mt-50"><small>Solo imagenes JPG, GIF or PNG. Max tamaño maximo 8 mb </small></p>
                                                               </div>
@@ -879,6 +879,34 @@ width: 100%;grid-gap: 15px;justify-items: start;  " >
       btn_procesar.style.display = 'block'; 
     })
 
+    function quitar(e){
+      e.preventDefault();  
+      e.stopPropagation(); 
+      //let url = "/empresas/" + {{ $empresa->id }};       
+
+      let url = `/empresas/{{$empresa->id}}?_delete=${e.target.dataset.tipo}`
+      
+      let formdata = new FormData();
+
+      formdata.append("_method", "PUT")
+
+      Fetchx({
+              title: "Guardando",
+              url: url,
+              type: "POST",
+              processData: false,
+              contentType: false,
+              headers : {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+              },
+              data: formdata, 
+              success: function(response){
+
+                e.target.closest(".media").querySelector("a").style.display = 'none'  
+                console.log(console);
+              }
+      })
+    }
     formGraficos.addEventListener("submit",function (e){
       e.preventDefault();
       let formdata = new FormData(formGraficos);
