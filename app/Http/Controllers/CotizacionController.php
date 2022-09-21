@@ -35,7 +35,7 @@ class CotizacionController extends Controller {
     } else {
       $listado = Cotizacion::visible()->orderBy('id', 'desc')->paginate(15)->appends(request()->query());
     }
-    $this->viewBag = $listado;
+    $this->viewBag['listado'] = $listado;
     return view('cotizacion.index', $this->viewBag );
   }
 
@@ -94,6 +94,7 @@ class CotizacionController extends Controller {
       unset($data['value']);
       unset($data['_update']);
     }
+    $data['updated_by'] = Auth::user()->id;
     $cotizacion->update($data);
     return response()->json(['status' => true , 'refresh' => true ]);
   }
@@ -119,6 +120,10 @@ class CotizacionController extends Controller {
   }
   public function exportar(Request $request, Cotizacion $cotizacion) {
     $empresa = $cotizacion->empresa();
+    if(count($cotizacion->items()) == 0) {
+      $cotizacion->igv = $cotizacion->monto * 0.18;
+      $cotizacion->subtotal = $cotizacion->monto - $cotizacion->igv;
+    }
     return Helper::pdf('cotizacion.pdf', compact('cotizacion','empresa'), 'P')->stream($cotizacion->nomenclatura() . '.pdf');
   }
 
@@ -238,9 +243,11 @@ class CotizacionController extends Controller {
     }
     return response()->json( [ 'status' => true ]);
   } 
-  public function registrar(Request $request, Cotizacion $cotizacion) {
+
+  public function registrar( Request $request, Cotizacion $cotizacion) {
     return view('cotizacion.registrar', compact('cotizacion'));
   }
+
   public function registrar_store(Request $request, Cotizacion $cotizacion) {
     $data  = $request->input();
     $items = $request->input('item');
@@ -251,6 +258,7 @@ class CotizacionController extends Controller {
       'message' => 'Se ha registrado correctamente.',
     ]);
   }
+
   public function exportar_repositorio(Request $request, Cotizacion $cotizacion) {
     $empresa = $cotizacion->empresa();
     $pdf = Helper::pdf('cotizacion.pdf', compact('cotizacion','empresa'), 'P');
@@ -272,7 +280,7 @@ class CotizacionController extends Controller {
         'oportunidad_id' => $cotizacion->oportunidad_id,
         'licitacion_id'  => $cotizacion->oportunidad()->licitacion_id,
       ]);
-      Helper::gsutil_mv($temporal, config('constants.ruta_storage') . $documento->archivo);
+      Helper::gsutil_mv($temporal, config('constants.ruta_storage') . $documento->archivo, false);
     } else {
       Documento::nuevo([
         'formato'        => 'PDF',
@@ -287,7 +295,7 @@ class CotizacionController extends Controller {
         'oportunidad_id' => $cotizacion->oportunidad_id,
         'licitacion_id'  => $cotizacion->oportunidad()->licitacion_id,
       ]);
-      Helper::gsutil_mv($temporal, config('constants.ruta_storage') . $destino);
+      Helper::gsutil_mv($temporal, config('constants.ruta_storage') . $destino, false);
     }
     return response()->json([
       'status'  => true,

@@ -135,23 +135,36 @@ class Licitacion extends Model
       return [];
     }
 
-    
-   public  static function listado_nuevas() {
-      /*$rp = DB::select("
-            SELECT O.*
-            FROM osce.oportunidad O
-            left  JOIN osce.licitacion L ON L.id = O.licitacion_id AND L.eliminado IS NULL
-            WHERE O.archivado_el IS NULL AND O.rechazado_el IS NULL AND O.aprobado_el IS NULL
-            ORDER BY L.fecha_participacion_hasta ASC 
-            Limit 500
-            ");*/
+   public static function borrar_tentativas($min, $max) {
+     return DB::select("SELECT osce.fn_tentativa_borrar_limites(:tenant, :min, :max) estado;", [
+      'tenant' => Auth::user()->tenant_id,
+      'min'    => $min,
+      'max'    => $max,
+     ]);
+   }
+   public static function listado_nuevas(&$parametros = null) {
+     $total = collect(DB::select("
+     SELECT COUNT(T.licitacion_id) cantidad
+     FROM osce.tentativa T
+     WHERE T.tenant_id = :tenant", ['tenant' => Auth::user()->tenant_id]))->first();
       $rp = DB::select("
-            SELECT L.*,O.licitacion_id
-            FROM osce.licitacion L
-            LEFT JOIN osce.oportunidad O ON L.id = O.licitacion_id AND L.eliminado IS NULL
-            WHERE L.buenapro_fecha IS NULL AND L.eliminado IS NULL AND O.licitacion_id IS NULL AND L.created_on >= NOW() - INTERVAL '30' DAY AND L.procedimiento_id IS NOT NULL AND L.fecha_participacion_hasta >= NOW()
-            ORDER BY L.id DESC
-            LIMIT 100");
+        SELECT L.*, O.licitacion_id
+FROM (
+	SELECT T.anho, T.licitacion_id
+	FROM osce.tentativa T
+	WHERE T.tenant_id = :tenant
+	ORDER BY T.licitacion_id DESC
+	LIMIT 20
+) T
+JOIN osce.licitacion L ON L.anho = T.anho AND L.id = T.licitacion_id
+LEFT JOIN osce.oportunidad O ON L.id = O.licitacion_id
+ORDER BY L.id DESC", ['tenant' => Auth::user()->tenant_id]);
+      $parametros = [];
+      if(!empty($rp)) {
+        $parametros['total'] = $total->cantidad;
+        $parametros['max']   = ($rp[0])->id;
+        $parametros['min']   = (end($rp))->id;
+      }
       return static::hydrate($rp);
     }
     
@@ -159,8 +172,8 @@ class Licitacion extends Model
       $rp = DB::select("
             SELECT L.*, osce.fn_empresa_rotulo(". Auth::user()->tenant_id . ", coalesce(L.empresa_id,O.empresa_id )) empresa, coalesce(L.monto,O.monto_base ) monto, O.licitacion_id
             FROM osce.licitacion L
-            LEFT JOIN osce.oportunidad O ON L.id = O.licitacion_id AND L.eliminado IS NULL
-            WHERE L.buenapro_fecha IS NULL AND L.eliminado IS NULL AND O.licitacion_id IS NULL AND L.created_on >= NOW() - INTERVAL '30' DAY AND L.procedimiento_id IS NOT NULL AND L.fecha_participacion_hasta >= NOW()
+            LEFT JOIN osce.oportunidad O ON L.id = O.licitacion_id
+            WHERE L.buenapro_fecha IS NULL AND O.licitacion_id IS NULL AND L.created_on >= NOW() - INTERVAL '30' DAY AND L.procedimiento_id IS NOT NULL AND L.fecha_participacion_hasta >= NOW()
             and L.id not in (" .$ids. ")
             ORDER BY L.id DESC
             LIMIT 15");
@@ -186,14 +199,14 @@ class Licitacion extends Model
             'timeout' => true,
             'status' => false,
             'class' => 'badge badge-light-danger',
-            'message' => 'TIMEOUT3',
+            'message' => 'VENCIDO',
           ];
       } else {
           return [
             'timeout' => false,
             'status' => false,
             'class' => 'badge badge-light-warning',
-            'message' => 'PARTICIPACIÓN',
+            'message' => 'DISPONIBLE',
           ];
       }
     }

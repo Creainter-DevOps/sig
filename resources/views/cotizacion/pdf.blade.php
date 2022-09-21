@@ -78,31 +78,34 @@
               {{ strtoupper($cotizacion->oportunidad()->rotulo) }}<br />
             @endif
             @if(!empty($cotizacion->plazo_instalacion) || !empty($cotizacion->plazo_servicio) || !empty($cotizacion->plazo_garantia))
-            @if(!empty($cotizacion->plazo_instalacion))
-            <!-- INSTALACION -->
-            <b>PLAZO DE ENTREGA:</b> {{ $cotizacion->plazo_instalacion }}<br />
-            @endif
-            @if(!empty($cotizacion->plazo_servicio))
-            <!-- SERVICIO -->
-            <!--<b>EJECUCIÓN:</b> {{ $cotizacion->plazo_servicio }}<br />-->
-            <!--<b>DURACIÓN DE SERVICIO:</b> {{ $cotizacion->plazo_servicio }}<br />-->
-            <b>PLAZO DE SERVICIO:</b> {{ $cotizacion->plazo_servicio }}<br/>
-            @endif
-            @if(!empty($cotizacion->plazo_garantia))
-            <b>GARANTÍA:</b> {{ $cotizacion->plazo_garantia }}<br />
-            @endif
-            @if(!empty($cotizacion->observacion))
+              @if(!empty($cotizacion->plazo_instalacion))
+              <!-- INSTALACION -->
+              <b>PLAZO DE ENTREGA:</b> {{ $cotizacion->plazo_instalacion }}<br />
+              @endif
+              @if(!empty($cotizacion->plazo_servicio))
+              <!-- SERVICIO -->
+              <!--<b>EJECUCIÓN:</b> {{ $cotizacion->plazo_servicio }}<br />-->
+              <!--<b>DURACIÓN DE SERVICIO:</b> {{ $cotizacion->plazo_servicio }}<br />-->
+              <b>PLAZO DE SERVICIO:</b> {{ $cotizacion->plazo_servicio }}<br/>
+              @endif
+              @if(!empty($cotizacion->plazo_garantia))
+              <b>GARANTÍA:</b> {{ $cotizacion->plazo_garantia }}<br />
+              @endif
+              @if(!empty($cotizacion->observacion))
                 <b>OBS.:</b>
                 {!! nl2br($cotizacion->observacion) !!}<br />
-            @endif
+              @endif
             @else
               <b>MONTO SUMA ALZADA</b>
+              @if( !empty($cotizacion->descripcion ))
+               <p>{!!  nl2br( $cotizacion->descripcion) !!}</p>     
+              @endif
             @endif
           </td>
           <td>UN</td>
-          <td class="texto-centrado">{{ Helper::money($cotizacion->monto, $cotizacion->moneda_id) }}</td>
+          <td class="texto-centrado">{{ Helper::money($cotizacion->subtotal, $cotizacion->moneda_id) }}</td>
           <td class="texto-centrado">1</td>
-          <td class="texto-centrado">{{ Helper::money($cotizacion->monto, $cotizacion->moneda_id) }}</td>
+          <td class="texto-centrado">{{ Helper::money($cotizacion->subtotal, $cotizacion->moneda_id) }}</td>
         </tr>
       @else
         @foreach($cotizacion->items() as $k => $p)
@@ -119,8 +122,8 @@
         </td>
         <td clasS="texto-centrado">{{ $p->unidad ?? 'UN' }}</td>
         <td class="texto-centrado">{{  Helper::money($p->monto) }}</td>
-        <td class="texto-centrado">{{  $p->cantidad }}</td>
-        <td class="texto-centrado">{{ Helper::money( $p->monto * $p->cantidad) }}</td>
+        <td class="texto-centrado">{{  intval($p->cantidad) }}</td>
+        <td class="texto-centrado">{{ Helper::money( $p->monto * $p->cantidad ) }}</td>
       </tr>
         @endforeach
         @endif

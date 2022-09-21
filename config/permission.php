@@ -84,6 +84,8 @@ return [
         'model_morph_key' => 'model_id',
     ],
 
+    'teams'=> true,
+
     /*
      * When set to true, the required permission/role names are added to the exception
      * message. This could be considered an information leak in some contexts, so

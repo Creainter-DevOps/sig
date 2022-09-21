@@ -108,7 +108,7 @@ class Etiqueta extends Model {
                 left join osce.empresa_etiqueta EM on EM.etiqueta_id = E.id
                 left join osce.empresa P on P.id = EM.empresa_id
                 left join public.usuario U1 on U1.id = E.solicitado_por
-                left join public.usuario U2 on U2.id = E.verificada_por
+                left join public.usuario U2 on U2.id = E.aprobado_por
                 left join public.usuario U3 on U3.id = E.rechazado_por
                 where E.rechazado_el is null 
                 and E.aprobado_el is null

@@ -329,7 +329,7 @@ public static function array_only_keys($n, $m) {
   }
   public static function money($data, $moneda_id = 1) {
     $dd = number_format($data, 2, ".", " ");
-    $dd = str_replace('.00','', $dd);
+    //$dd = str_replace('.00','', $dd);
     if($moneda_id == 1) {
       return 'S/. ' . $dd;
     }
@@ -349,6 +349,13 @@ public static function array_only_keys($n, $m) {
       return $monedas;
     } 
   }  
+  public static function recursive_count_key_value( $schema, $f_key, $f_value ){
+    $elements = 0;
+    array_walk_recursive( $schema, function( $value, $key ) use ( &$elements,$f_value,$f_key ) {
+     if ( strstr($value, $f_value ) && strstr( $key, $f_key )) $elements++;
+    });
+    return $elements;
+  }
   public static function recursive_find_value($structure,$results ){
     $iterator = new RecursiveIteratorIterator(
       new RecursiveArrayIterator($structure),

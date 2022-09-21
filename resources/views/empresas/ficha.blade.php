@@ -1253,11 +1253,12 @@ width: 100%;grid-gap: 15px;justify-items: start;  " >
       let formData = new FormData();
       formData.append('etiqueta_id', element.dataset.tag );
       formData.append('empresa_id', <?= $empresa->id ?> );   
+      formData.append("_method", "DELETE")
 
       Fetchx({
               title: "Guardando",
               url: "/etiquetas/" + element.dataset.tag  ,
-              type: "delete",
+              type: "post",
               processData: false,
               contentType: false,
               headers : {

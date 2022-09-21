@@ -37,11 +37,11 @@ return [
 
       'interno' => [
             'driver' => 'pgsql',
-            'host' => '127.0.0.1',
-            'port' => '4040',
-            'database' => 'postgres',
+            'host' => '10.21.32.3',
+            'port' => '5432',
+            'database' => 'creainter',
             'username' => 'postgres',
-            'password' => '123456',
+            'password' => 'meteLPBDo0gmsc3d',
             'charset' => 'utf8',
             'prefix' => '',
             'schema' => 'public',
@@ -89,7 +89,6 @@ return [
             'schema' => 'public',
             'sslmode' => 'prefer',
         ],
-
         'sqlsrv' => [
             'driver' => 'sqlsrv',
             'url' => env('DATABASE_URL'),

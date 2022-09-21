@@ -17,7 +17,7 @@ use Auth;
 
 class Pago extends Model
 {
-  use Notifiable,HasApiTokens,HasRoles;
+#  use Notifiable,HasApiTokens,HasRoles;
 
     protected $connection = 'interno';
     protected $table = 'osce.pago';

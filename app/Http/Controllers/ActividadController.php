@@ -5,7 +5,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Actividad;
 use Auth;
+use App\Facades\DB;
 use App\Helpers\Helper;
+use App\Empresa;
+use App\Contacto;
+use App\Llamada;
+use App\Caller;
 
 class ActividadController extends Controller
 {
@@ -187,14 +192,15 @@ class ActividadController extends Controller
       $data = Actividad::kanban();
       $data = array_map(function($n) {
         return [
-          'id' => $n->id,
-          'title' => $n->texto,
-          'fecha'    => Helper::fecha($n->fecha),
-          'dueDate' => Helper::fecha($n->fecha_limite),
-          'status' => $n->estado,
+          'id'        => $n->id,
+          'title'     => $n->texto,
+          'fecha'     => Helper::fecha($n->fecha),
+          'dueDate'   => Helper::fecha($n->fecha_limite),
+          'status'    => $n->estado,
           'is_linked' => $n->vinculado,
-          'link' => $n->link,
+          'link'      => $n->link,
           'completed' => ($n->estado == 3),
+          'users'     => $n->asignado_a,
         ];
       }, $data);
       return response()->json(['status' => true , 'data' => $data]);
@@ -207,14 +213,17 @@ class ActividadController extends Controller
       return view('actividad.calendario');
     }
     public function calendario_proyectos(Request $request) {
-      $ls = Actividad::calendario_proyectos();
-      return response()->json(['status' => true , 'data' => $ls]);
+      $desde = $request->input('desde');
+      $hasta = $request->input('hasta');
+      $user  = Auth::user()->id;#$request->input('user_id');
+      $data  = Actividad::calendario_proyectos($user, $desde, $hasta);
+      return response()->json(['status' => true , 'data' => $data]);
     }
     public function calendario_data(Request $request) {
-      $desde = $request->input('from');
-      $hasta = $request->input('to');
-      $user  = $request->input('user_id');
-      $data = Actividad::calendario($user, $desde, $hasta);
+      $desde = $request->input('desde');
+      $hasta = $request->input('hasta');
+      $user  = Auth::user()->id;#$request->input('user_id');
+      $data  = Actividad::calendario($user, $desde, $hasta);
       return response()->json(['status' => true , 'data' => $data]);
     }
     public function listado_ajax(Request $request) {
@@ -227,5 +236,94 @@ class ActividadController extends Controller
         }, $data);
       }
       return response()->json($data);
+    }
+    public function proxy_calls(Request $request) {
+      $numero       = $request->input('numero');
+      $mensaje      = $request->input('mensaje');
+      $contacto_id  = $request->input('contacto_id');
+      $caller_id    = $request->input('caller_id');
+      $desde_id     = $request->input('desde_id');
+      $actividad_id = $request->input('actividad_id');
+
+      if(!empty($actividad_id)) {
+        $actividad = Actividad::find($actividad_id);
+        if(empty($actividad)) {
+          return response()->json([
+            'status' => false,
+          ]);
+        }
+        $actividad->update([
+          'texto' => $mensaje,
+        ]);
+        
+        return response()->json([
+        'status' => true,
+        'data'   => [
+          'action' => 'save',
+          'id' => $actividad_id,
+          ],
+        ]);
+      }
+
+      $caller = Contacto::find($caller_id);
+      $desde  = Contacto::find($desde_id);
+      if(empty($caller) || empty($desde)) {
+        return response()->json([
+          'status' => false,
+        ]);
+      }
+      if(empty($contacto_id)) {
+        $contacto = Contacto::where('celular', $numero)->first();
+        if(empty($contacto)) {
+          $contacto = Contacto::create([
+            'nombres'    => 'Llamado el ' . Helper::fecha('now', true),
+            'celular'    => $numero,
+            'tenant_id'  => Auth::user()->tenant_id,
+            'created_by' => Auth::user()->id,
+          ]);
+        }
+      } else {
+        $contacto  = Contacto::find($contacto_id);
+        if(empty($contacto)) {
+          return response()->json([
+            'status' => false,
+          ]);
+        }
+      }
+      $llamada = Llamada::create([
+        'tenant_id'          => Auth::user()->tenant_id,
+        'created_by'         => Auth::user()->id,
+        'caller_numero'      => $caller->celular,
+        'caller_contacto_id' => $caller->id,
+        'desde_numero'       => $desde->celular,
+        'desde_contacto_id'  => $desde->id,
+        'hasta_numero'       => $contacto->celular,
+        'hasta_contacto_id'  => $contacto->id,
+        'estado'             => 0,
+        'fecha'              => DB::raw('now()'),
+        'direccion'          => 'out',
+        'speech_before'      => $mensaje,
+      ]);
+
+      $actividad = Actividad::create([
+        'tenant_id'   => Auth::user()->tenant_id,
+        'created_by'  => Auth::user()->id,
+        'llamada_id'  => $llamada->id,
+        'tipo_id'     => 2,
+        'fecha'       => DB::raw('now()'),
+        'hora'        => DB::raw('now()'),
+        'estado'      => 1,
+        'asignado_id' => '{' . Auth::user()->id . '}',
+        'texto'       => $mensaje,
+      ]);
+      exec("/usr/bin/php /var/www/html/interno.creainter.com.pe/util/seace/lanzar_llamadas.php");
+
+      return response()->json([
+        'status' => true,
+        'data'   => [
+          'action' => 'call',
+          'id' => $actividad->id,
+        ]
+      ]);
     }
 }

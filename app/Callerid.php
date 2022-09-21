@@ -3,7 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-
+use App\Facades\DB;
 use App\Empresa;
 use App\Actividad;
 class Callerid extends Model
@@ -32,6 +32,25 @@ class Callerid extends Model
             ->orWhereRaw("LOWER(osce.callerid.rotulo) LIKE ?",["%{$term}%"])
           ;
       });
+    }
+    public static function habilitados() {
+      return static::hydrate(DB::select("
+        SELECT C.*
+        FROM osce.callerid C
+        ORDER BY C.rotulo ASC"));
+    }
+    public static function destinatarios() {
+      return static::hydrate(DB::select("(
+	SELECT CONCAT(UE.anexo,'@internal') numero, CONCAT(UE.anexo, ' (@', U.usuario,')') rotulo
+	FROM public.usuario_empresa UE
+	JOIN public.usuario U ON U.id = UE.usuario_id
+	WHERE TRUE
+) UNION (
+	SELECT CONCAT(UE.celular, '@external') numero, CONCAT(UE.celular, ' (@', U.usuario,')') rotulo
+	FROM public.usuario_empresa UE
+	JOIN public.usuario U ON U.id = UE.usuario_id
+	WHERE TRUE
+)"));
     }
     public function log( $evento = null, $texto = '' ){
       Actividad::create([

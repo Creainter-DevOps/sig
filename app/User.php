@@ -54,10 +54,20 @@ class User extends Authenticatable
     public function tenants() {
       return $this->hasMany('App\Empresa', 'tenant_id', 'tenant_id')->get();
     }
-    public static function perfiles($empresa_id = null) {
+    public static function empresas() {
+      return collect(DB::select("
+        SELECT id, razon_social
+        FROM osce.empresa E
+        WHERE E.tenant_id = :tenant
+        ORDER BY 2 ASC
+      ", [
+        'tenant' => Auth::user()->tenant_id
+      ]));
+    }
+    public static function perfiles($empresa_id = null, $id_usuario = null ) {
       return collect(DB::select("SELECT * FROM osce.fn_usuario_perfiles(:tenant, :id, :empresa)", [
         'tenant'  => Auth::user()->tenant_id,
-        'id'      => Auth::user()->id,
+        'id'      => $id_usuario == null ? Auth::user()->id :  $id_usuario ,
         'empresa' => $empresa_id,
       ]));
     }
@@ -105,6 +115,9 @@ FROM (
       return  static::where( function ($query ) use( $term ) {
         $query->WhereRaw('LOWER(usuario) LIKE ?', ["%{$term}%"]);
       })->where('habilitado', true);
+    }
+    static function permitidos() {
+      return static::where('habilitado', true)->where('tenant_id', Auth::user()->tenant_id)->orderBy('usuario','ASC')->get();
     }
     static function habilitados() {
       return static::where('habilitado', true)->orderBy('usuario','ASC')->get();

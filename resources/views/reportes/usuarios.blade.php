@@ -18,7 +18,7 @@
       <div class="col-md-6 col-sm-12">
         <div class="card">
           <div class="card-header d-flex justify-content-between align-items-center">
-            <h4 class="card-title">Licitaciones: Aprobadas - desarprobadas</h4>
+            <h4 class="card-title">Licitaciones: Aprobadas - Rechazadas</h4>
             <i class="bx bx-dots-vertical-rounded font-medium-3 cursor-pointer"></i>
           </div>
           <div class="card-content">
@@ -108,63 +108,54 @@
     <div class="col-12">
       <section class="users-list-wrapper">
         <div class="users-list-filter px-1">
-          <form>
+          <form action="{{ route('reporte.actividad.listado') }}" method="POST" target="_blank">
+            @csrf
             <div class="row border rounded py-2 mb-2">
+              <div class="col-12 col-sm-6 col-lg-2">
+                <label for="users-list-verified">Empresa</label>
+                <fieldset class="form-group">
+                  <select class="form-control" name="empresa_id">
+                  @foreach(App\User::empresas() as $u)
+                      <option value="{{ $u->id }}">{{ $u->razon_social }}</option>
+                  @endforeach
+                  </select>
+                </fieldset>
+              </div>
+              <div class="col-12 col-sm-6 col-lg-2">
+                <label for="users-list-verified">Usuario</label>
+                <fieldset class="form-group">
+                  <select class="form-control" name="usuario_id">
+                  @foreach(App\User::permitidos() as $u)
+                      <option value="{{ $u->id }}">{{ $u->usuario }}</option>
+                  @endforeach
+                  </select>
+                </fieldset>
+              </div>
               <div class="col-12 col-sm-6 col-lg-2">
                 <label for="users-list-verified">Fecha desde</label>
                 <fieldset class="form-group">
-                  <!--<select class="form-control" id="users-list-verified">
-                      <option value="">Any</option>
-                      <option value="Yes">Yes</option>
-                      <option value="No">No</option>
-                  </select>-->
-                  <input class="form-control" type="date" name="fecha_desde" > 
+                  <input class="form-control" type="date" name="fecha_desde" value="{{ date('Y-m-d', strtotime('-1 MONTH'))}}"> 
                 </fieldset>
             </div>
               <div class="col-12 col-sm-6 col-lg-2">
                 <label for="users-list-verified">Fecha Hasta</label>
                 <fieldset class="form-group">
-                  <!--<select class="form-control" id="users-list-verified">
-                      <option value="">Any</option>
-                      <option value="Yes">Yes</option>
-                      <option value="No">No</option>
-                  </select>-->
-                  <input class="form-control" type="date" name="fecha_hasta" > 
+                  <input class="form-control" type="date" name="fecha_hasta" value="{{ date('Y-m-d', strtotime('+1 MONTH')) }}">
                 </fieldset>
             </div>
               <div class="col-12 col-sm-6 col-lg-2">
-                <label for="users-list-verified">Verified</label>
-                <fieldset class="form-group">
-                  <select class="form-control" id="users-list-verified">
-                      <option value="">Any</option>
-                      <option value="Yes">Yes</option>
-                      <option value="No">No</option>
-                  </select>
-                </fieldset>
-              </div>
-              <div class="col-12 col-sm-6 col-lg-2">
-                <label for="users-list-role">Role</label>
+                <label for="users-list-role">Estado</label>
                 <fieldset class="form-group">
                   <select class="form-control" id="users-list-role">
-                    <option value="">Any</option>
-                    <option value="User">User</option>
-                    <option value="Staff">Staff</option>
-                  </select>
-                </fieldset>
-              </div>
-              <div class="col-12 col-sm-6 col-lg-2">
-                <label for="users-list-status">Status</label>
-                <fieldset class="form-group">
-                  <select class="form-control" id="users-list-status">
-                    <option value="">Any</option>
-                    <option value="Active">Active</option>
-                    <option value="Close">Close</option>
-                    <option value="Banned">Banned</option>
+                    <option value="0">Todos</option>
+                    <option value="1">Pendientes</option>
+                    <option value="2">En proceso</option>
+                    <option value="3">Concluidos</option>
                   </select>
                 </fieldset>
               </div>
               <div class="col-12 col-sm-6 col-lg-2 d-flex align-items-center">
-                <button type="reset" class="btn btn-primary btn-block glow users-list-clear mb-0">Clear</button>
+                <button type="submit" class="btn btn-primary btn-block glow users-list-clear mb-0">Exportar</button>
               </div>
             </div>
           </form>

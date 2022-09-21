@@ -40,8 +40,8 @@
         <tr>
           <td>{{ $usuario->id }}</td>
           <td>{{ $usuario->usuario }}</td>
-          <td></td>
-          <td></td>
+          <td>{{ $usuario->usuario }}</td>
+          <td>{{ $usuario->sip_user}} </td>
           <td></td>
           <td class="text-center py-1">
               <div class="dropdown">

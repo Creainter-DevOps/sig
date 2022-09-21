@@ -4,6 +4,7 @@
 {{-- page styles --}}
 @section('content')
 @section('page-styles')
+@parent
 <link rel="stylesheet" type="text/css" href="{{asset('css/Bucket.css')}}">
 @endsection
 <!-- users view start -->
@@ -215,7 +216,13 @@
       </div>
     </div>
     <div class="col-12">
-      @include('actividad.create', ['into' => ['proyecto_id' => $proyecto->id]])
+      @include('actividad.create', [
+                    'into' => [
+                        'proyecto_id' => $proyecto->id,
+                        'oportunidad_id' => $proyecto->oportunidad()->id,
+                        'licitacion_id' => $proyecto->oportunidad()->licitacion_id,
+                    ],
+                ])
     </div>
     </div>
     </div>

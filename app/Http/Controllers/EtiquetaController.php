@@ -112,14 +112,17 @@ class EtiquetaController extends Controller
     }
 
     public function rechazar( Request $request, Etiqueta $etiqueta ){
+
       $etiqueta->rechazar();
 
-      if(!empty( $request->input("empresa_id")) && !empty( $request->input("tipo")) ){
+      if( !empty( $request->input("empresa_id")) && !empty( $request->input("tipo")) ){
 
         $emp = EmpresaEtiqueta::where('etiqueta_id', $etiqueta->id )->where('empresa_id',$request->input('empresa_id') )->first();
-        if(empty( $emp )){
+
+        if ( empty( $emp )){
           EmpresaEtiqueta::create([ 'tenant_id' => Auth::user()->tenant_id, 'empresa_id' => $request->input('empresa_id'), 'etiqueta_id' => $etiqueta->id , 'tipo' => $request->input('tipo') ]);
         }
+
       }
       $etiqueta->save();
       return response()->json(['status' => true, 'refresh' => true ]);
@@ -130,11 +133,9 @@ class EtiquetaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request, $id)
+    public function destroy( $id, Request $request)
     {
        $etiqueta = EmpresaEtiqueta::where('empresa_id',$request->input('empresa_id') )->where( 'etiqueta_id', $request->input('etiqueta_id') )->delete();  
-      //$etiqueta->delete(); 
-       return response()->json([ 'success'=> true  ]);
-        //
+       return response()->json([ 'success'=> true , 'request' => $request->all() ]);
     }
 }

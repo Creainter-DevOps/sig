@@ -29,27 +29,11 @@
       </div>
     </div>
     <div class="col-12 col-sm-5 px-0 d-flex justify-content-end align-items-center px-1 mb-2">
-@if(empty($oportunidad))
-<!--<div>Seguir</div>-->
-<a class="btn btn-success"href="/licitaciones/{{ $licitacion->id }}/aprobar">Aprobar</a>  
-@else
-@if(!empty($oportunidad->rechazado_el))
-  <div class="text-center">Rechazado el {{ Helper::fecha($oportunidad->rechazado_el, true) }}</div>
-@elseif(!empty($oportunidad->archivado_el))
-  <div class="text-center">Archivado el {{ Helper::fecha($oportunidad->archivado_el, true) }}</div>
-  <a class="btn btn-primary" href="/licitaciones/{{$oportunidad->licitacion_id}}/documento" ><i class="bx bxs-file-pdf"></i></a>
-@elseif(empty($oportunidad->aprobado_el))
-  <a href="/licitaciones/{{ $licitacion->id }}/aprobar" class="btn btn-sm btn-success mr-25">Aprobar</a>
-  <a data-confirm-input="¿Por qué desea Rechazarlo?" href="/licitaciones/{{ $licitacion->id }}/rechazar" class="btn btn-sm btn-danger mr-25">Rechazar</a>
-@elseif(empty($oportunidad->revisado_el))
-  <a href="/licitaciones/{{ $licitacion->id }}/revisar" class="btn btn-sm btn-success mr-25">Revisar</a>
-  <a data-confirm-input="¿Por qué desea Rechazarlo?" href="/licitaciones/{{ $licitacion->id }}/rechazar" class="btn btn-sm btn-danger mr-25">Rechazar</a>
-@elseif($oportunidad->estado == 'PENDIENTE')
-  <a data-confirm-input="¿Por qué desea Rechazarlo?" href="/licitaciones/{{ $licitacion->id }}/rechazar" class="btn btn-sm btn-danger mr-25">Rechazar</a>
-@else
-  <a data-confirm-input="¿Por qué desea Archivarlo?" href="/licitaciones/{{ $licitacion->id }}/archivar" class="btn btn-sm btn-danger mr-25">Archivar</a>
-@endif
-@endif
+                    <a href="/licitaciones/{{ $licitacion->id }}/aprobar"
+                        class="btn btn-sm btn-success mr-25" data-button-dinamic>Aprobar</a>
+                    <a data-confirm-input="¿Por qué desea Rechazarlo?"
+                        href="/licitaciones/{{ $licitacion->id }}/rechazar"
+                        class="btn btn-sm btn-danger mr-25" data-button-dinamic>Rechazar</a>
     </div>
   </div>
   <div class="row">

@@ -14,11 +14,11 @@
               <tbody id="table-body" >
                 @foreach ( $listado as $cotizacion )
                 <tr>
-                  <td><a href="{{ route('cotizaciones.show',['cotizacion' =>  $cotizacion->id ])}}" >{{ $cotizacion->codigo }}</td>
+                  <td><a href="{{ route('cotizaciones.show',['cotizacion' =>  $cotizacion->id ])}}" >{{ $cotizacion->id }}</td>
                   <td class="text-success" align="left" >{{ $cotizacion->monto_total }}</td>
                   <td class="">{{ Helper::fecha( $cotizacion->fecha ) }}</td>
                   <td class="">{{ Helper::fecha( $cotizacion->validez ) }}</td>
-                <!--  <td>
+                  <td>
                     <div class="dropdown">
                       <span class="bx bx-dots-vertical-rounded font-medium-3 dropdown-toggle nav-hide-arrow cursor-pointer"
                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="menu"></span>
@@ -29,7 +29,7 @@
                          <i class="bx bx-trash mr-1"></i> Eliminar</a>
                       </div>
                     </div>
-                  </td>-->
+                  </td>
               </tr> 
               @endforeach 
               </tbody>

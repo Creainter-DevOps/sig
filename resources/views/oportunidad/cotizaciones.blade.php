@@ -1,8 +1,8 @@
-<div style="margin-top: -25px;text-align: right;">
-  <button type="button" class="btn btn-sm m-0" data-popup="/cotizaciones/crear?oportunidad_id={{ $oportunidad->id }}">
-    <i class="bx bx-plus"></i>Nueva Cotización
-  </button>
-</div>
+          <div style="margin-top: -25px;text-align: right;">
+            <button type="button" class="btn btn-sm m-0" data-popup="/cotizaciones/crear?oportunidad_id={{ $oportunidad->id }}">
+              <i class="bx bx-plus"></i>Nueva Cotización
+            </button>
+          </div>
           <div class="table-responsive">
           <table class="table table-sm mb-0 table-bordered table-vcenter "  style="width:100%">
             <thead>
@@ -39,8 +39,7 @@
          @else
          <a href="{{ route('cotizaciones.proyecto', ['cotizacion' => $cotizacion->id] ) }} " title="Convertir a Proyecto"><i class="bx bx-folder"></i></a>
          @endif
-            <a href="{{ route('cotizacion.enviar',[ 'cotizacion'=> $cotizacion->id ])}}" title="Enviar propuesta" > <i class="bx bxs-up-arrow-square" ></i></a> 
-         <a class="verDetalle" onclick="verDetalle(this)" data-target="#modalCotizacionDetalle"  data-id= "{{ $cotizacion->id }}"  href="javascript:void(0)" data-size="modal-lg"
+         <a class="verDetalle" onclick="verDetalle(this)" data-target="#modalCotizacionDetalle" data-id= "{{ $cotizacion->id }}"  href="javascript:void(0)" data-size="modal-lg"
 data-toggle="modal" >
 <i class="bx bxs-detail" title="detalle"></i></a> 
          <a href="{{ route( 'cotizacion.exportar', [ 'cotizacion' => $cotizacion->id ] ) }}" target="_blank" title="Exportar"><i class="bx bx-printer"></i></a>

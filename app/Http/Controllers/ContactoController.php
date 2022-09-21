@@ -95,6 +95,14 @@ class ContactoController extends Controller {
     $data = Contacto::search($term)->selectRaw(" contacto.id, concat_ws(' ',contacto.nombres, contacto.apellidos) as value")->get();
     return response()->json($data);
   }
+  public function call_autocomplete(Request $request) {
+    $term = $request->input('value');
+    $data = Contacto::callAutocomplete($term);
+    return response()->json([
+      'status' => true,
+      'data'   => $data
+    ]);
+  }
   public function observacion(Request $request, Contacto $contacto) {
     $contacto->log('texto',$request->input('texto'));
     return back();

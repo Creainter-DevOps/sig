@@ -172,6 +172,7 @@
               <div class="card-body">
                 <div class="text-center">
                   Antes de continuar, le recomendamos vincular la oportunidad a una empresa. Este proceso no volverá a repetirse para el mismo correo remitente.<br /><br />
+                  <b>OJO: No ingresar una empresa nuestra, debe ingresar la empresa que solicita la cotización!</b><br /><br />
                 </div>
                 <div style="max-width:400px;margin:0 auto;text-align:center;">
                   <input type="text" class="form-control autocomplete"
@@ -236,6 +237,23 @@
                         </div>
                     </div>
                 </div>
+            @else
+              <div class="col-12">
+                  <div style="text-align: center;background: #ffb16e;margin-bottom: 5px;color: #ffff;">
+                    Cotizacion 
+                  </div>
+                  <div class="row">
+                      <div class="col-12">
+                          <div class="card">
+                              <div class="card-content">
+                                  <div class="card-body">
+                                      @include('oportunidad.cotizaciones',  ['oportunidad' => $oportunidad ])
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>      
             @endif
             <div class="col-12">
                 <div class="row">
@@ -413,7 +431,7 @@
                                 {{ $e->descripcion }}
                                 @if (empty($oportunidad->revisado_el) && false)
                                     <div>Debe marcar como <b>REVISADO</b></div>
-                                @elseif(empty($e->cotizacion) && strtotime($oportunidad->fecha_participacion_hasta) > time())
+                                @elseif(empty($e->cotizacion) && (strtotime($oportunidad->fecha_participacion_hasta) > time() || empty($oportunidad->licitacion_id)))
                                     <div class="text-center">
                                         <a class="btn btn-sm btn-success"
                                             href="/oportunidades/{{ $oportunidad->id }}/interes/{{ $e->id }}" data-confirm data-button-dinamic>Interés</a>
@@ -501,28 +519,7 @@
                 </div>
                 <div class="card-content">
                     <div class="card-body">
-                        <table class="table mb-0 table-sm" style="font-size:11px;">
-                            <thead>
-                                <tr>
-                                    <td>Servicio</th>
-                                    <td>Monto</td>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($oportunidad->similares() as $s)
-                                    <tr>
-                                        <td>
-                                            <div style="font-weight: bold;font-size: 9px;">
-                                                {{ $s->entidad }} - {{ $s->anho }}</div>
-                                            <div style="">{{ strtoupper($s->rotulo) }}</div>
-                                        </td>
-                                            <td colspan="1" style="width:80px;font-size:11px;text-align:right;">
-                                                123</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-
+                      <div data-block-dinamic="/oportunidades/{{ $oportunidad->id }}/part/oportunidades_similares"></div>
                     </div>
                 </div>
             </div>
@@ -537,45 +534,7 @@
                 </div>
                 <div class="card-content">
                     <div class="card-body">
-                        <table class="table mb-0 table-sm" style="font-size:11px;">
-                            <thead>
-                                <tr>
-                                    <td>Servicio</th>
-                                    <td>Min</th>
-                                    <td>Prom.</td>
-                                    <th>Max.</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($oportunidad->licitaciones_similares() as $s)
-                                    <tr>
-                                        <td>
-                                            <div style="font-weight: bold;font-size: 9px;">{{ $s->licitaciones }} x
-                                                {{ $s->entidad }} - {{ $s->anho }}</div>
-                                            <div style="">{{ $s->rotulo }}</div>
-                                            <div>
-                                                @foreach (explode(',', $s->ids) as $l)
-                                                    <a href="/licitaciones/{{ $l }}/detalles"
-                                                        style="margin-right:5px;">{{ $l }}</a>
-                                                @endforeach
-                                            </div>
-                                        </td>
-                                        @if ($s->minimo == $s->maximo)
-                                            <td colspan="3" style="width:80px;font-size:11px;text-align:right;">
-                                                {{ Helper::money($s->minimo) }}</td>
-                                        @else
-                                            <td style="width:80px;font-size:11px;text-align:right;">
-                                                {{ Helper::money($s->minimo) }}</td>
-                                            <td style="width:80px;font-size:11px;text-align:right;">
-                                                {{ Helper::money($s->promedio) }}</td>
-                                            <td style="width:80px;font-size:11px;text-align:right;">
-                                                {{ Helper::money($s->maximo) }}</td>
-                                        @endif
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-
+                      <div data-block-dinamic="/oportunidades/{{ $oportunidad->id }}/part/licitaciones_similares"></div>
                     </div>
                 </div>
             </div>

@@ -294,4 +294,22 @@
   background: linear-gradient(0deg, rgb(171 171 171) 0%, transparent 100%);
   cursor: pointer;
 }
-
+[data-block-dinamic] {
+  position: relative;  
+}
+.block_dinamic_time {
+    position: absolute;
+    font-size: 10px;
+    right: 5px;
+    bottom: 2px;
+}
+.block_dinamic_button {
+  background: #dfdfdf;
+    min-height: 30px;
+    border-radius: 6px;
+    text-align: center;
+    padding: 25px 10px;
+    color: #bfbfbf;
+    font-weight: bold;
+    cursor: pointer;
+}

@@ -106,7 +106,7 @@ class OrdenController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Orden $orden)
+    public function destroy(Request $request, Orden $orden)
     {
       $orden->delete();
       return response()->json(['status' => true , 'refresh' => true ]);

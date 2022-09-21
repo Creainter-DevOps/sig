@@ -10,7 +10,7 @@
   border-radius: 0.267rem;
   padding: 1rem 0rem;
   margin: 0 1.8rem 1rem 0 !important;
-  width: 18.67rem !important;
+  width: 20rem !important;
   background-color: #e7edf3;
 }
 
@@ -52,7 +52,8 @@
 .kanban-container .kanban-board .kanban-board-header .kanban-title-button {
   /* kanban title button */
   position: absolute;
-  bottom: 0;
+  top: 0;
+  right: 20px;
   padding: 0.467rem 0rem;
   display: block;
   color: #475F7B;

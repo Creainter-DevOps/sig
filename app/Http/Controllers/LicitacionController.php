@@ -25,6 +25,9 @@ class LicitacionController extends Controller {
   public function __construct() {
     $this->middleware('auth');
   }
+  public function part_avance_expedientes(Request $request) {
+    return view('licitacion.part_avance_expedientes');
+  }
   public function index(Request $request ) {
     if (!empty( $request->input("search") )){
       $query = strtolower($request->input("search")); 
@@ -34,59 +37,31 @@ class LicitacionController extends Controller {
     $participaciones_por_vencer = Oportunidad::listado_participanes_por_vencer();
     $propuestas_por_vencer = Oportunidad::listado_propuestas_por_vencer();
     $propuestas_en_pro = Oportunidad::listado_propuestas_buenas_pro();
-    $actividades = Oportunidad::actividades(); 
 
     $chartjs['resumen'] = Oportunidad::estadistica_enviado_diario();
-
-    $chartjs['barras'] = Oportunidad::estadistica_barra_cantidades();
-    $chartjs['barras'] = Chartjs::line($chartjs['barras'], [
-      'APROBADAS' => array(
-        'rotulo'     => 'APROBADAS',
-        'color'      => '#ffc800',
-      ),
-      'PARTICIPACIÓN' => array(
-        'rotulo'     => 'PARTICIPACIÓN',
-        'color'      => '#5A8DEE',
-      ),
-      'PROPUESTA' => array(
-        'rotulo'     => 'PROPUESTAS',
-        'color'      => '#56DF9B',
-      ),
-      'TIMEOUT/PARTICIPACIÓN' => array(
-        'rotulo'     => 'TIMEOUT/PARTICIPACIÓN',
-        'color'      => '#DF8F28',
-      ),
-      'TIMEOUT/PROPUESTA' => array(
-        'rotulo'     => 'TIMEOUT/PROPUESTA',
-        'color'      => '#DF2001',
-      ),
-      'RECHAZADAS' => array(
-        'rotulo'     => 'RECHAZADAS',
-        'color'      => '#7824ff',
-      ),
-    ]);
-
-    $chartjs['barras2'] = Oportunidad::estadistica_cantidad_mensual();
-    $chartjs['barras2'] = Chartjs::line($chartjs['barras2'], [
-      'PARTICIPACION' => array(
-        'rotulo'     => 'PARTICIPACION',
-        'color'      => '#ffc800',
-      ),
-      'PROPUESTA' => array(
-        'rotulo'     => 'PROPUESTA',
-        'color'      => '#5A8DEE',
-      ),
-      'BUENA PRO' => array(
-        'rotulo'     => 'BUENA PRO',
-        'color'      => '#3ad385',
-      ),
-    ]);
+    
     return view('licitacion.dashboard', compact('participaciones_por_vencer','propuestas_por_vencer','propuestas_en_pro','chartjs','actividades'));
   }
 
   public function listNuevas(){
-    $list = Licitacion::listado_nuevas();
-    return view('licitacion.nuevas', compact('list'));
+    $list = Licitacion::listado_nuevas($parametros);
+    return view('licitacion.nuevas', compact('list','parametros'));
+  }
+  public function listNuevasMas(Request $request) {
+    $params = $request->input('value');
+    $params = explode('-', $params);
+    $max    = $params[0];
+    $min    = $params[1];
+    $rp = Licitacion::borrar_tentativas($min, $max);
+     return response()->json([
+        'status'   => true,
+        'disabled' => true,
+        'label'    => 'Extrayendo...',
+        'message'  => 'Borrando los anteriores '  .$min . '-' . $max,
+        'refresh'  => true,
+        'class'    => 'success',
+        'data'     => $rp
+      ]);
   }
   public function listAprobadas(){
     $list = Oportunidad::listado_aprobadas();

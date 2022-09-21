@@ -81,7 +81,14 @@ class EmpresaController extends Controller {
     public function show(Request $request, Empresa $empresa)
     {
       $cliente = $empresa->cliente();
-      return view('empresas.show', compact('cliente','empresa'));
+      if($empresa->privada) {
+        $rivales = $empresa->rivales();
+        $ganadas = $empresa->licitacionesGanadas();
+        return view('empresas.show_privada', compact('cliente','empresa','rivales','ganadas'));
+      } else {
+        $licitaciones_activas = $empresa->licitacionesActivas();
+        return view('empresas.show_estatal', compact('cliente','empresa','licitaciones_activas'));
+      }
     }
 
     /**
@@ -99,6 +106,7 @@ class EmpresaController extends Controller {
             $departamentos = Ubigeo::departamentos($empresa->ubigeo_id);
             $provincias    = Ubigeo::provincias($empresa->ubigeo_id);
             $distritos     = Ubigeo::distritos($empresa->ubigeo_id);
+        '<textarea name="texto" class="form-control add-new-item" rows="2" autofocus required></textarea>' +
         } else {
             $distrito      = null;
             $departamentos = Ubigeo::departamentos();
@@ -119,29 +127,44 @@ class EmpresaController extends Controller {
 
     public function firmas_eliminar(Request $request, Empresa $empresa ){
         
-        $firmas = EmpresaFirma::porEmpresa($empresa->id, 'FIRMA');
-        //dd($firmas);
+        $firmas = EmpresaFirma::porEmpresa($empresa->id, 'FIRMA',15);
+        $commands[] = 'export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"';
+
         foreach( $firmas as $firma ){ 
-          Helper::gsutil_rm( config('constants.ruta_storage') . $firma['archivo'] );
+          $path_file =  config('constants.ruta_storage') . $firma['archivo'] ; 
+          $commands[] = "/snap/bin/gsutil -D -h Cache-Control:\"Cache-Control:private, max-age=0, no-transform\" rm '" . $path_file . "'";
           EmpresaFirma::where('id',$firma['id'] )->delete();
-          Documento::where('id', $firma['documento_id'] )->delete();  
         }   
 
-        return response()->json(['status' => true ]);
-    }
+        $doc = Documento::where('id', $firma['documento_id']);
+        $path_file = config('constants.ruta_storage') . $doc->archivo;
+        $commands[] = "/snap/bin/gsutil -D -h Cache-Control:\"Cache-Control:private, max-age=0, no-transform\" rm '" . $path_file . "'";
+        //Helper::gsutil_rm( config('constants.ruta_storage') . $doc->archivo);
+        $doc->delete();
 
+        return response()->json(['status' => true, 'firmas' => $firmas ]);
+    }
 
     public function sellos_eliminar(Request $request, Empresa $empresa ){
         
-        $sellos = EmpresaFirma::porEmpresa($empresa->id, 'VISADO', 100);
-        //dd($firmas);
+        $sellos = EmpresaFirma::porEmpresa($empresa->id, 'VISADO', 15 );
+
+        $commands[] = 'export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"';
         foreach( $sellos as $sello ){ 
-          //Helper::gsutil_rm( config('constants.ruta_storage') . $firma['archivo'] );
+          //Helper::gsutil_rm( config('constants.ruta_storage') . $sello['archivo'] );
+          $path_file =  config('constants.ruta_storage') . $sello['archivo'] ; 
+          $commands[] = "/snap/bin/gsutil -D -h Cache-Control:\"Cache-Control:private, max-age=0, no-transform\" rm '" . $path_file . "'";
           EmpresaFirma::where('id',$sello['id'] )->delete();
-          Documento::where('id', $sello['documento_id'] )->delete();  
         }   
 
-        return response()->json(['status' => true ]);
+        $doc = Documento::where('id', $sello['documento_id']);
+        //Helper::gsutil_rm( config('constants.ruta_storage') . $doc->archivo);
+        $path_file = config('constants.ruta_storage') . $doc->archivo;
+        $commands[] = "/snap/bin/gsutil -D -h Cache-Control:\"Cache-Control:private, max-age=0, no-transform\" rm '" . $path_file . "'";
+        $doc->delete();  
+
+        $pid = Helper::parallel_command($commands);
+        return response()->json(['status' => true, 'sellos'=> $sellos ]);
     }
 
     public function firmas_sellos_procesar( StoreFileRequest $request, Empresa $empresa ){
@@ -158,15 +181,9 @@ class EmpresaController extends Controller {
         //$request->gsutil( )
         $files = [];
         if($handler = opendir( "/tmp/".$folderName )){
-          $index = 1;
           while (false !== ($file = readdir($handler))) {
             if (strpos($file ,'jpg')  || strpos($file,'png')){
-              
-              //$destino_cloud = "FIRMAS/Firmas_" .$empresa->id . "_". $index. ".png" ; 
               $files[] =$folderName ."/". $file ;
-
-            //Helper::gsutil_cp( "/tmp/".$folderName ."/" . $file, config('constants.ruta_storage') . $destino_cloud);
-$index++;
             }
           }
           closedir($handler);
@@ -226,7 +243,7 @@ $index++;
 
       }
       
-      if ( isset($request->folder_firmas) &&  !empty($request->folder_firmas)  ) {
+      if ( isset($request->folder_firmas) &&  !empty($request->folder_firmas) ) {
         
         $request->merge( [
           'nombre' => "Firma " . $empresa->seudonimo,
@@ -240,7 +257,7 @@ $index++;
         return response()->json(['status' => true ]); 
      }
       
-      if (isset($request->folder_sellos) && empty( $request->folder_sellos )) {
+      if (isset($request->folder_sellos) && !empty( $request->folder_sellos ) ) {
 
         $request_doc = $request;
         $request->merge([
@@ -276,7 +293,7 @@ $index++;
      * @param  \DummyFullModelClass  $DummyModelVariable
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Empresa $empresa )
+    public function destroy( Empresa $empresa )
     {
       /* Proceso para eliminar */
       $empresa->eliminado = true;
@@ -297,8 +314,8 @@ $index++;
       $this->viewBag['breadcrumbs'][] = [ 'name' =>  $empresa->razon_social ];
       $this->viewBag['empresa']   = $empresa;
       $this->viewBag['etiquetas'] = $etiquetas;
-      $this->viewBag['sellos']    = Helper::unique_multidim_array( EmpresaFirma::porEmpresa( $empresa->id, "VISADO"),'archivo');
-      $this->viewBag['firmas']    = Helper::unique_multidim_array( EmpresaFirma::porEmpresa( $empresa->id, "FIRMA"), 'archivo')  ;
+      $this->viewBag['sellos']    = EmpresaFirma::porEmpresa( $empresa->id, "VISADO", 15 );
+      $this->viewBag['firmas']    = EmpresaFirma::porEmpresa( $empresa->id, "FIRMA", 15 );
       //dd($this->viewBag);
       // dd($etiquetas);
       return view('empresas.ficha',$this->viewBag );  

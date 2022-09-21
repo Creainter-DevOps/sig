@@ -52,10 +52,11 @@
                 <div data-time-left="{{ strtotime($documento->procesado_desde) + ((int) ($documento->folio * 9.78)) - time() }}"></div>
               </div>
               <div class="blockLog"></div>
+              <div style="text-align:center;padding:10px;"><button class="btn btn-primary" onclick="cancelarProceso(event)"  data-id="{{ $cotizacion->id }}"  >Cancelar proceso</button></div>
             </div>
             <div class="blockEndProcess">
               <div style="background: #efefef;border: 1px solid #d5d5d5;border-radius: 5px;padding: 5px;">
-                <iframe  class="doc" src='{{ $workspace['documento_final'] }}' frameborder='0' style="height:500px;">
+                <iframe  class="doc" src='{{ $workspace['documento_final'] ?? '' }}' frameborder='0' style="height:500px;">
                 This is an embedded <a target='_blank' href='http://office.com'>Microsoft Office</a> document, powered by <a target='_blank' href='http://office.com/webapps'>Office Online</a>.</iframe>
               </div>
               <div class="text-center" style="padding:10px;">
@@ -138,6 +139,17 @@ function descargar_pagina(box) {
     document.body.appendChild(a);
     a.click();
 }
+    function cancelarProceso(e){
+        e.preventDefault();
+           if(confirm("¿ Esta segur@ de cancelar el procesado ?")){
+                let id = e.target.dataset.id;
+                let url = `/expediente/${id}/cancelar_proceso`;
+                let a = document.createElement("a");
+                a.href = url;
+                a.click(); 
+           } 
+             
+    }
 function parallelStatus() {
   let url = '/documentos/{{ $documento->id }}/parallelStatus';
   fetch(url, {

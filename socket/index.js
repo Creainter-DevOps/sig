@@ -92,6 +92,12 @@ function fell_get_list(tenant_id, user_id, with_client) {
   return rp;
 }
 
+app.use(express.json())
+app.post('/api/broadcast', (req, res) => {
+  console.log('DATA', req.body);
+  io.sockets.emit('caller', req.body);
+  res.send('Ok');
+});
 io.on('connection', function(client) {
   var device = {
     id: client.id,

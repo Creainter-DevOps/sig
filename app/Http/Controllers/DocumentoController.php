@@ -109,6 +109,7 @@ class DocumentoController extends Controller {
     $data['directorio']   = trim($path, '/');
     $data['tipo']         = 'EXPEDIENTE';
     $data['oportunidad_id'] = $oid;
+    $data['elaborado_por']   = Auth::user()->id;
     $data['elaborado_desde'] = DB::raw('now()');
     $data['es_mesa']         = true;
 
@@ -123,6 +124,7 @@ class DocumentoController extends Controller {
 
       $licitacion = $documento->licitacion();
       $validaciones = [];   
+
       /*$logo_header = config('constants.ruta_storage') . $empresa->logo_header;
       $logo_central = config('constants.ruta_storage') . $empresa->logo_central;
 
@@ -145,6 +147,7 @@ class DocumentoController extends Controller {
       return view('documento.inicio', compact('documento', 'validaciones'));
 
   }
+
   public function expediente_inicio_store(Request $request, Documento $documento ){
       if(empty($documento->archivo)) {
         $documento->archivo = 'tenant-' . Auth::user()->tenant_id . '/' . gs_file('pdf');
@@ -251,7 +254,32 @@ class DocumentoController extends Controller {
         }
 
         $path = '/tmp/' . $carpeta . '/';
-        $files = array_diff(scandir($path), array('.', '..'));
+        
+        $i = 0;
+        if($handler = opendir( '/tmp/' . $carpeta  )){
+
+          $commands[] = 'export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"';
+          while ( false !== ( $file = readdir($handler) ) ) {
+            if ( strpos($file ,'jpg') || strpos($file,'png') ){
+              
+              $output = 'FIRMAS/' . strtolower($doc->tipo) . '_' . $doc->empresa_id . '_' . $i . '.png';
+
+              $commands[] = "/snap/bin/gsutil -D -h Cache-Control:\"Cache-Control:private, max-age=0, no-transform\" mv '" . $path . $file . "' '" . config('constants.ruta_storage') . $output. "'";
+
+              EmpresaFirma::create([
+                'empresa_id' => $doc->empresa_id,
+                'tipo'       => $doc->tipo,
+                'archivo'    => $output,
+                'documento_id' => $doc->id,
+              ]);
+              $i++;
+            }
+          }
+          closedir($handler);
+          $pid = Helper::parallel_command($commands);
+        }  
+
+        /*$files = array_diff(scandir($path), array('.', '..'));
 
         $commands[] = 'export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"';
         
@@ -267,7 +295,7 @@ class DocumentoController extends Controller {
           ]);
           $i++;
         }
-        $pid = Helper::parallel_command($commands);
+        $pid = Helper::parallel_command($commands);*/
       }
 
       if($request->ajax()){
@@ -539,7 +567,7 @@ class DocumentoController extends Controller {
         'id'     => $fid,
       ]);
     }
-    public function eliminarFirmas( Request $request, Documento $documento){
+    public function eliminarFirmas( Request $request, Documento $documento ){
       $workspace = $documento->json_load();
 
       $cid  = $request->get('cid');
@@ -737,7 +765,7 @@ class DocumentoController extends Controller {
       $name   = 'temp_thumb01_' . md5($documento->id . '-' . $cid . '-' . $page . '-' . $card['timestamp']) . '.jpg';
 
       if(!file_exists($input)) {
-        sleep(15);
+        //sleep(15);
       }
       if(!file_exists($input)) {
         echo "404";

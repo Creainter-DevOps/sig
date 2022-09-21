@@ -17,7 +17,7 @@ use Auth;
 
 class Orden extends Model
 {
-  use Notifiable,HasApiTokens,HasRoles;
+#  use Notifiable,HasApiTokens,HasRoles;
 
     protected $connection = 'interno';
     protected $table = 'osce.orden';

@@ -7,6 +7,8 @@ use App\Cotizacion;
 use App\Actividad;;
 use Auth;
 use App\Cliente;
+use App\Licitacion;
+use App\Facades\DB;
 
 class Empresa extends Model
 {
@@ -76,7 +78,46 @@ class Empresa extends Model
     public function getCategoria() {
         return static::TipoCategorias()[$this->categoria_id];
     }
+    public function licitacionesActivas() {
+      return Licitacion::hydrate(DB::select("
+        SELECT L.*
+        FROM osce.licitacion L
+        WHERE L.empresa_id = :empresa AND L.buenapro_fecha IS NULL AND L.fecha_buena_hasta >= NOW() - INTERVAL '1' MONTH
+        ORDER BY (L.fecha_participacion_hasta <= NOW()) ASC, L.nomenclatura DESC
 
+      ", [
+        'empresa' => $this->id,
+      ]));
+    }
+    public function rivales() {
+      return collect(DB::select("
+      SELECT
+        E2.id, E2.ruc, E2.razon_social, COUNT(*) cantidad, SUM(LI.monto_adjudicado) monto_adjudicado
+      FROM osce.empresa E1
+      JOIN osce.cotizacion C ON C.empresa_id = E1.id AND C.participacion_el IS NOT NULL AND C.propuesta_el IS NOT NULL
+      JOIN osce.oportunidad O ON O.id = C.oportunidad_id AND O.licitacion_id IS NOT NULL
+      JOIN osce.licitacion_item LI ON LI.licitacion_id = O.licitacion_id AND LI.empresa_id <> E1.id
+      JOIN osce.empresa E2 ON E2.id = LI.empresa_id
+      WHERE E1.id = :id
+      GROUP BY E2.id, E2.ruc, E2.razon_social
+      ORDER BY 4 DESC
+      LIMIT 20", [
+        'id' => $this->id,
+      ]));
+    }
+    public function licitacionesGanadas() {
+      return collect(DB::select("
+      SELECT
+        L.id,
+        L.fecha_buena_hasta::date fecha, L.nomenclatura, osce.fn_etiquetas_a_rotulo(L.etiquetas_id) etiquetas, LI.valor_referencial, LI.monto_adjudicado, (LI.monto_adjudicado - LI.valor_referencial) utilidad
+      FROM osce.licitacion_item LI
+      JOIN osce.licitacion L ON L.id = LI.licitacion_id
+      WHERE LI.empresa_id = :id
+      ORDER BY L.fecha_buena_hasta DESC
+      ", [
+        'id' => $this->id
+      ]));
+    }
     public static function search($term) {
       $term = strtolower(trim($term));
         return static::leftJoin('osce.cliente', 'osce.cliente.empresa_id', 'osce.empresa.id')->where(function($query) use($term) {
@@ -85,6 +126,7 @@ class Empresa extends Model
             ;
         })->select('osce.empresa.*')->orderBy('osce.cliente.id', 'ASC');
     } 
+
     public static function propias() {
       return static::where('tenant_id', Auth::user()->tenant_id)->get();
     }

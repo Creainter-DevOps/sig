@@ -91,6 +91,26 @@
                     </div>
                   </div>
                 </a>
+                <a class="d-flex justify-content-between" href="javascript:void(0)">
+                  <div class="media d-flex align-items-center">
+                    <div class="media-left pr-0">
+                      <div class="avatar mr-1 m-0"><img src="{{asset('images/portrait/small/avatar-s-11.jpg')}}" alt="avatar" height="39" width="39"></div>
+                    </div>
+                    <div class="media-body">
+                      <h6 class="media-heading"><span class="text-bold-500">Congratulate Socrates Itumay</span> for work anniversaries</h6><small class="notification-text">Mar 15 12:32pm</small>
+                    </div>
+                  </div>
+                </a>
+                <a class="d-flex justify-content-between" href="javascript:void(0)">
+                  <div class="media d-flex align-items-center">
+                    <div class="media-left pr-0">
+                      <div class="avatar mr-1 m-0"><img src="{{asset('images/portrait/small/avatar-s-11.jpg')}}" alt="avatar" height="39" width="39"></div>
+                    </div>
+                    <div class="media-body">
+                      <h6 class="media-heading"><span class="text-bold-500">Congratulate Socrates Itumay</span> for work anniversaries</h6><small class="notification-text">Mar 15 12:32pm</small>
+                    </div>
+                  </div>
+                </a>
                 <div class="d-flex justify-content-between read-notification cursor-pointer">
                     <div class="media d-flex align-items-center">
                       <div class="media-left pr-0">

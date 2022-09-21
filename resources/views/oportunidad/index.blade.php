@@ -11,7 +11,8 @@
 @section('content')
     <div class="row">
         <div class="offset-12 col-md-3" style="margin-bottom: 10px;">
-          <a class="btn btn-primary" href="/cotizaciones/crear" style=""> + Nueva Cotización</a>
+          <!--<a class="btn btn-primary" href="/cotizaciones/crear" style="" target="_blank"> + Nueva Cotización </a>-->
+          <a class="btn btn-primary" href="/oportunidades/crear" style="" target="_blank"> + Oportunidad </a>
         </div>
     </div>
 <div class="row" id="basic-table">
@@ -66,10 +67,6 @@
         </table>
       </div>
       </div>
-      <div class="card-footer"> 
-        {{ $listado->links() }}
-      </div>   
-      <div class="form-group" style="margin-left:20px;">Mostrando {{ count($listado) }} de {{ $listado->total() }} registros</div>
       </div>
     </div>
 </div>

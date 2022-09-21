@@ -7,6 +7,7 @@ use App\Actividad;
 use App\Reporte;
 use App\Empresa;
 use App\Helpers\Helper;
+use App\User;
 
 class ReporteController extends Controller
 {
@@ -60,7 +61,7 @@ class ReporteController extends Controller
        [ 'name' =>  'Aprobar',
          'data' => $data_apro
        ],
-       [ 'name' =>  'Aprobar',
+       [ 'name' =>  'Rechazar',
          'data' => $data_desapro
        ],
      ];
@@ -104,6 +105,20 @@ class ReporteController extends Controller
       }, $actividades );
       return Helper::pdf('reportes.usuario',compact('actividades') ,'P')->stream('exportado.pdf');
     }
+
+    /* Actividades */
+
+    public function pdf_actividad_listado(Request $request) {
+      $usuario_id  = $request->input('usuario_id');
+      $empresa_id  = $request->input('empresa_id');
+      $fecha_desde = $request->input('fecha_desde');
+      $fecha_hasta = $request->input('fecha_hasta');
+      $usuario = User::find($usuario_id);
+      $empresa = Empresa::find($empresa_id);
+      $pendientes = Actividad::pendientes($usuario_id, $fecha_desde, $fecha_hasta);
+      return Helper::pdf('reportes.actividad.pdf_listado', compact('usuario','empresa','pendientes', 'fecha_desde','fecha_hasta'), 'P')->stream('CuadroDeActividades.pdf');
+    }
+
 
 
 }

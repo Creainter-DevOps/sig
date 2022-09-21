@@ -32,7 +32,7 @@
     <div style="display: inline-block;width: 200px;padding-left: 10px;">
       <select id="selectEmpresa" class="form-control" data-value="{{ !empty($documento->cotizacion_id) ? $documento->cotizacion()->empresa_id : '' }}">
         @foreach(App\Empresa::propias() as $e)
-        <option value="{{ $e->id }}">{{ $e->razon_social }}</option>
+         <option value="{{ $e->id }}">{{ $e->razon_social }}</option>
         @endforeach
       </select>
     </div>

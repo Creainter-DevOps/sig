@@ -32,7 +32,7 @@ class Oportunidad extends Model
     protected $fillable = [
       'codigo','licitacion_id','tenant_id','aprobado_por','aprobado_el','rechazado_por','rechazado_el','motivo','monto_base','duracion_dias',
       'instalacion_dias','garantia_dias','estado','fecha_participacion','fecha_propuesta','empresa_id','contacto_id','rotulo', 'revisado_el','revisado_por','motivo','observacion','automatica','documento_id',
-      'es_favorito'
+      'es_favorito','updated_by'
     ];
 
     /**
@@ -57,6 +57,7 @@ class Oportunidad extends Model
     ];
     public function updateData($data) {
       DB::select('SELECT osce.fn_oportunidad_asignar_empresa(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . (!empty($data['empresa_id']) ? $data['empresa_id'] : 'null') . ',' . Auth::user()->id . ')');
+      $data['updated_by'] = Auth::user()->id;
       $this->update($data);
     }
     public function log($tipo, $texto) {
@@ -126,6 +127,18 @@ class Oportunidad extends Model
         ->orderBy('created_on', 'desc');
     }
     public static function search($query) {
+      $rp = DB::select("SELECT O.*
+      FROM osce.oportunidad O
+      JOIN osce.empresa E ON E.id = O.empresa_id
+      WHERE O.licitacion_id IS NULL AND (
+        LOWER(E.razon_social) LIKE :query
+        OR LOWER(O.rotulo) LIKE :query
+        OR LOWER(O.codigo) LIKE :query)
+      LIMIT 20
+        ", [
+        'query' => "%{$query}%",
+        ]);
+      return static::hydrate($rp);
       $query = strtolower($query);
       return Oportunidad::leftJoin('osce.licitacion', 'oportunidad.licitacion_id','licitacion.id')
         ->leftJoin('osce.empresa', 'empresa.id','licitacion.empresa_id')
@@ -239,7 +252,7 @@ class Oportunidad extends Model
       $rp = DB::select("
             SELECT L.*
             FROM osce.licitacion L
-            LEFT JOIN osce.oportunidad O ON L.id = O.licitacion_id AND L.eliminado IS NULL
+            LEFT JOIN osce.oportunidad O ON L.id = O.licitacion_id
             WHERE O.licitacion_id IS NULL AND L.procedimiento_id IS NOT NULL
             ORDER BY L.id DESC, L.fecha_participacion_hasta DESC 
             Limit 500
@@ -250,7 +263,7 @@ class Oportunidad extends Model
       $rp = DB::select("
 SELECT O.*
 FROM osce.oportunidad O
-JOIN osce.licitacion L ON L.id = O.licitacion_id AND L.eliminado IS NULL
+JOIN osce.licitacion L ON L.id = O.licitacion_id
 WHERE O.archivado_el IS NOT NULL AND O.aprobado_el IS NOT NULL
 ORDER BY O.archivado_el DESC
 LIMIT 50");
@@ -260,7 +273,7 @@ LIMIT 50");
       $rp = DB::select("
 SELECT O.*
 FROM osce.oportunidad O
-JOIN osce.licitacion L ON L.id = O.licitacion_id AND L.eliminado IS NULL
+JOIN osce.licitacion L ON L.id = O.licitacion_id
 WHERE O.rechazado_el IS NOT NULL
 ORDER BY O.rechazado_el DESC
 LIMIT 50");
@@ -299,7 +312,7 @@ SELECT O.*,
   (SELECT COUNT(*) FROM osce.cotizacion WHERE oportunidad_id = O.id AND participacion_el IS NOT NULL) cantidad_participadas
 FROM osce.oportunidad O
 WHERE O.aprobado_el >= NOW() - INTERVAL '80' DAY AND O.rechazado_el IS NULL AND O.archivado_el IS NULL)x
-JOIN osce.licitacion L ON L.id = x.licitacion_id AND L.eliminado IS NULL
+JOIN osce.licitacion L ON L.id = x.licitacion_id
 AND L.fecha_participacion_hasta - INTERVAL '1' HOUR <= NOW()
 AND L.fecha_participacion_hasta + INTERVAL '12' HOUR >= NOW()
 UNION
@@ -310,9 +323,10 @@ SELECT O.*,
   (SELECT COUNT(*) FROM osce.cotizacion WHERE oportunidad_id = O.id AND propuesta_el IS NOT NULL) cantidad_propuestas
 FROM osce.oportunidad O
 WHERE O.aprobado_el >= NOW() - INTERVAL '80' DAY AND O.rechazado_el IS NULL AND O.archivado_el IS NULL AND O.fecha_participacion IS NOT NULL)x
-JOIN osce.licitacion L ON L.id = x.licitacion_id AND L.eliminado IS NULL
+JOIN osce.licitacion L ON L.id = x.licitacion_id
 AND L.fecha_participacion_hasta - INTERVAL '1' HOUR <= NOW()
 AND L.fecha_participacion_hasta + INTERVAL '12' HOUR >= NOW()
+LIMIT 5;
 ");
       return static::hydrate($rp); 
     }
@@ -340,7 +354,7 @@ FROM (
     SELECT
       O.*,
       (SELECT COUNT(*) FROM osce.cotizacion C
-        WHERE C.oportunidad_id = O.id AND C.eliminado IS NULL AND C.participacion_el IS NULL AND COALESCE(LENGTH(C.seace_participacion_log), 0) > 0) no_es_posible,
+        WHERE C.oportunidad_id = O.id AND C.eliminado IS NULL AND C.participacion_el IS NULL AND C.seace_participacion_log IS NOT NULL) no_es_posible,
       (SELECT COUNT(*) FROM osce.cotizacion C
         WHERE C.oportunidad_id = O.id AND C.eliminado IS NULL AND C.interes_el IS NOT NULL) empresas_interes
     FROM (
@@ -355,7 +369,7 @@ FROM (
         )
     ) O
   ) x
-  WHERE x.no_es_posible > 0 OR x.empresas_interes = 0 OR x.aprobado_el::date = NOW()::date OR EXISTS(SELECT OE.id FROM osce.oportunidad_externo OE WHERE OE.oportunidad_id = x.id) OR x.es_favorito IS NOT NULL
+  WHERE x.no_es_posible > 0 OR x.empresas_interes = 0 OR x.aprobado_el::date = NOW()::date OR EXISTS( SELECT OE.id FROM osce.oportunidad_externo OE WHERE OE.oportunidad_id = x.id) OR x.es_favorito IS NOT NULL
 ) z
 ORDER BY z.fecha_participacion_hasta ASC, z.id ASC
 LIMIT 100");
@@ -404,16 +418,17 @@ FROM (
     x.*,
     osce.fn_oportunidad_expediente_step(x.tenant_id, x.id) as expediente_step,
     osce.fn_oportunidad_expediente_step_min(x.tenant_id, x.id) as expediente_step_min,
-    (SELECT COUNT(*) FROM osce.oportunidad_externo WHERE oportunidad_id = x.id) cantidad_externo,
+    EXISTS(SELECT OE.id FROM osce.oportunidad_externo OE WHERE OE.oportunidad_id = x.id) cantidad_externo,
     osce.fn_usuario_rotulo(x.aprobado_por) aprobado_por,
     osce.fn_usuario_rotulo(x.revisado_por) revisado_por,
     osce.fn_oportunidad_fecha_estado_propuesta(1, x.id) inx_estado_propuesta,
     osce.fn_etiquetas_a_rotulo(x.etiquetas_id) etiquetas,
-    osce.oportunidad_variacion_montos(x.id) montos
+    osce.oportunidad_variacion_montos(x.id) montos,
+    osce.fn_licitacion_tiene_bintegradas(x.licitacion_id::int) tiene_bases
   FROM (
     SELECT
       O.*,
-      (SELECT COUNT(*) FROM osce.cotizacion C
+      EXISTS(SELECT C.id FROM osce.cotizacion C
         WHERE C.oportunidad_id = O.id AND C.eliminado IS NULL AND C.interes_el IS NOT NULL) empresas_interes
     FROM (
       SELECT O.tenant_id, O.id, O.licitacion_id, O.aprobado_el, O.etiquetas_id, O.aprobado_por, O.rotulo, O.fecha_propuesta_hasta, O.correo_id, O.revisado_el, O.revisado_por, O.es_favorito, O.estado
@@ -421,14 +436,14 @@ FROM (
       WHERE 
 		    O.tenant_id = :tenant AND O.estado IN (1,2) AND O.aprobado_el IS NOT NULL
     		AND O.rechazado_el IS NULL AND O.archivado_el IS NULL
-        AND ((O.fecha_propuesta_hasta >= NOW() - INTERVAL '10' HOUR AND O.fecha_propuesta_hasta <= NOW() + INTERVAL '20' DAY) OR O.es_favorito IS NOT NULL)
+        AND ((O.fecha_propuesta_hasta >= NOW() - INTERVAL '10' HOUR AND O.fecha_propuesta_hasta <= NOW() + INTERVAL '25' DAY) OR O.es_favorito IS NOT NULL)
     ) O
   ) x
-  WHERE x.empresas_interes = 0 OR x.aprobado_el::date = NOW()::date OR x.es_favorito IS NOT NULL
-	OR x.fecha_propuesta_hasta <= NOW() + INTERVAL '15' DAY
+  WHERE x.empresas_interes IS FALSE OR x.aprobado_el::date = NOW()::date OR x.es_favorito IS NOT NULL
+	OR x.fecha_propuesta_hasta <= NOW() + INTERVAL '25' DAY
 ) z
 ORDER BY z.correo_id IS NULL ASC, z.fecha_propuesta_hasta::date ASC, z.fecha_propuesta_hasta::time ASC, z.es_favorito IS NULL DESC, z.estado DESC, (z.expediente_step_min = 4) ASC, z.revisado_el IS NULL ASC, z.expediente_step_min DESC
-LIMIT 65", ['tenant' => Auth::user()->tenant_id]);
+LIMIT 80", ['tenant' => Auth::user()->tenant_id]);
       /*
         SELECT x.*,
           L.fecha_propuesta_hasta,
@@ -488,9 +503,9 @@ WHERE O.tenant_id = 1 AND O.aprobado_el IS NOT NULL AND O.rechazado_el IS NULL A
 AND O.fecha_participacion IS NOT NULL
  AND O.fecha_propuesta IS NOT NULL
 ) O
-JOIN osce.licitacion L ON L.id = O.licitacion_id AND L.eliminado IS NULL AND ((L.fecha_buena_desde >= NOW() AND L.fecha_buena_hasta <= NOW())
-  OR (L.fecha_buena_hasta >= NOW() - INTERVAL '30' DAY AND L.fecha_buena_hasta <= NOW() + INTERVAL '30' DAY)
-  OR (L.buenapro_fecha >= NOW() - INTERVAL '50' DAY))
+JOIN osce.licitacion L ON L.id = O.licitacion_id AND ((L.fecha_buena_desde >= NOW() AND L.fecha_buena_hasta <= NOW())
+  OR (L.fecha_buena_hasta >= NOW() - INTERVAL '7' DAY AND L.fecha_buena_hasta <= NOW() + INTERVAL '20' DAY)
+  OR (L.buenapro_fecha >= NOW() - INTERVAL '7' DAY))
 ORDER BY L.buenapro_fecha ASC, L.fecha_buena_hasta ASC, O.id ASC");
       return static::hydrate($rp);
     }
@@ -498,7 +513,7 @@ ORDER BY L.buenapro_fecha ASC, L.fecha_buena_hasta ASC, O.id ASC");
       $rp = DB::cache(60 * 2, "
         SELECT O.*
     FROM osce.oportunidad O
-    JOIN osce.licitacion L ON L.id = O.licitacion_id AND L.eliminado IS NULL
+    JOIN osce.licitacion L ON L.id = O.licitacion_id
     WHERE O.aprobado_el IS NOT NULL AND O.rechazado_el IS NULL AND O.archivado_el IS NULL
     ORDER BY O.aprobado_el DESC, O.id ASC
     LIMIT 100");

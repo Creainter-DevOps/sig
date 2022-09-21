@@ -19,7 +19,7 @@
         <div class="media-body pt-25">
           <h4 class="media-heading"><span class="users-view-name">{{ $user->usuario }}</span>
           <span class="text-muted font-medium-1"> @</span>
-          <span class="users-view-username text-muted font-medium-1 ">candy007</span></h4>
+          <span class="users-view-username text-muted font-medium-1 ">{{ $user->usuario }}</span></h4>
           <span>ID:</span>
           <span class="users-view-id">305</span>
         </div>
@@ -27,8 +27,8 @@
     </div>
     <div class="col-12 col-sm-5 px-0 d-flex justify-content-end align-items-center px-1 mb-2">
       <a href="#" class="btn btn-sm mr-25 border"><i class="bx bx-envelope font-small-3"></i></a>
-      <a href="#" class="btn btn-sm mr-25 border">Profile</a>
-      <a href="{{asset('page-users-edit')}}" class="btn btn-sm btn-primary">Edit</a>
+      <a href="#" class="btn btn-sm mr-25 border">Perfil</a>
+      <a href="{{asset('page-users-edit')}}" class="btn btn-sm btn-primary">Editar</a>
     </div>
   </div>
   <!-- users view media object ends -->
@@ -106,6 +106,48 @@
     </div>
   </div>
   <!-- users view card data ends -->
+
+  <div class="card">
+    <div class="card-content">
+      <div class="card-body">
+        <h5 class="mb-1"style="width:max-content;" ><i class="bx bx-info-circle"></i> Perfiles </h5>
+        <button type="button" class="btn btn-sm m-0"  style="text-align:right;" data-popup="/usuarios/perfil/crear?usuario_id={{ $user->id }}" ><i class="bx bx-plus"></i> Agregar </button>
+            <table class="table mb-0">
+                <thead>
+                 <th>Empresa</th>       
+                 <th style="width:35%;" >Cargo</th>
+                 <th style="width:20%;" >Linea</th> 
+                 <th style="width:20%;" >Anexo</th> 
+                 <th style="width:20%;" >Celular</th> 
+                 <th style="width:5%;" ></th>
+                </thead>
+                <tbody>
+                    @foreach($perfiles  as $key  => $perfil )
+                    <tr>
+                    <td>{{ $perfil->empresa }}</td>
+                    <td>{{ $perfil->cargo  }}</td>
+                    <td>{{ $perfil->linea }}</td>
+                    <td>{{ $perfil->anexo }}</td>
+                    <td>{{ $perfil->celular }}</td>
+                    <td>
+                       <div class="dropdown">
+                        <span class="bx bx-dots-vertical-rounded font-medium-3 dropdown-toggle nav-hide-arrow cursor-pointer" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="menu">
+                        </span>
+                        <div class="dropdown-menu dropdown-menu-right" x-placement="top-end" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(19px, -7px, 0px);">
+                          <a class="dropdown-item" data-popup="/usuarios/perfil/{{$perfil->id}}/editar"><i class="bx bx-edit-alt mr-1"></i> Editar </a>
+                          <a class="dropdown-item" data-confirm-remove="/usuarios/perfil/{{$perfil->id}}/eliminar" href="#" ><i class="bx bx-trash mr-1"></i> Eliminar</a>
+                        </div>
+                    </div>
+                    </td>
+                  </tr>
+                  @endforeach
+                <tbody>
+              </tbody>
+            </table>
+      </div>
+    </div>  
+  </div>  
+
   <!-- users view card details start -->
   <div class="card">
     <div class="card-content">
@@ -161,36 +203,15 @@
             </tbody>
           </table>
           <h5 class="mb-1"><i class="bx bx-info-circle"></i> Personal Info</h5>
-          <table class="table table-borderless mb-0">
-            <tbody>
-              <tr>
-                <td>Birthday:</td>
-                <td>03/04/1990</td>
-              </tr>
-              <tr>
-                <td>Country:</td>
-                <td>USA</td>
-              </tr>
-              <tr>
-                <td>Languages:</td>
-                <td>English</td>
-              </tr>
-              <tr>
-                <td>Contact:</td>
-                <td>+(305) 254 24668</td>
-              </tr>
-            </tbody>
-          </table>
         </div>
       </div>
     </div>
   </div>
   <!-- users view card details ends -->
-
 </section>
 <!-- users view ends -->
 @endsection
 {{-- page scripts --}}
 @section('page-scripts')
-<script src="{{asset('js/scripts/pages/page-users.js')}}"></script>
+<!--<script src="{{asset('js/scripts/pages/page-users.js')}}"></script>-->
 @endsection

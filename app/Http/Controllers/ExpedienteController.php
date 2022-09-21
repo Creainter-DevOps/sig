@@ -96,6 +96,7 @@ class ExpedienteController extends Controller
           'directorio'    => trim($cotizacion->folder(true), '/'),
           'filesize'      => 0,
           'es_mesa'       => true,
+          'elaborado_por'   => Auth::user()->id,
           'elaborado_desde' => DB::raw('now()'),
           'respaldado_el'  => null,
           'archivo'        => 'tenant-' . Auth::user()->tenant_id . '/' . gs_file('pdf'),
@@ -109,6 +110,7 @@ class ExpedienteController extends Controller
         $documento = Documento::find($cotizacion->documento_id);
         $documento->directorio     = trim($cotizacion->folder(true), '/');
         $documento->respaldado_el  = null;
+        $documento->elaborado_por   = Auth::user()->id;
         $documento->elaborado_desde = DB::raw('now()');
         if(empty($documento->original)) {
           $documento->original = 'tenant-' . Auth::user()->tenant_id . '/' . gs_file('pdf');
@@ -157,6 +159,7 @@ class ExpedienteController extends Controller
     }
 
     public function paso01_store(Cotizacion $cotizacion, Request $request) {
+
       $documento = $cotizacion->documento();
       $workspace = $documento->json_load();
       $workspace['paso01'] = $_POST['anexos'] ?? [];
@@ -190,7 +193,18 @@ class ExpedienteController extends Controller
       return redirect('/expediente/' . $cotizacion->id . '/paso02');
 
     }
-
+    public function cancelar_proceso( Cotizacion $cotizacion){
+      $documento = $cotizacion->documento();
+      $workspace = $documento->json_load();
+        
+      if(!empty($workspace['parallel']) ) {
+        $finished = Helper::parallel_finished_pool($workspace['parallel']['pids']);
+        if( !$finished ){
+          exec("kill -9 " . $workspace['parallel']['pids'] );  
+          return redirect('/expediente/' . $cotizacion->id . '/paso03');
+        }
+      }
+    }
     public function paso02(Cotizacion $cotizacion) {
       $documento = $cotizacion->documento();
       $workspace = $documento->json_load();
@@ -332,7 +346,7 @@ class ExpedienteController extends Controller
     public function paso04(Cotizacion $cotizacion) {
       $documento = $cotizacion->documento();
       $workspace = $documento->json_load();
-
+      
       return view('expediente.paso04', compact('workspace','cotizacion','documento'));
     }
     public function paso04_store(Cotizacion $cotizacion, Request $request) {
@@ -379,11 +393,17 @@ class ExpedienteController extends Controller
       if(empty($file)) {
         exit(11);
       }
+
       $dir = $documento->folder_workspace();
 
       $root = $dir . $file;
 
       if(!file_exists($root)) {
+        if( Helper::gs_exists(config('constants.ruta_storage') . $archivo )){
+          echo "Restaurar";  
+          exit; 
+        }
+
         echo "404;" . $root;
         exit;
       }

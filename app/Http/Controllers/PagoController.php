@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Pago;
 use App\Entregable;
 use Auth;
+
 class PagoController extends Controller
 {
     /**

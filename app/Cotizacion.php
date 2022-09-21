@@ -57,7 +57,7 @@ class Cotizacion extends Model
     protected $fillable = [
       'id','empresa_id','fecha','monto','numero','duracion_meses','oportunidad_id','interes_el','interes_por','participacion_el','participacion_por','propuesta_el','propuesta_por',
       'plazo_servicio','plazo_garantia','plazo_instalacion','validez','moneda_id','observacion','terminos','seace_participacion_log','seace_participacion_fecha','seace_participacion_html','documento_id',
-      'elaborado_por','elaborado_desde','elaborado_hasta','elaborado_step','elaborado_json','rotulo','notas','subtotal','igv'
+      'elaborado_por','elaborado_desde','elaborado_hasta','elaborado_step','elaborado_json','rotulo','notas','subtotal','igv','updated_by'
     ];
 
     /**

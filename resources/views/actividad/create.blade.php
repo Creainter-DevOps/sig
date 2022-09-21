@@ -114,55 +114,13 @@ function actualizar_timeline() {
           box.css({'border-left': '5px solid #ff5b5c'});
         }
 
-        if(n.tipo == 'LLAMADA') {
-          box.append($('<div>').addClass('timeline-time').text(n.fecha + ' ' + n.hora));
-          box.append($('<div>').addClass('timeline-content').html('<div>LLAMADA A <b>' + n.contacto_nombres + '</b>: ' + n.texto + '</div>'));
-          box.find('.timeline-content>div').append('<div style="max-width: 450px;max-height: 100px;overflow: hidden;">' + n.contenido + '</div>');
-          box.append($('<div>').addClass('timeline-actions')
-            .append($('<a>').attr('href', 'javascript:void(0)').attr('data-popup', '/actividades/' + n.id + '/editar').text('Ver más'))
-          );
-
-        } else if(n.tipo == 'REUNION') {
-          box.append($('<div>').addClass('timeline-time').text(n.fecha + ' ' + n.hora));
-          box.append($('<div>').addClass('timeline-content').text(n.texto));
-          box.find('.timeline-content>div').append('<div style="max-width: 450px;max-height: 100px;overflow: hidden;">' + n.contenido + '</div>');
-          box.append($('<div>').addClass('timeline-actions')
-            .append($('<a>').attr('href', 'javascript:void(0)').attr('data-popup', '/actividades/' + n.id + '/editar').text('Ver más'))
-          );
-
-        } else if(n.tipo.indexOf('LICITACION') > -1 || n.tipo.indexOf('OPORTUNIDAD') > -1 || true) {
-          /*box.append($('<div>').addClass('timeline-time').text(n.fecha + ' ' + n.hora));
-          box.append($('<div>').addClass('timeline-content').html('<div>ACTIVIDAD : ' + n.texto + '</div>'));
-          box.find('.timeline-content>div').append('<div style="max-width: 450px;max-height: 100px;overflow: hidden;">' + n.contenido + '</div>');
-          box.append($('<div>').addClass('timeline-actions')
-            .append($('<a>').attr('href', 'javascript:void(0)').attr('data-popup', '/actividades/' + n.id + '/editar').text('Vér más'))
-          );*/
-          var html = `<div class="timeline-time">${ moment( n.fecha + ' ' + n.hora ).fromNow() + ` ( ${moment( n.tiempo).format('DD/MM/YYYY hh:MM:ss a') } ) `}</div>
+          var html = `<div class="timeline-time">${ moment( n.created_on ).fromNow() + ` ( ${moment(n.created_on).format('DD/MM/YYYY hh:MM:ss a') } ) `}</div>
                       <h6 class="timeline-title">${n.texto}</h6>
                       <p class="timeline-text">${ n.descripcion}</p>
                       <p class="timeline-user" ><i style="font-size:inherit;" class="bx bxs-user"></i> ${n.usuario } </p>`;
           box.append(html);
 
-        } else if(n.tipo == 'NOTA' || n.tipo == 'ACTIVIDAD') {
-          var html = `<div class="timeline-time">${ moment( n.fecha + ' ' + n.hora ).fromNow() + ` ( ${moment( n.tiempo).format('DD/MM/YYYY hh:MM a') } ) `}</div>
-                      <h6 class="timeline-title">${n.texto}</h6>
-                      <p class="timeline-text">${ n.descripcion}</p>
-                      <p class="timeline-user" ><i style="font-size:inherit;" class="bx bxs-user"></i> ${n.usuario } </p>`;
-          box.append(html);
-
-        } else if(n.tipo == 'VISITA') {
-          box.append($('<div>').addClass('timeline-time').text(n.fecha + ' ' + n.hora));
-          box.append($('<div>').addClass('timeline-content').text(n.texto));
-          box.find('.timeline-content>div').append('<div style="max-width: 450px;max-height: 100px;overflow: hidden;">' + n.contenido + '</div>');
-          box.append($('<div>').addClass('timeline-actions')
-            .append($('<a>').attr('href', 'javascript:void(0)').attr('data-popup', '/actividades/' + n.id + '/editar').text('Ver más'))
-          );
-        } else if(n.tipo == 'log') {
-          box.append($('<div>').addClass('timeline-time').text(n.created_on));
-          box.append($('<div>').addClass('timeline-content').css({'font-size': '10px'}).html('<div>LOG: ' + n.texto + '</div>'));
-
-        }
-        if(n.estado == 3) {
+        if(n.estado ) {
           ll.append(box);
         } else {
           llc.append(box);

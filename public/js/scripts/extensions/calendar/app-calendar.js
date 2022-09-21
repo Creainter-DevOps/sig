@@ -9,9 +9,8 @@
 ==========================================================================================*/
 'use strict';
 
-(function (window, Calendar) {
-  // variables
-  var cal, resizeThrottled;
+var cal, resizeThrottled;
+function renderCalendar(callback) {
   var useCreationPopup = true;
   var useDetailPopup = true;
 
@@ -29,16 +28,20 @@
   }
 
   // calendar initialize here
-  cal = new Calendar('#calendar', {
-    defaultView: 'month',
+  console.log('LISTADO', CalendarList);
+  cal = new tui.Calendar('#calendar', {
+    defaultView: 'week',
     useCreationPopup: useCreationPopup,
     useDetailPopup: useDetailPopup,
     calendars: CalendarList,
     theme: themeConfig,
+    taskView: false,
+    scheduleView: ['time','allday'],
+    week: {
+      hourStart: 5,
+      hourEnd: 22
+    },
     template: {
-      milestone: function (model) {
-        return '<span class="bx bx-flag align-middle"></span> <span style="background-color: ' + model.bgColor + '">' + model.title + '</span>';
-      },
       allday: function (schedule) {
         return getTimeTemplate(schedule, true);
       },
@@ -84,6 +87,8 @@
       return true;
     }
   });
+  callback();
+}
 
   // Create Event according to their Template
   function getTimeTemplate(schedule, isAllDay) {
@@ -331,10 +336,14 @@
   }
   // Randome Generated schedule
   function setSchedules() {
-    cal.clear();
-    generateSchedule(cal.getViewName(), cal.getDateRangeStart(), cal.getDateRangeEnd());
-    cal.createSchedules(ScheduleList);
-    refreshScheduleVisibility();
+    processProjects(cal.getDateRangeStart(), cal.getDateRangeEnd(), function() {
+      cal.clear();
+      renderSideLeft();
+      generateSchedule(cal.getViewName(), cal.getDateRangeStart(), cal.getDateRangeEnd(), function() {
+        cal.createSchedules(ScheduleList);
+        refreshScheduleVisibility();
+      });
+    });
   }
   // Events initialize
   function setEventListener() {
@@ -348,22 +357,11 @@
   function getDataAction(target) {
     return target.dataset ? target.dataset.action : target.getAttribute('data-action');
   }
-  resizeThrottled = tui.util.throttle(function () {
-    cal.render();
-  }, 50);
-  window.cal = cal;
-  setDropdownCalendarType();
-  setRenderRangeText();
-  setSchedules();
-  setEventListener();
-})(window, tui.Calendar);
-
-// set sidebar calendar list
-(function () {
+function renderSideLeft() {
   var calendarList = document.getElementById('calendarList');
   var html = [];
   CalendarList.forEach(function (calendar) {
-    html.push('<div class="sidebar-calendars-item"><label>' +
+    html.push('<div class="sidebar-calendars-item"><label title="' + calendar.alias + '">' +
       '<input type="checkbox" class="tui-full-calendar-checkbox-round" value="' + calendar.id + '" checked>' +
       '<span style="border-color: ' + calendar.borderColor + '; background-color: ' + calendar.borderColor + ';"></span>' +
       '<span>' + calendar.name + '</span>' +
@@ -371,7 +369,19 @@
     );
   });
   calendarList.innerHTML = html.join('\n');
-})();
+}
+(function (window) {
+  renderCalendar(function() {
+        resizeThrottled = tui.util.throttle(function () {
+          cal.render();
+        }, 50);
+        window.cal = cal;
+        setDropdownCalendarType();
+        setRenderRangeText();
+        setSchedules();
+        setEventListener();
+  });
+})(window);
 
 $(document).ready(function () {
 

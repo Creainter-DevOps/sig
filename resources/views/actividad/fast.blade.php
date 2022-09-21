@@ -11,9 +11,9 @@
     <input type="hidden" name="proyecto_id" value="{{ $actividad->proyecto_id }}">
     <input type="hidden" name="oportunidad_id" value="{{ $actividad->oportunidad_id }}">
     <input type="hidden" name="tipo" value="{{ $actividad->tipo }}">
-    @if($tipo == 'LLAMADA')
+    @if($actividad->tipo == 'LLAMADA')
       @include('actividad.form-llamada')
-    @elseif($tipo == 'NOTA')
+    @elseif($actividad->tipo == 'NOTA')
       @include('actividad.form-nota')
     @else
       @include('actividad.form-reunion')

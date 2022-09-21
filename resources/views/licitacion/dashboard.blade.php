@@ -61,6 +61,12 @@
     </div>
     <div class="row">
       <div class="col-xl-6 col-12 dashboard-marketing-campaign">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center pb-1">
+            <h4 class="card-title">Expedientes en Elaboración</h4>
+          </div>
+          <div data-block-dinamic="/licitaciones/part/avance_expedientes" data-block-refresh="40" data-block-auto="true"></div>
+        </div>
         <div class="card marketing-campaigns">
           <div class="card-header d-flex justify-content-between align-items-center pb-1">
             <h4 class="card-title">Registro en Oportunidades ({{ count($participaciones_por_vencer) }})</h4>
@@ -195,7 +201,11 @@
               @else
               <tr>
                   <td class="" style="max-width:200px;">
-                    <div style="font-size:11px;"><i class="bx bx-buildings" style="font-size:12px"></i> {!! $v->inx_rotulo !!}</div>
+                    <div style="font-size:11px;"><i class="bx bx-buildings" style="font-size:12px"></i> {!! $v->inx_rotulo !!}
+                    @if(!empty($v->tiene_bases))
+                    <i class="bx bx-check" style="font-size:15px;color:green;"></i>
+                    @endif
+                    </div>
                     @if(empty($v->revisado_el))
                     <div style="font-size:9px;">Aprobado el {{ Helper::fecha($v->aprobado_el, true) }} por {{ $v->aprobado_por }}</div>
                     @else

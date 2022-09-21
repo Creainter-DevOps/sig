@@ -805,6 +805,60 @@ function render_link_confirm() {
         });
     });
 }
+function render_block_dinamic() {
+  $("[data-block-dinamic]").each(function () {
+    var box = $(this);
+    var boxt = $('<div>').addClass('block_dinamic_time');
+    box.append(boxt);
+    var boxc = $('<div>').addClass('block_dinamic_content');
+    box.append(boxc);
+    var url = box.attr('data-block-dinamic');
+    var auto = box.attr('data-block-auto') ?? false;
+    var refresh = box.attr('data-block-refresh') ?? 0;
+    
+    var click = function() {
+      Fetchx({
+//        title: 'Cargando...',
+        url: url,
+        type: 'POST',
+        headers : {
+         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+        },
+        success: function(res) {
+          boxc.html(res);
+        },
+        complete: function() {
+          if(refresh > 1) {
+            var ii = 0;
+            var cc = null;
+            cc = setInterval(function() {
+              ii++;
+              if(refresh <= ii) {
+                click();
+                boxt.slideUp();
+                ii = 0;
+                clearInterval(cc);
+              } else {
+                boxt.slideDown();
+                boxt.text('Actualizando en ' + (refresh - ii) + ' segundos');
+              }
+            }, 1000);
+          }
+        }
+      });
+    };
+    if(auto) {
+      boxc.html('<div class="block_dinamic_loading">Cargando...</div>');
+      click();
+    } else {
+      boxc.html('<div class="block_dinamic_button">CLICK PARA VER CONTENIDO</div>');
+      boxc.on('click', function() {
+        box.off('click');
+        click();
+      });
+    }
+  });
+}
 function render_dom_popup() {
     $("[data-popup]").each(function () {
         var box = $(this);
@@ -1189,6 +1243,7 @@ function micro_ready() {
   render_outgoing();
   render_editable();
   render_button_dinamic();
+  render_block_dinamic();
   render_time_left();
 //  combo();
 }

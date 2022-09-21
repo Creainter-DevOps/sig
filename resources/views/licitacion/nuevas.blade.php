@@ -34,6 +34,11 @@ tr.block_details>td>div {
 
 @section('content')
 <!-- invoice list -->
+@if(!empty($parametros))
+  <div class="text-center">
+    <a href="/licitaciones/nuevas/mas" class="btn btn-sm btn-success shadow mr-1 mb-1" data-pass-value="{{ $parametros['max'] . '-' . $parametros['min'] }}" data-button-dinamic>Mostrar más ({{ $parametros['total']}})</a>
+  </div>
+@endif
 <section class="invoice-list-wrapper">
   <!-- create invoice button-->
   <!-- Options and filter dropdown button-->
@@ -116,6 +121,11 @@ tr.block_details>td>div {
     </table>
   </div>
 </section>
+@if(!empty($parametros))
+  <div class="text-center">
+    <a href="/licitaciones/nuevas/mas" class="btn btn-sm btn-success shadow mr-1 mb-1" data-pass-value="{{ $parametros['max'] . '-' . $parametros['min'] }}" data-button-dinamic>Mostrar más ({{ $parametros['total']}})</a>
+  </div>
+@endif
 @endsection
 
 {{-- vendor scripts --}}

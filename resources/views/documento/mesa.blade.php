@@ -77,12 +77,17 @@
                           </div>
                           <div class="DragHandle">
                           </div>
-                          <div class="Pattern Pattern--typeHalftone" style="position:absolute; top:4px;left:4px;" >
-                             @if ( !empty($file['estampados']['firma'] ))
-                                <span class="text-white" style="text-align:center; padding:3px;border-radius:4px; background-color:#ff7600;"><i class="bx bxs-edit-alt"></i> </span>
+                          <div class="Pattern Pattern--typeHalftone" style="position:absolute; top:4px;left:4px;display: grid;grid-template: 1fr/1fr 1fr;column-gap: 4px;" >
+                           @if ( Helper::recursive_count_key_value( $file, 'tool','firma') == ( $file['is_part'] == true ? 1 : $file['folio'] )   )
+                                <span class="text-white" style="text-align:center; padding:1px 3px; border-radius:4px; background-color:#ff7600; cursor: initial;" title="Firmado">
+                                  <i class="bx bxs-edit-alt" style="font-size:15px;"></i>
+                                </span>
                              @endif
-                             @if ( !empty($file['estampados']['visado'] )) 
-                                <span class="text-white" style="margin-left:2px;text-align:center; padding:3px;border-radius:4px; background-color:#188aff ;" > <i class="bx bx-check-circle"></i> </span>
+
+                             @if ( Helper::recursive_count_key_value( $file, 'tool','visado') == ( $file['is_part'] == true ? 1 : $file['folio'] ))
+                                <span class="text-white" style="text-align:center; padding:1px 3px;border-radius:4px; background-color:#188aff; cursor: initial;"  title="Visado">
+                                  <i class="bx bx-check-circle"style="font-size:15px;"></i>
+                                </span>
                              @endif
                           </div>
                         <div class="Pattern Pattern--typePlaced"style="display:flex;flex-direction: column; align-items:center; " >
@@ -220,9 +225,9 @@ var pushBucket = function () {
                         <img class="background_image" src="/documentos/{{ $documento->id}}/generarImagenTemporal?cid=${ doc.cid }&page=${ doc.page }&t={{time()}}" />
                         <div class="StackedListContent">
                           <div class="tools">
-                            <a href="/static/temporal/${ doc.root.replace('/tmp/', '' )}?t={{ time() }}" download >Descargar</a>
-                            <a href="javascript:void(0);" data-popup="/documentos/{{ $documento->id }}/visualizar?cid=${ doc.cid }">Editar</a>
-                            <a href="javascript:eliminarCid('${doc.cid}');">Eliminar</a>
+                            <a class="download" href="/static/temporal/${ doc.root.replace('/tmp/', '' )}?t={{ time() }}">Descargar</a>
+                            <a class="edit" href="javascript:void(0);" data-popup="/documentos/{{ $documento->id }}/visualizar?cid=${ doc.cid }">Editar</a>
+                            <a class="delete" href="javascript:eliminarCid('${doc.cid}');">Eliminar</a>
                           </div>
                           <div class="DragHandle">
                           </div>
@@ -311,6 +316,7 @@ $(document).on('mousemove', '.contentPoint', function(e) {
     }
   }
 });
+
 $(document).on('click', '.contentPoint', function(e) {
   if(!current_tool) {
     return;
@@ -351,6 +357,7 @@ $(document).on('click', '.contentPoint', function(e) {
     },
   });
 });
+
 $(document).on('click', '.addons>div[data-id]', function(e) {
   let url  = '/documentos/{{ $documento->id }}/eliminarEstampa';
   var cid  = $(this).closest('.contentPoint').find('.imagePoint').attr('data-cid');

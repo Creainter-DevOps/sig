@@ -4,7 +4,6 @@
 var ScheduleList = [];
 
 var SCHEDULE_CATEGORY = [
-  'milestone',
   'task'
 ];
 // constructor
@@ -145,17 +144,72 @@ function generateRandomSchedule(calendar, renderStart, renderEnd) {
   ScheduleList.push(schedule);
 }
 // random schedule created
-function generateSchedule(viewName, renderStart, renderEnd) {
+function generateSchedule(viewName, renderStart, renderEnd, callback) {
   ScheduleList = [];
-  CalendarList.forEach(function (calendar) {
-    var i = 0, length = 1;
-    if (viewName === 'month') {
-      length = 1;
-    } else if (viewName === 'day') {
-      length = 2;
-    }
-    for (i; i < length; i += 1) {
-      generateRandomSchedule(calendar, renderStart, renderEnd);
-    }
+  console.log('DESDE', renderStart);
+  Fetchx({
+    url: '/actividades/calendario/json',
+    type: 'POST',
+    data: {
+      desde: moment(renderStart.getTime()).format("YYYY-MM-DD"),
+      hasta: moment(renderEnd.getTime()).format("YYYY-MM-DD"),
+    },
+    dataType: 'json',
+    headers : {
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+    },
+    success: function(res) {
+      console.log('DATA', res);
+      for(var index in res.data) {
+
+        var schedule = new ScheduleInfo();
+
+        schedule.id = res.data[index].id;
+        schedule.calendarId = res.data[index].calendario_id;
+
+        schedule.title = res.data[index].descripcion;//chance.name({ nationalty: 'en' });
+        schedule.body = chance.bool({ likelihood: 20 }) ? chance.sentence({ words: 10 }) : '';
+        schedule.isReadOnly = true;//chance.bool({ likelihood: 20 });
+
+
+
+        schedule.isAllday = res.data[index].todo_dia;
+        if (schedule.isAllday) {
+          schedule.category = 'allday';
+        } else {
+          schedule.category = 'time';
+        }
+
+        schedule.start = moment(res.data[index].preparada_desde).toDate();
+        //schedule.end   = moment(res.data[index].preparada_hasta).toDate();
+        //generateTime(schedule, renderStart, renderEnd);
+
+        schedule.isPrivate = chance.bool({ likelihood: 10 });
+        schedule.location = chance.address();
+        schedule.attendees = chance.bool({ likelihood: 70 }) ? generateNames() : [];
+
+        schedule.color = calendar.color;
+        schedule.bgColor = calendar.bgColor;
+        schedule.dragBgColor = calendar.dragBgColor;
+        schedule.borderColor = calendar.borderColor;
+
+        if (schedule.category === 'milestone') {
+          schedule.color = schedule.bgColor;
+          schedule.bgColor = 'transparent';
+          schedule.dragBgColor = 'transparent';
+          schedule.borderColor = 'transparent';
+        }
+
+        schedule.raw.memo = chance.sentence();
+        schedule.raw.creator.name = chance.name();
+        schedule.raw.creator.avatar = chance.avatar();
+        schedule.raw.creator.company = chance.company();
+        schedule.raw.creator.email = chance.email();
+        schedule.raw.creator.phone = chance.phone();
+
+        ScheduleList.push(schedule);
+      }
+      callback();
+    },
   });
 }

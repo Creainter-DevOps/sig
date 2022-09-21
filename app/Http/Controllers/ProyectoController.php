@@ -10,6 +10,7 @@ use App\Cliente;
 use App\Persona;
 use App\Ubigeo;
 use App\Helpers\Helper;
+use Auth;
 
 class ProyectoController extends Controller {
  
@@ -101,9 +102,10 @@ class ProyectoController extends Controller {
         unset($data['value']);
         unset($data['_update']);
       }
+      $data['updated_by'] = Auth::user()->id;
       $proyecto->update($data);
       #$proyecto->log("editado");
-      return response()->json(['status'=> "success" , 'redirect' => "/proyectos" ]);
+      return response()->json(['status'=> 'success' ]);
     }
 
     /**

@@ -1,7 +1,26 @@
 <?php
+if(!function_exists('fecha')) {
+function fecha($x) {
+  $x = strtotime($x);
+  if(empty($x)) {
+    return null;
+  }
+  return date('d/m/Y', $x);
+}
+}
+function hora($x) {
+  $x = strtotime($x);
+  if(empty($x)) {
+    return null;
+  }
+  return date('h:i A', $x);
+}
 function SendMail($perfil, $data) {
+
   require_once(config('constants.internal') . 'conf.php');
+
   require_once(ABS_LIBRERIAS . 'xmail.php');
+
   $credenciales = [
     'servidor_smtp' => $perfil->servidor_smtp,
     'puerto_smtp'   => $perfil->puerto_smtp,

@@ -20,7 +20,7 @@
     <div class="row">
       <!-- Website Analytics Starts-->
     <div class="col-lg-3 col-md-6 col-12 mb-3">
-    <div class="card h-75">
+    <div class="card" style="height:250px;">
       <div class="card-header">
         <h3 class="card-title mb-1">Bienvenido {{ '@' . Auth::user()->usuario }}!</h3>
         <span class="d-block text-nowrap">Tenemos una meta para esta semana</span>
@@ -28,9 +28,8 @@
       <div class="card-body">
         <div class="row align-items-end">
           <div class="col-6">
-            <h1 class="display-6 text-primary">10%</h1>
+            <h1 class="display-6 text-primary">{{ (int) ($chartjs['usuario']->enviados * 100 / 150) }}%</h1>
             <small class="d-block mb-1">Nos falta poco para lograr nuestra meta.</small>
-            <a href="javascript:;" class="btn btn-sm btn-primary">View sales</a>
           </div>
         </div>
       </div>
@@ -102,37 +101,6 @@
           </div>
         </div>
       </div>
-      <div class="col-xl-3 col-md-6 col-sm-12 dashboard-referral-impression">
-        <div class="row">
-          <!-- Referral Chart Starts-->
-          <div class="col-xl-12 col-12">
-            <div class="card">
-              <div class="card-content">
-                <div class="card-body text-center pb-0">
-                  <h2>$32,690</h2>
-                  <span class="text-muted">Referral</span> 40%
-                  <div id="success-line-chart"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- Impression Radial Chart Starts-->
-          <div class="col-xl-12 col-12">
-            <div class="card">
-              <div class="card-content">
-                <div class="card-body donut-chart-wrapper">
-                  <div id="donut-chart" class="d-flex justify-content-center"></div>
-                  <ul class="list-inline d-flex justify-content-around mb-0">
-                    <li> <span class="bullet bullet-xs bullet-warning mr-50"></span>Search</li>
-                    <li> <span class="bullet bullet-xs bullet-info mr-50"></span>Email</li>
-                    <li> <span class="bullet bullet-xs bullet-primary mr-50"></span>Social</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
       <div class="col-xl-3 col-md-12 col-sm-12 dashboard-latest-update">
           <div class="card">
           <div class="card-header d-flex justify-content-between align-items-center pb-50">
@@ -191,7 +159,38 @@
           </div>
         </div>
       </div>
-      <!-- aCTIVITY-->
+            <div class="col-12">
+        <div class="card marketing-campaigns">
+          <div class="card-header d-flex justify-content-between align-items-center pb-1">
+            <h4 class="card-title">PROXIMOS PAGOS</h4>
+          </div>
+          <div class="table-responsive">
+            <table id="table-marketing-campaigns" class="table" style="font-size:12px;">
+              <thead>
+                <tr>
+                  <th style="width:180px;">Codigo</th>
+                  <th>Rotulo</th>
+                  <th style="width:120px;">Fecha</th>
+                  <th style="width:200px;">Monto</th>
+                  <th style="width:200px;">Soles</th>
+                </tr>
+              </thead>
+              <tbody>
+@foreach(App\Contable::proximos_pagos() as $n)
+                <tr>
+                  <td class="py-1"><a href="{{ route('proyectos.show', ['proyecto' => $n->proyecto_id ]) }}">{{ $n->codigo }}</a> Cuota #{{ $n->numero }}</td>
+                  <td class="py-1">{{ $n->rotulo }}</td>
+                  <td class="py-1">{{ Helper::fecha($n->fecha) }}</td>
+                  <td class="py-1">{{ Helper::money($n->monto, $n->moneda_id) }}</td>
+                  <td class="py-1">{{ Helper::money($n->soles) }}</td>
+                </tr>
+@endforeach
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
            <div class="col-md-6 col-sm-12 ">
        <div class="card">
           <div class="card-content">

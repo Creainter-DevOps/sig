@@ -5,6 +5,8 @@ namespace App;
 use App\Persona;
 use App\Actividad;
 use Illuminate\Database\Eloquent\Model;
+use Auth;
+use App\Facades\DB;
 
 class Contacto extends Model
 {
@@ -71,6 +73,12 @@ class Contacto extends Model
               ->orWhereRaw("LOWER(celular) LIKE ?",["%{$term}%"])
             ;
         });
+    }
+    public static function callAutocomplete($term) {
+      return static::hydrate(DB::select("SELECT * FROM osce.fn_contacto_numero_completar(:tenant, :term)", [
+        'tenant' => Auth::user()->tenant_id,
+        'term'   => $term,
+      ]));
     }
     
 }

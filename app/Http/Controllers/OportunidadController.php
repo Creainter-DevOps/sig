@@ -31,9 +31,9 @@ class OportunidadController extends Controller {
   {
       $search = $request->input('search');
       if(!empty($search)) {
-          $listado = Oportunidad::search($search)->selectRaw('licitacion.*,  empresa.* ,oportunidad.*')->paginate(15)->appends(request()->query()) ;
+          $listado = Oportunidad::search($search);
       } else {
-          $listado = Oportunidad::list()->paginate(15)->appends(request()->query());
+          $listado = Oportunidad::list()->paginate(40)->appends(request()->query());
       }
 
       $this->viewBag['listado'] = $listado;
@@ -70,10 +70,15 @@ class OportunidadController extends Controller {
     }
     return response()->json([ 'status' => true , 'redirect' => '/oportunidades']);
   }
-  public function show( Oportunidad $oportunidad )
-  {
+  public function show(Oportunidad $oportunidad) {
     $contacto = $oportunidad->contacto(); 
     return view('oportunidad.show', compact('oportunidad'));
+  }
+  public function part_licitaciones_similares(Oportunidad $oportunidad) {
+    return view('oportunidad.part_licitaciones_similares', compact('oportunidad'));
+  }
+  public function part_oportunidades_similares(Oportunidad $oportunidad) {
+    return view('oportunidad.part_oportunidades_similares', compact('oportunidad'));
   }
   public function proyecto(Request $request, Cotizacion $cotizacion, Proyecto $proyecto ){
      $proyecto->oportunidad_id = $cotizacion->oportunidad_id;

@@ -31,7 +31,8 @@ class Proyecto extends Model
      */
     protected $fillable = [
       'tenant_id','cliente_id','contacto_id','oportunidad_id','cotizacion_id','nombre','codigo','nomenclatura','rotulo',
-      'dias_servicio', 'estado', 'dias_garantia','dias_instalacion','tipo' ,'fecha_consentimiento','fecha_firma','fecha_desde','fecha_hasta', 'eliminado', 'empresa_id','color'
+      'dias_servicio', 'estado', 'dias_garantia','dias_instalacion','tipo' ,'fecha_consentimiento','fecha_firma','fecha_desde','fecha_hasta', 'eliminado', 'empresa_id','color',
+      'updated_by',
     ];
 
     /**

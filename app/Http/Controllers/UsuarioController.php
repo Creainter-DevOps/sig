@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\User;
-
+use App\UsuarioEmpresa;
 
 class UsuarioController extends Controller
 {
@@ -62,8 +62,36 @@ class UsuarioController extends Controller
     public function show($id)
     {
        $user = User::find($id); 
-       //$this->viewBag[' = $user;
-      return view('usuarios.show', compact('user')); 
+       $perfiles = UsuarioEmpresa::perfiles_usuario($id);
+      return view('usuarios.show', compact('user','perfiles')); 
+    }
+    public function crear_perfil(UsuarioEmpresa $perfil, Request $request ){
+      $perfil->usuario_id = $request->usuario_id;  
+      return view('usuarios.perfil', compact('usuario_id' ,'perfil'));
+    }
+    public function editar_perfil( UsuarioEmpresa $perfil ){
+        return view('usuarios.perfil',compact('perfil'));
+    }
+    public function update_perfil(UsuarioEmpresa $perfil,  Request $request ){
+        $perfil->fill($request->all());
+        $perfil->save();  
+    }
+    public function eliminar_perfil( UsuarioEmpresa $perfil){
+       // dd($perfil);
+       $perfil->update(['eliminado' => true]);
+       return response()->json(['status' => true, 'refresh' => true ]);
+    } 
+    public function perfil_store(Request $request ){
+        if(empty($request->perfil_id) ){
+            $usuario = new UsuarioEmpresa();
+            $usuario->fill($request->all());
+            $usuario->save();
+            return response()->json(['status' => true, 'refresh' => true ]);
+        }else{
+            $usuario = UsuarioEmpresa::find($request->perfil_id);
+            $usuario->update($request->all());
+            return response()->json(['status' => true, 'refresh' => true ]);
+        }
     }
 
     /**

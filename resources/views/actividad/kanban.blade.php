@@ -199,7 +199,7 @@ $(document).ready(function() {
           '<div class="kanban-due-date d-flex align-items-center mr-50">' +
           '<i class="bx bx-time-five font-size-small mr-25"></i>' +
           '<span class="font-size-small">' +
-          $(it).attr("data-fecha") + ' - ' + $(it).attr("data-dueDate") + 
+          $(it).attr("data-fecha") + ' - @' + $(it).attr('data-users') + 
           "</span>" +
           "</div>";
 
@@ -255,6 +255,7 @@ $(document).ready(function() {
         '<button type="button" id="CancelBtn" class="btn btn-sm btn-danger">Cancelar</button>' +
         "</div>";
       jsKan.addForm(boardId, formItem);
+      $(formItem).parent().scrollTop(999999999999999999999);
       formItem.addEventListener("submit", function (e) {
         e.preventDefault();
         var text = e.target[0].value;
