@@ -310,7 +310,10 @@ class EmpresaController extends Controller {
 
     public function datos(Empresa $empresa ){
        
-      $etiquetas = EmpresaEtiqueta::with('etiqueta','empresa')->where('empresa_id',$empresa->id)->get();   
+      $etiquetas = EmpresaEtiqueta::with('etiqueta','empresa')
+        ->where('empresa_id',$empresa->id)
+        ->whereNull('rechazado_el')
+        ->get();   
       $this->viewBag['breadcrumbs'][] = [ 'name' =>  $empresa->razon_social ];
       $this->viewBag['empresa']   = $empresa;
       $this->viewBag['etiquetas'] = $etiquetas;

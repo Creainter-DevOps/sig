@@ -74,12 +74,19 @@ class ContactoController extends Controller {
     return view('contactos.edit',$this->viewBag );    
   }
 
-  public function update( Request $request,Contacto  $contacto  ) {
-    $contacto->update($request->all());
-    #$contacto->log('editado');
+  public function update(Request $request, Contacto $contacto) {
+    $data = $request->all();
+
+    if(!empty($data['_update'])) {
+      $data[$data['_update']] = $data['value'];
+      unset($data['value']);
+      unset($data['_update']);
+    }
+
+    $contacto->update($data);
     return response()->json([ 
       'status' => true,
-      'redirect' => '/contactos',
+//      'redirect' => '/contactos',
     ]);
   }
 

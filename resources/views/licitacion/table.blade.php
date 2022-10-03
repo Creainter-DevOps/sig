@@ -43,7 +43,22 @@
                 @if(!empty($licitacion->buenapro_fecha))
                 <tr>
                   <th>Resultados:</th>
-                  <td colspan="5">{!! $licitacion->ganadora() !!}</td>
+                  <td colspan="5">
+                    {!! $licitacion->ganadora() !!}
+                    @if($licitacion->buenapro_fecha && empty($proyecto) && !empty($oportunidad))
+                    <div style="padding:10px;background: #ff6c6c;color: #fff;text-align: center;">
+                      <div>¿Perdimos, por qué?</div>
+                      <div>
+                       <select class="form-control select-data" data-editable="/oportunidades/{{ $licitacion->oportunidad()->id }}?_update=perdido_por" data-value="{{ $licitacion->oportunidad()->perdido_por }}">
+                       <option value="">Seleccione</option>
+@foreach(App\Oportunidad::selectPerdidos() as $k => $n)
+          <option value="{{ $k }}" style="color:#fff;background-color: {{ $n['color'] }};">{{ $n['name'] }}</option>
+@endforeach
+         </select> 
+                      </div>
+                    </div>
+                    @endif
+                  </td>
                 </tr>
                 @endif
                 <tr>

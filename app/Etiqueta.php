@@ -47,10 +47,16 @@ class Etiqueta extends Model {
         'email_verified_at' => 'datetime',
       ];
 
-      public static function nuevo($nombre) {
-        $rp = collect(DB::select("SELECT osce.etiqueta_registrar(:name) id", ['name' => $nombre]))->first();;
-        return static::find($rp->id);
+      public static function nuevo($empresa_id, $tipo, $etiqueta) {
+        return collect(DB::select("SELECT * FROM osce.fn_etiqueta_vincular(:tenant, :empresa, :etiqueta, :tipo, :user)", [
+          'tenant'   => Auth::user()->tenant_id,
+          'empresa'  => $empresa_id,
+          'etiqueta' => $etiqueta,
+          'tipo'     => $tipo,
+          'user'     => Auth::user()->id,
+        ]))->first();
       }
+
     public static function listado() {
       $rp = DB::select("
         SELECT C.*

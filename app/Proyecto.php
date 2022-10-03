@@ -32,7 +32,7 @@ class Proyecto extends Model
     protected $fillable = [
       'tenant_id','cliente_id','contacto_id','oportunidad_id','cotizacion_id','nombre','codigo','nomenclatura','rotulo',
       'dias_servicio', 'estado', 'dias_garantia','dias_instalacion','tipo' ,'fecha_consentimiento','fecha_firma','fecha_desde','fecha_hasta', 'eliminado', 'empresa_id','color',
-      'updated_by',
+      'updated_by','alias'
     ];
 
     /**
@@ -51,7 +51,11 @@ class Proyecto extends Model
      */
     protected $casts = [
     ];
-    
+    public static function list() {
+      return static::where( 'eliminado', false )
+      ->where('tenant_id', Auth::user()->tenant_id)
+      ->orderBy('created_on', 'desc');
+    }
     public function rotulo() {
       if(!empty($this->nombre)) {
         return $this->nombre;
@@ -107,13 +111,20 @@ class Proyecto extends Model
           ->orWhereRaw("LOWER(nomenclatura) LIKE ?", ["%{$term}%"]);
       }); 
     }
+    public static function activos() {
+      return DB::select("
+        SELECT P.id, P.codigo, CONCAT(TO_CHAR(P.created_on, 'YYYY'), ': ', COALESCE(P.alias, CONCAT(C.nomenclatura, ': ', SUBSTRING(P.rotulo, 1, 40)))) rotulo
+        FROM osce.proyecto P
+        LEFT JOIN osce.cliente C ON C.id = P.cliente_id
+        WHERE P.estado NOT IN ('concluido','cancelado') AND P.eliminado IS FALSE AND P.tenant_id = :tenant
+        ORDER BY P.created_on DESC;
+      ", ['tenant' => Auth::user()->tenant_id]);
+    }
     public function entregables() {
       return $this->hasMany('App\Entregable','proyecto_id')->orderBy('numero', 'ASC')->get();
     }
     public function pagos() {
-      if(in_array(Auth::user()->id, [12,3])) {
         return $this->hasMany('App\Pago','proyecto_id')->orderBy('numero', 'ASC')->get();
-      }
       return [];
     }
     public function ordenes() {

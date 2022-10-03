@@ -15,6 +15,16 @@
                   <th>Cliente</th>
                   <td colspan="3">{{ $proyecto->cliente()->rotulo() }}</td>
                 </tr>
+                <tr>
+                  <th>Color</th>
+                  <td>
+                    <input type="color" name="color" data-editable="/proyectos/{{ $proyecto->id }}?_update=color" value="{{ $proyecto->color }}">
+                  </td>
+                  <th>Alias:</th>
+                  <td>
+                    <input type="text" name="alias" data-editable="/proyectos/{{ $proyecto->id }}?_update=alias" value="{{ $proyecto->alias }}">
+                  </td>
+                </tr>
                  <tr>
                   <th>Fecha del Consentimiento</th>
                   <td><input type="date" name="fecha_consentimiento" data-editable="/proyectos/{{ $proyecto->id }}?_update=fecha_consentimiento" value="{{ $proyecto->fecha_consentimiento }}"></td>

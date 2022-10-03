@@ -29,7 +29,7 @@
       <thead>
         <tr>
           <th>ID</th>
-          <th style="width:150px;">Código</th>
+          <th style="width:200px;">Código</th>
           <th>Empresa</th>
           <th>Cliente</th>
           <th>Rótulo</th>
@@ -43,7 +43,7 @@
       @foreach ($listado as $proyecto)
         <tr>
           <td>{{ $proyecto->cotizacion_id }}</td>
-          <td><div>{{ $proyecto->codigo }}</div></td>
+          <td style="text-align:center;"><a href="/proyectos/{{ $proyecto->id }}/"><div style="color:#fff;padding:2px;background-color:#b3b3b3;background:{{ $proyecto->color }}">{{ $proyecto->codigo }}</div></a></td>
           <td>{{ isset($proyecto->empresa_id) ?   $proyecto->empresa()->rotulo() : ''  }}</td>
           <td>{{ $proyecto->oportunidad()->institucion() }}</td>
           <td>{{ $proyecto->rotulo }}</td>

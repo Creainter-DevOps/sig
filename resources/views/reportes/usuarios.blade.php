@@ -160,11 +160,10 @@
             </div>
           </form>
         </div>
-        <div class="users-list-table">
+        <!--<div class="users-list-table">
           <div class="card">
             <div class="card-content">
               <div class="card-body">
-                <!-- datatable start -->
                 <div class="table-responsive">
                   <table id="users-list-datatable" class="table">
                     <thead>
@@ -609,14 +608,12 @@
                         <td>Yes</td>
                         <td>User </td>
                         <td><span class="badge badge-light-success">Active</span></td>
-                        <td><a href="{{asset('page-users-edit')}}"><i
-                                    class="bx bx-edit-alt"></i></a></td>
+                        <td><a href="{{asset('page-users-edit')}}"><i class="bx bx-edit-alt"></i></a></td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
-                <!-- datatable ends -->
-              </div>
+              </div>-->
             </div>
           </div>
         </div>

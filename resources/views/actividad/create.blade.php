@@ -9,11 +9,10 @@
               <li>
                 <i class="bx bx-dots-vertical-rounded" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></i>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                  <a class="dropdown-item" href="#" data-popup="/actividades/crear?tipo=LLAMADA&{!! http_build_query($into) !!}">+ Llamada</a>
-                  <a class="dropdown-item" href="#" data-popup="/actividades/crear?tipo=REUNION&{!! http_build_query($into) !!}">+ Reunión</a>
-                  <a class="dropdown-item" href="#" data-popup="/actividades/crear?tipo=ACTIVIDAD&{!! http_build_query($into) !!}">+ Actividad</a>
-                  <a class="dropdown-item" href="#" data-popup="/actividades/crear?tipo=VISITA&{!! http_build_query($into) !!}">+ Visita</a>
-                  <a class="dropdown-item" href="#" data-popup="/actividades/crear?tipo=NOTA&{!! http_build_query($into) !!}">+ Nota</a>
+                  <a class="dropdown-item" href="#" data-popup="/actividades/crear?tipo_id=2&{!! http_build_query($into) !!}">+ Llamada</a>
+                  <a class="dropdown-item" href="#" data-popup="/actividades/crear?tipo_id=6&{!! http_build_query($into) !!}">+ Reunión</a>
+                  <a class="dropdown-item" href="#" data-popup="/actividades/crear?tipo_id=4&{!! http_build_query($into) !!}">+ Actividad</a>
+                  <a class="dropdown-item" href="#" data-popup="/actividades/crear?tipo_id=5&{!! http_build_query($into) !!}">+ Nota</a>
                 </div>
               </li>
             </ul>

@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use App\Facades\DB;
 use App\Empresa;
 use App\Actividad;
+use Auth;
+
 class Voip extends Model
 {
      
@@ -37,15 +39,19 @@ class Voip extends Model
       return static::hydrate(DB::select("
         SELECT C.*
         FROM osce.contacto C
-        WHERE C.is_outbound IS TRUE
-        ORDER BY C.nombres ASC"));
+        WHERE C.is_outbound IS TRUE AND C.tenant_id = :tenant
+        ORDER BY C.nombres ASC", [
+          'tenant' => Auth::user()->tenant_id
+        ]));
     }
     public static function destinatarios() {
       return static::hydrate(DB::select("
         SELECT C.*
         FROM osce.contacto C
-        WHERE C.is_inbound IS TRUE OR C.is_exten IS TRUE
-        ORDER BY C.nombres ASC"));
+        WHERE C.is_inbound IS TRUE OR C.is_exten IS TRUE AND C.tenant_id = :tenant
+        ORDER BY C.nombres ASC", [
+          'tenant' => Auth::user()->tenant_id
+        ]));
     }
     public function log( $evento = null, $texto = '' ){
       Actividad::create([

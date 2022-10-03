@@ -54,13 +54,13 @@ class Licitacion extends Model
     }
 
     public function aprobar() {
-      DB::select('SELECT osce.fn_licitacion_accion_aprobar(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ')');
+      return collect(DB::select('SELECT * FROM osce.fn_licitacion_accion_aprobar(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ')'))->first();
     }
 
     public function rechazar($texto) {
-      DB::select('SELECT osce.fn_licitacion_accion_rechazar(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ',:motivo)', [
+      return collect(DB::select('SELECT osce.fn_licitacion_accion_rechazar(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ',:motivo)', [
         'motivo' => $texto,
-      ]);
+      ]))->first();
     }
 
     public function etiquetas() {
@@ -75,19 +75,9 @@ class Licitacion extends Model
         LIMIT 20", ['tenant' => Auth::user()->tenant_id, 'referencia' => $this->id]);
     }
     public function oportunidad() {
-      return $this->belongsTo('App\Oportunidad', 'id', 'licitacion_id')->first();
-      $oportunidad = Oportunidad::where('licitacion_id',$this->id)
+      //return $this->belongsTo('App\Oportunidad', 'id', 'licitacion_id')->first();
+      return Oportunidad::where('licitacion_id', $this->id)
                      ->where('tenant_id', Auth::user()->tenant_id)->first();
-      if(empty( $oportunidad )) {
-        $data['tenant_id'] = Auth::user()->tenant_id;
-        $data['aprobado_el'] = DB::raw('now');
-        $data['aprobado_por'] = Auth::user()->id; 
-        $data['licitacion_id'] = $this->id;
-        $data['empresa_id'] = $this->empresa_id;
-        $data['rotulo'] = $this->rotulo;    
-        $oportunidad =  Oportunidad::create($data)->fresh();
-      }
-      return $oportunidad;
     }
     public function items() {
       return $this->hasMany('App\LicitacionItem','licitacion_id')
@@ -217,14 +207,15 @@ ORDER BY L.id DESC", ['tenant' => Auth::user()->tenant_id]);
         ->leftJoin('osce.empresa', 'empresa.id','licitacion.empresa_id')
         ->where(function($r) use($query) {
           $r->orWhereRaw("LOWER(licitacion.rotulo) LIKE ? ", ["%{$query}%" ])
-          ->orWhereRaw("LOWER(licitacion.descripcion) LIKE ? ", ["%{$query}%" ])
+//          ->orWhereRaw("LOWER(licitacion.descripcion) LIKE ? ", ["%{$query}%" ])
           ->orWhereRaw("LOWER(licitacion.nomenclatura) LIKE ? ", ["%{$query}%" ])
           ->orWhereRaw("licitacion.procedimiento_id::text LIKE ? ", ["%{$query}%" ])
           ->orWhereRaw("licitacion.expediente_id::text LIKE ? ", ["%{$query}%" ])
-          ->orWhereRaw("LOWER(licitacion.descripcion) LIKE ? ", ["%{$query}%" ])
-          ->orWhereRaw("LOWER(empresa.razon_social) LIKE ? ", ["%{$query}%" ])
-          ->orWhereRaw("LOWER(oportunidad.rotulo) LIKE ? ", ["%{$query}%" ])
-          ->orWhereRaw("LOWER(oportunidad.codigo) LIKE ? ", ["%{$query}%" ]);
+//          ->orWhereRaw("LOWER(licitacion.descripcion) LIKE ? ", ["%{$query}%" ])
+//          ->orWhereRaw("LOWER(empresa.razon_social) LIKE ? ", ["%{$query}%" ])
+//          ->orWhereRaw("LOWER(oportunidad.rotulo) LIKE ? ", ["%{$query}%" ])
+//          ->orWhereRaw("LOWER(oportunidad.codigo) LIKE ? ", ["%{$query}%" ]);
+;
       });
     }
 }

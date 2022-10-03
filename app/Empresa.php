@@ -83,7 +83,7 @@ class Empresa extends Model
         SELECT L.*
         FROM osce.licitacion L
         WHERE L.empresa_id = :empresa AND L.buenapro_fecha IS NULL AND L.fecha_buena_hasta >= NOW() - INTERVAL '1' MONTH
-        ORDER BY (L.fecha_participacion_hasta <= NOW()) ASC, L.nomenclatura DESC
+        ORDER BY L.nomenclatura ASC, (L.fecha_participacion_hasta <= NOW()) ASC, L.nomenclatura DESC
 
       ", [
         'empresa' => $this->id,

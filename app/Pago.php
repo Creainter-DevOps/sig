@@ -29,7 +29,7 @@ class Pago extends Model
      * @var array
      */
     protected $fillable = [
-      'proyecto_id','numero','fecha','descripcion','monto','movimiento_id','descripcion','moneda_id','estado_id','contenido','monto_penalidad','monto_depositado','monto_detraccion'
+      'proyecto_id','numero','fecha','descripcion','monto','movimiento_id','descripcion','moneda_id','estado_id','contenido','monto_penalidad','monto_depositado','monto_detraccion','created_by','updated_by'
     ];
 
     /**

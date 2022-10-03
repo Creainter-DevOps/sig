@@ -11,6 +11,7 @@ use App\Empresa;
 use App\Contacto;
 use App\Llamada;
 use App\Caller;
+use App\Proyecto;
 
 class ActividadController extends Controller
 {
@@ -77,6 +78,7 @@ class ActividadController extends Controller
       $data = $request->all();
       $data['tenant_id'] = Auth::user()->tenant_id;
       $data['tipo_id'] = !empty($data['tipo_id']) ? $data['tipo_id'] : 4;
+
       if(!empty($data['fecha_desde'])) {
         $data['fecha'] = date('Y-m-d', strtotime($data['fecha_desde']));
         $data['hora']  = date('H:i:s', strtotime($data['fecha_desde']));
@@ -141,6 +143,8 @@ class ActividadController extends Controller
       if(!empty($data['asignado_id'])) {
         $data['asignado_id'] = '{' . trim(trim($data['asignado_id'], '{'), '}') . '}';
       }
+      $data['updated_by'] = Auth::user()->id;
+
       $actividad->update($data);
       if($request->ajax()) {
         return response()->json(['status' => true , 'refresh' => true , 'redirect' => '/actividades', 'data' => $data]);
@@ -198,9 +202,11 @@ class ActividadController extends Controller
           'dueDate'   => Helper::fecha($n->fecha_limite),
           'status'    => $n->estado,
           'is_linked' => $n->vinculado,
-          'link'      => $n->link,
+          'link'      => !empty($n->proyecto_id) ? '/proyectos/' . $n->proyecto_id : (!empty($n->oportunidad_id) ? '/oportunidades/' . $n->oportunidad_id : null),
           'completed' => ($n->estado == 3),
           'users'     => $n->asignado_a,
+          'contexto'  => $n->contexto,
+          'color'     => $n->color,
         ];
       }, $data);
       return response()->json(['status' => true , 'data' => $data]);

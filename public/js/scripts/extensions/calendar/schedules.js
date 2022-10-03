@@ -12,6 +12,7 @@ function ScheduleInfo() {
   this.calendarId = null;
 
   this.title = null;
+  this.seccion = null;
   this.body = null;
   this.isAllday = false;
   this.start = null;
@@ -99,55 +100,11 @@ function generateNames() {
   }
   return names;
 }
-// generate randome schedule
-function generateRandomSchedule(calendar, renderStart, renderEnd) {
-  var schedule = new ScheduleInfo();
-
-  schedule.id = chance.guid();
-  schedule.calendarId = calendar.id;
-
-  schedule.title = chance.name({ nationalty: 'en' });
-  schedule.body = chance.bool({ likelihood: 20 }) ? chance.sentence({ words: 10 }) : '';
-  schedule.isReadOnly = chance.bool({ likelihood: 20 });
-  generateTime(schedule, renderStart, renderEnd);
-
-  schedule.isPrivate = chance.bool({ likelihood: 10 });
-  schedule.location = chance.address();
-  schedule.attendees = chance.bool({ likelihood: 70 }) ? generateNames() : [];
-  schedule.recurrenceRule = chance.bool({ likelihood: 20 }) ? 'repeated events' : '';
-
-  schedule.color = calendar.color;
-  schedule.bgColor = calendar.bgColor;
-  schedule.dragBgColor = calendar.dragBgColor;
-  schedule.borderColor = calendar.borderColor;
-
-  if (schedule.category === 'milestone') {
-    schedule.color = schedule.bgColor;
-    schedule.bgColor = 'transparent';
-    schedule.dragBgColor = 'transparent';
-    schedule.borderColor = 'transparent';
-  }
-
-  schedule.raw.memo = chance.sentence();
-  schedule.raw.creator.name = chance.name();
-  schedule.raw.creator.avatar = chance.avatar();
-  schedule.raw.creator.company = chance.company();
-  schedule.raw.creator.email = chance.email();
-  schedule.raw.creator.phone = chance.phone();
-
-  if (chance.bool({ likelihood: 20 })) {
-    var travelTime = chance.minute();
-    schedule.goingDuration = travelTime;
-    schedule.comingDuration = travelTime;
-  }
-
-  ScheduleList.push(schedule);
-}
-// random schedule created
 function generateSchedule(viewName, renderStart, renderEnd, callback) {
   ScheduleList = [];
   console.log('DESDE', renderStart);
   Fetchx({
+    title: 'Conectando...',
     url: '/actividades/calendario/json',
     type: 'POST',
     data: {
@@ -167,11 +124,8 @@ function generateSchedule(viewName, renderStart, renderEnd, callback) {
         schedule.id = res.data[index].id;
         schedule.calendarId = res.data[index].calendario_id;
 
-        schedule.title = res.data[index].descripcion;//chance.name({ nationalty: 'en' });
-        schedule.body = chance.bool({ likelihood: 20 }) ? chance.sentence({ words: 10 }) : '';
-        schedule.isReadOnly = true;//chance.bool({ likelihood: 20 });
-
-
+        schedule.title = res.data[index].tipo; //chance.name({ nationalty: 'en' });
+        schedule.body  = '#' + res.data[index].id + ': ' + res.data[index].seccion + ' - ' + res.data[index].descripcion; //chance.bool({ likelihood: 20 }) ? chance.sentence({ words: 10 }) : '';
 
         schedule.isAllday = res.data[index].todo_dia;
         if (schedule.isAllday) {
@@ -181,31 +135,22 @@ function generateSchedule(viewName, renderStart, renderEnd, callback) {
         }
 
         schedule.start = moment(res.data[index].preparada_desde).toDate();
-        //schedule.end   = moment(res.data[index].preparada_hasta).toDate();
+        schedule.end   = moment(res.data[index].preparada_hasta).toDate();
         //generateTime(schedule, renderStart, renderEnd);
 
-        schedule.isPrivate = chance.bool({ likelihood: 10 });
-        schedule.location = chance.address();
-        schedule.attendees = chance.bool({ likelihood: 70 }) ? generateNames() : [];
+        schedule.attendees = ['Creado por ' + res.data[index].created_by, ' Asignado a '  + res.data[index].asignados];
 
         schedule.color = calendar.color;
-        schedule.bgColor = calendar.bgColor;
-        schedule.dragBgColor = calendar.dragBgColor;
-        schedule.borderColor = calendar.borderColor;
+        schedule.bgColor = '#dbdbdb';
+        schedule.borderColor = res.data[index].color;
 
-        if (schedule.category === 'milestone') {
-          schedule.color = schedule.bgColor;
-          schedule.bgColor = 'transparent';
-          schedule.dragBgColor = 'transparent';
+        if(res.data[index].importancia) {
+          schedule.color = '#000000';
+          schedule.bgColor = '#94e164';
           schedule.borderColor = 'transparent';
         }
 
-        schedule.raw.memo = chance.sentence();
-        schedule.raw.creator.name = chance.name();
-        schedule.raw.creator.avatar = chance.avatar();
-        schedule.raw.creator.company = chance.company();
-        schedule.raw.creator.email = chance.email();
-        schedule.raw.creator.phone = chance.phone();
+        schedule.raw.seccion = res.data[index].seccion;
 
         ScheduleList.push(schedule);
       }

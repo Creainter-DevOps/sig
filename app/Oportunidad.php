@@ -15,6 +15,7 @@ use App\Cotizacion;
 use App\Actividad;
 use App\Correo;
 use Auth;
+use App\Scopes\MultiTenant;
 
 class Oportunidad extends Model
 {
@@ -32,7 +33,7 @@ class Oportunidad extends Model
     protected $fillable = [
       'codigo','licitacion_id','tenant_id','aprobado_por','aprobado_el','rechazado_por','rechazado_el','motivo','monto_base','duracion_dias',
       'instalacion_dias','garantia_dias','estado','fecha_participacion','fecha_propuesta','empresa_id','contacto_id','rotulo', 'revisado_el','revisado_por','motivo','observacion','automatica','documento_id',
-      'es_favorito','updated_by'
+      'es_favorito','updated_by','perdido_por',
     ];
 
     /**
@@ -123,36 +124,24 @@ class Oportunidad extends Model
     public static function list() {
       return Oportunidad::whereNull('oportunidad.licitacion_id')
         ->whereNull('oportunidad.eliminado')
+        ->where('tenant_id', Auth::user()->tenant_id)
         ->orderBy('estado', 'asc')
         ->orderBy('created_on', 'desc');
     }
     public static function search($query) {
       $rp = DB::select("SELECT O.*
       FROM osce.oportunidad O
-      JOIN osce.empresa E ON E.id = O.empresa_id
-      WHERE O.licitacion_id IS NULL AND (
+      LEFT JOIN osce.empresa E ON E.id = O.empresa_id
+      WHERE O.licitacion_id IS NULL AND O.tenant_id = :tenant AND (
         LOWER(E.razon_social) LIKE :query
         OR LOWER(O.rotulo) LIKE :query
         OR LOWER(O.codigo) LIKE :query)
       LIMIT 20
         ", [
-        'query' => "%{$query}%",
+        'query'  => "%{$query}%",
+        'tenant' => Auth::user()->tenant_id
         ]);
       return static::hydrate($rp);
-      $query = strtolower($query);
-      return Oportunidad::leftJoin('osce.licitacion', 'oportunidad.licitacion_id','licitacion.id')
-        ->leftJoin('osce.empresa', 'empresa.id','licitacion.empresa_id')
-//        ->whereNull('oportunidad.licitacion_id')
-        ->where(function($r) use($query) {
-          $r->WhereRaw("LOWER(licitacion.rotulo) LIKE ? ", ["%{$query}%" ])
-          ->orWhereRaw("LOWER(empresa.razon_social) LIKE ? ", ["%{$query}%" ])
-          ->orWhereRaw("LOWER(licitacion.descripcion) LIKE ? ", ["%{$query}%" ])
-          ->orWhereRaw("LOWER(oportunidad.rotulo) LIKE ? ", ["%{$query}%" ])
-          ->orWhereRaw("LOWER(licitacion.nomenclatura) LIKE ? ", ["%{$query}%" ])
-          ->orWhereRaw("LOWER(oportunidad.codigo) LIKE ? ", ["%{$query}%" ])
-          ->orWhereRaw("licitacion.procedimiento_id::text LIKE ? ", ["%{$query}%" ])
-          ->orWhereRaw("LOWER(licitacion.descripcion) LIKE ? ", ["%{$query}%" ]);
-      })->take(5);
     }
     public static function search_codigo($query) {
       $query = strtolower($query);
@@ -220,6 +209,19 @@ class Oportunidad extends Model
         return $datos->listaCronograma;
       }
       return [];
+    }
+    public function empresasMenu() {
+      $rp = DB::select("
+        SELECT E.id, E.razon_social, C.id cotizacion
+        FROM osce.empresa E
+          LEFT JOIN osce.cotizacion C ON C.oportunidad_id = :oid AND C.empresa_id = E.id
+        WHERE E.tenant_id = :tenant
+        ORDER BY E.razon_social ASC
+        LIMIT 10", [
+          'oid' => $this->id,
+          'tenant' => Auth::user()->tenant_id
+        ]);
+        return Empresa::hydrate($rp);
     }
     public function empresas() {
       $rp = DB::select("
@@ -297,10 +299,13 @@ FROM osce.oportunidad O
 LEFT JOIN osce.cotizacion C ON C.oportunidad_id = O.id AND C.eliminado IS NULL AND C.propuesta_el IS NOT NULL
 WHERE O.estado IN (1,2) AND O.aprobado_el IS NOT NULL AND O.rechazado_el IS NULL AND O.archivado_el IS NULL
   AND O.fecha_propuesta_hasta >= NOW() - INTERVAL '18' DAY AND O.fecha_propuesta_hasta <= NOW() + INTERVAL '5' DAY
+  AND O.tenant_id = :tenant
 GROUP BY O.fecha_propuesta_hasta::date
 ORDER BY 1 ASC
 ) x
-      ");
+      ", [
+        'tenant' => Auth::user()->tenant_id,
+      ]);
       return static::hydrate($rp);
     }
     static function requiere_atencion() {
@@ -322,12 +327,16 @@ SELECT O.*,
   (SELECT COUNT(*) FROM osce.cotizacion WHERE oportunidad_id = O.id AND participacion_el IS NOT NULL) cantidad_participadas,
   (SELECT COUNT(*) FROM osce.cotizacion WHERE oportunidad_id = O.id AND propuesta_el IS NOT NULL) cantidad_propuestas
 FROM osce.oportunidad O
-WHERE O.aprobado_el >= NOW() - INTERVAL '80' DAY AND O.rechazado_el IS NULL AND O.archivado_el IS NULL AND O.fecha_participacion IS NOT NULL)x
+WHERE O.aprobado_el >= NOW() - INTERVAL '80' DAY AND O.rechazado_el IS NULL AND O.archivado_el IS NULL AND O.fecha_participacion IS NOT NULL
+  AND O.tenant_id = :tenant
+)x
 JOIN osce.licitacion L ON L.id = x.licitacion_id
 AND L.fecha_participacion_hasta - INTERVAL '1' HOUR <= NOW()
 AND L.fecha_participacion_hasta + INTERVAL '12' HOUR >= NOW()
 LIMIT 5;
-");
+", [
+  'tenant' => Auth::user()->tenant_id
+]);
       return static::hydrate($rp); 
     }
    static function listado_participanes_por_vencer() {
@@ -361,6 +370,7 @@ FROM (
       SELECT O.tenant_id, O.id, O.licitacion_id, O.aprobado_el, O.etiquetas_id, O.aprobado_por, O.rotulo, O.fecha_participacion_hasta, O.correo_id, O.revisado_el, O.revisado_por, O.es_favorito
       FROM osce.oportunidad O
       WHERE O.estado = 1 AND O.tenant_id = 1 AND O.aprobado_el IS NOT NULL AND O.rechazado_el IS NULL AND O.archivado_el IS NULL AND O.correo_id IS NULL
+        AND O.tenant_id = :tenant
         AND (
           (O.fecha_participacion_hasta >= NOW() - INTERVAL '2' DAY AND O.fecha_participacion_hasta <= NOW() + INTERVAL '4' DAY)
           OR O.aprobado_el::date = NOW()::date
@@ -372,7 +382,9 @@ FROM (
   WHERE x.no_es_posible > 0 OR x.empresas_interes = 0 OR x.aprobado_el::date = NOW()::date OR EXISTS( SELECT OE.id FROM osce.oportunidad_externo OE WHERE OE.oportunidad_id = x.id) OR x.es_favorito IS NOT NULL
 ) z
 ORDER BY z.fecha_participacion_hasta ASC, z.id ASC
-LIMIT 100");
+LIMIT 100", [
+  'tenant' => Auth::user()->tenant_id
+]);
      /*$rp = DB::cache(20, "
        SELECT x.*,
          L.fecha_participacion_hasta,
@@ -436,6 +448,7 @@ FROM (
       WHERE 
 		    O.tenant_id = :tenant AND O.estado IN (1,2) AND O.aprobado_el IS NOT NULL
     		AND O.rechazado_el IS NULL AND O.archivado_el IS NULL
+        AND O.fecha_propuesta_hasta >= NOW() - INTERVAL '7' DAY
         AND ((O.fecha_propuesta_hasta >= NOW() - INTERVAL '10' HOUR AND O.fecha_propuesta_hasta <= NOW() + INTERVAL '25' DAY) OR O.es_favorito IS NOT NULL)
     ) O
   ) x
@@ -500,17 +513,20 @@ FROM (SELECT O.*,
 (SELECT COUNT(*) FROM osce.oportunidad_externo WHERE oportunidad_id = O.id) cantidad_externo
 FROM osce.oportunidad O
 WHERE O.tenant_id = 1 AND O.aprobado_el IS NOT NULL AND O.rechazado_el IS NULL AND O.archivado_el IS NULL
-AND O.fecha_participacion IS NOT NULL
+  --AND O.fecha_participacion IS NOT NULL
  AND O.fecha_propuesta IS NOT NULL
+ AND O.tenant_id = :tenant
 ) O
 JOIN osce.licitacion L ON L.id = O.licitacion_id AND ((L.fecha_buena_desde >= NOW() AND L.fecha_buena_hasta <= NOW())
   OR (L.fecha_buena_hasta >= NOW() - INTERVAL '7' DAY AND L.fecha_buena_hasta <= NOW() + INTERVAL '20' DAY)
   OR (L.buenapro_fecha >= NOW() - INTERVAL '7' DAY))
-ORDER BY L.buenapro_fecha ASC, L.fecha_buena_hasta ASC, O.id ASC");
+ORDER BY L.buenapro_fecha ASC, L.fecha_buena_hasta ASC, O.id ASC", [
+  'tenant' => Auth::user()->tenant_id
+]);
       return static::hydrate($rp);
     }
    static function listado_aprobadas() {
-      $rp = DB::cache(60 * 2, "
+      $rp = DB::select("
         SELECT O.*
     FROM osce.oportunidad O
     JOIN osce.licitacion L ON L.id = O.licitacion_id
@@ -528,23 +544,23 @@ ORDER BY L.buenapro_fecha ASC, L.fecha_buena_hasta ASC, O.id ASC");
       ]);
     }
     public function aprobar() {
-      DB::select('SELECT osce.fn_oportunidad_accion_aprobar(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ')');
+      return collect(DB::select('SELECT * FROM osce.fn_oportunidad_accion_aprobar(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ')'))->first();
     }
     public function revisar() {
-      DB::select('SELECT osce.fn_oportunidad_accion_revisar(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ')');
+      return collect(DB::select('SELECT * FROM osce.fn_oportunidad_accion_revisar(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ')'))->first();
     }
     public function rechazar($motivo) {
-      DB::select('SELECT osce.fn_oportunidad_accion_rechazar(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ', :texto)', [
+      return collect(DB::select('SELECT * FROM osce.fn_oportunidad_accion_rechazar(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ', :texto)', [
       'texto' => $motivo
-      ]);
+      ]))->first();
     }
     public function archivar($motivo) {
-      DB::select('SELECT osce.fn_oportunidad_accion_archivar(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ', :texto)', [
+      return collect(DB::select('SELECT * FROM osce.fn_oportunidad_accion_archivar(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ', :texto)', [
       'texto' => $motivo
-      ]);
+      ]))->first();
     }
     public function registrar_interes(Empresa $empresa) {
-      DB::select('SELECT osce.fn_oportunidad_accion_interes(' . Auth::user()->tenant_id . ', ' . $this->id . ', ' . Auth::user()->id . ', ' . $empresa->id . ', null);');
+      return collect(DB::select('SELECT * FROM osce.fn_oportunidad_accion_interes(' . Auth::user()->tenant_id . ', ' . $this->id . ', ' . Auth::user()->id . ', ' . $empresa->id . ', null);'))->first();
     }
     public function timeline() {
       return $this->hasMany('App\Actividad','oportunidad_id')->orderBy('id', 'desc')->get();
@@ -817,16 +833,19 @@ ORDER BY L.buenapro_fecha ASC, L.fecha_buena_hasta ASC, O.id ASC");
        return $this->belongsTo('App\Cotizacion', 'licitacion_id','id')->first(); 
     }*/
     static function estadistica_barra_cantidades() {
-      return DB::cache(60 * 60 * 1, "SELECT fecha eje_x, cantidad eje_y, tipo collection FROM osce.estadistica_rapida_oportunidades(7, 1)");
+      return DB::select("SELECT fecha eje_x, cantidad eje_y, tipo collection FROM osce.estadistica_rapida_oportunidades(:tenant, 7, :user)", [
+        'tenant' => Auth::user()->tenant_id,
+        'user'   => Auth::user()->id,
+      ]);
     }
     static function estadistica_cantidad_mensual() {
-      return DB::cache(60 * 60 * 2, "
+      return DB::select("
         SELECT
         	date_trunc('month', O.fecha_participacion)::date eje_x,
           count(*) eje_y,
           'PARTICIPACION' collection
         FROM osce.oportunidad O
-        WHERE O.fecha_participacion IS NOT NULL AND O.rechazado_el IS NULL AND O.archivado_el IS NULL
+        WHERE O.tenant_id = :tenant AND O.fecha_participacion IS NOT NULL AND O.rechazado_el IS NULL AND O.archivado_el IS NULL
         GROUP BY 1
         UNION
         SELECT
@@ -834,7 +853,7 @@ ORDER BY L.buenapro_fecha ASC, L.fecha_buena_hasta ASC, O.id ASC");
           count(*) eje_y,
           'PROPUESTA' collection
         FROM osce.oportunidad O
-        WHERE O.fecha_propuesta IS NOT NULL AND O.rechazado_el IS NULL AND O.archivado_el IS NULL
+        WHERE O.tenant_id = :tenant AND O.fecha_propuesta IS NOT NULL AND O.rechazado_el IS NULL AND O.archivado_el IS NULL
         GROUP BY 1
         UNION
 SELECT
@@ -842,7 +861,7 @@ SELECT
 	count(*) eje_y,
 	'BUENA PRO' collection
 FROM osce.oportunidad O
-WHERE O.fecha_propuesta IS NOT NULL
+WHERE O.tenant_id = :tenant AND O.fecha_propuesta IS NOT NULL
 	AND EXISTS(
 		SELECT P.id
 		FROM osce.cotizacion C
@@ -850,7 +869,9 @@ WHERE O.fecha_propuesta IS NOT NULL
 		WHERE C.oportunidad_id = O.id
 	)
 GROUP BY 1
-        ORDER BY 1 ASC");
+        ORDER BY 1 ASC", [
+          'tenant' => Auth::user()->tenant_id
+        ]);
     }
     public function render_estado() {
       if($this->estado == 1) {
@@ -883,11 +904,32 @@ GROUP BY 1
         3 => array('name' => 'CERRADA', 'color' => '#2c2c2c'),
       ];
     }
-
+    static function selectPerdidos() {
+      return [
+        'PRECIO_COMPETENCIA' => array('name' => 'POR COMPETENCIA', 'color' => '#2c2c2c'),
+        'PRECIO_ELEVADO' => array('name' => 'POR PRECIO ELEVADO', 'color' => '#f3f3f3'),
+        'PRECIO_BAJO' => array('name' => 'POR PRECIO BAJO', 'color' => '#2dc72d'),
+        'MAL_ANEXO' => array('name' => 'POR MAL ANEXO', 'color' => '#2c2c2c'),
+        'DEFECTUOSO' => array('name' => 'POR DEFECTUOSO', 'color' => '#2c2c2c'),
+        'FICHA_TENICA' => array('name' => 'POR FICHA TECNICA', 'color' => '#2c2c2c'),
+        'FIRMAS' => array('name' => 'POR FIRMA', 'color' => '#2c2c2c'),
+        'VIGENCIA_PODER' => array('name' => 'POR COMPETENCIA', 'color' => '#2c2c2c'),
+        'ERROR_CONTRATO' => array('name' => 'POR CONTRATO ERRONEO', 'color' => '#2c2c2c'),
+        'EXPERIENCIA' => array('name' => 'POR EXPERIENCIA', 'color' => '#2c2c2c'),
+        'PERSONAL_CLAVE' => array('name' => 'POR PERSONAL CLAVE', 'color' => '#2c2c2c'),
+        'NO_ENVIADO' => array('name' => 'POR NO ENVIAR', 'color' => '#2c2c2c'),
+        'NO_PARTNER' => array('name' => 'POR DOC FABRICANTE', 'color' => '#2c2c2c'),
+        'OTRO' => array('name' => 'POR OTRO', 'color' => '#2c2c2c'),
+      ];
+    }
     public function json_load() {
       return Helper::json_load('oportunidad_' . $this->id);
     }
     public function json_save($x) {
       return Helper::json_save('oportunidad_' . $this->id);
+    }
+  protected static function booted()
+    {
+        static::addGlobalScope(new MultiTenant);
     }
 }

@@ -96,7 +96,7 @@ class PagoController extends Controller
       unset($data['value']);
       unset($data['_update']);
     }
-
+      $data['updated_by'] = Auth::user()->id;
       $pago->update($data);
       return response()->json(['status' => true , 'refresh' => true ]);
     }

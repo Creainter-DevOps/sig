@@ -116,37 +116,35 @@ class LicitacionController extends Controller {
   }
 public function aprobar(Request $request, Licitacion $licitacion)
 {
-  $oportunidad = $licitacion->oportunidad();
-  if(empty($oportunidad)) {
-    $licitacion->aprobar();
+  $proc = $licitacion->aprobar();
+
+  if($proc->estado == 200) {
     return response()->json([
       'status'   => true,
       'disabled' => true,
       'label'    => 'Oportunidad Aprobada!',
-      'message'  => 'Oportunidad ha sido registrada como aprobada',
+      'message'  => $proc->mensaje,
       'refresh'  => false,
       'class'    => 'success',
     ]);
-  } else {
-    if(empty($oportunidad->aprobado_el)) {
-      return response()->json([
-        'status'   => true,
-        'disabled' => true,
-        'label'    => 'Oportunidad Aprobada!',
-        'message'  => 'Oportunidad ha sido registrada como aprobada',
-        'refresh'  => false,
-        'class'    => 'success',
-      ]);
-    } else {
-      return response()->json([
+  } else if($proc->estado == 500) {
+    return response()->json([
         'status'   => false,
         'disabled' => true,
-        'label'    => 'Oportunidad ya aprobado',
-        'message'  => 'Ya fue aprobado anteriormente.',
+        'label'    => 'Ya existe',
+        'message'  => $proc->mensaje,
         'refresh'  => false,
         'class'    => 'warning',
       ]);
-    }
+  } else {
+      return response()->json([
+        'status'   => false,
+        'disabled' => true,
+        'label'    => 'Ops! Un problema',
+        'message'  => $proc->mensaje,
+        'refresh'  => false,
+        'class'    => 'warning',
+      ]);
   }
 }
 public function rechazar(Request $request, Licitacion $licitacion)
@@ -161,34 +159,34 @@ public function rechazar(Request $request, Licitacion $licitacion)
     ]);
   }
 
-  $licitacion->rechazar($motivo);
-  if(empty($oportunidad)) {
-      return response()->json([
-        'status'   => true,
-        'disabled' => true,
-        'label'    => 'Rechazado',
-        'message'  => 'Se ha realizado registro con éxito.',
-      ]);
-  } else {
-    if(empty($oportunidad->rechazado_el)) {
-      return response()->json([
-        'status'   => true,
-        'disabled' => true,
-        'label'    => 'Oportunidad Rechazada!',
-        'message'  => 'Oportunidad ha sido registrada como rechazada',
-        'refresh'  => false,
-        'class'    => 'success',
-      ]);
-    } else {
-      return response()->json([
+  $proc = $licitacion->rechazar($motivo);
+  if($proc->estado == 200) {
+    return response()->json([
+      'status'   => true,
+      'disabled' => true,
+      'label'    => 'Oportunidad Aprobada!',
+      'message'  => $proc->mensaje,
+      'refresh'  => false,
+      'class'    => 'success',
+    ]);
+  } else if($proc->estado == 500) {
+    return response()->json([
         'status'   => false,
         'disabled' => true,
-        'label'    => 'Oportunidad ya rechazada',
-        'message'  => 'Ya fue rechazada anteriormente.',
+        'label'    => 'Ya existe',
+        'message'  => $proc->mensaje,
         'refresh'  => false,
         'class'    => 'warning',
       ]);
-    }
+  } else {
+      return response()->json([
+        'status'   => false,
+        'disabled' => true,
+        'label'    => 'Ops! Un problema',
+        'message'  => $proc->mensaje,
+        'refresh'  => false,
+        'class'    => 'warning',
+      ]);
   }
 }
 

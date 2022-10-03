@@ -78,13 +78,13 @@
                                 <span>Social links</span>
                             </a>
                         </li>-->
-                        <li class="nav-item">
+                        <!--<li class="nav-item">
                             <a class="nav-link d-flex align-items-center" id="account-pill-connections" data-toggle="pill"
                                 href="#account-vertical-connections" aria-expanded="false">
                                 <i class="bx bx-link"></i>
                                 <span>Connections</span>
                             </a>
-                        </li>
+                        </li>-->
                         <!--<li class="nav-item">
                             <a class="nav-link d-flex align-items-center" id="account-pill-notifications" data-toggle="pill"
                                 href="#account-vertical-notifications" aria-expanded="false">
@@ -1189,7 +1189,6 @@ width: 100%;grid-gap: 15px;justify-items: start;  " >
       }
 
       Fetchx({
-              title: "Guardando",
               url: "/etiquetas" ,
               type: "post",
               processData: false,
@@ -1199,12 +1198,13 @@ width: 100%;grid-gap: 15px;justify-items: start;  " >
               },
               data: formData,
               success: function (data) {
-               //containerImgFirmas.slideDown()
                  if(data.success){
-                   addTagFavor(tagFavor.value.toUpperCase(), data.id );
-                   tagFavor.value = '';  
-                 }else if(data.success == false ){
-                   toastr.info(data.message)    
+                   toastr.success(data.message);
+                   addTagFavor(tagFavor.value.toUpperCase(), data.id);
+                   tagFavor.value = '';
+                 } else {
+                   toastr.warning(data.message);
+                   tagFavor.value = '';
                  }
               }
             })
@@ -1215,7 +1215,6 @@ width: 100%;grid-gap: 15px;justify-items: start;  " >
       let formData = new FormData(frmContra);
       
       Fetchx({
-              title: "Guardando",
               url: "/etiquetas",
               type: "post",
               processData: false,
@@ -1225,16 +1224,16 @@ width: 100%;grid-gap: 15px;justify-items: start;  " >
               },
               data: formData,
               success: function (data) {
-
-               if ( data.success ) {
-                 addTagContra(tagContra.value, data.id);
-                 tagContra.value = '';  
-               
-               }else if(data.success == false ){
-                 toasr.info(data.message)    
-               }
+                if(data.success){
+                   toastr.success(data.message);
+                   addTagContra(tagContra.value.toUpperCase(), data.id);
+                   tagContra.value = '';
+                 } else {
+                   toastr.warning(data.message);
+                   tagContra.value = '';
+                 }
               }
-            })
+            });
 
     })
     

@@ -237,23 +237,6 @@
                         </div>
                     </div>
                 </div>
-            @else
-              <div class="col-12">
-                  <div style="text-align: center;background: #ffb16e;margin-bottom: 5px;color: #ffff;">
-                    Cotizacion 
-                  </div>
-                  <div class="row">
-                      <div class="col-12">
-                          <div class="card">
-                              <div class="card-content">
-                                  <div class="card-body">
-                                      @include('oportunidad.cotizaciones',  ['oportunidad' => $oportunidad ])
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-              </div>      
             @endif
             <div class="col-12">
                 <div class="row">

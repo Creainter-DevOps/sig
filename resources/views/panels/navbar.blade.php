@@ -23,10 +23,12 @@ data-bgcolor="@if(isset($configData['navbarBgColor'])){{$configData['navbarBgCol
             </div>
             </form>
           </li>
-          <li class="dropdown dropdown-notification nav-item"><a class="nav-link nav-link-label" href="#" data-toggle="dropdown"><i class="ficon bx bx-bell bx-tada bx-flip-horizontal"></i><span class="badge badge-pill badge-danger badge-up">5</span></a>
+          <li class="dropdown dropdown-notification nav-item"><a class="nav-link nav-link-label" href="#" data-toggle="dropdown"><i class="ficon bx bx-bell bx-tada bx-flip-horizontal"></i><span class="badge badge-pill badge-danger badge-up">{{ count(App\Actividad::pendientes_por_usuario()) }}</span></a>
             <ul class="dropdown-menu dropdown-menu-media dropdown-menu-right">
               <li class="dropdown-menu-header">
-                <div class="dropdown-header px-1 py-75 d-flex justify-content-between"><span class="notification-title">7 new Notification</span><span class="text-bold-400 cursor-pointer">Mark all as read</span></div>
+                <div class="dropdown-header px-1 py-75 d-flex justify-content-between"><span class="notification-title">{{ count(App\Actividad::pendientes_por_usuario()) }} Nuevas Notificaciones</span>
+                    <!-- <span class="text-bold-400 cursor-pointer">Mark all as read</span>-->
+                </div>
               </li>
               <li class="scrollable-container media-list">
               @foreach(App\Actividad::pendientes_por_usuario() as $n)
@@ -41,18 +43,19 @@ data-bgcolor="@if(isset($configData['navbarBgColor'])){{$configData['navbarBgCol
                   </div></a>
                   @endforeach
               </li>
-              <li class="dropdown-menu-footer"><a class="dropdown-item p-50 text-primary justify-content-center" href="javascript:void(0)">Read all notifications</a></li>
+              <!--<li class="dropdown-menu-footer"><a class="dropdown-item p-50 text-primary justify-content-center" href="javascript:void(0)">Read all notifications</a></li>-->
             </ul>
           </li>
           <li class="dropdown dropdown-user nav-item">
             <a class="dropdown-toggle nav-link dropdown-user-link" href="#" data-toggle="dropdown">
               <div class="user-nav d-sm-flex d-none">
-                <span class="user-name">{{ auth()->user()->usuario }}</span>
-                <span class="user-status text-muted">Available</span>
+                <span class="user-name">{{ ucfirst(auth()->user()->usuario) }}</span>
+                <!--<span class="user-status text-muted">Available</span>-->
               </div>
               <span><img class="round" src="{{asset('images/portrait/small/avatar-s-11.jpg')}}" alt="avatar" height="40" width="40"></span>
             </a>
             <div class="dropdown-menu dropdown-menu-right pb-0">
+              <!--
               <a class="dropdown-item" href="{{asset('page-user-profile')}}">
                 <i class="bx bx-user mr-50"></i> Edit Profile
               </a>
@@ -61,10 +64,10 @@ data-bgcolor="@if(isset($configData['navbarBgColor'])){{$configData['navbarBgCol
               </a>
               <a class="dropdown-item" href="{{asset('app-todo')}}">
                 <i class="bx bx-check-square mr-50"></i> Task</a>
-                <a class="dropdown-item" href="{{asset('app-chat')}}"><i class="bx bx-message mr-50"></i> Chats
+              <a class="dropdown-item" href="{{asset('app-chat')}}"><i class="bx bx-message mr-50"></i> Chats
               </a>
-              <div class="dropdown-divider mb-0"></div>
-              <a class="dropdown-item" href="{{asset('logout')}}"><i class="bx bx-power-off mr-50"></i> Logout</a>
+              <div class="dropdown-divider mb-0"></div>-->
+              <a class="dropdown-item" href="{{asset('logout')}}"><i class="bx bx-power-off mr-50"></i>Salir</a>
             </div>
           </li>
         </ul>

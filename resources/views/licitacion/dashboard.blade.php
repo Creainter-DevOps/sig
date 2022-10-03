@@ -102,9 +102,22 @@
                     <div style="font-size:10px;">{{ $v->etiquetas }}</div>
                   </td>
                   <td class="text-center" style="width:80px;">
-                    <a href="/oportunidades/{{ $v->id }}/">
-                      <i class="bx bx-show-alt"></i>
-                    </a>
+            <ul class="list-inline mb-0">
+              <li>
+                <i class="bx bx-dots-vertical-rounded" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></i>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                  <a class="dropdown-item" href="/oportunidades/{{ $v->id }}/">Ver Ficha de Oportunidad</a>
+                  @foreach ($v->empresasMenu() as $e)
+                    @if(!empty($e->cotizacion))
+                      <a class="dropdown-item" style="background: #cfffcf">Registrado con {{ $e->razon_social }}</a>
+                    @else
+                      <a class="dropdown-item" href="/oportunidades/{{ $v->id }}/interes/{{ $e->id }}" data-confirm data-button-dinamic>Interés con {{ $e->razon_social }}</a>
+                    @endif
+                  @endforeach
+                  <a class="dropdown-item" data-confirm-input="¿Por qué desea Rechazarlo?" href="/oportunidades/{{ $v->id }}/rechazar" data-button-dinamic>Rechazar Oportunidad</a>
+                </div>
+              </li>
+            </ul>
                     <div>{{ $v->montos }}</div>
                   </td>
                 </tr>
@@ -142,6 +155,9 @@
                   </td>
                   <td>
                     {!! $v->ganadora() !!}
+                    @if(!empty($v->perdido_por))
+                    <div style="color: red;text-align: center;font-size: 10px;background: #ffdfdf;">{{ App\Oportunidad::selectPerdidos()[$v->perdido_por]['name'] }}</div>
+                    @endif
                   </td>
                   <td class="text-center" style="width:120px;">
                     <span style="font-size: 10px;">{!! implode('<br/>', explode(',', $v->elaborado_por)) !!}</span>
@@ -192,10 +208,23 @@
                     <div style="font-size:10px;">{{ $v->etiquetas }}</div>
                   </td>
                   <td class="text-center" style="width:80px;">
-                    <a href="/oportunidades/{{ $v->id }}/">
-                      <i class="bx bx-show-alt"></i>
-                    </a>
-                    <div>{{ $v->montos }}</div>
+            <ul class="list-inline mb-0">
+              <li>
+                <i class="bx bx-dots-vertical-rounded" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></i>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                  <a class="dropdown-item" href="/oportunidades/{{ $v->id }}/">Ver Ficha de Oportunidad</a>
+                  @foreach ([] as $e)
+                    @if(!empty($e->cotizacion))
+                      <a class="dropdown-item" style="background: #cfffcf">Registrado con {{ $e->razon_social }}</a>
+                    @else
+                      <a class="dropdown-item" href="/oportunidades/{{ $v->id }}/interes/{{ $e->id }}" data-confirm data-button-dinamic>Interés con {{ $e->razon_social }}</a>
+                    @endif
+                  @endforeach
+                  <a class="dropdown-item" data-confirm-input="¿Por qué desea Rechazarlo?" href="/oportunidades/{{ $v->id }}/rechazar" data-button-dinamic>Rechazar Oportunidad</a>
+                </div>
+              </li>
+            </ul>
+            <div>{{ $v->montos }}</div>
                   </td>
                 </tr>
               @else
@@ -218,9 +247,22 @@
                     <div style="font-size:10px;">{{ $v->etiquetas }}</div>
                   </td>
                   <td class="text-center" style="width:80px;">
-                    <a href="/oportunidades/{{ $v->id }}/">
-                      <i class="bx bx-show-alt"></i>
-                    </a>
+            <ul class="list-inline mb-0">
+              <li>
+                <i class="bx bx-dots-vertical-rounded" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></i>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                  <a class="dropdown-item" href="/oportunidades/{{ $v->id }}/">Ver Ficha de Oportunidad</a>
+                  @foreach ([] as $e)
+                    @if(!empty($e->cotizacion))
+                      <a class="dropdown-item" style="background: #cfffcf">Registrado con {{ $e->razon_social }}</a>
+                    @else
+                      <a class="dropdown-item" href="/oportunidades/{{ $v->id }}/interes/{{ $e->id }}" data-confirm data-button-dinamic>Interés con {{ $e->razon_social }}</a>
+                    @endif
+                  @endforeach
+                  <a class="dropdown-item" data-confirm-input="¿Por qué desea Rechazarlo?" href="/oportunidades/{{ $v->id }}/rechazar" data-button-dinamic>Rechazar Oportunidad</a>
+                </div>
+              </li>
+            </ul>
                     <div>{{ $v->montos }}</div>
                   </td>
                 </tr>

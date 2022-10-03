@@ -196,13 +196,13 @@ width: 100%;
     padding: 10px;
     background: #fff;
     position: relative;
-    height: 70px;
+    height: 80px;
     margin-bottom: 10px;
 }
 .voip_call i {
   font-size: 25px;
     position: absolute;
-    top: 35px;
+    top: 50px;
     left: 240px;
     color: #62ff2e;
 }
@@ -218,7 +218,7 @@ width: 100%;
 .voip_to {
   right: 0;  
 }
-.voip_side h4 {
+.voip_side input {
   font-size: 18px;
   color: #000;
   text-align: center;
@@ -382,11 +382,11 @@ socket.on('connect', () => {
 
 socket.on('caller', function(data) {
   let html ='<div class="voip_side voip_from">';
-  html +='<h4>' + data.desde_rotulo + '</h4>';
+  html +='<input type="text" data-editable="/contactos/' + data.desde_id + '?_update=nombres" value="' + data.desde_rotulo + '">';
   html +='<div>' + data.desde + '</div>';
   html +='</div>';
   html +='<div class="voip_side voip_to">';
-  html +='<h4>' + data.hasta_rotulo + '</h4>';
+  html +='<input type="text" data-editable="/contactos/' + data.hasta_id + '?_update=nombres" value="' + data.hasta_rotulo + '">';
   html +='<div>' + data.hasta + '</div>';
   html +='</div>';
   html +='<i class="bx bx-phone"></i>';
@@ -395,9 +395,10 @@ socket.on('caller', function(data) {
   var box = $('<div>').addClass('voip_call').html(html);
 
   $(".voip_callers").append(box);
+  render_editable();
   setTimeout(function() {
     box.slideUp();
-  }, 15000);
+  }, 100000);
   console.log('broadcast', data);
 });
 socket.on('registred', function(data) {

@@ -116,7 +116,7 @@ class OportunidadController extends Controller {
     $data = $request->all();
     $refresh = false;
 
-    if(!empty($data['_update'])) {
+    if(!empty($data['_update'])) {# && !in_array($data['_update'], ['perdido_por'])) {
       if(!empty($oportunidad->{$data['_update']})) {
         if($oportunidad->estado == 3) {
           return response()->json([
@@ -203,55 +203,74 @@ class OportunidadController extends Controller {
   }
   public function aprobar(Request $request, Oportunidad $oportunidad)
   {
-    if(!empty($oportunidad->aprobado_el)) {
-      $oportunidad->aprobar();
-      return response()->json([
-        'status'   => true,
-        'disabled' => true,
-        'label'    => 'Oportunidad Aprobada!',
-        'message'  => 'Oportunidad ha sido registrada como aprobada',
-        'refresh'  => true,
-        'class'    => 'success',
-      ]);
-    } else {
-      return response()->json([
+  $proc = $oportunidad->aprobar();
+  if($proc->estado == 200) {
+    return response()->json([
+      'status'   => true,
+      'disabled' => true,
+      'label'    => 'Oportunidad Aprobada!',
+      'message'  => $proc->mensaje,
+      'refresh'  => false,
+      'class'    => 'success',
+    ]);
+  } else if($proc->estado == 500) {
+    return response()->json([
         'status'   => false,
         'disabled' => true,
-        'label'    => 'Oportunidad ya aprobada',
-        'message'  => 'Ya fue aprobada anteriormente.',
+        'label'    => 'Ya existe',
+        'message'  => $proc->mensaje,
         'refresh'  => false,
         'class'    => 'warning',
       ]);
-    }
+  } else {
+      return response()->json([
+        'status'   => false,
+        'disabled' => true,
+        'label'    => 'Ops! Un problema',
+        'message'  => $proc->mensaje,
+        'refresh'  => false,
+        'class'    => 'warning',
+      ]);
+  }
   }
   public function revisar(Request $request, Oportunidad $oportunidad)
   {
-    if(empty($oportunidad->revisado_el)) {
       if(empty($oportunidad->montos_variacion())) {
         return response()->json([
           'status'  => false,
           'message' => 'Debe cotizar la Oportunidad',
         ]);
       }
-      $oportunidad->revisar();
-      return response()->json([
-        'status'   => true,
-        'disabled' => true,
-        'label'    => 'Oportunidad Revisada!',
-        'message'  => 'Oportunidad ha sido registrada como revisada',
-        'refresh'  => false,
-        'class'    => 'success',
-      ]);
-    } else {
-      return response()->json([
+      $proc = $oportunidad->revisar();
+      
+      if($proc->estado == 200) {
+    return response()->json([
+      'status'   => true,
+      'disabled' => true,
+      'label'    => 'Oportunidad Aprobada!',
+      'message'  => $proc->mensaje,
+      'refresh'  => false,
+      'class'    => 'success',
+    ]);
+  } else if($proc->estado == 500) {
+    return response()->json([
         'status'   => false,
         'disabled' => true,
-        'label'    => 'Oportunidad ya revisada',
-        'message'  => 'Ya fue revisada anteriormente.',
+        'label'    => 'Ya existe',
+        'message'  => $proc->mensaje,
         'refresh'  => false,
         'class'    => 'warning',
       ]);
-    }
+  } else {
+      return response()->json([
+        'status'   => false,
+        'disabled' => true,
+        'label'    => 'Ops! Un problema',
+        'message'  => $proc->mensaje,
+        'refresh'  => false,
+        'class'    => 'warning',
+      ]);
+  }
   }
   public function rechazar(Request $request, Oportunidad $oportunidad)
   {
@@ -263,13 +282,35 @@ class OportunidadController extends Controller {
         'message' => 'Debe indicar el motivo',
       ]);
     }
-    $oportunidad->rechazar($motivo);
-      return response()->json([
-        'status'   => true,
+    $proc = $oportunidad->rechazar($motivo);
+      if($proc->estado == 200) {
+    return response()->json([
+      'status'   => true,
+      'disabled' => true,
+      'label'    => 'Oportunidad Aprobada!',
+      'message'  => $proc->mensaje,
+      'refresh'  => false,
+      'class'    => 'success',
+    ]);
+  } else if($proc->estado == 500) {
+    return response()->json([
+        'status'   => false,
         'disabled' => true,
-        'label'    => 'Rechazado!',
-        'message'  => 'Se ha rechazado correctamente.',
+        'label'    => 'Ya existe',
+        'message'  => $proc->mensaje,
+        'refresh'  => false,
+        'class'    => 'warning',
       ]);
+  } else {
+      return response()->json([
+        'status'   => false,
+        'disabled' => true,
+        'label'    => 'Ops! Un problema',
+        'message'  => $proc->mensaje,
+        'refresh'  => false,
+        'class'    => 'warning',
+      ]);
+  }
   }
 
   public function archivar(Request $request, Oportunidad $oportunidad)
@@ -281,27 +322,65 @@ class OportunidadController extends Controller {
         'message' => 'Debe indicar el motivo',
       ]);
     }
-    $oportunidad->archivar($motivo);
-    if($request->ajax()) {
-      return response()->json([
-        'status'   => true,
+    $proc = $oportunidad->archivar($motivo);
+    if($proc->estado == 200) {
+    return response()->json([
+      'status'   => true,
+      'disabled' => true,
+      'label'    => 'Oportunidad Aprobada!',
+      'message'  => $proc->mensaje,
+      'refresh'  => false,
+      'class'    => 'success',
+    ]);
+  } else if($proc->estado == 500) {
+    return response()->json([
+        'status'   => false,
         'disabled' => true,
-        'label'    => 'Archivado!',
-        'message'  => 'Se ha realizado registro con éxito.',
-        'data'     => $oportunidad
+        'label'    => 'Ya existe',
+        'message'  => $proc->mensaje,
+        'refresh'  => false,
+        'class'    => 'warning',
       ]);
-    } else {
-      return redirect('/oportunidades');
-    }
+  } else {
+      return response()->json([
+        'status'   => false,
+        'disabled' => true,
+        'label'    => 'Ops! Un problema',
+        'message'  => $proc->mensaje,
+        'refresh'  => false,
+        'class'    => 'warning',
+      ]);
+  }
   }
   public function interes(Request $request, Oportunidad $oportunidad, Empresa $empresa) {
-    $oportunidad->registrar_interes($empresa);
+    $proc = $oportunidad->registrar_interes($empresa);
+    if($proc->estado == 200) {
     return response()->json([
-        'status'   => true,
+      'status'   => true,
+      'disabled' => true,
+      'label'    => 'Oportunidad Aprobada!',
+      'message'  => $proc->mensaje,
+      'refresh'  => false,
+      'class'    => 'success',
+    ]);
+  } else if($proc->estado == 500) {
+    return response()->json([
+        'status'   => false,
         'disabled' => true,
-        'label'    => 'Interesante!',
-        'message'  => 'Se ha realizado registro con éxito.',
-        'refresh'  => true,
+        'label'    => 'Ya existe',
+        'message'  => $proc->mensaje,
+        'refresh'  => false,
+        'class'    => 'warning',
       ]);
+  } else {
+      return response()->json([
+        'status'   => false,
+        'disabled' => true,
+        'label'    => 'Ops! Un problema',
+        'message'  => $proc->mensaje,
+        'refresh'  => false,
+        'class'    => 'warning',
+      ]);
+  }
   }
 }

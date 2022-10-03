@@ -81,10 +81,12 @@ SELECT
   P.moneda_id,
   osce.fn_convertir_moneda(1, P.monto, P.moneda_id, P.fecha) soles
 FROM osce.pago P
-JOIN osce.proyecto PP ON PP.id = P.proyecto_id
+JOIN osce.proyecto PP ON PP.id = P.proyecto_id AND PP.tenant_id = :tenant
 JOIN osce.oportunidad O ON O.id = PP.oportunidad_id
 WHERE P.fecha <= NOW() + INTERVAL '10' DAY AND P.estado_id IN (1,2)
-ORDER BY P.fecha ASC");
+ORDER BY P.fecha ASC", [
+  'tenant' => Auth::user()->tenant_id
+]);
     }
     static function facturas_por_cobrar() {
       return DB::select("

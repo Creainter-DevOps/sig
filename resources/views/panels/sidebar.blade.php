@@ -66,6 +66,12 @@
                                 <span class="menu-title">Dashboard</span>
                               </a>
                             </li>
+                            <li class="nav-item {{(request()->is('actividades/calendario')) ? 'active' : '' }}">
+                              <a href="/actividades/calendario">
+                                <i class="menu-livicon livicon-evo-holder" data-icon="calendar"></i>
+                                <span class="menu-title">Mi Calendario</span>
+                              </a>
+                            </li>
                             <li class="nav-item {{(request()->is('actividades/kanban')) ? 'active' : '' }}">
                               <a href="/actividades/kanban">
                                 <i class="menu-livicon livicon-evo-holder" data-icon="check"></i>
@@ -77,12 +83,6 @@
                               <a href="/licitaciones">
                                 <i class="menu-livicon livicon-evo-holder" data-icon="line-chart"></i>
                                 <span class="menu-title">Panel de Trabajo</span>
-                              </a>
-                            </li>
-                            <li class="nav-item {{(request()->is('licitaciones/por-revisar')) ? 'active' : '' }}">
-                              <a href="/licitaciones/por-revisar">
-                                <i class="menu-livicon livicon-evo-holder" data-icon="line-chart"></i>
-                                <span class="menu-title">Por Revisar</span>
                               </a>
                             </li>
                             <!-- <li class="nav-item {{(request()->is('licitaciones/aprobadas')) ? 'active' : '' }}">
@@ -147,9 +147,9 @@
                                                           <span class="menu-title">Productos</span>
                                                   </a>
                             </li> */ ?>
-                                                    <li class="nav-item {{(request()->is('misempresas'.'*')) ? 'active' : '' }}   ">
-              <a href="https://sig.creainter.com.pe/misempresas">
-                                        <i class="menu-livicon livicon-evo-holder" data-icon="diagram"></i>
+                                                    <li class="nav-item {{(request()->is('empresas'.'*')) ? 'active' : '' }}   ">
+                                                        <a href="https://sig.creainter.com.pe/empresas">
+                                                    <i class="menu-livicon livicon-evo-holder" data-icon="diagram"></i>
                                                           <span class="menu-title">Empresas</span>
                                                   </a>
                             </li>
@@ -192,6 +192,15 @@
                                         <i class="menu-livicon livicon-evo-holder" data-icon="line-chart"></i>
                                                           <span class="menu-title">Reportes</span>
                                                   </a>
+                            </li>
+
+                            <li class="navigation-header"><span>Configuraciones</span></li>
+                                
+                            <li class="nav-item {{(request()->is('misempresas'.'*')) ? 'active' : '' }}   ">
+                                <a href="https://sig.creainter.com.pe/misempresas">
+                            <i class="menu-livicon livicon-evo-holder" data-icon="diagram"></i>
+                                  <span class="menu-title">Empresas</span>
+                          </a>
                             </li>
                             <li class="navigation-header"><span>Acceso directo</span></li>
                             <li class="nav-item {{(request()->is('reportes')) ? 'active' : '' }}  ">

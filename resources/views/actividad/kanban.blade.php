@@ -16,16 +16,40 @@
   min-height: 400px!important;
 }
 .kanban-item[data-is_linked=true] {
-  border-right: 5px solid #8fa4b9;
+  background: #d7d7d7;
+  color: #181818;
 }
 .kanban-container .kanban-board .kanban-drag {
   max-height: 750px;
   overflow: auto;
 }
+.kanban-container .kanban-board {
+  width: 32%!important;
+  margin: 0 0.5rem 1rem 0 !important;
+}
+.kanban-container .kanban-board .kanban-drag {
+  display: inline-flex;
+  flex-wrap: wrap;
+}
+.kanban-container .kanban-item {
+  width: 100%;
+  max-width: 210px;
+  margin: 0 auto;
+  height: 160px;
+}
 .itemform {
   padding: 5px 10px;
   border-radius: 3px;
   background: #fafafb;
+}
+.kanban-container .kanban-board .kanban-item:before {
+  background-color: #8273ff;
+}
+.kanban-item-title {
+  text-align: center;
+  background: #8374ff;
+  color: #fff;
+  font-size: 11px;
 }
 </style>
 @endsection
@@ -203,6 +227,7 @@ $(document).ready(function() {
           "</span>" +
           "</div>";
 
+      $(it).prepend("<div class=\"kanban-item-title\" style=\"background-color:" + $(it).attr('data-color') + "\">" + $(it).attr('data-contexto') + "</div>");
       $(it).append(
           '<div class="kanban-footer d-flex justify-content-between mt-1">' +
           '<div class="kanban-footer-left d-flex">' + board_item_dueDate + 
@@ -247,6 +272,13 @@ $(document).ready(function() {
         '<select class="form-control" name="asignado_id">' +
         @foreach(App\Actividad::usuarios() as $u)
         '<option value="{{ $u->id }}">{{ $u->usuario }}</option>' +
+        @endforeach
+        '</select>' +
+        "</div>" +
+        '<div class="form-group">' +
+        '<select class="form-control" name="proyecto_id">' +
+        @foreach(App\Proyecto::activos() as $u)
+        '<option value="{{ $u->id }}">{{ $u->rotulo }}</option>' +
         @endforeach
         '</select>' +
         "</div>" +

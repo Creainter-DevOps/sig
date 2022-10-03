@@ -10,10 +10,10 @@
 @endif
     <input type="hidden" name="proyecto_id" value="{{ $actividad->proyecto_id }}">
     <input type="hidden" name="oportunidad_id" value="{{ $actividad->oportunidad_id }}">
-    <input type="hidden" name="tipo" value="{{ $actividad->tipo }}">
-    @if($actividad->tipo == 'LLAMADA')
+    <input type="hidden" name="tipo_id" value="{{ $actividad->tipo_id }}">
+    @if($actividad->tipo_id == 2)
       @include('actividad.form-llamada')
-    @elseif($actividad->tipo == 'NOTA')
+    @elseif($actividad->tipo_id == 5)
       @include('actividad.form-nota')
     @else
       @include('actividad.form-reunion')

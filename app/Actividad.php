@@ -28,7 +28,7 @@ class Actividad extends Model
     protected $fillable = [
       'tenant_id','tipo_id','usuario_id', 'oportunidad_id', 'cliente_id', 'contacto_id', 'cotizacion_id', 'entregable_id', 'proyecto_id', 'empresa_id','texto', 'created_by','estado', 'importancia', 'fecha_terminado',
       'fecha_limite', 'asignado_id','fecha_comienzo', 'color', 'orden', 'bloque_id' , 'nombre', 'eliminado','link','direccion','realizado','fecha','hora','importancia','contenido',
-      'fecha_hasta','callerid_id','callerid_to','llamada_id'
+      'fecha_hasta','callerid_id','callerid_to','llamada_id','updated_by'
     ];
 
     /**
@@ -181,24 +181,31 @@ class Actividad extends Model
     }
     public static function kanban() {
       return DB::select("
-(
-	SELECT id, estado, fecha, hora, fecha_limite, texto, created_by, asignado_id, estado, importancia,color, tiempo_estimado, vinculado, link, osce.fn_usuarios_a_rotulo(A.tenant_id, A.asignado_id) asignado_a
+SELECT COALESCE(P.alias, O.rotulo) contexto, COALESCE(P.color, '#b3b3b3') color, A.*
+FROM (SELECT * FROM ((
+	SELECT id, estado, fecha, hora, fecha_limite, texto, created_by, asignado_id, estado, importancia, tiempo_estimado, vinculado, link, osce.fn_usuarios_a_rotulo(A.tenant_id, A.asignado_id) asignado_a,
+    proyecto_id, oportunidad_id
 	FROM osce.actividad A
 	WHERE A.tenant_id = 1 AND A.estado = 1 AND (A.created_by = ANY(osce.fn_usuario_supervisados(:tenant, :user)) OR A.asignado_id && osce.fn_usuario_supervisados(:tenant, :user))
+    AND ((A.vinculado IS TRUE AND A.fecha <= NOW() + INTERVAL '2' DAY) OR (A.vinculado IS FALSE AND A.fecha <= NOW() + INTERVAL '10' DAY))
 	ORDER BY A.fecha DESC
 ) UNION (
-	SELECT id, estado, fecha, hora, fecha_limite, texto, created_by, asignado_id, estado, importancia,color, tiempo_estimado, vinculado, link, osce.fn_usuarios_a_rotulo(A.tenant_id, A.asignado_id) asignado_a
+	SELECT id, estado, fecha, hora, fecha_limite, texto, created_by, asignado_id, estado, importancia, tiempo_estimado, vinculado, link, osce.fn_usuarios_a_rotulo(A.tenant_id, A.asignado_id) asignado_a,
+    proyecto_id, oportunidad_id
 	FROM osce.actividad A
 	WHERE A.tenant_id = 1 AND A.estado = 2 AND (A.created_by = ANY(osce.fn_usuario_supervisados(:tenant, :user)) OR A.asignado_id && osce.fn_usuario_supervisados(:tenant, :user))
 	ORDER BY A.fecha DESC
 ) UNION (
-	SELECT id, estado, fecha, hora, fecha_limite, texto, created_by, asignado_id, estado, importancia,color, tiempo_estimado, vinculado, link, osce.fn_usuarios_a_rotulo(A.tenant_id, A.asignado_id) asignado_a
+	SELECT id, estado, fecha, hora, fecha_limite, texto, created_by, asignado_id, estado, importancia, tiempo_estimado, vinculado, link, osce.fn_usuarios_a_rotulo(A.tenant_id, A.asignado_id) asignado_a,
+    proyecto_id, oportunidad_id
 	FROM osce.actividad A
 	WHERE A.tenant_id = 1 AND A.estado = 3 AND (A.created_by = ANY(osce.fn_usuario_supervisados(:tenant, :user)) OR A.asignado_id && osce.fn_usuario_supervisados(:tenant, :user))
-	ORDER BY A.fecha_terminado DESC
+	ORDER BY A.updated_on DESC
 	LIMIT 30
-)
-ORDER BY fecha ASC, hora ASC", [
+)) A) A
+LEFT JOIN osce.proyecto P ON P.id = A.proyecto_id
+LEFT JOIN osce.oportunidad O ON O.id = A.oportunidad_id
+ORDER BY A.vinculado ASC, A.fecha ASC, 1 ASC, A.hora ASC", [
   'tenant' => Auth::user()->tenant_id,
   'user'   => Auth::user()->id
 ]);
@@ -256,9 +263,8 @@ ORDER BY fecha ASC, hora ASC", [
     }
     public static function fillImportancia() {
       return [   
-          1 => 'Baja',
-          2 => 'Media',
-          3 => 'Alta' 
+          0 => 'Baja',
+          1 => 'Alta',
       ];
     }
     public static function timeline($into) {
@@ -267,16 +273,16 @@ ORDER BY fecha ASC, hora ASC", [
       }
       $where = [];
       if(!empty($into['proyecto_id'])) {
-        $where[] = 'A.proyecto_id = '. $into['licitacion_id'];
-      }
+        $where[] = 'A.proyecto_id = '. $into['proyecto_id'];
+      } else
+      if(!empty($into['oportunidad_id'])) {
+        $where[] = 'A.oportunidad_id = '. $into['oportunidad_id'];
+      } else
       if(!empty($into['licitacion_id'])) {
         $where[] = 'A.licitacion_id = '. $into['licitacion_id'];
       }
-      if(!empty($into['oportunidad_id'])) {
-        $where[] = 'A.oportunidad_id = '. $into['oportunidad_id'];
-      }
       $where = !empty($where) ? 'WHERE ' . implode(' OR ', $where) : '';
-        $result =  DB::select('
+      $result =  DB::select('
             SELECT
               A.id,A.estado, A.importancia,T.tipo tipo, T.tiempo_estimado tiempo_maximo, A.tiempo_estimado tiempo_calculado, A.fecha, A.hora, U1.usuario,
               A.texto descripcion, A.created_on
@@ -326,9 +332,16 @@ ORDER BY fecha ASC, hora ASC", [
     }
     public static function calendario($user_id, $desde, $hasta) {
       return DB::select("
-        SELECT C.*, P.color, UPPER(COALESCE(L.rotulo,O.rotulo, P.rotulo)) descripcion
+        SELECT C.*, COALESCE(P.color, '#0086f9') color,
+          COALESCE(AT.descripcion, AT.tipo) tipo,
+          A.texto descripcion,
+          UPPER(COALESCE(L.rotulo, O.rotulo, P.rotulo, 'LIBRE')) seccion,
+          osce.fn_usuario_rotulo(A.created_by) created_by,
+          osce.fn_usuarios_a_rotulo(A.tenant_id, A.asignado_id) asignados,
+          A.importancia
         FROM osce.fn_obtener_actividades_de_calendario(:tenant, :user, :desde, :hasta) C
         JOIN osce.actividad A ON A.id = C.id
+        LEFT JOIN osce.actividad_tipo AT ON AT.id = A.tipo_id
         LEFT JOIN osce.proyecto P ON P.id = A.proyecto_id
         LEFT JOIN osce.oportunidad O ON O.id = A.oportunidad_id
         LEFT JOIN osce.licitacion L ON L.id = O.licitacion_id
