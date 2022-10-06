@@ -32,9 +32,9 @@ class DocumentoController extends Controller {
   public function index( Request $request ) {
     $search = $request->input('search');
     if(!empty($search)){
-      $listado = Documento::search($search)->paginate(15)->appends(request()->query());
+      $listado = Documento::where('tenant_id', '=', Auth::user()->tenant_id)->search($search)->paginate(15)->appends(request()->query());
     } else {
-      $listado = Documento::orderBy( 'id', 'desc')->paginate(15)->appends(request()->query());
+      $listado = Documento::where('tenant_id', '=', Auth::user()->tenant_id)->orderBy( 'id', 'desc')->paginate(15)->appends(request()->query());
     }
     $this->viewBag['listado'] = $listado;
     return view('documento.index', $this->viewBag  );

@@ -379,11 +379,10 @@
                                                         <div class="controls">
                                                               <label>Sellos</label>
                                                               <p class="tex-muted description">Los sellos seran utilizados en los documentos, expedientes y anexos .</p>
-
                                                             <div style="" >
                                                               <p>Para ello debera realiza los siguientes pasos</p>
                                                               <ul>
-                                                                 <li>Descargar la plantilla.<a href="/static/cloud/FORMATO-SELLOS.pdf" target="_blank" > Aqui</a> </li>  
+                                                                 <li>Descargar la plantilla.<a href="/static/cloud/FORMATO_VISADO.pdf" target="_blank">Aqui</a></li>  
                                                                  <li>Cargar el documento escaneado con las firmas o sellos  en cada recuadro.</li>  
                                                                  <li>Procesar y guardar.</li>  
                                                               </ul>
@@ -434,7 +433,7 @@
                                                             <p class="tex-muted description">La firmas seran utilizados en los documentos, expedientes y anexos .</p>
                                                             <p>Para ello debera realiza los siguientes pasos</p>
                                                             <ul>
-                                                               <li>Descargar la plantilla.<a href="/static/cloud/FORMATO-SELLOS.pdf" target="_blank" > Aqui</a> </li>  
+                                                               <li>Descargar la plantilla.<a href="/static/cloud/FORMATO_VISADO.pdf" target="_blank" > Aqui</a> </li>  
                                                                <li>Cargar el documento escaneado con las firmas o sellos  en cada recuadro.</li>  
                                                                <li>Procesar y guardar.</li>  
                                                             </ul>
@@ -1110,8 +1109,8 @@ width: 100%;grid-gap: 15px;justify-items: start;  " >
       if(file){
         var reader = new FileReader();
         reader.onload = function() {
-          evt.target.closest(".media").querySelector("a > img.rounded").src = reader.result  
-          evt.target.closest(".media").querySelector("a").style.display = 'block'  
+          //evt.target.closest(".media").querySelector("a > img.rounded").src = reader.result  
+          //evt.target.closest(".media").querySelector("a").style.display = 'block'  
 
           let url = `/empresas/{{$empresa->id}}?_update=${evt.target.dataset.campo}`
           let formdata = new FormData();
@@ -1198,7 +1197,7 @@ width: 100%;grid-gap: 15px;justify-items: start;  " >
               },
               data: formData,
               success: function (data) {
-                 if(data.success){
+                 if(data.status) {
                    toastr.success(data.message);
                    addTagFavor(tagFavor.value.toUpperCase(), data.id);
                    tagFavor.value = '';
@@ -1224,7 +1223,7 @@ width: 100%;grid-gap: 15px;justify-items: start;  " >
               },
               data: formData,
               success: function (data) {
-                if(data.success){
+                if(data.status) {
                    toastr.success(data.message);
                    addTagContra(tagContra.value.toUpperCase(), data.id);
                    tagContra.value = '';

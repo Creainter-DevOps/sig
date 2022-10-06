@@ -7,6 +7,7 @@ use App\Cliente;
 use App\Oportunidad;
 use App\Helpers\Chartjs;
 use App\User;
+use App\Cuota;
 
 class DashboardController extends Controller
 {
@@ -63,7 +64,11 @@ class DashboardController extends Controller
         'color'      => '#3ad385',
       ),
     ]);
-    return view('dashboard', compact('cliente','chartjs','actividades'));
+    $oportunidades = Cuota::oportunidades();
+    $etiquetas     = Cuota::etiquetas();
+    $empresas      = Cuota::empresas();
+
+    return view('dashboard', compact('cliente','chartjs','actividades','oportunidades','etiquetas','empresas'));
   }
     //ecommerce
   public function dashboardEcommerce(){

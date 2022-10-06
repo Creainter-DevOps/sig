@@ -134,13 +134,15 @@ class EmpresaController extends Controller {
           $path_file =  config('constants.ruta_storage') . $firma['archivo'] ; 
           $commands[] = "/snap/bin/gsutil -D -h Cache-Control:\"Cache-Control:private, max-age=0, no-transform\" rm '" . $path_file . "'";
           EmpresaFirma::where('id',$firma['id'] )->delete();
-        }   
 
         $doc = Documento::where('id', $firma['documento_id']);
-        $path_file = config('constants.ruta_storage') . $doc->archivo;
-        $commands[] = "/snap/bin/gsutil -D -h Cache-Control:\"Cache-Control:private, max-age=0, no-transform\" rm '" . $path_file . "'";
-        //Helper::gsutil_rm( config('constants.ruta_storage') . $doc->archivo);
+
         $doc->delete();
+        }   
+
+        //$path_file = config('constants.ruta_storage') . $doc->archivo;
+        //$commands[] = "/snap/bin/gsutil -D -h Cache-Control:\"Cache-Control:private, max-age=0, no-transform\" rm '" . $path_file . "'";
+        //Helper::gsutil_rm( config('constants.ruta_storage') . $doc->archivo);
 
         return response()->json(['status' => true, 'firmas' => $firmas ]);
     }
@@ -169,7 +171,7 @@ class EmpresaController extends Controller {
 
     public function firmas_sellos_procesar( StoreFileRequest $request, Empresa $empresa ){
 
-      if($request->hasFile("file") ){
+      if($request->hasFile("file")){
 
         $extension = $request->file->extension();
         $fileName = auth()->id() . '_' . time() . '.'. $extension;

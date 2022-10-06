@@ -239,6 +239,7 @@ class Documento extends Model
 (
   SELECT
 	D.rotulo, D.cotizacion_id id,
+  D.oportunidad_id,
   D.elaborado_desde, (CASE WHEN D.elaborado_hasta IS NULL THEN CONCAT((hora(NOW() - D.elaborado_desde))::text, '...') ELSE hora(D.elaborado_hasta - D.elaborado_desde)::text END) duracion_elaborado,
   D.procesado_desde, (CASE WHEN D.procesado_desde IS NULL THEN NULL ELSE (CASE WHEN D.procesado_hasta IS NULL THEN CONCAT(hora(NOW() - D.procesado_desde)::text, '...') ELSE hora(D.procesado_hasta - D.procesado_desde)::text END) END) duracion_procesado,
   osce.fn_usuario_rotulo(D.elaborado_por) usuario
@@ -247,6 +248,7 @@ class Documento extends Model
   WHERE D.es_mesa IS TRUE AND D.elaborado_por IS NOT NULL AND D.elaborado_desde IS NOT NULL AND D.elaborado_hasta IS NULL AND D.tenant_id = :tenant
 ) UNION (
   SELECT D.rotulo, D.cotizacion_id id,
+  D.oportunidad_id,
 	D.elaborado_desde, (CASE WHEN D.elaborado_hasta IS NULL THEN CONCAT((hora(NOW() - D.elaborado_desde))::text, '...') ELSE hora(D.elaborado_hasta - D.elaborado_desde)::text END) duracion_elaborado,
   D.procesado_desde, (CASE WHEN D.procesado_desde IS NULL THEN NULL ELSE (CASE WHEN D.procesado_hasta IS NULL THEN CONCAT(hora(NOW() - D.procesado_desde)::text, '...') ELSE hora(D.procesado_hasta - D.procesado_desde)::text END) END) duracion_procesado,
 	osce.fn_usuario_rotulo(D.elaborado_por) usuario
@@ -256,7 +258,7 @@ class Documento extends Model
     AND D.elaborado_desde::date = NOW()::date
   ORDER BY D.elaborado_desde DESC
 )
-ORDER BY 3 DESC", ['tenant' => Auth::user()->tenant_id]));
+ORDER BY 4 DESC", ['tenant' => Auth::user()->tenant_id]));
     }
     public function CompressWorkspace() {
       return 'doc-workspace-' . $this->id . '.tar.gz';

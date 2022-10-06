@@ -33,6 +33,9 @@
     <!-- END: Theme JS-->
 @if(Auth::user())
 <style>
+.hovered {
+  background-color: #9dff9d!important;
+}
 .fell {
     position: fixed;
     z-index: 999999;
@@ -234,10 +237,66 @@ width: 100%;
   left: 235px;
   font-size: 11px;
 }
+.todo_block {
+    position: fixed;
+    bottom: 0;
+    left: 270px;
+    background: #ffe27a;
+    max-width: 450px;
+    width: 100%;
+    min-height: 50px;
+    z-index: 99;
+    padding: 5px;
+    border-radius: 5px 5px 0 0;
+    font-size: 12px;  
+}
+.todo_block_btn {
+  position: absolute;
+    top: -23px;
+    left: 10px;
+    background: #fce173;
+    padding: 4px;
+    border-radius: 5px 5px 0 0;
+    font-size: 13px;
+    color: #000;
+    cursor:pointer;
+}
+.todo_block table {
+  width: 100%;
+  text-align: center;
+}
+.todo_block thead {
+  background: #bb9500;
+  color: #ffffff;
+}
+.todo_block tbody tr {
+  background: #fff;
+}
+.todo_block tbody tr:hover {
+  background: #ffdbc1;
+}
+.todo_block tbody td {
+  padding: 3px 0;
+}
 </style>
 
-<div class="voip_callers">
+<div class="todo_block">
+  <div class="todo_block_btn" onclick="javascript:todo_add();">Solicitar</div>
+  <div>
+    <table>
+      <thead>
+        <th>De</th>
+        <th>Petición</th>
+        <th>Link</th>
+        <th>Para</th>
+        <th>Estado</th>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
 </div>
+<div class="voip_callers"></div>
 
 <div class="actphone">
   <div class="actphone_id"></div>
@@ -276,6 +335,18 @@ width: 100%;
   </form>
 </div>
 <script>
+$(document).on('mouseover', '[data-link]', function() {
+  var link = $(this).attr('data-link');
+  $("[data-link='" + link + "']").addClass('hovered');
+  console.log('HOVER', link);
+});
+$(document).on('mouseout', '[data-link]', function() {
+  var link = $(this).attr('data-link');
+  $("[data-link='" + link + "']").removeClass('hovered');
+  console.log('HOVEROUT', link);
+});
+
+
 var actphone_inter = null;
 $(".actphone .cancelar").on('click', function() {
   $('.actphone').removeClass('visible');
@@ -373,10 +444,10 @@ var socket = io.connect('sig.creainter.com.pe:4001');
 socket.on('connect', () => {
   console.log('SOCKET CONECTADO');
   socket.emit('register', {
+    tid: {{ Auth::user()->tenant_id }},
     user_id: {{ Auth::user()->id }},
     user_name: '{{ Auth::user()->usuario }}',
     link: '{{ $_SERVER['REQUEST_URI'] }}',
-    slug: '{{ $_SERVER['REQUEST_URI'] }}'
   });
 });
 
@@ -409,7 +480,9 @@ socket.on('registred', function(data) {
   if(data.fell) {
     fell_init(data.fell);
   }
-
+  if(data.todo) {
+    todo_show(data.todo);
+  }
 });
 socket.on('sip_heredado', function(data) {
   console.log('sip_heredado', data);
@@ -419,10 +492,62 @@ socket.on('sip_end', function(data) {
   console.log('sip_end', data);
 //  sip_finalize();
 });
+socket.on('todo', function(data) {
+  todo_show(data);
+});
+socket.on('todo_mod', function(data) {
+  todo_mod(data);
+});
 var fell = null;
 var fell_names = {};
 var fell_list = {};
 
+function todo_add(url, texto) {
+  if(typeof url === 'undefined') {
+    url = '{{ $_SERVER['REQUEST_URI'] }}';
+  }
+  if(typeof texto == 'undefined') {
+    texto = prompt('Ingrese la petición');
+    if(!texto) {
+      return;
+    }
+    if(texto.trim() == '') {
+      return;
+    }
+  }
+  socket.emit('todo_add', {
+    texto: texto.toUpperCase(),
+    url: url,
+  });
+//  console.log('PEDIR', texto, document.location.href);
+}
+function todo_show(data) {
+   var b = $(".todo_block tbody");
+   b.empty();
+   for(var i in data) {
+     if(data.hasOwnProperty(i)) {
+       b.append($('<tr>').attr('data-id', data[i].id).attr('data-link', data[i].url)
+        .append($('<td>').text('@' + data[i].desde))
+        .append($('<td>').text(data[i].texto))
+        .append($('<td>').html($('<a>').attr('href', data[i].url).text(data[i].url)))
+        .append($('<td>').text('Todos'))
+        .append($('<td>').html($('<input>').attr('type','checkbox').on('change', function() {
+          var bid = $(this).closest('tr').attr('data-id');
+          socket.emit('todo_mod', {
+            id: bid,
+            status: $(this).is(':checked'),
+          });
+        })))
+      );
+     }
+   }
+}
+function todo_mod(data) {
+  console.log('MOD', data);
+  var b = $(".todo_block tbody");
+  var bloque = b.find("tr[data-id='" + data.id + "']");
+  bloque.find('input')[0].checked = data.status;
+}
 function fell_set_name(id, name) {
   if(typeof fell_names[id] !== 'undefined') {
     fell_names[id] = name;

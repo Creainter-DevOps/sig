@@ -12,7 +12,7 @@
               </thead>
               <tbody>
               @foreach(App\Documento::expedientesTrabajando() as $d)
-              <tr>
+              <tr data-link="/oportunidades/{{ $d->oportunidad_id }}/">
                 <td><a href="/expediente/{{ $d->id }}/inicio">{{ $d->rotulo }}</a></td>
                 <td>{{ fecha($d->elaborado_desde) }}</td>
                 <td>{{ hora($d->elaborado_desde) }}</td>

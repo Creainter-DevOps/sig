@@ -31,7 +31,7 @@
         <div class="table-responsive">
         <table class="table table-striped table-reduce" style="margin-bottom:0">
           <tr>
-            <th style="width:180px;">RESUMEN DEL MES</th>
+            <th style="width:180px;">DÍA</th>
             @foreach($chartjs['resumen'] as $n)
             <th class="text-center" style="padding: 1.15rem 10px;background:{{ date('d', strtotime($n->fecha)) == date('d') ? '#b7ffaf' : '' }}">{{ date('d', strtotime($n->fecha)) }}</th>
             @endforeach
@@ -56,6 +56,7 @@
           </tr>-->
         </table>
         </div>
+        <div style="text-align:right;font-size:11px;padding: 0 5px;">Tiempo de consulta: {{ $chartjs['execute']->time }} ms</div>
         </div>
       </div>
     </div>
@@ -69,7 +70,7 @@
         </div>
         <div class="card marketing-campaigns">
           <div class="card-header d-flex justify-content-between align-items-center pb-1">
-            <h4 class="card-title">Registro en Oportunidades ({{ count($participaciones_por_vencer) }})</h4>
+            <h4 class="card-title">Registro en Oportunidades</h4>
           </div>
           <div class="table-responsive" style="padding: 0 15px;">
             <table class="table table-striped table-reduce">
@@ -81,11 +82,11 @@
                 </tr>
               </thead>
               <tbody>
-@foreach($participaciones_por_vencer as $v)
+@foreach(App\Oportunidad::listado_participanes_por_vencer($execute) as $v)
                 @if(!empty($v->correo_id))
-                  <tr style="background: #fff9dc;">
+                  <tr data-link="/oportunidades/{{ $v->id }}/" style="background: #fff9dc;">
                 @else
-                  <tr>
+                  <tr data-link="/oportunidades/{{ $v->id }}/">
                 @endif
                   <td class="">
                     <div style="font-size:11px;">{!! $v->inx_rotulo !!}</div>
@@ -107,7 +108,7 @@
                 <i class="bx bx-dots-vertical-rounded" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></i>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                   <a class="dropdown-item" href="/oportunidades/{{ $v->id }}/">Ver Ficha de Oportunidad</a>
-                  @foreach ($v->empresasMenu() as $e)
+                  @foreach ([] as $e)
                     @if(!empty($e->cotizacion))
                       <a class="dropdown-item" style="background: #cfffcf">Registrado con {{ $e->razon_social }}</a>
                     @else
@@ -126,11 +127,12 @@
             </table>
             <!-- table ends -->
           </div>
+          <div style="text-align:right;font-size:11px;padding: 0 5px;">Tiempo de consulta: {{ $execute->time }} ms</div>
         </div>
         <div class="dashboard-marketing-campaign">
         <div class="card marketing-campaigns">
           <div class="card-header d-flex justify-content-between align-items-center pb-1">
-            <h4 class="card-title">Resultado en Oportunidades ({{ count($propuestas_en_pro) }})</h4>
+            <h4 class="card-title">Resultado en Oportunidades</h4>
           </div>
          <div class="table-responsive" style="padding: 0 15px;">
             <table class="table table-striped table-reduce">
@@ -144,8 +146,8 @@
                 </tr>
               </thead>
               <tbody>
-@foreach($propuestas_en_pro as $v)
-                <tr>
+@foreach(App\Oportunidad::listado_propuestas_buenas_pro($execute) as $v)
+                <tr data-link="/oportunidades/{{ $v->id }}/">
                   <td title="{{ $v->rotulo() }}" class="text-center">
                     <div>{!! $v->nomenclatura !!}</div>
                     <div><span class="{{ $v->estado_pro()['class'] }}">{{ $v->estado_pro()['message'] }}</span></div>
@@ -173,13 +175,14 @@
             </table>
             <!-- table ends -->
           </div>
+          <div style="text-align:right;font-size:11px;padding: 0 5px;">Tiempo de consulta: {{ $execute->time }} ms</div>
         </div>
       </div>
       </div>
       <div class="col-xl-6 col-12 dashboard-marketing-campaign">
         <div class="card marketing-campaigns">
           <div class="card-header d-flex justify-content-between align-items-center pb-1">
-            <h4 class="card-title">Expedientes ({{ count($propuestas_por_vencer) }})</h4>
+            <h4 class="card-title">Expedientes</h4>
           </div>
           <div class="table-responsive" style="padding: 0 15px;">
             <table class="table table-striped table-reduce">
@@ -191,9 +194,9 @@
                 </tr>
               </thead>
               <tbody>
-@foreach($propuestas_por_vencer as $v)
+@foreach(App\Oportunidad::listado_propuestas_por_vencer($execute) as $v)
                 @if(!empty($v->correo_id))
-                  <tr style="background: #fff9dc;">
+                  <tr data-link="/oportunidades/{{ $v->id }}/" style="background: #fff9dc;">
                   <td class="" style="max-width:200px;">
                     <div style="font-size:11px;"><i class="bx bx-envelope" style="font-size:12px"></i> {!! $v->inx_rotulo !!}</div>
                     @if(empty($v->revisado_el))
@@ -213,6 +216,7 @@
                 <i class="bx bx-dots-vertical-rounded" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></i>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                   <a class="dropdown-item" href="/oportunidades/{{ $v->id }}/">Ver Ficha de Oportunidad</a>
+                  <a class="dropdown-item" href="javascript:todo_add('/oportunidades/{{ $v->id }}/','PRECIO')">Solicitar Precio</a>
                   @foreach ([] as $e)
                     @if(!empty($e->cotizacion))
                       <a class="dropdown-item" style="background: #cfffcf">Registrado con {{ $e->razon_social }}</a>
@@ -228,7 +232,7 @@
                   </td>
                 </tr>
               @else
-              <tr>
+              <tr data-link="/oportunidades/{{ $v->id }}/">
                   <td class="" style="max-width:200px;">
                     <div style="font-size:11px;"><i class="bx bx-buildings" style="font-size:12px"></i> {!! $v->inx_rotulo !!}
                     @if(!empty($v->tiene_bases))
@@ -252,6 +256,7 @@
                 <i class="bx bx-dots-vertical-rounded" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></i>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                   <a class="dropdown-item" href="/oportunidades/{{ $v->id }}/">Ver Ficha de Oportunidad</a>
+                  <a class="dropdown-item" href="javascript:todo_add('/oportunidades/{{ $v->id }}/','MONTO')">Solicitar Monto</a>
                   @foreach ([] as $e)
                     @if(!empty($e->cotizacion))
                       <a class="dropdown-item" style="background: #cfffcf">Registrado con {{ $e->razon_social }}</a>
@@ -272,6 +277,7 @@
             </table>
             <!-- table ends -->
           </div>
+          <div style="text-align:right;font-size:11px;padding: 0 5px;">Tiempo de consulta: {{ $execute->time }} ms</div>
         </div>
       </div>
 <!-- Dashboard Ecommerce ends -->

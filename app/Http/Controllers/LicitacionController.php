@@ -29,24 +29,22 @@ class LicitacionController extends Controller {
     return view('licitacion.part_avance_expedientes');
   }
   public function index(Request $request ) {
-    if (!empty( $request->input("search") )){
+    if (!empty($request->input("search"))) {
       $query = strtolower($request->input("search")); 
       $list = Licitacion::search($query)->take(200)->orderBy('fecha_participacion_hasta', 'DESC')->get();
       return view('licitacion.index', compact("list"));
     } 
-    $participaciones_por_vencer = Oportunidad::listado_participanes_por_vencer();
-    $propuestas_por_vencer = Oportunidad::listado_propuestas_por_vencer();
-    $propuestas_en_pro = Oportunidad::listado_propuestas_buenas_pro();
 
-    $chartjs['resumen'] = Oportunidad::estadistica_enviado_diario();
-    
-    return view('licitacion.dashboard', compact('participaciones_por_vencer','propuestas_por_vencer','propuestas_en_pro','chartjs','actividades'));
+    $chartjs['resumen'] = Oportunidad::estadistica_enviado_diario($out);
+    $chartjs['execute'] = $out;
+    return view('licitacion.dashboard', compact('chartjs','actividades'));
   }
 
   public function listNuevas(){
     $list = Licitacion::listado_nuevas($parametros);
     return view('licitacion.nuevas', compact('list','parametros'));
   }
+
   public function listNuevasMas(Request $request) {
     $params = $request->input('value');
     $params = explode('-', $params);
@@ -63,6 +61,7 @@ class LicitacionController extends Controller {
         'data'     => $rp
       ]);
   }
+
   public function listAprobadas(){
     $list = Oportunidad::listado_aprobadas();
     return view('licitacion.aprobadas', compact('list'));

@@ -202,7 +202,8 @@
                                   <span class="menu-title">Empresas</span>
                           </a>
                             </li>
-                            <li class="navigation-header"><span>Acceso directo</span></li>
+                            <?php
+                            /*<li class="navigation-header"><span>Acceso directo</span></li>
                             <li class="nav-item {{(request()->is('reportes')) ? 'active' : '' }}  ">
               <a href="https://sig.creainter.com.pe/reportes">
                                         <i class="menu-livicon livicon-evo-holder" data-icon="line-chart"></i>
@@ -226,7 +227,8 @@
                                <i class="menu-livicon livicon-evo-holder" data-icon="line-chart"></i>
                                <span class="menu-title">Mantenimiento</span>
                                          </a>
-                            </li>
+                            </li>*/
+                            ?>  
                 </ul>
         </ul>
       </div>

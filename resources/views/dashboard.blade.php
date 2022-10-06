@@ -4,8 +4,8 @@
 @section('title','Dashboard Analytics')
 {{-- venodr style --}}
 @section('vendor-styles')
-<link rel="stylesheet" type="text/css" href="{{asset('vendors/css/charts/apexcharts.css')}}">
-<link rel="stylesheet" type="text/css" href="{{asset('vendors/css/extensions/dragula.min.css')}}">
+<!--<link rel="stylesheet" type="text/css" href="{{asset('vendors/css/charts/apexcharts.css')}}">-->
+<link rel="stylesheet" type="text/css" href="{{asset('vendors/css/extensions/dragula.min.css')}}">-->
 <link rel="stylesheet" type="text/css" href="{{asset('vendors/css/calendars/clndr.css')}}">
 @endsection
 
@@ -18,8 +18,67 @@
 <!-- Dashboard Analytics Start -->
 <section id="dashboard-analytics">
     <div class="row">
+    <!-- Radial Followers Primary Chart Starts -->
+    <div class="col-sm-4">
+      <div class="card">
+        <div class="card-content">
+          <div class="card-body p-0">
+            <div class="d-lg-flex justify-content-between">
+              <div class="widget-card-details d-flex flex-column justify-content-between p-2">
+                <div>
+                  <h5 class="font-medium-2 font-weight-normal">Oportunidades</h5>
+                  <p class="text-muted">Actualmente tiene {{ $oportunidades->usado }} de {{ $oportunidades->limite }} oportunidades en la que puede participar en simultáneo.</p>
+                </div>
+              </div>
+              <div id="radial-chart-primary"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Radial Followers Primary Chart Ends -->
+    <!-- Radial Users Success Chart Starts -->
+    <div class="col-sm-4">
+      <div class="card">
+        <div class="card-content">
+          <div class="card-body p-0">
+            <div class="d-lg-flex justify-content-between">
+              <div class="widget-card-details d-flex flex-column justify-content-between p-2">
+                <div>
+                  <h5 class="font-medium-2 font-weight-normal">Etiquetas</h5>
+                  <p class="text-muted">Actualmente tiene {{ $etiquetas->usado_total }} de {{ $etiquetas->limite_total }} permitidas para su cuenta.</p>
+                </div>
+              </div>
+              <div id="radial-chart-success"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Radial Users Success Chart Ends -->
+    <!-- Radial Registrations Danger Chart Starts -->
+    <div class="col-sm-4">
+      <div class="card">
+        <div class="card-content">
+          <div class="card-body p-0">
+            <div class="d-lg-flex justify-content-between">
+              <div class="widget-card-details d-flex flex-column justify-content-between p-2">
+                <div>
+                  <h5 class="font-medium-2 font-weight-normal">Empresa</h5>
+                  <p class="text-muted">Actualmente tiene {{ $empresas->usado }} de {{ $empresas->limite }} empresa(s) registrada(s).</p>
+                </div>
+              </div>
+              <div id="radial-chart-danger"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Radial Registrations Danger Chart Ends -->
+    </div>
+    <div class="row">
       <!-- Website Analytics Starts-->
-    <div class="col-lg-3 col-md-6 col-12 mb-3">
+    <div class="col-lg-4 col-md-6 col-12 mb-3">
     <div class="card" style="height:250px;">
       <div class="card-header">
         <h3 class="card-title mb-1">Bienvenido {{ '@' . Auth::user()->usuario }}!</h3>
@@ -36,7 +95,7 @@
     </div>
   </div>
         <!-- Sales Chart Starts-->
-      <div class="col-xl-3 col-md-6 col-12 sales-card">
+      <div class="col-xl-3 col-lg-3 col-md-6 col-12 sales-card">
         <div class="card">
           <div class="card-header d-flex justify-content-between align-items-center">
             <div class="card-title-content">
@@ -101,7 +160,7 @@
           </div>
         </div>
       </div>
-      <div class="col-xl-3 col-md-12 col-sm-12 dashboard-latest-update">
+      <div class="col-xl-5 col-lg-5 col-md-12 col-sm-12 dashboard-latest-update">
           <div class="card">
           <div class="card-header d-flex justify-content-between align-items-center pb-50">
             <h4 class="card-title">Atención en Licitaciones</h4>
@@ -109,7 +168,7 @@
           <div class="card-content">
             <div class="card-body p-0 pb-1">
               <ul class="list-group list-group-flush">
-                @foreach(App\Oportunidad::requiere_atencion() as $o)
+                @foreach(App\Oportunidad::requiere_atencion($execute) as $o)
                 <li
                   class="list-group-item list-group-item-action border-0 d-flex align-items-center justify-content-between">
                   <div class="list-left d-flex">
@@ -122,7 +181,7 @@
                     </div>
                     <div class="list-content">
                       <span class="list-title"><a href="/licitaciones/{{ $o->licitacion_id }}/detalles">{{ $o->codigo }}</a></span>
-                      <small class="text-muted d-block">{{ strtoupper(substr($o->licitacion()->rotulo(),0, 17)) }}</small>
+                      <small class="text-muted d-block">{{ strtoupper(substr($o->licitacion_rotulo,0, 17)) }}</small>
                     </div>
                   </div>
                   <span class="{{ $o->estado()['class'] }}">{{ $o->estado()['message'] }}</span>
@@ -130,6 +189,7 @@
                @endforeach
               </ul>
             </div>
+            <div style="text-align:right;font-size:11px;padding: 0 5px;">Tiempo de consulta: {{ $execute->time }} ms</div>
           </div>
         </div>
 
@@ -300,6 +360,140 @@
 <script src="{{asset('js/scripts/clndr.js')}}"></script>
 <script src="{{asset('js/scripts/pages/dashboard-analytics.js')}}"></script>
 <script>
+$(document).ready(function () {
+
+  var $primary = '#5A8DEE';
+  var $success = '#39DA8A';
+  var $danger = '#FF5B5C';
+  var $warning = '#FDAC41';
+  var $info = '#00CFDD';
+  var $label_color = '#304156';
+  var $danger_light = '#FFDEDE';
+  var $gray_light = '#828D99';
+  var $bg_light = "#f2f4f4";
+
+  // Radial Followers Chart - Primary
+  // --------------------------------
+  var radialPrimaryoptions = {
+    chart: {
+      height: 250,
+      type: "radialBar"
+    },
+    series: [{{ (int) ($oportunidades->usado * 100 / $oportunidades->limite) }}],
+    plotOptions: {
+      radialBar: {
+        offsetY: -10,
+        size: 70,
+        hollow: {
+          size: "70%"
+        },
+        dataLabels: {
+          showOn: "always",
+          name: {
+            show: false
+          },
+          value: {
+            colors: [$label_color],
+            fontSize: "20px",
+            show: true,
+            offsetY: 8,
+            fontFamily: "Rubik"
+          }
+        }
+      }
+    },
+    stroke: {
+      lineCap: "round",
+    }
+  };
+  var radialPrimaryChart = new ApexCharts(
+    document.querySelector("#radial-chart-primary"),
+    radialPrimaryoptions
+  );
+
+  radialPrimaryChart.render();
+
+    var radialSuccessoptions = {
+    chart: {
+      height: 250,
+      type: "radialBar"
+    },
+    series: [{{ (int) ($etiquetas->usado_total * 100 / $etiquetas->limite_total) }}],
+    colors: [$success],
+    plotOptions: {
+      radialBar: {
+        offsetY: -10,
+        size: 70,
+        hollow: {
+          size: "70%"
+        },
+
+        dataLabels: {
+          showOn: "always",
+          name: {
+            show: false
+          },
+          value: {
+            colors: [$label_color],
+            fontSize: "20px",
+            show: true,
+            offsetY: 8,
+            fontFamily: "Rubik"
+          }
+        }
+      }
+    },
+    stroke: {
+      lineCap: "round",
+    }
+  };
+  var radialSuccessChart = new ApexCharts(
+    document.querySelector("#radial-chart-success"),
+    radialSuccessoptions
+  );
+
+  radialSuccessChart.render();
+
+    var radialDangeroptions = {
+    chart: {
+      height: 250,
+      type: "radialBar"
+    },
+    series: [{{ (int) ($empresas->usado * 100 / $empresas->limite) }}],
+    colors: [$danger],
+    plotOptions: {
+      radialBar: {
+        offsetY: -10,
+        size: 70,
+        hollow: {
+          size: "70%"
+        },
+
+        dataLabels: {
+          showOn: "always",
+          name: {
+            show: false
+          },
+          value: {
+            colors: [$label_color],
+            fontSize: "20px",
+            show: true,
+            offsetY: 8,
+            fontFamily: "Rubik"
+          }
+        }
+      }
+    },
+    stroke: {
+      lineCap: "round",
+    }
+  };
+  var radialDangerChart = new ApexCharts(
+    document.querySelector("#radial-chart-danger"),
+    radialDangeroptions
+  );
+  radialDangerChart.render();
+});
 var $primary = '#5A8DEE',
     $success = '#39DA8A',
     $danger = '#FF5B5C',
