@@ -183,6 +183,12 @@ io.on('connection', function(client) {
     if(typeof data.id === 'undefined') {
       return null;
     }
+    if(typeof todo_lici[device.tenant_id] === 'undefined') {
+      return null;
+    }
+    if(typeof todo_lici[device.tenant_id][data.id] === 'undefined') {
+      return null;
+    }
     todo_lici[device.tenant_id][data.id] = Object.assign(todo_lici[device.tenant_id][data.id], data);
     io.sockets.emit('todo_mod', todo_lici[device.tenant_id][data.id]);
   });
@@ -240,6 +246,9 @@ io.on('connection', function(client) {
       return console.log('no registrado 0');
     }
     if(typeof device.user_id === 'undefined') {
+      return console.log('no registrado 1');
+    }
+    if(typeof ls[device.tenant_id] === 'undefined') {
       return console.log('no registrado 1');
     }
     if(typeof ls[device.tenant_id][device.user_id] === 'undefined') {

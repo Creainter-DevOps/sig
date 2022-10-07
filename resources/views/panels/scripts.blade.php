@@ -531,7 +531,7 @@ function todo_show(data) {
         .append($('<td>').text(data[i].texto))
         .append($('<td>').html($('<a>').attr('href', data[i].url).text(data[i].url)))
         .append($('<td>').text('Todos'))
-        .append($('<td>').html($('<input>').attr('type','checkbox').on('change', function() {
+        .append($('<td>').html($('<input>').attr('type','checkbox').attr('checked', data[i].status).on('change', function() {
           var bid = $(this).closest('tr').attr('data-id');
           socket.emit('todo_mod', {
             id: bid,
