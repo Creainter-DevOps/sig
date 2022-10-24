@@ -87,7 +87,7 @@ class Helper
     }
 
     if(!empty($last_pid)) {
-      $cmd = '(/var/www/html/interno.creainter.com.pe/util/waitProcess ' . $last_pid . '; ' . implode('; ', $cmd) . ')';
+      $cmd = '(/var/www/html/interno.creainter.com.pe/util/waitProcess ' . $last_pid . ' "' . $queue . '"; ' . implode('; ', $cmd) . ')';
     } else {
       $cmd = '(' . implode('; ', $cmd) . ')';
     }
@@ -618,9 +618,9 @@ public static function subir_documento( $archivo, $name ){
         ];
         // navbar body class array
         $navbarBodyClass = [
-          'fixed'=>'navbar-sticky',
-          'static'=>'navbar-static',
-          'hidden'=>'navbar-hidden',
+          'fixed'  => 'navbar-static',
+          'static' => 'navbar-static',
+          'hidden' => 'navbar-hidden',
         ];
         $navbarClass  = [
           'fixed'=>'fixed-top',
@@ -736,9 +736,10 @@ public static function subir_documento( $archivo, $name ){
     }
     public static function formatoCard($x, $empresa_id = null) {
       $default = [
+        'contexto'  => 'draw',
         'documento' => null,
-        'imagen' => null,
-        'addons' => [],
+        'imagen'    => null,
+        'addons'    => [],
       ];
       if(!empty($empresa_id)) {
         if(!empty($x['is_part'])) {
@@ -770,56 +771,75 @@ public static function subir_documento( $archivo, $name ){
       }
       return array_merge($default, $x);
     }
-    public static function workspace_move($matrix, $cidx, $orden, $space = 1) {
-
+    public static function workspace_move($matrix, $cidx, $orden, $contexto = 'draw') {
+      $space = 1;
       $o_i = static::workspace_get_card($matrix, $cidx);
+      $o_c = $o_i['contexto'] ?? 'draw';
       $o_i = $o_i['orden'];
 
-      if($o_i == $orden) {
+      if($o_i == $orden && $o_c == $contexto) {
         return $matrix;
       }
       if ($o_i > $orden) {
-        $cids = static::workspace_get_range($matrix, $o_i, $orden);
+        $cids = static::workspace_get_range($matrix, $o_i, $orden, $contexto);
         foreach($cids as $cid) {
           $c = static::workspace_get_card($matrix, $cid);
           $c['orden'] += $space;
           $matrix[$cid] = $c;
         }
       } else {
-        $cids = static::workspace_get_range($matrix, $o_i, $orden);
+        $cids = static::workspace_get_range($matrix, $o_i, $orden, $contexto);
         foreach($cids as $cid) {
           $c = static::workspace_get_card($matrix, $cid);
           $c['orden'] -= $space;
           $matrix[$cid] = $c;
         }
       }
-      $matrix[$cidx]['orden'] = (int) $orden;
+      $matrix[$cidx]['orden']   = (int) $orden;
+      $matrix[$cidx]['contexto'] = $contexto;
       return static::workspace_ordenar($matrix);
     }
 
     public static function workspace_ordenar($matrix) {
       uasort($matrix, function($item1,$item2) {
-        return $item1['orden'] - $item2['orden'];
+        $item1['contexto'] = $item1['contexto'] ?? 'draw';
+        $item2['contexto'] = $item2['contexto'] ?? 'draw';
+
+        if($item1['orden']  == $item2['orden'] && $item1['contexto'] == $item2['contexto']) {
+          return 0;
+        }
+        if(strlen($item1['contexto']) > strlen($item2['contexto'])) {
+          return -1;
+        } else if($item1['orden'] < $item2['orden'] && $item1['contexto'] == $item2['contexto']) {
+          return -1;
+        } else {
+          return 1;
+        }
       });
-      $i = 0;
-      $matrix = array_map(function($n) use(&$i) {
-        $n['orden'] = $i;
-        $i++;
+      $ii = [
+        'draw'   => 0,
+        'secure' => 0
+      ];
+      $matrix = array_map(function($n) use(&$ii) {
+        $n['contexto'] = $n['contexto'] ?? 'draw';
+        $n['orden'] = $ii[$n['contexto']];
+        $ii[$n['contexto']]++;
         return $n;
       }, $matrix);
 
       return $matrix;
     }
-    public static function workspace_get_range($matrix, $o_i, $o_f = null) {
-      $matrix = array_filter($matrix, function($c) use ($o_i, $o_f) {
+    public static function workspace_get_range($matrix, $o_i, $o_f = null, $contexto = null) {
+      $matrix = array_filter($matrix, function($c) use ($o_i, $o_f, $contexto) {
+        $c['contexto'] = $c['contexto'] ?? 'draw';
         if($o_f === null) {
-          return $c['orden'] >= $o_i;
+          return $c['orden'] >= $o_i && $c['contexto'] == $contexto;
 
         } elseif($o_i > $o_f) {
-          return $c['orden'] <= $o_i && $c['orden'] >= $o_f;
+          return $c['orden'] <= $o_i && $c['orden'] >= $o_f && $c['contexto'] == $contexto;
 
         } else {
-          return $c['orden'] <= $o_f && $c['orden'] > $o_i;
+          return $c['orden'] <= $o_f && $c['orden'] > $o_i && $c['contexto'] == $contexto;
         }
       });
      return array_keys($matrix);

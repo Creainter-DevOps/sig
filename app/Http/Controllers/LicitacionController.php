@@ -24,11 +24,29 @@ class LicitacionController extends Controller {
   ];
   public function __construct() {
     $this->middleware('auth');
+    $this->viewBag['pageConfigs'] = ['pageHeader' => true ];
+    $this->viewBag['breadcrumbs'] = [
+      ["link" => "/dashboard", "name" => "Inicio"],
+      ["link" => "/licitaciones", "name" => "Licitaciones" ]
+    ];
   }
+
   public function part_avance_expedientes(Request $request) {
     return view('licitacion.part_avance_expedientes');
   }
   public function index(Request $request ) {
+    $search = $request->input('search');
+      if(!empty($search)) {
+          $listado = Licitacion::search($search)->take(200)->orderBy('fecha_participacion_hasta', 'DESC')->get();
+      } else {
+          $listado = Licitacion::list();#->paginate(40)->appends(request()->query());
+      }
+
+      $this->viewBag['listado'] = $listado;
+
+    return view('licitacion.index', $this->viewBag);
+  }
+  public function workspace(Request $request) {
     if (!empty($request->input("search"))) {
       $query = strtolower($request->input("search")); 
       $list = Licitacion::search($query)->take(200)->orderBy('fecha_participacion_hasta', 'DESC')->get();
@@ -37,7 +55,7 @@ class LicitacionController extends Controller {
 
     $chartjs['resumen'] = Oportunidad::estadistica_enviado_diario($out);
     $chartjs['execute'] = $out;
-    return view('licitacion.dashboard', compact('chartjs','actividades'));
+    return view('licitacion.workspace', compact('chartjs','actividades'));
   }
 
   public function listNuevas(){
@@ -113,6 +131,70 @@ class LicitacionController extends Controller {
       ]);
     }
   }
+public function aprobar_interes(Request $request, Licitacion $licitacion, Empresa $empresa) {
+  $proc = $licitacion->aprobar();
+
+  if($proc->estado == 200) {
+  } else if($proc->estado == 500) {
+    return response()->json([
+        'status'   => false,
+        'disabled' => true,
+        'label'    => 'Ya existe',
+        'message'  => $proc->mensaje,
+        'refresh'  => false,
+        'class'    => 'warning',
+      ]);
+  } else {
+      return response()->json([
+        'status'   => false,
+        'disabled' => true,
+        'label'    => 'Ops! Un problema',
+        'message'  => $proc->mensaje,
+        'refresh'  => false,
+        'class'    => 'warning',
+      ]);
+  }
+   $oportunidad = Oportunidad::find($proc->oid);
+   if(empty($oportunidad)) {
+     return response()->json([
+        'status'   => false,
+        'disabled' => true,
+        'label'    => 'No existe',
+        'message'  => 'Error',
+        'refresh'  => false,
+        'class'    => 'warning',
+      ]);
+   }
+   $proc = $oportunidad->registrar_interes($empresa);
+    if($proc->estado == 200) {
+    return response()->json([
+      'status'   => true,
+      'disabled' => true,
+      'label'    => 'Oportunidad Aprobada!',
+      'message'  => $proc->mensaje,
+      'refresh'  => false,
+      'class'    => 'success',
+    ]);
+  } else if($proc->estado == 500) {
+    return response()->json([
+        'status'   => false,
+        'disabled' => true,
+        'label'    => 'Ya existe',
+        'message'  => $proc->mensaje,
+        'refresh'  => false,
+        'class'    => 'warning',
+      ]);
+  } else {
+      return response()->json([
+        'status'   => false,
+        'disabled' => true,
+        'label'    => 'Ops! Un problema',
+        'message'  => $proc->mensaje,
+        'refresh'  => false,
+        'class'    => 'warning',
+      ]);
+  }
+}
 public function aprobar(Request $request, Licitacion $licitacion)
 {
   $proc = $licitacion->aprobar();

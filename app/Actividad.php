@@ -184,20 +184,20 @@ class Actividad extends Model
 SELECT COALESCE(P.alias, O.rotulo) contexto, COALESCE(P.color, '#b3b3b3') color, A.*
 FROM (SELECT * FROM ((
 	SELECT id, estado, fecha, hora, fecha_limite, texto, created_by, asignado_id, estado, importancia, tiempo_estimado, vinculado, link, osce.fn_usuarios_a_rotulo(A.tenant_id, A.asignado_id) asignado_a,
-    proyecto_id, oportunidad_id
+    proyecto_id, oportunidad_id, array_to_string(A.asignado_id, ',') asignado_id
 	FROM osce.actividad A
 	WHERE A.tenant_id = 1 AND A.estado = 1 AND (A.created_by = ANY(osce.fn_usuario_supervisados(:tenant, :user)) OR A.asignado_id && osce.fn_usuario_supervisados(:tenant, :user))
     AND ((A.vinculado IS TRUE AND A.fecha <= NOW() + INTERVAL '2' DAY) OR (A.vinculado IS FALSE AND A.fecha <= NOW() + INTERVAL '10' DAY))
 	ORDER BY A.fecha DESC
 ) UNION (
 	SELECT id, estado, fecha, hora, fecha_limite, texto, created_by, asignado_id, estado, importancia, tiempo_estimado, vinculado, link, osce.fn_usuarios_a_rotulo(A.tenant_id, A.asignado_id) asignado_a,
-    proyecto_id, oportunidad_id
+    proyecto_id, oportunidad_id, array_to_string(A.asignado_id, ',') asignado_id
 	FROM osce.actividad A
 	WHERE A.tenant_id = 1 AND A.estado = 2 AND (A.created_by = ANY(osce.fn_usuario_supervisados(:tenant, :user)) OR A.asignado_id && osce.fn_usuario_supervisados(:tenant, :user))
 	ORDER BY A.fecha DESC
 ) UNION (
 	SELECT id, estado, fecha, hora, fecha_limite, texto, created_by, asignado_id, estado, importancia, tiempo_estimado, vinculado, link, osce.fn_usuarios_a_rotulo(A.tenant_id, A.asignado_id) asignado_a,
-    proyecto_id, oportunidad_id
+    proyecto_id, oportunidad_id, array_to_string(A.asignado_id, ',') asignado_id
 	FROM osce.actividad A
 	WHERE A.tenant_id = 1 AND A.estado = 3 AND (A.created_by = ANY(osce.fn_usuario_supervisados(:tenant, :user)) OR A.asignado_id && osce.fn_usuario_supervisados(:tenant, :user))
 	ORDER BY A.updated_on DESC

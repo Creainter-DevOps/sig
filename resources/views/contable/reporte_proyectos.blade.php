@@ -16,12 +16,12 @@
         <th>Firma</th>
         <th>Desde</th>
         <th>Hasta</th>
-        <th>Registrado</th>
-        <th>Efectuado</th>
-        <th>Pendiente</th>
-        <th>Registrado</th>
-        <th>Efectuado</th>
-        <th>Pendiente</th>
+        <th>Regist.</th>
+        <th>Efect.</th>
+        <th>Pend.</th>
+        <th>Regist.</th>
+        <th>Efect.</th>
+        <th>Pend.</th>
         <th>Contrato</th>
         <th>Actual</th>
       </tr>
@@ -29,7 +29,7 @@
     <tbody>
 <?php foreach(App\Contable::proyectos_activos() as $p) { ?>
       <tr>
-        <td class="texto-centrado" style="width:70px;font-size:10px;">{{ $p->codigo }}</td>
+        <td class="texto-centrado" style="width:70px;font-size:10px;">{{ $p->codigo }}<br />{{ $p->alias }}</td>
         <td class="texto-centrado" style="width:60px;font-size:10px;">{!! Helper::color($p->buenapro_fecha, 'date', '#000000', '#000000','#000000') !!}</td>
         <td class="texto-centrado" style="width:60px;font-size:10px;">{{ Helper::fecha($p->fecha_firma) }}</td>
         <td class="texto-centrado" style="width:60px;font-size:10px;">{!! Helper::color($p->fecha_desde, 'date', '#019f01', '#00ff00','#000000') !!}</td>

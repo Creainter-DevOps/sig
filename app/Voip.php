@@ -48,7 +48,7 @@ class Voip extends Model
       return static::hydrate(DB::select("
         SELECT C.*
         FROM osce.contacto C
-        WHERE C.is_inbound IS TRUE OR C.is_exten IS TRUE AND C.tenant_id = :tenant
+        WHERE (C.is_inbound IS TRUE OR C.is_exten IS TRUE) AND C.tenant_id = :tenant
         ORDER BY C.nombres ASC", [
           'tenant' => Auth::user()->tenant_id
         ]));

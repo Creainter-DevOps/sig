@@ -29,7 +29,7 @@ class Licitacion extends Model
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password','buenapro_revision','bases_integradas','eliminado','monto'
+        'name', 'email', 'password','buenapro_revision','bases_integradas','eliminado','monto','tipo_objeto',
     ];
 
     /**
@@ -78,6 +78,33 @@ class Licitacion extends Model
       //return $this->belongsTo('App\Oportunidad', 'id', 'licitacion_id')->first();
       return Oportunidad::where('licitacion_id', $this->id)
                      ->where('tenant_id', Auth::user()->tenant_id)->first();
+    }
+    public function empresasMenu() {
+      $rp = DB::select("
+        SELECT E.id, E.razon_social
+        FROM osce.empresa E
+        WHERE E.tenant_id = :tenant AND :tipo = ANY(E.licitacion_tipo)
+        ORDER BY E.razon_social ASC
+        LIMIT 10", [
+          'tenant' => Auth::user()->tenant_id,
+          'tipo'   => $this->tipo_objeto
+        ]);
+        return Empresa::hydrate($rp);
+    }
+    public static function list() {
+      $rp = DB::select("
+        SELECT L.*
+        FROM osce.oportunidad O
+          JOIN osce.licitacion L ON L.id = O.licitacion_id
+        WHERE O.tenant_id = :tenant AND O.licitacion_id IS NOT NULL AND O.eliminado IS NULL
+          AND O.estado IN (0,1,2)
+          AND O.rechazado_el IS NULL
+          AND O.aprobado_el IS NOT NULL
+        ORDER BY O.aprobado_el DESC
+      ", [
+        'tenant' => Auth::user()->tenant_id,
+      ]);
+      return static::hydrate($rp);
     }
     public function items() {
       return $this->hasMany('App\LicitacionItem','licitacion_id')

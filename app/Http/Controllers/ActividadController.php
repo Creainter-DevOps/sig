@@ -205,6 +205,7 @@ class ActividadController extends Controller
           'link'      => !empty($n->proyecto_id) ? '/proyectos/' . $n->proyecto_id : (!empty($n->oportunidad_id) ? '/oportunidades/' . $n->oportunidad_id : null),
           'completed' => ($n->estado == 3),
           'users'     => $n->asignado_a,
+          'uid'       => $n->asignado_id,
           'contexto'  => $n->contexto,
           'color'     => $n->color,
         ];

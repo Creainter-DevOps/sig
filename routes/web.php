@@ -190,6 +190,8 @@ Route::get('expediente/{cotizacion}/paso04','ExpedienteController@paso04');
 Route::post('expediente/{cotizacion}/paso04','ExpedienteController@paso04_store')->name('expediente.paso04');
 Route::get('expediente/{cotizacion}/cancelar_proceso','ExpedienteController@cancelar_proceso');
 
+Route::get('expediente/{cotizacion}/pendiente','ExpedienteController@pendiente');
+
 #Route::post('expediente/{cotizacion}/agregarDocumento/{documento}', 'ExpedienteController@agregarDocumento');
 
 Route::get('expediente/{cotizacion}/visualizar', 'ExpedienteController@visualizar_documento');
@@ -299,6 +301,7 @@ Route::get('licitaciones/autocomplete','LicitacionController@autocomplete');
 Route::post('licitaciones/actualizar/{oportunidad}','LicitacionController@update')->name("licitacion.update");
 Route::get('licitaciones/calendario','LicitacionController@calendario');
 Route::post('licitaciones/nuevas/mas','LicitacionController@listNuevasMas');
+Route::get('licitaciones/workspace','LicitacionController@workspace');
 Route::get('licitaciones/nuevas','LicitacionController@listNuevas');
 Route::get('licitaciones/archivadas','LicitacionController@listArchivadas');
 Route::get('licitaciones/eliminadas','LicitacionController@listEliminadas');
@@ -306,6 +309,7 @@ Route::get('licitaciones/aprobadas','LicitacionController@listAprobadas');
 Route::post('licitaciones/part/avance_expedientes','LicitacionController@part_avance_expedientes');
 Route::get('licitaciones/{licitacion}/detalles','LicitacionController@show');
 Route::get('licitaciones/{licitacion}/actualizar','LicitacionController@actualizar')->name('licitacion.actualizar');
+Route::post('licitaciones/{licitacion}/aprobar/{empresa}','LicitacionController@aprobar_interes');
 Route::post('licitaciones/{licitacion}/aprobar','LicitacionController@aprobar');
 Route::post('licitaciones/{licitacion}/rechazar','LicitacionController@rechazar');
 Route::post('licitaciones/{licitacion}/observacion','LicitacionController@observacion');

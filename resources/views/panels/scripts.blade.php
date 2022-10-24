@@ -250,6 +250,13 @@ width: 100%;
     border-radius: 5px 5px 0 0;
     font-size: 12px;  
 }
+.todo_block.comprimir {
+  max-height: 15px;
+  min-height: 15px;  
+}
+.todo_block thead {
+  cursor: pointer;
+}
 .todo_block_btn {
   position: absolute;
     top: -23px;
@@ -284,7 +291,7 @@ width: 100%;
   <div class="todo_block_btn" onclick="javascript:todo_add();">Solicitar</div>
   <div>
     <table>
-      <thead>
+      <thead onclick="javascript:todo_mini();;">
         <th>De</th>
         <th>Petición</th>
         <th>Link</th>
@@ -335,15 +342,52 @@ width: 100%;
   </form>
 </div>
 <script>
+var xpageContent = $('.x-page-nav');
+function xlink(url) {
+  var xpage_nav  = $('<div>').addClass('x-page-nav');
+  var xpage_body = $('<div>').addClass('x-page-body').addClass('x-page-loading');
+  var xpage_over = $('<div>').addClass('x-page-overlay').on('click', function(e) {
+   xpageContent = $(this).closest('.x-page-nav');
+   xpage.remove();
+ });
+  var xpage = $('<div>').addClass('x-page')
+      .append(xpage_over)
+      .append(xpage_body)
+      .append(xpage_nav);
+    $(xpageContent).append(xpage);
+    xpageContent = xpage_nav;
+  fetch(url, {
+    method: "GET",
+    headers: {
+      "X-THEME-TOKEN": "X-THEME-TOKEN"
+    }
+  })
+  .then(res => res.text())
+  .then(res => {
+    xpage_body.removeClass('x-page-loading').html(res);
+    micro_ready();
+  })
+  .catch(err => {
+    window.location.href = url;
+    xpage_over.click();
+    console.log(err);
+
+  });
+}
+$(document).on('click', 'a[href]', function(e) {
+  if(_hasTag(this)) {
+    e.preventDefault();
+    xlink($(this).attr('href'));
+    return false;
+  }
+});
 $(document).on('mouseover', '[data-link]', function() {
   var link = $(this).attr('data-link');
   $("[data-link='" + link + "']").addClass('hovered');
-  console.log('HOVER', link);
 });
 $(document).on('mouseout', '[data-link]', function() {
   var link = $(this).attr('data-link');
   $("[data-link='" + link + "']").removeClass('hovered');
-  console.log('HOVEROUT', link);
 });
 
 
@@ -483,6 +527,11 @@ socket.on('registred', function(data) {
   if(data.todo) {
     todo_show(data.todo);
   }
+  if(data.states['todo-compress']) {
+     $(".todo_block").addClass('comprimir');
+  } else {
+     $(".todo_block").removeClass('comprimir');
+  }
 });
 socket.on('sip_heredado', function(data) {
   console.log('sip_heredado', data);
@@ -502,6 +551,22 @@ var fell = null;
 var fell_names = {};
 var fell_list = {};
 
+function todo_mini() {
+  var box = $(".todo_block");
+  if(box.hasClass('comprimir')) {
+    box.removeClass('comprimir');
+    socket.emit('state', {
+      key:   'todo-compress',
+      value: false
+    });
+  } else {
+    box.addClass('comprimir');
+    socket.emit('state', {
+      key:   'todo-compress',
+      value: true
+    });
+  }
+}
 function todo_add(url, texto) {
   if(typeof url === 'undefined') {
     url = '{{ $_SERVER['REQUEST_URI'] }}';

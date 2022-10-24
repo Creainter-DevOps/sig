@@ -1,6 +1,6 @@
 @extends('layouts.contentLayoutMaster')
 {{-- page title --}}
-@section('title','App Kanban')
+@section('title','Kanban Empresarial')
 {{-- vendor style --}}
 @section('vendor-styles')
 <link rel="stylesheet" type="text/css" href="{{asset('vendors/css/jkanban/jkanban.min.css')}}">
@@ -20,7 +20,7 @@
   color: #181818;
 }
 .kanban-container .kanban-board .kanban-drag {
-  max-height: 750px;
+  max-height: 600px;
   overflow: auto;
 }
 .kanban-container .kanban-board {
@@ -55,10 +55,19 @@
 @endsection
 
 @section('content')
-<!-- Basic Kanban App -->
+<div class="form-row">
+  <div class="col-md-3 mb-1">
+    <label for="usuario_id">Usuario</label>
+    <select class="form-control changeKanban" name="usuario_id">
+      <option value="">Todos</option>
+      @foreach(App\Actividad::usuarios() as $u)
+      <option value="{{ $u->id }}">{{ $u->usuario }}</option>
+      @endforeach
+    </select>
+  </div>
+</div>
 <div class="kanban-overlay"></div>
 <section id="kanban-wrapper">
-  <!-- User new mail right area -->
   <div class="kanban-sidebar">
     <div class="card shadow-none quill-wrapper">
       <div class="card-header d-flex justify-content-between align-items-center border-bottom px-2 py-1">
@@ -67,7 +76,6 @@
           <i class="bx bx-x"></i>
         </button>
       </div>
-      <!-- form start -->
       <form class="edit-kanban-item">
         <div class="card-content">
           <div class="card-body">
@@ -165,6 +173,24 @@
 {{-- page scripts --}}
 @section('page-scripts')
 <script>
+$(".changeKanban").on('change', function() {
+  var uid = $(".changeKanban[name='usuario_id']").val();
+  console.log('Change', uid);
+  if(uid == '') {
+    $(".kanban-item").show();
+  } else {
+    $(".kanban-item").each(function() {
+      var item = $(this);
+      if(item.attr('data-uid') == uid) {
+        item.stop().slideDown();
+//        console.log('Mostrando por', uid, item.attr('data-uid'));
+      } else {
+//        console.log('Ocultando por', uid, item.attr('data-uid'));
+        item.stop().slideUp();
+      }
+    });
+  }
+});
 $(document).ready(function() {
   window.jsKan = null;
   var data = [];
@@ -217,8 +243,6 @@ $(document).ready(function() {
     jsKan.addBoards(getBoards());
     for(var index in data) {
       var it = jsKan.findElement(data[index].id);
-      console.log('item', data[index].id, it, '11');
-
       var board_item_dueDate =
           '<div class="kanban-due-date d-flex align-items-center mr-50">' +
           '<i class="bx bx-time-five font-size-small mr-25"></i>' +

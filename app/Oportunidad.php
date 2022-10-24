@@ -297,13 +297,13 @@ SELECT
   COUNT(C.id) enviadas
 FROM osce.oportunidad O
 LEFT JOIN osce.cotizacion C ON C.oportunidad_id = O.id AND C.eliminado IS NULL AND C.propuesta_el IS NOT NULL
-WHERE O.estado IN (1,2) AND O.aprobado_el IS NOT NULL AND O.rechazado_el IS NULL AND O.archivado_el IS NULL
-  AND O.fecha_propuesta_hasta >= NOW() - INTERVAL '18' DAY AND O.fecha_propuesta_hasta <= NOW() + INTERVAL '5' DAY
+WHERE O.estado IN (0,1,2) AND O.aprobado_el IS NOT NULL AND O.rechazado_el IS NULL AND O.archivado_el IS NULL
+  AND O.fecha_propuesta_hasta >= NOW() - INTERVAL '15' DAY AND O.fecha_propuesta_hasta <= NOW() + INTERVAL '100' DAY
   AND O.tenant_id = :tenant
 GROUP BY O.fecha_propuesta_hasta::date
 ORDER BY 1 ASC
 ) x
-      ", [
+LIMIT 30", [
         'tenant' => Auth::user()->tenant_id,
       ]);
       $out = $rp->execute;
@@ -371,7 +371,7 @@ FROM (
     FROM (
       SELECT O.tenant_id, O.id, O.licitacion_id, O.aprobado_el, O.etiquetas_id, O.aprobado_por, O.rotulo, O.fecha_participacion_hasta, O.correo_id, O.revisado_el, O.revisado_por, O.es_favorito
       FROM osce.oportunidad O
-      WHERE O.estado = 1 AND O.tenant_id = 1 AND O.aprobado_el IS NOT NULL AND O.rechazado_el IS NULL AND O.archivado_el IS NULL AND O.correo_id IS NULL
+      WHERE O.estado = 1 AND O.tenant_id = :tenant AND O.aprobado_el IS NOT NULL AND O.rechazado_el IS NULL AND O.archivado_el IS NULL AND O.correo_id IS NULL
         AND O.tenant_id = :tenant
         AND (
           (O.fecha_participacion_hasta >= NOW() - INTERVAL '2' DAY AND O.fecha_participacion_hasta <= NOW() + INTERVAL '4' DAY)
@@ -425,11 +425,11 @@ FROM (
 		    O.tenant_id = :tenant AND O.estado IN (1,2) AND O.aprobado_el IS NOT NULL
     		AND O.rechazado_el IS NULL AND O.archivado_el IS NULL
         AND O.fecha_propuesta_hasta >= NOW() - INTERVAL '7' DAY
-        AND ((O.fecha_propuesta_hasta >= NOW() - INTERVAL '10' HOUR AND O.fecha_propuesta_hasta <= NOW() + INTERVAL '25' DAY) OR O.es_favorito IS NOT NULL)
+        AND ((O.fecha_propuesta_hasta >= NOW() - INTERVAL '10' HOUR AND O.fecha_propuesta_hasta <= NOW() + INTERVAL '40' DAY) OR O.es_favorito IS NOT NULL)
     ) O
   ) x
   WHERE x.empresas_interes IS FALSE OR x.aprobado_el::date = NOW()::date OR x.es_favorito IS NOT NULL
-	OR x.fecha_propuesta_hasta <= NOW() + INTERVAL '25' DAY
+	OR x.fecha_propuesta_hasta <= NOW() + INTERVAL '40' DAY
 ) z
 ORDER BY z.correo_id IS NULL ASC, z.fecha_propuesta_hasta::date ASC, z.fecha_propuesta_hasta::time ASC, z.es_favorito IS NULL DESC, z.estado DESC, (z.expediente_step_min = 4) ASC, z.revisado_el IS NULL ASC, z.expediente_step_min DESC
 LIMIT 140", ['tenant' => Auth::user()->tenant_id]);
@@ -464,15 +464,17 @@ limit 15
 FROM (SELECT O.*,
 (SELECT COUNT(*) FROM osce.oportunidad_externo WHERE oportunidad_id = O.id) cantidad_externo
 FROM osce.oportunidad O
-WHERE O.tenant_id = 1 AND O.aprobado_el IS NOT NULL AND O.rechazado_el IS NULL AND O.archivado_el IS NULL
+WHERE O.aprobado_el IS NOT NULL AND O.rechazado_el IS NULL AND O.archivado_el IS NULL
   --AND O.fecha_participacion IS NOT NULL
  AND O.fecha_propuesta IS NOT NULL
  AND O.tenant_id = :tenant
 ) O
-JOIN osce.licitacion L ON L.id = O.licitacion_id AND ((L.fecha_buena_desde >= NOW() AND L.fecha_buena_hasta <= NOW())
-  OR (L.fecha_buena_hasta >= NOW() - INTERVAL '7' DAY AND L.fecha_buena_hasta <= NOW() + INTERVAL '20' DAY)
+JOIN osce.licitacion L ON L.id = O.licitacion_id AND (
+  (L.fecha_buena_desde >= NOW() AND L.fecha_buena_hasta <= NOW())
+  OR (L.fecha_buena_hasta >= NOW() - INTERVAL '7' DAY AND L.fecha_buena_hasta <= NOW() + INTERVAL '60' DAY)
   OR (L.buenapro_fecha >= NOW() - INTERVAL '7' DAY))
-ORDER BY L.buenapro_fecha ASC, L.fecha_buena_hasta ASC, O.id ASC", [
+ORDER BY L.fecha_buena_hasta ASC, L.buenapro_fecha ASC, O.id ASC
+LIMIT 50", [
   'tenant' => Auth::user()->tenant_id
 ]);
       $out = $rp->execute;
@@ -786,7 +788,7 @@ ORDER BY L.buenapro_fecha ASC, L.fecha_buena_hasta ASC, O.id ASC", [
        return $this->belongsTo('App\Cotizacion', 'licitacion_id','id')->first(); 
     }*/
     static function estadistica_barra_cantidades() {
-      return DB::select("SELECT fecha eje_x, cantidad eje_y, tipo collection FROM osce.estadistica_rapida_oportunidades(:tenant, 7, :user)", [
+      return DB::select("SELECT fecha eje_x, cantidad eje_y, tipo collection FROM osce.estadistica_rapida_oportunidades(:tenant, 105, :user)", [
         'tenant' => Auth::user()->tenant_id,
         'user'   => Auth::user()->id,
       ]);

@@ -40,6 +40,7 @@ class OportunidadController extends Controller {
 
       return view('oportunidad.index', $this->viewBag );
   }
+
   public function pruebas(Request $request, Oportunidad $oportunidad) {
     return response()->json([
       'status'   => false,
@@ -49,12 +50,14 @@ class OportunidadController extends Controller {
       'refresh'  => true,
     ]);
   }
+
   public function create(Request $request)
   {
     $oportunidad = new Oportunidad;
     $oportunidad->rotulo = '';
     return view( $request->ajax() ? 'oportunidad.fast' : 'oportunidad.create', compact( 'oportunidad'));
   }
+
   public function store(Request $request)
   {
     $data        = $request->all();
@@ -158,7 +161,7 @@ class OportunidadController extends Controller {
     {
       $oportunidad->eliminado = date('Y-m-d h:i:sa');
       $oportunidad->save();
-      $oportunidad->log('eliminado');
+     // $oportunidad->log('eliminado');
       return response()->json(['status'=> true , 'refresh' => true  ]);
     }
    public function autocomplete(Request $request) {

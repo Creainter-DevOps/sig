@@ -33,7 +33,7 @@
           <tr>
             <th style="width:180px;">DÍA</th>
             @foreach($chartjs['resumen'] as $n)
-            <th class="text-center" style="padding: 1.15rem 10px;background:{{ date('d', strtotime($n->fecha)) == date('d') ? '#b7ffaf' : '' }}">{{ date('d', strtotime($n->fecha)) }}</th>
+            <th class="text-center" style="padding: 1.15rem 10px;background:{{ date('d', strtotime($n->fecha)) == date('d') ? '#b7ffaf' : '' }}">{{ date('d/m', strtotime($n->fecha)) }}</th>
             @endforeach
           </tr>
           <tr>
@@ -108,7 +108,7 @@
                 <i class="bx bx-dots-vertical-rounded" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></i>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                   <a class="dropdown-item" href="/oportunidades/{{ $v->id }}/">Ver Ficha de Oportunidad</a>
-                  @foreach ([] as $e)
+                  @foreach ($v->empresasMenu() as $e)
                     @if(!empty($e->cotizacion))
                       <a class="dropdown-item" style="background: #cfffcf">Registrado con {{ $e->razon_social }}</a>
                     @else

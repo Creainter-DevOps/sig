@@ -24,28 +24,8 @@
       <div class="card">
         <div class="card-content mt-2">
           <div class="card-body">
-            <ul class="nav nav-tabs justify-content-center" role="tablist">
-              <li class="nav-item">
-                <a class="nav-link" href="/expediente/{{ $cotizacion->id }}/paso01">
-                  Anexos
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/expediente/{{ $cotizacion->id }}/paso02">
-                  Modificación
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/expediente/{{ $cotizacion->id }}/paso03">
-                  Mesa de Trabajo
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link active" href="/expediente/{{ $cotizacion->id }}/paso04">
-                  Magia
-                </a>
-              </li>
-            </ul>
+            <h1 class="text-center">El expediente se encuentra en proceso de revisión</h1>
+            <hr>
             <div class="blockProcess">
               <div style="font-size: 30px;text-align: center;color: #8b5bff;">
                 Se está procesando {{ $documento->folio }} páginas, tiempo estimado:
@@ -61,19 +41,19 @@
               </div>
               <div class="text-center" style="padding:10px;">
               <div class="row">
-                <div class="col-3">
+                <div class="col-4">
                   @if(!empty($documento->original))
                   <a class="btn btn-primary text-white" data-url-download-original target="_blank">Descargar Confidencial
                     <i class="bx bxs-download" ></i>
                   </a>
                   @endif
                   </div>
-                  <div class="col-3">
+                  <div class="col-4">
                   <a class="btn btn-secondary text-white" data-url-download target="_blank">Descargar Expediente
                     <i class="bx bxs-download" ></i>
                   </a>
                   </div>
-                  <div class="col-3">
+                  <div class="col-4">
                     <div class="input-group">
                       <input type="text" class="form-control" placeholder="Página" value="1" min="1" max="{{ $documento->folio }}">
                       <div class="input-group-append">
@@ -81,43 +61,9 @@
                       </div>
                     </div>
                   </div>
-                  <div class="col-3">
-                  @if(empty($cotizacion->propuesta_el))
-                    <a class="btn btn-secondary text-white" data-confirm data-button-dinamic href="/cotizaciones/{{ $cotizacion->id }}/registrarPropuesta" class="btn btn-sm btn-dark">Marcar como Enviado</a>
-                  @else
-                    Ya se ha registrado el Envio:<br /> {{ Helper::fecha($cotizacion->propuesta_el, true) }} por {{ $cotizacion->propuesta_por }}
-                  @endif
-                  </div>
                 </div>
               </div>
             </div>
-            @if(!empty($cotizacion->oportunidad()->correo_id))
-            <div class="blockSendMail" style="max-width: 700px;margin:0 auto;background: #f3f3f3;border: 1px solid #e1e1e1;color: #000;padding: 10px;border-radius: 3px;">
-              <fieldset class="form-group">
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <label class="input-group-text" for="inputGroupSelect01">De:</label>
-                    </div>
-                    <select class="form-control" onchange="$(this).closest('.blockSendMail').find('a.btn').attr('data-pass-value', $(this).val());">
-                      <option>Elija el Remitente</option>
-                    @foreach(App\User::perfiles($cotizacion->empresa_id) as $r)
-                      <option value="{{ $r->id }}">{{ $r->cargo }}</option>
-                    @endforeach
-                    </select>
-                  </div>
-                </fieldset>
-              <table>
-                <tr>
-                  <th>Para:</th>
-                  <td>{{ $cotizacion->oportunidad()->correo()->correo_desde }}</td>
-                </tr>
-              </table>
-              <div class="text-center">
-                <i>En el correo se adjuntará este expediente recién elaborado, puede que demore un minuto en llegar a tu correo.</i><br>
-                <a class="btn btn-secondary text-white" data-confirm data-button-dinamic href="/cotizaciones/{{ $cotizacion->id }}/enviarPorCorreo" class="btn btn-sm btn-dark">Envíar por Correo Eléctronico</a>
-              </div>
-            </div>
-            @endif
           </div>
         </div>
       </div>

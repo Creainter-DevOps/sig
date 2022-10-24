@@ -1,5 +1,10 @@
 @extends('layouts.pdf')
 @section('content')
+<style>
+td {
+  border-bottom: 1px solid #ebeaea;
+}
+</style>
   <h1 class="mayuscula texto-centrado">Reporte de Facturas por Cobrar</h1>
   <table class="tabla w-100">
     <thead>
@@ -23,8 +28,8 @@
   $totales[$p->moneda_id]['detraccion'] += $p->monto_detraccion;
 ?>
       <tr>
-        <td><?= $p->rotulo; ?></td>
-        <td style="width:100px;"><?= $p->descripcion; ?></td>
+        <td style="width:100px;"><a href="https://sig.creainter.com.pe/proyectos/<?= $p->proyecto_id ?>" style="color:#000;" target="_blank"><?= $p->alias ?></a></td>
+        <td style=""><?= $p->descripcion; ?></td>
         <td class="texto-centrado" style="width:70px;"><?= $p->numero; ?></td>
         <td class="texto-centrado" style="width:90px;"><?= Helper::fecha($p->fecha); ?></td>
         <td class="texto-derecha" style="width:90px;"><?= Helper::money($p->monto, $p->moneda_id); ?></td>

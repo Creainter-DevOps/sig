@@ -427,7 +427,9 @@ ORDER BY 4 DESC", ['tenant' => Auth::user()->tenant_id]));
       //exit;
 
       /* Hasta este paso tenemos los pdf finales, para unir */
-      $pdf_individuales = [];
+      $pdf_individuales_expediente = [];
+      $pdf_individuales_secure = [];
+
       $documentos_ids = [];
       foreach($workspace['paso03'] as $key => $file) {
         $folios += $file['folio'] ?? 1;
@@ -436,37 +438,47 @@ ORDER BY 4 DESC", ['tenant' => Auth::user()->tenant_id]));
         } elseif(!empty($file['generado_de_id'])) {
           $documentos_ids[] = $file['generado_de_id'];
         }
-        if(is_array($file['root'])) {
-          foreach($file['root'] as $ff) {
-            $pdf_individuales[] = $ff;
+        if($file['contexto'] == 'secure') {
+          if(is_array($file['root'])) {
+            foreach($file['root'] as $ff) {
+              $pdf_individuales_secure[] = $ff;
+            }
+          } else {
+            $pdf_individuales_secure[] = $file['root'];
           }
         } else {
-          $pdf_individuales[] = $file['root'];
+          if(is_array($file['root'])) {
+            foreach($file['root'] as $ff) {
+              $pdf_individuales_expediente[] = $ff;
+            }
+          } else {
+            $pdf_individuales_expediente[] = $file['root'];
+          }
         }
       }
       $dir = $documento->folder_workspace();
 
-      $output = $dir . 'Propuesta.pdf';
-      $output_final = $dir . 'Propuesta_Seace.pdf';
+      $output_draw   = $dir . 'PropuestaSeace.pdf';
+      $output_secure = $dir . 'PropuestaSecure.pdf';
 
 
       /* Unimos los PDFs */
-      $commands[] = 'echo "Uniendo los documento en PDF"';
-      $commands[] = '/usr/bin/convert -alpha remove -density 200 -quality 100 '. implode(' ', $pdf_individuales) . ' ' . $output;
+      $commands[] = 'echo "Uniendo los documento en PDF del EXPEDIENTE"';
+      $commands[] = '/usr/bin/convert -alpha remove -density 200 -quality 100 '. implode(' ', $pdf_individuales_expediente) . ' ' . $output_draw;
+      $commands[] = 'echo "Escaneando documento..."';
+      $commands[] = '/usr/bin/convert -density 140 ' . $output_draw . ' -rotate 0.5 -attenuate 0.1 +noise Multiplicative -attenuate 0.01 +noise Multiplicative -sharpen 0x1.0 ' . $output_draw;
+      $commands[] = 'echo "Proceso de foliación de PDF"';
+      $commands[] = '/bin/pdf-foliar ' . $output_draw;
+      $commands[] = "/snap/bin/gsutil -h Cache-Control:\"Cache-Control:private, max-age=0, no-transform\" cp '" . $output_draw . "' '" . config('constants.ruta_storage') . $documento->archivo . "'";
 
-      $commands[] = '/bin/cp ' . $output . ' ' . $output_final;
-
-      if($escanear) {
-        if(!empty($documento->getAttribute('original'))) {
-          $commands[] = "/snap/bin/gsutil -h Cache-Control:\"Cache-Control:private, max-age=0, no-transform\"  cp '" . $output_final . "' '" . config('constants.ruta_storage') . $documento->getAttribute('original') . "'";
-        }
+      if(!empty($pdf_individuales_secure)) {
+        $commands[] = 'echo "Uniendo los documento en PDF del SECURE"';
+        $commands[] = '/usr/bin/convert -alpha remove -density 200 -quality 100 '. implode(' ', $pdf_individuales_secure) . ' ' . $output_secure;
         $commands[] = 'echo "Escaneando documento..."';
-        $commands[] = '/usr/bin/convert -density 140 ' . $output . ' -rotate 0.5 -attenuate 0.1 +noise Multiplicative -attenuate 0.01 +noise Multiplicative -sharpen 0x1.0 ' . $output_final;
+        $commands[] = '/usr/bin/convert -density 140 ' . $output_secure . ' -rotate 0.5 -attenuate 0.1 +noise Multiplicative -attenuate 0.01 +noise Multiplicative -sharpen 0x1.0 ' . $output_secure;
         $commands[] = 'echo "Proceso de foliación de PDF"';
-        $commands[] = '/bin/pdf-foliar ' . $output_final;
-        $commands[] = "/snap/bin/gsutil -h Cache-Control:\"Cache-Control:private, max-age=0, no-transform\" cp '" . $output_final . "' '" . config('constants.ruta_storage') . $documento->archivo . "'";
-      } else {
-        $commands[] = "/snap/bin/gsutil -h Cache-Control:\"Cache-Control:private, max-age=0, no-transform\"  cp '" . $output_final . "' '" . config('constants.ruta_storage') . $documento->archivo . "'";
+        $commands[] = '/bin/pdf-foliar ' . $output_secure;
+        $commands[] = "/snap/bin/gsutil -h Cache-Control:\"Cache-Control:private, max-age=0, no-transform\"  cp '" . $output_secure . "' '" . config('constants.ruta_storage') . $documento->getAttribute('original') . "'";
       }
 
       $commands[] = 'echo "Eliminando directorio de trabajo: ' . $documento->folder_workspace() . '"';
@@ -477,6 +489,7 @@ ORDER BY 4 DESC", ['tenant' => Auth::user()->tenant_id]));
 
       $commands[] = 'echo "Finalizó el proceso"';
       $commands[] = "sleep 5";
+
 
       $workspace['paso03'] = $workspace['paso04'];
       unset($workspace['paso04']);

@@ -78,35 +78,23 @@
                                 <span class="menu-title">Mi Kanban</span>
                               </a>
                             </li>
-                            <li class="navigation-header"><span>Licitaciones</span></li>
-                            <li class="nav-item {{(request()->is('licitaciones')) ? 'active' : '' }}">
-                              <a href="/licitaciones">
+                            <li class="navigation-header"><span>Negocios</span></li>
+                            <li class="nav-item {{(request()->is('licitaciones/workspace')) ? 'active' : '' }}">
+                              <a href="/licitaciones/workspace">
                                 <i class="menu-livicon livicon-evo-holder" data-icon="line-chart"></i>
                                 <span class="menu-title">Panel de Trabajo</span>
                               </a>
                             </li>
-                            <!-- <li class="nav-item {{(request()->is('licitaciones/aprobadas')) ? 'active' : '' }}">
-                              <a href="/licitaciones/aprobadas">
-                                <i class="menu-livicon livicon-evo-holder" data-icon="line-chart"></i>
-                                <span class="menu-title">Aprobadas</span>
-                              </a>
-                            </li>
-                            <li class="nav-item {{(request()->is('licitaciones/rechazadas')) ? 'active' : '' }}">
-                              <a href="/licitaciones/rechazadas">
-                                <i class="menu-livicon livicon-evo-holder" data-icon="line-chart"></i>
-                                <span class="menu-title">Rechazadas</span>
-                              </a>
-                            </li>
-                            <li class="nav-item {{(request()->is('licitaciones/archivadas')) ? 'active' : '' }}">
-                              <a href="/licitaciones/archivadas">
-                                <i class="menu-livicon livicon-evo-holder" data-icon="line-chart"></i>
-                                <span class="menu-title">Archivadas</span>
-                              </a>
-                            </li> -->
                             <li class="nav-item {{(request()->is('licitaciones/nuevas')) ? 'active' : '' }}">
                               <a href="/licitaciones/nuevas">
                                 <i class="menu-livicon livicon-evo-holder" data-icon="line-chart"></i>
-                                <span class="menu-title">Nuevas</span>
+                                <span class="menu-title">Revisar Nuevas</span>
+                              </a>
+                            </li>
+                            <li class="nav-item {{(request()->is('licitaciones')) ? 'active' : '' }}">
+                              <a href="/licitaciones/">
+                                <i class="menu-livicon livicon-evo-holder" data-icon="line-chart"></i>
+                                <span class="menu-title">Licitaciones</span>
                               </a>
                             </li>
                             <li class="nav-item {{(request()->is('oportunidades')) ? 'active' : '' }}">
@@ -115,7 +103,7 @@
                                 <span class="menu-title">Oportunidades</span>
                               </a>
                             </li>
-                                                        <li class="navigation-header"><span>Negocios</span></li>
+                                                        <li class="navigation-header"><span>Gestión</span></li>
                                                     <li class="nav-item {{(request()->is('proyectos'.'*')) ? 'active' : '' }}   ">
               <a href="https://sig.creainter.com.pe/proyectos">
                                         <i class="menu-livicon livicon-evo-holder" data-icon="desktop"></i>

@@ -1,3 +1,19 @@
+function _hasTag(box, tag) {
+  if(typeof box.tags !== 'undefined') {
+    return true;
+  }
+  return false;
+}
+function _addTag(box, tag) {
+  if(typeof box.tags === 'undefined') {
+    box.tags = {};
+  }
+  if(typeof box.tags[tag] == 'undefined') {
+    box.tags[tag] = tag;
+    return true;
+  }
+  return false;
+}
 function toHHMMSS(text) {
     var sec_num = parseInt(text, 10); // don't forget the second param
     var hours   = Math.floor(sec_num / 3600);
@@ -295,7 +311,10 @@ function render_table() {
 
 function render_autocomplete() {
     $(":input.autocomplete").each(function () {
-        var box = $(this);
+      if(!_addTag(this, 'autocomplete')) {
+        return false;
+      }
+      var box = $(this);
         var rotulo = box.attr("data-value");
         var url = box.attr("data-ajax");
         var form = box.attr("data-register");
@@ -580,7 +599,10 @@ function render_autocomplete() {
 }
 function render_input_ajax() {
     $(".form-ajax").each(function () {
-        var box = $(this);
+      if(!_addTag(this, 'form-ajax')) {
+        return false;
+      }
+      var box = $(this);
         box.removeClass("form-ajax");
         var url = box.attr("data-ajax");
         box.on("change", function () {
@@ -620,6 +642,11 @@ function form_select_fill(field, data) {
 }
 function render_select_default() {
     $("select[data-value]").each(function () {
+      if(!_addTag(this, 'data-value')) {
+        return false;
+      }
+      var box = $(this);
+
       var vvv = $(this).attr("data-value");
       $(this).removeAttr('data-value');
         if (vvv != "") {
@@ -677,6 +704,9 @@ function time_input_js(time, formato) {
 }
 function render_input_time() {
     $("input[data-format]").each(function () {
+      if(!_addTag(this, 'format')) {
+        return false;
+      }
         var box = this;
         var format = $(box).attr("data-format");
         $(box).removeClass("data-format");
@@ -696,6 +726,9 @@ function render_input_time() {
 }
 function render_time_left() {
   $("[data-time-left]").each(function() {
+    if(!_addTag(this, 'time-left')) {
+      return false;
+    }
     var box  = this;
     var text = $(box).attr("data-time-left") || '0';
     text     = parseInt(text);
@@ -714,6 +747,9 @@ function render_time_left() {
 }
 function render_confirm_input() {
   $("[data-confirm-input]").each(function () {
+    if(!_addTag(this, 'confirm-input')) {
+      return false;
+    }
     var box  = this;
     var text = $(box).attr("data-confirm-input") || '¿Cual fue el motivo?';
     var url  = $(box).attr('href');
@@ -775,6 +811,9 @@ function render_confirm_input() {
 }
 function render_link_confirm() {
     $("[data-confirm]").each(function () {
+      if(!_addTag(this, 'confirm')) {
+        return false;
+      }
         var box = this;
         var text = $(box).attr("data-confirm") || "Realizar";
         $(this).on("click", function (e) {
@@ -807,6 +846,9 @@ function render_link_confirm() {
 }
 function render_block_dinamic() {
   $("[data-block-dinamic]").each(function () {
+    if(!_addTag(this, 'block-dinamic')) {
+      return false;
+    }
     var box = $(this);
     var boxt = $('<div>').addClass('block_dinamic_time');
     box.append(boxt);
@@ -861,6 +903,9 @@ function render_block_dinamic() {
 }
 function render_dom_popup() {
     $("[data-popup]").each(function () {
+      if(!_addTag(this, 'popup')) {
+        return false;
+      }
         var box = $(this);
         var form = box.attr("data-popup");
         var title = box.attr('data-title') || 'Proceso';
@@ -949,7 +994,10 @@ function render_dom_popup() {
 }
 function render_confirm_remove() {
     $("[data-confirm-remove]").each(function () {
-        var box = $(this);
+      if(!_addTag(this, 'confirm-remove')) {
+        return false;
+      }
+      var box = $(this);
         var url = $(this).attr("data-confirm-remove");
         box.removeAttr("data-confirm-remove");
 
@@ -1024,6 +1072,9 @@ function render_button_dinamic() {
     },
   });
   $('[data-button-dinamic]').each(function() {
+    if(!_addTag(this, 'button-dinamic')) {
+      return false;
+    }
     $(this).data('fn_dinamic', 1).removeAttr('data-button-dinamic').on('click', function(e) {
       e.preventDefault();
       if(typeof $(this).attr('disabled') !== 'undefined') {
@@ -1086,6 +1137,10 @@ function render_button_dinamic() {
 }
 function render_outgoing() {
   $('[data-outgoing]').each(function() {
+    if(!_addTag(this, 'outgoing')) {
+      return false;
+    }
+    var box = $(this);
     var num = $(this).attr('data-outgoing');
     var title = $(this).attr('data-outgoing-title');
     $(this).removeAttr('data-outgoing').attr('data-outgoing-view', 1)
@@ -1127,8 +1182,11 @@ function combo() {
 
 function render_editable() {
   $('[data-editable]').each(function(event ) {
-    var xhr = $(this).attr('data-editable');
+    if(!_addTag(this, 'editable')) {
+        return false;
+    }
     var box = $(this);
+    var xhr = $(this).attr('data-editable');
     $(this).removeAttr('data-editable').attr('data-editable-view', 1);
     var focus = false;
     enableImageResizeInDiv(this);

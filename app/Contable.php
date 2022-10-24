@@ -90,10 +90,12 @@ ORDER BY P.fecha ASC", [
     }
     static function facturas_por_cobrar() {
       return DB::select("
-SELECT PP.rotulo, P.*
-FROM osce.pago P
-JOIN osce.proyecto PP ON PP.id = P.proyecto_id
-WHERE P.estado_id IN (1,2) AND P.fecha <= NOW()::date");
+        SELECT PP.rotulo, COALESCE(PP.alias, PP.codigo) alias, P.*
+        FROM osce.pago P
+        JOIN osce.proyecto PP ON PP.id = P.proyecto_id
+        WHERE P.estado_id IN (1,2) AND P.fecha <= NOW()::date + INTERVAL '15' DAY
+        ORDER BY P.fecha ASC
+        ");
     }
     static function licitaciones_semanal() {
       $rp = DB::select("
@@ -139,6 +141,7 @@ FROM (
 		P.nomenclatura,
 		P.codigo,
 		P.rotulo,
+    P.alias,
 		L.buenapro_fecha,
 		P.fecha_firma,
 		P.fecha_desde,
@@ -185,7 +188,7 @@ FROM (
 	LEFT JOIN osce.cotizacion C ON C.id = P.cotizacion_id
 	LEFT JOIN osce.oportunidad O ON O.id = C.oportunidad_id
 	LEFT JOIN osce.licitacion L ON L.id = O.licitacion_id
-	WHERE P.eliminado IS FALSE) x
+	WHERE P.eliminado IS FALSE AND P.estado NOT IN ('concluido','cancelado','garantia_inicio')) x
   ORDER BY x.codigo DESC;
       ");
       return Oportunidad::hydrate($rp);
@@ -206,5 +209,16 @@ WHERE P.estado <> 'concluido'
 ORDER BY 1 DESC
 ");
       return Oportunidad::hydrate($rp);
+    }
+
+    static function cuentas($empresa_id) {
+      return collect(DB::select("
+      SELECT C.id, CONCAT(B.nombre, ': ', C.nombre) rotulo
+      FROM financiero.cuenta C
+      JOIN financiero.banco B ON B.id = C.banco_id
+      WHERE C.empresa_id = :empresa AND C.eliminado IS NULL
+      ORDER BY C.id ASC", [
+        'empresa' => $empresa_id,
+      ]));
     }
 }

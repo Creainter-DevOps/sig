@@ -61,9 +61,10 @@
                       <div id="drawRepositorio" style="padding: 5px 15px;display:none;">
                         <div id="BucketRepositorio" data-bucket="1" data-path="{{ $documento->directorio }}" data-upload="true" style="border:3px dashed #ff9900!important;"></div>
                       </div>
-                      <ul class="StackedListDrag StackedList" data-container="draw" data-dropzone="draw">
+                      <ul class="StackedListDrag StackedList" data-container="secure" data-dropzone="secure,draw" style="min-height:225px;padding-bottom: 15px;">
                       @if(!empty($workspace['paso03']))
                       @foreach (Helper::workspace_ordenar($workspace['paso03']) as $k => $file)
+                      @if(!empty($file['contexto']) && $file['contexto'] == 'secure')
                       <li class="boxDraggable StackedListItem StackedListItem--isDraggable StackedListItem--item1" data-id="{{ $k }}" data-orden="{{$file['orden'] }}" data-firma="{{ !empty($file['estampados']['firma']) ? "true" : '' }}" data-tipo="{{ $file['tipo'] }}"  data-visado="{{ !empty($file['estampados']['visado']) ? "true" : '' }}" data-tipo="{{ $file['tipo'] }}">
                         <img class="background_image" src="/documentos/{{ $documento->id }}/generarImagenTemporal?page=0&cid={{$k}}&t={{time()}}"/>
                         <div class="StackedListContent">
@@ -96,6 +97,47 @@
                         </div>
                         </div>
                       </li>
+                      @endif
+                      @endforeach
+                      @endif
+                     </ul>
+                      <ul class="StackedListDrag StackedList" data-container="draw" data-dropzone="draw,secure">
+                      @if(!empty($workspace['paso03']))
+                      @foreach (Helper::workspace_ordenar($workspace['paso03']) as $k => $file)
+                      @if(empty($file['contexto']) || $file['contexto'] == 'draw')
+                      <li class="boxDraggable StackedListItem StackedListItem--isDraggable StackedListItem--item1" data-id="{{ $k }}" data-orden="{{$file['orden'] }}" data-firma="{{ !empty($file['estampados']['firma']) ? "true" : '' }}" data-tipo="{{ $file['tipo'] }}"  data-visado="{{ !empty($file['estampados']['visado']) ? "true" : '' }}" data-tipo="{{ $file['tipo'] }}">
+                        <img class="background_image" src="/documentos/{{ $documento->id }}/generarImagenTemporal?page=0&cid={{$k}}&t={{time()}}"/>
+                        <div class="StackedListContent">
+                          <div class="tools">
+                            <a class="download" href="/static/temporal/{{ str_replace('/tmp/', '', $file['root']) }}?t={{time()}}" download>Descargar</a>
+                            <a class="edit"  href="javascript:void(0);" data-popup="/documentos/{{ $documento->id }}/visualizar?cid={{ $k }}">Editar</a>
+                            <a class="delete" href="javascript:eliminarCid('{{ $k }}');">Eliminar</a>
+                            @if(!file_exists($file['root']))
+                            <div style="width: 8px;height: 8px;background: red;display: inline-block;border-radius: 6px;"></div>
+                            @endif
+                          </div>
+                          <div class="DragHandle">
+                          </div>
+                          <div class="Pattern Pattern--typeHalftone" style="position:absolute; top:4px;left:4px;display: grid;grid-template: 1fr/1fr 1fr;column-gap: 4px;" >
+                           @if ( Helper::recursive_count_key_value( $file, 'tool','firma') == ( $file['is_part'] == true ? 1 : $file['folio'] )   )
+                                <span class="text-white" style="text-align:center; padding:1px 3px; border-radius:4px; background-color:#ff7600; cursor: initial;" title="Firmado">
+                                  <i class="bx bxs-edit-alt" style="font-size:15px;"></i>
+                                </span>
+                             @endif
+
+                             @if ( Helper::recursive_count_key_value( $file, 'tool','visado') == ( $file['is_part'] == true ? 1 : $file['folio'] ))
+                                <span class="text-white" style="text-align:center; padding:1px 3px;border-radius:4px; background-color:#188aff; cursor: initial;"  title="Visado">
+                                  <i class="bx bx-check-circle"style="font-size:15px;"></i>
+                                </span>
+                             @endif
+                          </div>
+                        <div class="Pattern Pattern--typePlaced"style="display:flex;flex-direction: column; align-items:center; " >
+                          <div class="folio">{{ $file['folio'] }}</div>
+                          <div class="Heading Heading--size4 text-no-select">{{ $file['rotulo'] }}</div>
+                        </div>
+                        </div>
+                      </li>
+                      @endif
                       @endforeach
                       @endif
                      </ul>
@@ -553,12 +595,22 @@ bucket.capture(document.getElementById('BucketRepositorio'));
     console.log('droppable:dropped');
   });
   sortable.on('sortable:sort', (evt) => {
-    console.log('sortable:sort', evt.dragEvent.sourceContainer.dataset.container, evt.dragEvent.sourceContainer.dataset.dropzone, evt.dragEvent.overContainer.dataset.container);
-    if(evt.dragEvent.sourceContainer.dataset.dropzone != evt.dragEvent.overContainer.dataset.container) {
-      console.log('CANCELANDO...');
-//      sortable.dragging = false;
+    var ll = evt.dragEvent.sourceContainer.dataset.dropzone.split(',');
+    var rr = false;
+    for(var ii in ll) {
+      if(ll[ii] == evt.dragEvent.overContainer.dataset.container) {
+        rr = true;
+      }
+    }
+    if(!rr) {
       return evt.cancel();
     }
+
+//  if(evt.dragEvent.sourceContainer.dataset.dropzone != evt.dragEvent.overContainer.dataset.container) {
+//    console.log('CANCELANDO...');
+//      sortable.dragging = false;
+//    return evt.cancel();
+//  }
     if (!capacityReached) {
       //console.log('SOURCE', evt.dragEvent.source );
       return;
@@ -566,7 +618,8 @@ bucket.capture(document.getElementById('BucketRepositorio'));
     const sourceIsCapacityContainer = evt.dragEvent.sourceContainer === sortable.containers[1];
 
     if (!sourceIsCapacityContainer && evt.dragEvent.overContainer === sortable.containers[1]) {
-      evt.cancel();
+      //console.log('CANCELADO XD', sortable.containers);
+      //evt.cancel();
     }
     
   });
@@ -582,7 +635,8 @@ bucket.capture(document.getElementById('BucketRepositorio'));
 
   });
   sortable.on('sortable:stop', (evt) => {
-    if ( evt.data.oldContainer != lastOverContainer && $(lastOverContainer).attr('data-container') == 'draw') {
+//    console.log('SORTABLE:STOP', evt.data.oldContainer, evt.data.newContainer);
+    if ( evt.data.oldContainer != lastOverContainer && $(evt.data.newContainer).attr('data-container') == 'draw' && $(evt.data.oldContainer).attr('data-container') == 'news') {
       var box = evt.data.dragEvent.data.originalSource;
       console.log('NUEVO ELEMENTO', evt.data.dragEvent, lastOverContainer);
       if (box.dataset.plantilla == "true") {
@@ -604,22 +658,26 @@ bucket.capture(document.getElementById('BucketRepositorio'));
       $(box).remove();
       return 0;
 
-    } else if ( lastOverContainer === evt.data.newContainer && $(lastOverContainer).attr('data-container') == 'draw' && evt.data.newIndex !== evt.data.oldIndex) {
-      console.log('MOVER', evt.data.newIndex, evt.data.oldIndex, lastOverContainer, evt);
+    } else if ( lastOverContainer === evt.data.newContainer && evt.data.newIndex !== evt.data.oldIndex && $(lastOverContainer).attr('data-container') == 'draw') {
+      console.log('MOVER1', evt.data.newIndex, evt.data.oldIndex, lastOverContainer, evt);
       var box = evt.data.dragEvent.data.originalSource;
-      move_card( box.dataset.id, evt.data.newIndex);
+      move_card(box.dataset.id, evt.data.newIndex, $(lastOverContainer).attr('data-container'));
+      return 0;
+    } else if ( lastOverContainer === evt.data.newContainer && evt.data.newIndex !== evt.data.oldIndex && $(lastOverContainer).attr('data-container') == 'secure') {
+      console.log('MOVER2', evt.data.newIndex, evt.data.oldIndex, lastOverContainer, evt);
+      var box = evt.data.dragEvent.data.originalSource;
+      move_card(box.dataset.id, evt.data.newIndex, $(lastOverContainer).attr('data-container'));
       return 0;
     }
   });
 
 
-  function move_card (id, orden){
+  function move_card (id, orden, contexto) {
+    console.log('move_card', id, orden, contexto);
       let url = '/documentos/{{ $documento->id }}/ordenar';
       let formdata = new FormData();
       formdata.append('id', id);
       formdata.append('orden', orden);
-      //formdata.append('page', page) ;
-
       Fetchx({
         title: 'Ordenando',
         url: url,
@@ -627,7 +685,7 @@ bucket.capture(document.getElementById('BucketRepositorio'));
         headers: {
           "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute('content') 
         },
-        data: { id: id, orden: orden },
+        data: { id: id, orden: orden, contexto: contexto },
         dataType: 'json',
         success: function(data) {
           console.log(data);

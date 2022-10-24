@@ -32,9 +32,11 @@
                   <ul>
                   @foreach($licitacion->adjuntos() as $a)
                     <li>
-                      <a target="_blank" href="{{ config('constants.static_seace') . $a->codigoAlfresco }}">
+                      <a target="_blank" href="{{ config('constants.static_seace') . $a->codigoAlfresco }}" title="Publicado el {{ $a->fechaPublicacion }}">
                         {{ $a->tipoDocumento }}
                       </a>
+                      <a target="_blank" href="http://prodcont.seace.gob.pe/alfresco/d/a/workspace/SpacesStore/{{ $a->codigoAlfresco }}/{{ str_replace(' ', '_', $a->nombreArchivo) }}?ticket=TICKET_46673d80f95718415e90372f25d0e972de39f1e6">[Alt]</a>
+                      <small>{{ $a->fechaPublicacion }}</small>
                     </li>
                   @endforeach
                   </ul>
@@ -44,7 +46,7 @@
                 <tr>
                   <th>Resultados:</th>
                   <td colspan="5">
-                    {!! $licitacion->ganadora() !!}
+                    {!! $licitacion->ganadora() !!} (<i>{{ Helper::fecha($licitacion->buenapro_fecha, true) }}</i>)
                     @if($licitacion->buenapro_fecha && empty($proyecto) && !empty($oportunidad))
                     <div style="padding:10px;background: #ff6c6c;color: #fff;text-align: center;">
                       <div>¿Perdimos, por qué?</div>

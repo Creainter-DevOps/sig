@@ -32,7 +32,7 @@ class Proyecto extends Model
     protected $fillable = [
       'tenant_id','cliente_id','contacto_id','oportunidad_id','cotizacion_id','nombre','codigo','nomenclatura','rotulo',
       'dias_servicio', 'estado', 'dias_garantia','dias_instalacion','tipo' ,'fecha_consentimiento','fecha_firma','fecha_desde','fecha_hasta', 'eliminado', 'empresa_id','color',
-      'updated_by','alias'
+      'updated_by','alias','responsable_financiero','responsable_tecnico','responsable_entregable'
     ];
 
     /**
@@ -52,9 +52,12 @@ class Proyecto extends Model
     protected $casts = [
     ];
     public static function list() {
-      return static::where( 'eliminado', false )
+      return static::where('eliminado', false)
       ->where('tenant_id', Auth::user()->tenant_id)
-      ->orderBy('created_on', 'desc');
+      ->orderByRaw("
+        (estado NOT IN('concluido','cancelado')) desc,
+        array_position(ARRAY['precontrato','contrato','instalacion_inicio','desarrollo_inicio','servicio_inicio','entregables','servicio_fin','garantia_inicio'], estado) asc,
+        proyecto.id DESC");
     }
     public function rotulo() {
       if(!empty($this->nombre)) {
@@ -93,6 +96,9 @@ class Proyecto extends Model
     }
     public function oportunidad() {
       return $this->cotizacion()->oportunidad();
+    }
+    public function licitacion() {
+      return $this->belongsTo('App\Licitacion', 'licitacion_id')->first();
     }
     public function cliente() {
       return $this->belongsTo('App\Cliente', 'cliente_id')->first() ?? new Cliente;
@@ -151,13 +157,33 @@ class Proyecto extends Model
         'contrato'           => array('name' => 'CONTRATO', 'color' => '#666565'),
         'instalacion_inicio' => array('name' => 'INICIO DE INSTALACIÓN', 'color' => '#6cc529'),
         'instalacion_fin'    => array('name' => 'FIN DE INSTALACIÓN', 'color' => '#c77e10'),
-        'servicio_inicio'    => array('name' => 'INICIO DE SERVICIO', 'color' => '#2f71eb'),
-        'servicio_fin'       => array('name' => 'FIN DE SERVICIO', 'color' => '#193976'),
+        'desarrollo_inicio'  => array('name' => 'INICIO DE DESARROLLO', 'color' => '#2f71eb'),
+        'desarrollo_fin'     => array('name' => 'FIN DE DESARROLLO', 'color' => '#193976'),
+        'servicio_inicio'    => array('name' => 'INICIO DE SERVICIO', 'color' => '#7b9cdb'),
+        'servicio_fin'       => array('name' => 'FIN DE SERVICIO', 'color' => '#7b9cdb'),
         'garantia_inicio'    => array('name' => 'INICIO DE GARANTÍA', 'color' => '#e78467'),
         'garantia_fin'       => array('name' => 'FIN DE GARANTÍA', 'color' => '#b14728'),
         'cancelado'          => array('name' => 'CANCELADO', 'color' => '#ed5252'),
         'concluido'          => array('name' => 'CONCLUIDO', 'color' => '#005803'),
       ];
+    }
+    public function fechaCalculadaConsentimiento() {
+      if(empty($this->licitacion_id)) {
+        return '...';
+      }
+      return (collect(DB::select("SELECT osce.fn_sumar_dias_habiles(:fecha, :suma) fecha", [
+        'fecha' => $this->licitacion()->buenapro_fecha,
+        'suma'  => 8,
+      ]))->first())->fecha;
+    }
+    public function fechaCalculadaPerfeccionamiento() {
+      if(empty($this->licitacion_id)) {
+        return '...';
+      }
+      return (collect(DB::select("SELECT osce.fn_sumar_dias_habiles(:fecha, :suma) fecha", [
+        'fecha' => $this->fecha_consentimiento,
+        'suma'  => 8,
+      ]))->first())->fecha;
     }
     public function meta() {
       if($this->metas === null) {

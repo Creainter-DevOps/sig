@@ -12,22 +12,18 @@
     <div class="row">
         <div class="offset-12 col-md-3" style="margin-bottom: 10px;">
           <!--<a class="btn btn-primary" href="/cotizaciones/crear" style="" target="_blank"> + Nueva Cotización </a>-->
-          <a class="btn btn-primary" href="/oportunidades/crear" style="" target="_blank"> + Oportunidad </a>
+          <a class="btn btn-primary" href="/oportunidades/crear" style="">+ Oportunidad </a>
         </div>
     </div>
 <div class="row" id="basic-table">
   <div class="col-12">
     <div class="card">
-      <!--<div class="card-header">
-        <h4 class="card-title">Oportunidades</h4>
-      </div>-->
       <div class="card-content">
         <div class="card-body">
   <div class="table-responsive">
     <table class="table table-sm mb-0" style="width:100%">
       <thead>
         <tr>
-<!--          <th style="width:150px;">Código</th> -->
           <th>Cliente</th>
           <th>Rótulo</th>
           <th>Solicitado</th>

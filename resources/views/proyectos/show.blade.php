@@ -31,53 +31,6 @@
   </div>
   <div class="row">
     <div class="col-12">
-      <div style="text-align: center;background: #6ea1ff;margin-bottom: 5px;color: #ffff;">EL CLIENTE</div>
-      <div class="row">
-      <div class="col-sm-6">
-        <div class="card">
-          <div class="card-body">
-            @include('clientes.table')
-          </div>
-        </div>
-      </div>
-      <div class="col-sm-6">
-        <div class="card">
-          <div class="card-body">
-            @include('clientes.contactos')
-          </div>
-        </div>
-      </div>
-      </div>
-    </div>
-    <div class="col-12">
-      <div style="text-align: center;background: #ffb16e;margin-bottom: 5px;color: #ffff;">LA OPORTUNIDAD</div>
-      <div class="row">
-      <div class="col-sm-6">
-        <div class="card">
-          <div class="card-body">
-            @include('oportunidad.table', ['oportunidad' => $proyecto->oportunidad()])
-          </div>
-        </div>
-      </div>
-      @if(!empty($proyecto->oportunidad()->licitacion_id))
-      <div class="col-sm-6">
-        <div class="card">
-          <div class="card-body">
-            @include('licitacion.table', ['licitacion' => $proyecto->oportunidad()->licitacion()])
-          </div>
-        </div>
-      </div>
-      @endif
-      <div class="col-sm-6">
-        <div class="card">
-          <div class="card-body">
-            @include('cotizacion.table', ['cotizacion' => $proyecto->cotizacion()])
-          </div>
-        </div>
-      </div>
-      </div>
-    </div>
-    <div class="col-12">
       <div style="text-align: center;background: #43e16c;margin-bottom: 5px;color: #ffff;">EL PROYECTO</div>
 <div class="row">
     <div class="col-xl-2 col-md-4 col-sm-6">
@@ -175,6 +128,15 @@
         </div>
       </div>
     </div>
+    @if(!empty($proyecto->oportunidad()->licitacion_id))
+      <div class="col-sm-6">
+        <div class="card">
+          <div class="card-body">
+            @include('licitacion.table', ['licitacion' => $proyecto->oportunidad()->licitacion()])
+          </div>
+        </div>
+      </div>
+    @endif
     <div class="col-sm-6">
         <div class="card">
           <div class="card-body">

@@ -1,30 +1,21 @@
 <!DOCTYPE html>
-<!--
-Template Name: Frest HTML Admin Template
-Author: :Pixinvent
-Website: http://www.pixinvent.com/
-Contact: hello@pixinvent.com
-Follow: www.twitter.com/pixinvents
-Like: www.facebook.com/pixinvents
-Purchase: https://1.envato.market/pixinvent_portfolio
-Renew Support: https://1.envato.market/pixinvent_portfolio
-License: You must have a valid license purchased only from themeforest(the above link) in order to legally use the theme for your project.
-
--->
-{{-- pageConfigs variable pass to Helper's updatePageConfig function to update page configuration  --}}
 @isset($pageConfigs)
   {!! Helper::updatePageConfig($pageConfigs) !!}
 @endisset
 @php
-//confiData variable layoutClasses array in Helper.php file.
   $configData = Helper::applClasses();
 @endphp
 
+@if(!empty($_SERVER['HTTP_X_THEME_TOKEN']))
+  @include('panels.styles')
+  @include('layouts.contentLayoutCenter')
+  @yield('vendor-scripts')
+  @yield('page-scripts')
+@else
 <html class="loading" 
  {{--lang="@if(session()->has('locale')){{session()->get('locale')}}@else{{$configData['defaultLanguage']}}@endif" --}}
 lang="es"
  data-textdirection="{{$configData['direction'] == 'rtl' ? 'rtl' : 'ltr' }}">
-  <!-- BEGIN: Head-->
 
     <head>
     <meta  charset="UTF-8">
@@ -45,7 +36,7 @@ lang="es"
      @if(!empty($configData['mainLayoutType']) && isset($configData['mainLayoutType']))
      @include(($configData['mainLayoutType'] === 'horizontal-menu') ? 'layouts.horizontalLayoutMaster':'layouts.verticalLayoutMaster')
      @else
-     {{-- if mainLaoutType is empty or not set then its print below line --}}
      <h1>{{'mainLayoutType Option is empty in config custom.php file.'}}</h1>
      @endif
 </html>
+@endif

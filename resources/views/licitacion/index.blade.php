@@ -1,6 +1,6 @@
 @extends('layouts.contentLayoutMaster')
 {{-- page title --}}
-@section('title','Licitaciones Dashboard')
+@section('title','Mis Licitaciones')
 {{-- vendor style --}}
 @section('vendor-styles')
 <link rel="stylesheet" type="text/css" href="{{asset('vendors/css/tables/datatable/datatables.min.css')}}">
@@ -39,9 +39,10 @@ tr.block_details>td>div {
   <!-- create invoice button-->
   <!-- Options and filter dropdown button-->
   <div class="table-responsive">
-    <table class="table table-dark mb-0" style="width:100%">
+    <table class="table table-dark table-sm" style="width:100%;font-size:12px;">
       <thead>
         <tr>
+          <th>Orden</th>
           <th style="width:300px;">Institución</th>
           <th colspan="2">Proceso</th>
           <th>Rótulo</th>
@@ -49,9 +50,10 @@ tr.block_details>td>div {
           <th style="width:250px;">Estado</th>
         </tr>
       </thead>
-      @foreach ($list as $licitacion )
+      @foreach ($listado as $k => $licitacion)
       <tbody class="block" data-licitacion-id="{{ $licitacion->id }}" data-oportunidad-id="{{ $licitacion->id }}">
         <tr class="block_header">
+          <td>{{ ($k + 1) }}</th>
           <td>{{ $licitacion->empresa()->rotulo() }}</td>
           <td style="width:200px;">{{ $licitacion->tipo_proceso }} <br /> {{ Helper::money($licitacion->monto) }}</td>
           <td>{{ $licitacion->tipo_objeto }}</td>

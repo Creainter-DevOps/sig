@@ -61,7 +61,7 @@ function gs($file, $folder = null) {
   $path_temporal = $folder ?? config('constants.ruta_temporal');
 
   if(strpos($file, 'gs://') !== false) {
-    $filename = md5($file) . '.' . strtolower(pathinfo($file, PATHINFO_EXTENSION));
+    $filename = 'gs_' . md5($file) . '.' . strtolower(pathinfo($file, PATHINFO_EXTENSION));
     $temporal = $path_temporal . $filename;
     if(file_exists($temporal)) {
       return $temporal;
@@ -81,7 +81,7 @@ function gs_async($file, $folder = null, &$commands = null) {
   $path_temporal = $folder ?? config('constants.ruta_temporal');
 
   if(strpos($file, 'gs://') !== false) {
-    $filename = md5($file) . '.' . strtolower(pathinfo($file, PATHINFO_EXTENSION));
+    $filename = 'gs_' . md5($file) . '.' . strtolower(pathinfo($file, PATHINFO_EXTENSION));
     $temporal = $path_temporal . $filename;
     if(file_exists($temporal)) {
       return $temporal;

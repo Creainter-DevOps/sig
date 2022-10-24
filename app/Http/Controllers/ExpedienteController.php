@@ -55,7 +55,11 @@ class ExpedienteController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function inicio(Request $request, Cotizacion $cotizacion ){
+    public function inicio(Request $request, Cotizacion $cotizacion) {
+
+      if(!empty($cotizacion->finalizado_el)) {
+        return redirect('/expediente/' . $cotizacion->id . '/pendiente');
+      }
       
       $licitacion = $cotizacion->oportunidad()->licitacion();
       $validaciones = [];   
@@ -80,6 +84,10 @@ class ExpedienteController extends Controller
 
     }
     public function inicio_store(Cotizacion $cotizacion) {
+      if(!empty($cotizacion->finalizado_el)) {
+        return redirect('/expediente/' . $cotizacion->id . '/pendiente');
+      }
+
       if(empty($cotizacion->documento_id)) {
         $documento = Documento::nuevo([
           'cotizacion_id'  => $cotizacion->id,
@@ -138,6 +146,10 @@ class ExpedienteController extends Controller
       $documento = $cotizacion->documento();
       $workspace = $documento->json_load();
 
+      if(!empty($cotizacion->finalizado_el)) {
+        return redirect('/expediente/' . $cotizacion->id . '/pendiente');
+      }
+      
       if(!empty($workspace['parallel'])) {
         $finished = Helper::parallel_finished_pool($workspace['parallel']['pids']);
         if(!$finished) {
@@ -162,9 +174,13 @@ class ExpedienteController extends Controller
 
       $documento = $cotizacion->documento();
       $workspace = $documento->json_load();
+
+      if(!empty($cotizacion->finalizado_el)) {
+        return redirect('/expediente/' . $cotizacion->id . '/pendiente');
+      }
+
       $workspace['paso01'] = $_POST['anexos'] ?? [];
       $workspace['paso02'] = [];
-
 
       $dir_tmp = $documento->folder_workspace();
       $dir_tmp = Helper::mkdir_p($dir_tmp);
@@ -193,10 +209,10 @@ class ExpedienteController extends Controller
       return redirect('/expediente/' . $cotizacion->id . '/paso02');
 
     }
-    public function cancelar_proceso( Cotizacion $cotizacion){
+    public function cancelar_proceso(Cotizacion $cotizacion) {
       $documento = $cotizacion->documento();
       $workspace = $documento->json_load();
-        
+      
       if(!empty($workspace['parallel']) ) {
         $finished = Helper::parallel_finished_pool($workspace['parallel']['pids']);
         if( !$finished ){
@@ -208,6 +224,10 @@ class ExpedienteController extends Controller
     public function paso02(Cotizacion $cotizacion) {
       $documento = $cotizacion->documento();
       $workspace = $documento->json_load();
+
+      if(!empty($cotizacion->finalizado_el)) {
+        return redirect('/expediente/' . $cotizacion->id . '/pendiente');
+      }
 
       if(!empty($workspace['parallel'])) {
         $finished = Helper::parallel_finished_pool($workspace['parallel']['pids']);
@@ -226,6 +246,11 @@ class ExpedienteController extends Controller
     public function paso02_store(Cotizacion $cotizacion, Request $request) {
       $documento = $cotizacion->documento();
       $workspace = $documento->json_load();
+
+      if(!empty($cotizacion->finalizado_el)) {
+        return redirect('/expediente/' . $cotizacion->id . '/pendiente');
+      }
+
       $workspace['paso03'] = array();
       $workspace['addons'] = [
         'firma'  => [],
@@ -289,7 +314,9 @@ class ExpedienteController extends Controller
         print_r($workspace);
         exit;
       }
-
+      if(!empty($cotizacion->finalizado_el)) {
+        return redirect('/expediente/' . $cotizacion->id . '/pendiente');
+      }
       if(!empty($workspace['parallel'])) {
         $finished = Helper::parallel_finished_pool($workspace['parallel']['pids']);
         if(!$finished) {
@@ -307,6 +334,10 @@ class ExpedienteController extends Controller
 
       $documento = $cotizacion->documento();
       $workspace = $documento->json_load();
+
+      if(!empty($cotizacion->finalizado_el)) {
+        return redirect('/expediente/' . $cotizacion->id . '/pendiente');
+      }
 
       if($cotizacion->elaborado_step == 4) {
 #        return redirect('/expediente/' . $cotizacion->id . '/paso04?verror=ya-esta-procesando');
@@ -346,19 +377,12 @@ class ExpedienteController extends Controller
     public function paso04(Cotizacion $cotizacion) {
       $documento = $cotizacion->documento();
       $workspace = $documento->json_load();
-      
       return view('expediente.paso04', compact('workspace','cotizacion','documento'));
     }
-    public function paso04_store(Cotizacion $cotizacion, Request $request) {
+    public function pendiente(Cotizacion $cotizacion) {
       $documento = $cotizacion->documento();
       $workspace = $documento->json_load();
-      /* Si llega aquí es que aceptó el PDF, $workspace['paso04'], entonces procedemos a realizar los pasos finales:
-       * 1> Firmas en fotos random
-       * 2> Efecto Escaneo
-       * 3> Foliación
-       */
-      $documento->json_save($workspace);
-      return redirect('/expediente/' . $cotizacion->id . '/paso04');
+      return view('expediente.pendiente', compact('workspace','cotizacion','documento'));
     }
 
     public function parallelStatus(Request $request, Cotizacion $cotizacion) {

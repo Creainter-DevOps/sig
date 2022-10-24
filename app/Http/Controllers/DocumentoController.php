@@ -519,10 +519,11 @@ class DocumentoController extends Controller {
   public function actualizar_orden(Request $request, Documento $documento) {
       $workspace = $documento->json_load();
 
-      $cid = $request->get('id');
-      $orden = $request->get('orden');
+      $cid      = $request->get('id');
+      $orden    = $request->get('orden');
+      $contexto = $request->get('contexto');
 
-      $workspace['paso03'] = Helper::workspace_move($workspace['paso03'], $cid, $orden);
+      $workspace['paso03'] = Helper::workspace_move($workspace['paso03'], $cid, $orden, $contexto);
       $documento->json_save($workspace);
 
       return response()->json([
