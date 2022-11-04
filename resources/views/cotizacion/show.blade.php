@@ -52,31 +52,8 @@ tr.block_details > td > div {
         </div>
       </div>
     </div>
-    <div class="col-12 col-sm-5 px-0 d-flex justify-content-end align-items-center px-1 mb-2">
-      <a href="#" class="btn btn-sm mr-25 border"><i class="bx bx-envelope font-small-3"></i></a>
-      <a href="#" class="btn btn-sm mr-25 border">Profile</a>
-      <a href="https://sig.creainter.com.pe/page-users-edit" class="btn btn-sm btn-primary">Edit</a>
-    </div>
   </div>
 <div class="row">
-<div class="col-6">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-body">
-          @include('clientes.table', ['cliente' => $cotizacion->oportunidad()->cliente() ])
-        </div>
-      </div>
-   </div>
-</div>
-<div class="col-6">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-body">
-          @include('oportunidad.table', ['oportunidad' => $cotizacion->oportunidad()])
-        </div>
-      </div>
-   </div>
-</div>
 <div class="col-6">
     <div class="card">
       <div class="card-content">
@@ -86,13 +63,12 @@ tr.block_details > td > div {
       </div>
    </div>
 </div>
-<div class="col-md-12">
-@if(!empty($cotizacion->cliente_id )) 
-@endif
-</div>
-<div class="col-6 col-sm-6">
-    <!-- Timeline Widget Starts -->
-    @include('cotizacion.timeline') 
+<div class="col-6">
+    @include('actividad.create', [
+      'into' => [
+        'cotizacion_id' => $cotizacion->id
+      ]
+    ]) 
 </div>
 </div>
 

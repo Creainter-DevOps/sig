@@ -57,6 +57,12 @@ class LicitacionController extends Controller {
     $chartjs['execute'] = $out;
     return view('licitacion.workspace', compact('chartjs','actividades'));
   }
+  public function participaciones(Request $request) {
+    return view('licitacion.participaciones');
+  }
+  public function resultados(Request $request) {
+    return view('licitacion.resultados');
+  }
 
   public function listNuevas(){
     $list = Licitacion::listado_nuevas($parametros);

@@ -26,11 +26,13 @@ class Documento extends Model
       'tipo','archivo','folio','es_plantilla', 'es_ordenable','rotulo','portada','created_by','formato','generado_de_id','documentos_id',
       'empresa_id','personal_id','vinculo_empresa_id','fecha_firma','fecha_desde','fecha_hasta','plazo_servicio','monto_texto','monto','fecha_acta','filename','es_reusable','tenant_id',
       'filesize','filename','directorio','oportunidad_id','cotizacion_id','licitacion_id','elaborado_json','elaborado_por','elaborado_desde','elaborado_hasta','usado',
-      'es_mesa','respaldado_el','original','procesado_desde',
+      'es_mesa','respaldado_el','original','procesado_desde','elaborado_step',
+      'revisado_por','revisado_el','revisado_status'
     ];
     protected $casts = [
       'es_reusable'  => 'boolean',
       'es_mesa'      => 'boolean',
+      'revisado_status' => 'boolean',
     ];
 
     public static function nuevo($data) {
@@ -110,7 +112,7 @@ class Documento extends Model
         'LICITACION.TIPO'              => '',
       ];
     }
-    public function generar_documento( $cotizacion, $data , $destino) {
+    public function generar_documento($cotizacion, $data, $destino) {
 
      $documento = new Documento(); 
      $documento->fill($data);  
@@ -157,7 +159,7 @@ class Documento extends Model
        $inputs["LICITACION.ID"] = $licitacion->id;
        $inputs["LICITACION.NOMENCLATURA"] = $licitacion->nomenclatura;
        $inputs["LICITACION.ENTIDAD"] = strtoupper($licitacion->empresa()->razon_social);
-       $inputs["LICITACION.TIPO"] = $licitacion->tipo;
+       $inputs["LICITACION.TIPO"] = $licitacion->tipo_objeto;
        $inputs["LICITACION.ROTULO"] = strtoupper($licitacion->rotulo);
        $inputs["LICITACION.FECHA_PROPUESTA"] = $licitacion->fecha_propuesta;
        $inputs["LICITACION.PLAZO_SERVICIO"] = $cotizacion->plazo_servicio;
@@ -236,29 +238,22 @@ class Documento extends Model
     }
     public static function expedientesTrabajando() {
       return collect(DB::select("
-(
   SELECT
-	D.rotulo, D.cotizacion_id id,
+	D.elaborado_desde::date fecha, D.rotulo, D.id,
   D.oportunidad_id,
   D.elaborado_desde, (CASE WHEN D.elaborado_hasta IS NULL THEN CONCAT((hora(NOW() - D.elaborado_desde))::text, '...') ELSE hora(D.elaborado_hasta - D.elaborado_desde)::text END) duracion_elaborado,
   D.procesado_desde, (CASE WHEN D.procesado_desde IS NULL THEN NULL ELSE (CASE WHEN D.procesado_hasta IS NULL THEN CONCAT(hora(NOW() - D.procesado_desde)::text, '...') ELSE hora(D.procesado_hasta - D.procesado_desde)::text END) END) duracion_procesado,
-  osce.fn_usuario_rotulo(D.elaborado_por) usuario
+  osce.fn_usuario_rotulo(D.elaborado_por) usuario,
+  osce.fn_usuario_rotulo(D.revisado_por) revisado_por,
+  D.revisado_status,
+  D.revisado_el,
+  osce.fn_usuario_rotulo(C.propuesta_por) propuesta_por
   FROM osce.documento D
   JOIN osce.oportunidad O ON O.id = D.oportunidad_id AND (O.rechazado_el IS NULL OR O.rechazado_el >= NOW() - INTERVAL '2' DAY)
-  WHERE D.es_mesa IS TRUE AND D.elaborado_por IS NOT NULL AND D.elaborado_desde IS NOT NULL AND D.elaborado_hasta IS NULL AND D.tenant_id = :tenant
-) UNION (
-  SELECT D.rotulo, D.cotizacion_id id,
-  D.oportunidad_id,
-	D.elaborado_desde, (CASE WHEN D.elaborado_hasta IS NULL THEN CONCAT((hora(NOW() - D.elaborado_desde))::text, '...') ELSE hora(D.elaborado_hasta - D.elaborado_desde)::text END) duracion_elaborado,
-  D.procesado_desde, (CASE WHEN D.procesado_desde IS NULL THEN NULL ELSE (CASE WHEN D.procesado_hasta IS NULL THEN CONCAT(hora(NOW() - D.procesado_desde)::text, '...') ELSE hora(D.procesado_hasta - D.procesado_desde)::text END) END) duracion_procesado,
-	osce.fn_usuario_rotulo(D.elaborado_por) usuario
-  FROM osce.documento D
-  JOIN osce.oportunidad O ON O.id = D.oportunidad_id AND (O.rechazado_el IS NULL OR O.rechazado_el >= NOW() - INTERVAL '2' DAY)
-  WHERE D.es_mesa IS TRUE AND D.elaborado_por IS NOT NULL AND D.elaborado_desde IS NOT NULL AND D.elaborado_hasta IS NOT NULL AND D.tenant_id = :tenant
-    AND D.elaborado_desde::date = NOW()::date
-  ORDER BY D.elaborado_desde DESC
-)
-ORDER BY 4 DESC", ['tenant' => Auth::user()->tenant_id]));
+  LEFT JOIN osce.cotizacion C ON C.id = D.cotizacion_id AND C.documento_id = D.id
+  WHERE D.es_mesa IS TRUE AND D.elaborado_por IS NOT NULL AND D.elaborado_desde IS NOT NULL AND D.tenant_id = :tenant
+    AND (D.elaborado_desde::date = NOW()::date OR D.elaborado_hasta >= NOW() - INTERVAL '12' HOUR)
+ORDER BY 1 DESC, 9 DESC, 5 DESC", ['tenant' => Auth::user()->tenant_id]));
     }
     public function CompressWorkspace() {
       return 'doc-workspace-' . $this->id . '.tar.gz';
@@ -513,5 +508,18 @@ ORDER BY 4 DESC", ['tenant' => Auth::user()->tenant_id]));
 
       $documento->json_save($workspace);
       $metrados['folios'] = $folios;
+    }
+    public function log($tipo, $texto) {
+      DB::select('SELECT osce.fn_documento_actividad(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ", '" . $tipo . "', :texto)", [
+        'texto' => $texto,
+      ]);
+    }
+    public function paso($numero) {
+      DB::select("SELECT osce.fn_documento_accion_paso(:tenant, :id, :user, :paso)", [
+        'tenant' => Auth::user()->tenant_id,
+        'id'     => $this->id,
+        'user'   => Auth::user()->id,
+        'paso'   => $numero,
+      ]);
     }
 }

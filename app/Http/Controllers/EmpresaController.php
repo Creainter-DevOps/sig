@@ -31,6 +31,12 @@ class EmpresaController extends Controller {
         ["link" => "/empresas", "name" => "Empresas" ]
       ];
     }
+    public function contactos(Request $request, Empresa $empresa)
+    {
+      $this->viewBag['breadcrumbs'][]  = [ 'name' => 'Contactos' ];
+      $this->viewBag['empresa'] = $empresa;
+      return view('empresas.contactos ', $this->viewBag);
+    }
     public function index(Request $request)
     {
       $search = $request->input('search');

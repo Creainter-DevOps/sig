@@ -58,7 +58,6 @@
                 <span class="bx bx-dots-vertical-rounded font-medium-2 dropdown-toggle nav-hide-arrow cursor-pointer"
                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="menu"></span>
                 <div class="dropdown-menu dropdown-menu-right">
-                  <a class="dropdown-item" href="{{ route( 'contactos.show', [ 'contacto' => $contacto->id ] ) }}"><i class="bx bx-show-alt mr-1"></i> Ver más</a>
                   <a class="dropdown-item" href="{{ route( 'contactos.edit', [ 'contacto' => $contacto->id ] ) }}"><i class="bx bx-edit-alt mr-1"></i> Editar</a>
                   <a class="dropdown-item" data-confirm-remove="{{ route('contactos.destroy', [ 'contacto' => $contacto->id ])}}" href="#" ><i class="bx bx-trash mr-1"></i> Eliminar</a>
                 </div>
@@ -68,7 +67,6 @@
         @endforeach
         </tbody>
       </table>
-    </div>
     </div>
       <div class="card-footer" >
         {{ $listado->links() }}
@@ -88,10 +86,8 @@
 <script src="{{asset('vendors/js/pickers/daterange/moment.min.js')}}"></script>
 <script src="{{asset('vendors/js/pickers/daterange/daterangepicker.js')}}"></script>
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="{{asset('js/scripts/helpers/basic.crud.js')}}"></script>
 
 @endsection
 {{-- page scripts --}}
 @section('page-scripts')
-  <script src="{{asset('js/scripts/cotizacion/index.js')}}"></script>
 @endsection

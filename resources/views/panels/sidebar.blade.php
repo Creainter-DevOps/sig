@@ -85,6 +85,18 @@
                                 <span class="menu-title">Panel de Trabajo</span>
                               </a>
                             </li>
+                            <li class="nav-item {{(request()->is('licitaciones/participaciones')) ? 'active' : '' }}">
+                              <a href="/licitaciones/participaciones">
+                                <i class="menu-livicon livicon-evo-holder" data-icon="line-chart"></i>
+                                <span class="menu-title">Participaciones</span>
+                              </a>
+                            </li>
+                            <li class="nav-item {{(request()->is('licitaciones/resultados')) ? 'active' : '' }}">
+                              <a href="/licitaciones/resultados">
+                                <i class="menu-livicon livicon-evo-holder" data-icon="line-chart"></i>
+                                <span class="menu-title">Resultados</span>
+                              </a>
+                            </li>
                             <li class="nav-item {{(request()->is('licitaciones/nuevas')) ? 'active' : '' }}">
                               <a href="/licitaciones/nuevas">
                                 <i class="menu-livicon livicon-evo-holder" data-icon="line-chart"></i>
@@ -105,78 +117,85 @@
                             </li>
                                                         <li class="navigation-header"><span>Gestión</span></li>
                                                     <li class="nav-item {{(request()->is('proyectos'.'*')) ? 'active' : '' }}   ">
-              <a href="https://sig.creainter.com.pe/proyectos">
+              <a href="/proyectos">
                                         <i class="menu-livicon livicon-evo-holder" data-icon="desktop"></i>
                                                           <span class="menu-title">Proyectos</span>
                                                   </a>
                             </li>
 <?php /*                                                    <li class="nav-item {{(  request()->is('oportunidades'.'*')) ? 'active' : '' }}">
-              <a href="https://sig.creainter.com.pe/oportunidades ">
+              <a href="/oportunidades ">
                                         <i class="menu-livicon livicon-evo-holder" data-icon="bulb"></i>
                                                           <span class="menu-title">Oportunidades</span>
                                                   </a>
                             </li>
                             <li class="navigation-header"><span>CRM</span></li>
                                                     <li class="nav-item {{(request()->is('clientes'.'*')) ? 'active' : '' }}   ">
-              <a href="https://sig.creainter.com.pe/clientes ">
+              <a href="/clientes ">
                                         <i class="menu-livicon livicon-evo-holder" data-icon="building"></i>
                                                           <span class="menu-title">Clientes</span>
                                                   </a>
                             </li>
                                                     <li class="nav-item {{(request()->is('proveedores'.'*')) ? 'active' : '' }}  ">
-              <a href="https://sig.creainter.com.pe/proveedores ">
+              <a href="/proveedores ">
                                         <i class="menu-livicon livicon-evo-holder" data-icon="box"></i>
                                                           <span class="menu-title">Proveedores</span>
                                                   </a>
                             </li>
                                                     <li class="nav-item {{(request()->is('productos'.'*')) ? 'active' : '' }}   ">
-              <a href="https://sig.creainter.com.pe/productos ">
+              <a href="/productos ">
                                         <i class="menu-livicon livicon-evo-holder" data-icon="box"></i>
                                                           <span class="menu-title">Productos</span>
                                                   </a>
                             </li> */ ?>
                                                     <li class="nav-item {{(request()->is('empresas'.'*')) ? 'active' : '' }}   ">
-                                                        <a href="https://sig.creainter.com.pe/empresas">
+                                                        <a href="/empresas">
                                                     <i class="menu-livicon livicon-evo-holder" data-icon="diagram"></i>
                                                           <span class="menu-title">Empresas</span>
                                                   </a>
                             </li>
-                            <li class="nav-item {{(request()->is('documentos/filestore'.'*')) ? 'active' : '' }}   ">
-             <a href="https://sig.creainter.com.pe/documentos/filestore">
+                            <li class="nav-item {{(request()->is('callcenter/llamadas')) ? 'active' : '' }}   ">
+             <a href="/callcenter/llamadas">
 
-                                        <i class="menu-livicon livicon-evo-holder" data-icon="box"></i>
-                                                          <span class="menu-title">Filestore</span>
+                                        <i class="menu-livicon livicon-evo-holder" data-icon="phone"></i>
+                                                          <span class="menu-title">Llamadas</span>
                                                   </a>
+                            </li>
+                            <li class="nav-item {{(request()->is('contactos')) ? 'active' : '' }}   ">
+                                                  <a href="/contactos">
+                                        <i class="menu-livicon livicon-evo-holder" data-icon="user"></i>
+                                                          <span class="menu-title">Contactos</span>
+                                                  </a>
+
                             </li>
                             <?php /* 
                             <li class="navigation-header"><span>Redes</span></li>
                                                     <li class="nav-item {{(request()->is('callerids'.'*')) ? 'active' : '' }} ">
-              <a href="https://sig.creainter.com.pe/callerids ">
+              <a href="/callerids ">
                                         <i class="menu-livicon livicon-evo-holder" data-icon="phone"></i>
                                                           <span class="menu-title">Callerids</span>
                                                   </a>
                             </li>
                                                     <li class="nav-item {{(request()->is('contactos'.'*')) ? 'active' : '' }}    ">
-              <a href="https://sig.creainter.com.pe/contactos ">
+              <a href="/contactos ">
                                         <i class="menu-livicon livicon-evo-holder" data-icon="users"></i>
                                                           <span class="menu-title">Contactos</span>
                                                   </a>
                             </li>
                                                     <li class="nav-item {{(request()->is('app-email'.'*')) ? 'active' : '' }}">
-              <a href="https://sig.creainter.com.pe/actividades ">
+              <a href="/actividades ">
                                         <i class="menu-livicon livicon-evo-holder" data-icon="check"></i>
                                                           <span class="menu-title">Actividades</span>
                                                   </a>
                             </li>
                                                     <li class="nav-item {{(request()->is('usuarios'.'*')) ? 'active' : '' }}  ">
-              <a href="https://sig.creainter.com.pe/usuarios ">
+              <a href="/usuarios ">
                                         <i class="menu-livicon livicon-evo-holder" data-icon="user"></i>
                                                           <span class="menu-title">Usuarios</span>
                                                   </a>
                             </li> */ ?>
                             <li class="navigation-header"><span>Analisis de Datos</span></li>
                             <li class="nav-item {{(request()->is('reportes')) ? 'active' : '' }}  ">
-              <a href="https://sig.creainter.com.pe/reportes">
+              <a href="/reportes">
                                         <i class="menu-livicon livicon-evo-holder" data-icon="line-chart"></i>
                                                           <span class="menu-title">Reportes</span>
                                                   </a>
@@ -185,7 +204,7 @@
                             <li class="navigation-header"><span>Configuraciones</span></li>
                                 
                             <li class="nav-item {{(request()->is('misempresas'.'*')) ? 'active' : '' }}   ">
-                                <a href="https://sig.creainter.com.pe/misempresas">
+                                <a href="/misempresas">
                             <i class="menu-livicon livicon-evo-holder" data-icon="diagram"></i>
                                   <span class="menu-title">Empresas</span>
                           </a>
@@ -193,13 +212,13 @@
                             <?php
                             /*<li class="navigation-header"><span>Acceso directo</span></li>
                             <li class="nav-item {{(request()->is('reportes')) ? 'active' : '' }}  ">
-              <a href="https://sig.creainter.com.pe/reportes">
+              <a href="/reportes">
                                         <i class="menu-livicon livicon-evo-holder" data-icon="line-chart"></i>
                                                           <span class="menu-title">RastreaPerú</span>
                                                   </a>
                             </li>
                             <li class="nav-item {{(request()->is('reportes')) ? 'active' : '' }}  ">
-              <a href="https://sig.creainter.com.pe/reportes">
+              <a href="/reportes">
                                         <i class="menu-livicon livicon-evo-holder" data-icon="line-chart"></i>
                                                           <span class="menu-title">Datos Abiertos</span>
                                                   </a>

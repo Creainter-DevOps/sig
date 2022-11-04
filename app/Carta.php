@@ -21,8 +21,12 @@ class Carta extends Model
     public function proyecto() {
       return $this->belongsTo('App\Proyecto','proyecto_id')->first();
     }
-    public function folder() {
-      return  $this->proyecto()->folder(). 'CARTAS\\CARTA ' . str_pad($this->numero , 3, '0', STR_PAD_LEFT) .  '\\'; 
+    public function folder($unix = false) {
+      if($unix) {
+        return $this->proyecto()->folder(true) . 'CARTAS/CARTA ' . str_pad($this->numero , 3, '0', STR_PAD_LEFT) .  '/';
+      } else {
+        return $this->proyecto()->folder() . 'CARTAS\\CARTA ' . str_pad($this->numero , 3, '0', STR_PAD_LEFT) .  '\\'; 
+      }
     }
     public function entregable() {
       return $this->belongsTo('App\Entregable', 'entregable_id', 'id')->first();

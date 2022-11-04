@@ -47,25 +47,5 @@
          </select>
       </td>
     </tr>
-                    <tr>
-                  <th>Monto Base:</th>
-                  <td style="display:flex;" >
-                    <div data-editable="/oportunidades/{{  $oportunidad->id }}?_update=monto_base" data-name="monto_base"  >{{ Helper::money($oportunidad->monto_base) }}</div>
-                  </td>
-                  <th>Instalación:</th>
-                  <td class="d-flex align-items-end" >
-                    <div data-editable="/oportunidades/{{ $oportunidad->id }}?_update=instalacion_dias" data-name="instalacion_dias">{{ $oportunidad->instalacion_dias ?? 0 }}</div><label>días</label>
-                  </td>
-                </tr>
-                <tr>
-                  <th>Servicio:</th>
-                  <td class="d-flex align-items-end ">
-                    <div data-editable="/oportunidades/{{ $oportunidad->id }}?_update=duracion_dias" data-name="duracion_dias">{{ $oportunidad->duracion_dias ?? 0 }}</div> <label>días</label>
-                  </td>
-                  <th>Garantía:</th>
-                  <td class="d-flex align-items-end">
-                    <div data-editable="/oportunidades/{{ $oportunidad->id }}?_update=garantia_dias" data-name="garantia_dias">{{ $oportunidad->garantia_dias ?? 0 }}</div> <label>días</label>
-                  </td>
-                </tr>
-</tbody>
+  </tbody>
 </table>

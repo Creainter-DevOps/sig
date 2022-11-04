@@ -25,6 +25,9 @@ html .navbar-static .content {
 html .navbar-static .app-content .content-wrapper {
   padding: 20px!important;
 }
+.header-navbar .navbar-container ul.nav li.dropdown-user .dropdown-menu-right {
+  z-index: 999;
+}
 footer.footer {
   padding: 2px 10px!important;
   font-size: 11px!important;

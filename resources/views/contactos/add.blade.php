@@ -46,7 +46,7 @@ tr.block_details > td > div {
           <div class="card-header">
           </div> 
           <div class="card-body">
-            <form class="form" action="{{ route('contactos.store')}}" method="post" id="form-data" >
+            <form class="form" action="{{ route('contactos.store')}}" method="post">
               @include('contactos.form')
             </form>
           </div>
@@ -71,5 +71,4 @@ tr.block_details > td > div {
 {{-- page scripts --}}
 
 @section('page-scripts')
-<script src="{{asset('js/scripts/contacto/save.js')}}"></script>
 @endsection

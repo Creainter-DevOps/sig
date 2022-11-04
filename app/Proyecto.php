@@ -134,7 +134,7 @@ class Proyecto extends Model
       return [];
     }
     public function ordenes() {
-      if(in_array(Auth::user()->id, [12,3])) {
+      if(in_array(Auth::user()->id, [12,3,20])) {
         return $this->hasMany('App\Orden','proyecto_id')->orderBy('fecha', 'ASC')->get();
       }
       return [];

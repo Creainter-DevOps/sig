@@ -280,6 +280,18 @@ position: absolute;
   border-radius: 5px;
   background-color: orange ;
 }
+.loader {
+  border: 16px solid #f3f3f3; /* Light grey */
+  border-top: 16px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  animation: spin 2s linear infinite;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 </style>
 <meta name="csrf-token" content="{{ csrf_token() }}">
 @endsection
@@ -291,7 +303,43 @@ position: absolute;
 <!-- Form wizard with number tabs section end -->
 <!-- Form wizard with icon tabs section start -->
 <section id="icon-tabs">
+  <div class="content-header row">
+  <div class="content-header-left col-12 mb-2 mt-1">
+  <div class="row breadcrumbs-top">
+    <div class="col-12">
+      <h5 class="content-header-title float-left pr-1 mb-0">Elaboración de Expediente</h5>
+      <div class="breadcrumb-wrapper col-12">
+        <ol class="breadcrumb p-0 mb-0">
+          <li class="breadcrumb-item">
+            <a href="/dashboard"><i class="bx bx-home-alt"></i></a>
+          </li>
+          @foreach(explode('/', $documento->directorio) as $d)
+          <li class="breadcrumb-item">
+            {{ $d }}
+          </li>
+          @endforeach
+        </ol>
+      </div>
+    </div>
+  </div>
+  </div>
+  </div>
+
+  <div>
+  @yield('contenedor')
+  </div>
   <div class="row">
+   @if ( null !== $documento->cotizacion() )
+    <div class="col-6">
+    <div class="card">
+      <div class="card-content">
+        <div class="card-body">
+        @include('cotizacion.table', ['cotizacion'=> $documento->cotizacion()])
+        </div>
+      </div>
+    </div>
+    </div>
+    @endif
     @if(!empty($documento->oportunidad()->licitacion_id))
     <div class="col-6">
       <div class="card">
@@ -301,15 +349,6 @@ position: absolute;
           </div>
         </div>
       </div>
-      </div>
-      <div class="col-6">
-          <div class="card">
-            <div class="card-content">
-              <div class="card-body">
-                @include('licitacion.cronograma', ['licitacion'=> $documento->oportunidad()->licitacion()])
-              </div>
-            </div>
-          </div>
       </div>
       @endif
       @if(!empty($documento->oportunidad_id))
@@ -323,25 +362,8 @@ position: absolute;
     </div>
     </div>
     @endif
-    @if ( null !== $documento->cotizacion() ) 
-    <div class="col-6">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-body">
-        @include('cotizacion.table', ['cotizacion'=> $documento->cotizacion()])
-        </div>
-      </div>
     </div>
-    </div>
-    @endif
-    </div>
-
-@yield('contenedor')
 </section>
-  </div>
-  </div>
-</section>
-<!-- Widgets Charts End -->
 @endsection
 @section('page-scripts')
   <script src="{{ asset('js/Bucket.js') }}"></script>

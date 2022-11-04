@@ -13,7 +13,7 @@
                 </tr>
                 <tr>
                   <th>Cliente</th>
-                  <td colspan="3">{{ $proyecto->cliente()->rotulo() }}</td>
+                  <td colspan="3"><a href="/empresas/{{ $proyecto->cliente()->empresa_id }}">{{ $proyecto->cliente()->rotulo() }}</a></td>
                 </tr>
                 <tr>
                   <th>Color</th>

@@ -84,10 +84,12 @@ class ContactoController extends Controller {
     }
 
     $contacto->update($data);
-    return response()->json([ 
-      'status' => true,
-//      'redirect' => '/contactos',
-    ]);
+    if($request->ajax()) {
+       return response()->json([
+        'status' => true,
+       ]);
+    }
+    return redirect('/contactos/' . $contacto->id . '/editar');
   }
 
   public  function destroy(Contacto $contacto  ){

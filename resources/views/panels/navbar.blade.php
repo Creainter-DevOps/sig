@@ -67,7 +67,7 @@ data-bgcolor="@if(isset($configData['navbarBgColor'])){{$configData['navbarBgCol
               <a class="dropdown-item" href="{{asset('app-chat')}}"><i class="bx bx-message mr-50"></i> Chats
               </a>
               <div class="dropdown-divider mb-0"></div>-->
-              <a class="dropdown-item" href="{{asset('logout')}}"><i class="bx bx-power-off mr-50"></i>Salir</a>
+              <a class="dropdown-item" href="{{asset('logout')}}#"><i class="bx bx-power-off mr-50"></i>Salir</a>
             </div>
           </li>
         </ul>

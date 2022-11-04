@@ -339,17 +339,6 @@ class ExpedienteController extends Controller
         return redirect('/expediente/' . $cotizacion->id . '/pendiente');
       }
 
-      if($cotizacion->elaborado_step == 4) {
-#        return redirect('/expediente/' . $cotizacion->id . '/paso04?verror=ya-esta-procesando');
-      }
-      /*if(empty($documento->respaldado_el)) {
-        return redirect('/expediente/' . $cotizacion->id . '/paso03?merror=sin-respaldo');
-      }
-
-      if(strtotime($documento->respaldado_el) >= time() - 60) {
-        return redirect('/expediente/' . $cotizacion->id . '/paso03?merror=esperemosRecienRespaldado');
-      }*/
-
       foreach($workspace['paso03'] as $key => $file) {
         if($file['folio'] == '#') {
           return redirect('/expediente/' . $cotizacion->id . '/paso03?verror=' . $key);

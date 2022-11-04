@@ -14,6 +14,7 @@ use App\Documento;
 use App\Helpers\Helper;
 use Auth;
 use App\User;
+use Illuminate\Support\Facades\DB;
 
 class CotizacionController extends Controller {
 
@@ -116,7 +117,48 @@ class CotizacionController extends Controller {
   }
   public function proyecto(Request $request, Cotizacion $cotizacion) {
     $id = $cotizacion->migrateProyecto();
-    return redirect()->route( 'proyectos.show', [ 'proyecto' => $id ]);
+    return response()->json([
+        'status'   => true,
+        'disabled' => true,
+        'label'    => 'Proyecto!',
+        'message'  => 'Proyecto registrado',
+        'refresh'  => false,
+        'class'    => 'success',
+        'redirect' => '/proyectos/' . $id,
+      ]);
+  }
+  public function expediente(Request $request, Cotizacion $cotizacion) {
+      if(empty($cotizacion->documento_id)) {
+        $documento = Documento::nuevo([
+          'cotizacion_id'   => $cotizacion->id,
+          'oportunidad_id'  => $cotizacion->oportunidad_id,
+          'licitacion_id'   => $cotizacion->oportunidad()->licitacion_id,
+          'es_plantilla'    => false,
+          'es_ordenable'    => false,
+          'es_reusable'     => false,
+          'tipo'            => 'EXPEDIENTE',
+          'folio'           => 0,
+          'rotulo'          => 'Expediente: ' . $cotizacion->oportunidad()->codigo,
+          'filename'        => 'Propuesta_Seace.pdf',
+          'formato'         => 'PDF',
+          'directorio'      => trim($cotizacion->folder(true), '/'),
+          'filesize'        => 0,
+          'es_mesa'         => true,
+          'elaborado_por'   => Auth::user()->id,
+          'elaborado_desde' => DB::raw('now()'),
+          'respaldado_el'   => null,
+          'archivo'         => 'tenant-' . Auth::user()->tenant_id . '/' . gs_file('pdf'),
+          'original'        => 'tenant-' . Auth::user()->tenant_id . '/' . gs_file('pdf')
+        ]);
+        $cotizacion->documento_id = $documento->id;
+        $cotizacion->elaborado_por   = Auth::user()->id;
+        $cotizacion->elaborado_step  = 1;
+        $cotizacion->save();
+        
+        return redirect('/documentos/'. $documento->id . '/expediente/inicio');
+      } else {
+        return redirect('/documentos/'. $cotizacion->documento_id . '/expediente/inicio');
+      }
   }
   public function exportar(Request $request, Cotizacion $cotizacion) {
     $empresa = $cotizacion->empresa();
@@ -158,6 +200,19 @@ class CotizacionController extends Controller {
 //    return redirect('/oportunidades/' . $cotizacion->oportunidad_id . '/');
   }
   public function registrarPropuesta(Request $request, Cotizacion $cotizacion) {
+    $documento = $cotizacion->documento();
+    if(!empty($documento) && !empty($documento->id)) {
+      if(empty($documento->revisado_por) || empty($documento->revisado_status)) {
+        return response()->json([
+          'status'   => false,
+          'disabled' => true,
+          'label'    => 'Requiere Aprobación',
+          'message'  => 'Es necesario la aprobación del expediente.',
+          'refresh'  => false,
+          'class'    => 'warning',
+        ]);
+      }
+    }
     if(empty($cotizacion->propuesta_el)) {
       $cotizacion->registrar_propuesta();
       return response()->json([

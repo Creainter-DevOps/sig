@@ -138,7 +138,7 @@ class Oportunidad extends Model
         OR LOWER(O.codigo) LIKE :query)
       LIMIT 20
         ", [
-        'query'  => "%{$query}%",
+        'query'  => strtolower("%{$query}%"),
         'tenant' => Auth::user()->tenant_id
         ]);
       return static::hydrate($rp);
@@ -212,10 +212,11 @@ class Oportunidad extends Model
     }
     public function empresasMenu() {
       $rp = DB::select("
-        SELECT E.id, E.razon_social, C.id cotizacion
+        SELECT E.id, E.razon_social, (SELECT COUNT(C.id) FROM osce.cotizacion C WHERE C.oportunidad_id = :oid) cotizacion
         FROM osce.empresa E
-          LEFT JOIN osce.cotizacion C ON C.oportunidad_id = :oid AND C.empresa_id = E.id
-        WHERE E.tenant_id = :tenant
+          LEFT JOIN osce.oportunidad O ON O.id = :oid
+          LEFT JOIN osce.licitacion L ON L.id = O.licitacion_id
+        WHERE E.tenant_id = :tenant AND (L.tipo_objeto IS NULL OR L.tipo_objeto = ANY(E.licitacion_tipo))
         ORDER BY E.razon_social ASC
         LIMIT 10", [
           'oid' => $this->id,
@@ -223,21 +224,30 @@ class Oportunidad extends Model
         ]);
         return Empresa::hydrate($rp);
     }
-    public function empresas() {
+    public function cotizando() {
       $rp = DB::select("
         SELECT E.razon_social, E.ruc, E.descripcion, E.id e_empresa_id, C.*, C.id c_cotizacion_id, C.seace_participacion_log, C.seace_participacion_fecha, C.seace_participacion_html,
-          osce.fn_cotizacion_fecha_estado_participacion(1, C.id::int) inx_estado_participacion,
-          osce.fn_cotizacion_fecha_estado_propuesta(1, C.id::int) inx_estado_propuesta,
-          osce.fn_cotizacion_fecha_estado_buenapro(1, C.id::int) inx_estado_buenapro,
+          osce.fn_cotizacion_fecha_estado_participacion(:tenant, C.id::int) inx_estado_participacion,
+          osce.fn_cotizacion_fecha_estado_propuesta(:tenant, C.id::int) inx_estado_propuesta,
+          osce.fn_cotizacion_fecha_estado_buenapro(:tenant, C.id::int) inx_estado_buenapro,
           osce.fn_usuario_rotulo(C.interes_por) interes_por,
-          osce.fn_usuario_rotulo(C.elaborado_por) elaborado_por,
           osce.fn_usuario_rotulo(C.participacion_por) participacion_por,
-          osce.fn_usuario_rotulo(C.propuesta_por) propuesta_por
-        FROM osce.empresa E
-        LEFT JOIN osce.cotizacion C ON C.oportunidad_id = " . $this->id . " AND C.empresa_id = E.id
-        WHERE E.tenant_id = " . $this->tenant_id . "
+          osce.fn_usuario_rotulo(C.propuesta_por) propuesta_por,
+          osce.fn_usuario_rotulo(D.elaborado_por) elaborado_por,
+          D.elaborado_step,
+          osce.fn_usuario_rotulo(D.finalizado_por) finalizado_por,
+          osce.fn_usuario_rotulo(D.revisado_por) revisado_por,
+          D.revisado_status,
+          D.revisado_el
+        FROM osce.cotizacion C
+        LEFT JOIN osce.empresa E ON E.id = C.empresa_id
+        LEFT JOIN osce.documento D ON D.id = C.documento_id
+        WHERE C.tenant_id = :tenant AND C.oportunidad_id = :oid
         ORDER BY E.id ASC, C.numero ASC
-        LIMIT 10");
+        LIMIT 10", [
+          'tenant' => Auth::user()->tenant_id,
+          'oid'    => $this->id,
+        ]);
       return array_map(function($n) {
         return new Empresa((array) $n);
       }, $rp);
@@ -288,15 +298,25 @@ SELECT
 	x.oportunidades,
 	x.participando,
   x.enviadas,
-	(CASE WHEN x.fecha <= '2022-07-31'::date THEN (CASE WHEN x.enviadas >= x.oportunidades THEN x.enviadas ELSE CEIL(x.oportunidades/1.8) END) ELSE x.enviadas END) enviadas2
+  (
+    SELECT COUNT(DD.id)
+    FROM osce.documento DD
+    WHERE DD.finalizado_el::date = x.fecha
+  ) terminados,
+  (
+    SELECT COUNT(OO.id)
+    FROM osce.oportunidad OO
+    WHERE OO.rechazado_el::date = x.fecha
+  ) rechazados
 FROM (
 SELECT
   O.fecha_propuesta_hasta::date fecha,
   COUNT(DISTINCT O.id) oportunidades,
   COUNT(C.oportunidad_id) participando,
-  COUNT(C.id) enviadas
+  COUNT(C.id) enviadas --D.id
 FROM osce.oportunidad O
 LEFT JOIN osce.cotizacion C ON C.oportunidad_id = O.id AND C.eliminado IS NULL AND C.propuesta_el IS NOT NULL
+LEFT JOIN osce.documento D ON D.id = C.documento_id AND D.finalizado_el IS NOT NULL
 WHERE O.estado IN (0,1,2) AND O.aprobado_el IS NOT NULL AND O.rechazado_el IS NULL AND O.archivado_el IS NULL
   AND O.fecha_propuesta_hasta >= NOW() - INTERVAL '15' DAY AND O.fecha_propuesta_hasta <= NOW() + INTERVAL '100' DAY
   AND O.tenant_id = :tenant
@@ -391,6 +411,50 @@ LIMIT 100", [
       return static::hydrate($rp->toArray());
 
    }
+   static function listado_propuestas_por_vencer_correo(&$out = null) {
+      $rp = DB::collect("
+SELECT
+  z.*,
+  CONCAT(
+    (CASE WHEN z.expediente_step IS NOT NULL THEN CONCAT('<span style=\"background: #438eff;font-size: 11px;color: white;padding: 1px 4px;border-radius: 3px;margin-right: 2px;\">', z.expediente_step::text, '</span>') ELSE '' END),
+    (CASE WHEN z.es_favorito IS NOT NULL THEN '<i class=\"bx bxs-circle\" style=\"color:orange;font-size: 10px;\"></i>' ELSE '' END),
+    (CASE WHEN z.aprobado_el >= DATE_TRUNC('day', NOW()) - INTERVAL '1' DAY THEN '<i class=\"bx bxs-circle\" style=\"color:green;font-size: 10px;\"></i>' ELSE '' END),
+    UPPER(z.rotulo)
+  ) inx_rotulo
+FROM (
+  SELECT
+    x.*,
+    osce.fn_oportunidad_expediente_step(x.tenant_id, x.id) as expediente_step,
+    osce.fn_oportunidad_expediente_step_min(x.tenant_id, x.id) as expediente_step_min,
+    EXISTS(SELECT OE.id FROM osce.oportunidad_externo OE WHERE OE.oportunidad_id = x.id) cantidad_externo,
+    osce.fn_usuario_rotulo(x.aprobado_por) aprobado_por,
+    osce.fn_usuario_rotulo(x.revisado_por) revisado_por,
+    osce.fn_oportunidad_fecha_estado_propuesta(1, x.id) inx_estado_propuesta,
+    osce.fn_etiquetas_a_rotulo(x.etiquetas_id) etiquetas,
+    osce.oportunidad_variacion_montos(x.id) montos,
+    osce.fn_licitacion_tiene_bintegradas(x.licitacion_id::int) tiene_bases
+  FROM (
+    SELECT
+      O.*,
+      EXISTS(SELECT C.id FROM osce.cotizacion C
+        WHERE C.oportunidad_id = O.id AND C.eliminado IS NULL AND C.interes_el IS NOT NULL) empresas_interes
+    FROM (
+      SELECT O.tenant_id, O.id, O.licitacion_id, O.aprobado_el, O.etiquetas_id, O.aprobado_por, O.rotulo, O.fecha_propuesta_hasta, O.correo_id, O.revisado_el, O.revisado_por, O.es_favorito, O.estado
+      FROM osce.oportunidad O
+      WHERE
+        O.tenant_id = :tenant AND O.estado IN (1,2) AND O.aprobado_el IS NOT NULL AND O.licitacion_id IS NULL
+        AND O.rechazado_el IS NULL AND O.archivado_el IS NULL
+        AND O.created_on >= NOW() - INTERVAL '15' DAY
+    ) O
+  ) x
+  WHERE x.empresas_interes IS FALSE OR x.aprobado_el::date = NOW()::date OR x.es_favorito IS NOT NULL
+  OR x.fecha_propuesta_hasta <= NOW() + INTERVAL '40' DAY
+) z
+ORDER BY z.correo_id IS NULL ASC, z.fecha_propuesta_hasta::date ASC, z.fecha_propuesta_hasta::time ASC, z.es_favorito IS NULL DESC, z.estado DESC, (z.expediente_step_min = 4) ASC, z.revisado_el IS NULL ASC, z.expediente_step_min DESC
+LIMIT 140", ['tenant' => Auth::user()->tenant_id]);
+      $out = $rp->execute;
+      return static::hydrate($rp->toArray());
+    }
     static function listado_propuestas_por_vencer(&$out = null) {
       $rp = DB::collect("
 SELECT
@@ -422,7 +486,7 @@ FROM (
       SELECT O.tenant_id, O.id, O.licitacion_id, O.aprobado_el, O.etiquetas_id, O.aprobado_por, O.rotulo, O.fecha_propuesta_hasta, O.correo_id, O.revisado_el, O.revisado_por, O.es_favorito, O.estado
       FROM osce.oportunidad O
       WHERE 
-		    O.tenant_id = :tenant AND O.estado IN (1,2) AND O.aprobado_el IS NOT NULL
+		    O.tenant_id = :tenant AND O.estado IN (1,2) AND O.aprobado_el IS NOT NULL AND O.licitacion_id IS NOT NULL
     		AND O.rechazado_el IS NULL AND O.archivado_el IS NULL
         AND O.fecha_propuesta_hasta >= NOW() - INTERVAL '7' DAY
         AND ((O.fecha_propuesta_hasta >= NOW() - INTERVAL '10' HOUR AND O.fecha_propuesta_hasta <= NOW() + INTERVAL '40' DAY) OR O.es_favorito IS NOT NULL)

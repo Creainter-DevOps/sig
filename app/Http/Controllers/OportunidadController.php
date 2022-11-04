@@ -363,7 +363,7 @@ class OportunidadController extends Controller {
       'disabled' => true,
       'label'    => 'Oportunidad Aprobada!',
       'message'  => $proc->mensaje,
-      'refresh'  => false,
+      'refresh'  => true,
       'class'    => 'success',
     ]);
   } else if($proc->estado == 500) {

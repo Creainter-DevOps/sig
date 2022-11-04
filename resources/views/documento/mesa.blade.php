@@ -61,7 +61,7 @@
                       <div id="drawRepositorio" style="padding: 5px 15px;display:none;">
                         <div id="BucketRepositorio" data-bucket="1" data-path="{{ $documento->directorio }}" data-upload="true" style="border:3px dashed #ff9900!important;"></div>
                       </div>
-                      <ul class="StackedListDrag StackedList" data-container="secure" data-dropzone="secure,draw" style="min-height:225px;padding-bottom: 15px;">
+                      <ul class="StackedListDrag StackedList" data-container="secure" data-dropzone="secure,draw" style="min-height:225px;padding-bottom: 15px;background: #bcc1d7;">
                       @if(!empty($workspace['paso03']))
                       @foreach (Helper::workspace_ordenar($workspace['paso03']) as $k => $file)
                       @if(!empty($file['contexto']) && $file['contexto'] == 'secure')

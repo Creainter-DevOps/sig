@@ -39,7 +39,11 @@ class DocumentoController extends Controller {
     $this->viewBag['listado'] = $listado;
     return view('documento.index', $this->viewBag  );
   }
-
+  public function explorer(Request $request) {
+    $url    = $request->input('url');
+    $format = $request->input('format');
+    return view('documento.explore'  , compact('url','format'));
+  }
   public function show( Request $request, Documento $documento ) {
      $breadcrumbs[] = [ 'name' => "Detalle Documento" ];
      return view( 'documento.show'  , compact('documento','breadcrumbs'));
@@ -119,69 +123,353 @@ class DocumentoController extends Controller {
       'status' => true,
     ]);
   }
+  public function expediente_inicio (Request $request, Documento $documento) {
+    $licitacion   = $documento->licitacion();
+    $validaciones = [];
+    $empresa      = $documento->cotizacion()->empresa();
 
-  public function expediente_inicio( Request $request, Documento $documento ) {
+    $logo_header  = config('constants.ruta_storage') . $empresa->logo_header;
+    $logo_central = config('constants.ruta_storage') . $empresa->logo_central;
+    $firma        = EmpresaFirma::porEmpresa($documento->cotizacion()->empresa_id, 'FIRMA');
+    $visado       = EmpresaFirma::porEmpresa($documento->cotizacion()->empresa_id, 'VISADO');
 
-      $licitacion = $documento->licitacion();
-      $validaciones = [];   
+    $validaciones['empresa_logos'] = (gs_exists($logo_central) || gs_exists($logo_header)) ? true : false;
+    $validaciones['sellos_firmas'] = (!empty($firma) && !empty($visado)) ? true:false;
+    $validaciones['representante'] = (!empty($empresa->representante_nombres ) &&  !empty($empresa->representante_documento) ) ? true : false;
+    $validaciones['montos']        = (!empty( $cotizacion->monto) && !empty($cotizacion->moneda_id)) ? true : false;
 
-      /*$logo_header = config('constants.ruta_storage') . $empresa->logo_header;
-      $logo_central = config('constants.ruta_storage') . $empresa->logo_central;
+    return view('documento.expediente.inicio', compact('documento', 'licitacion', 'validaciones'));
+  }
+  public function expediente_inicio_store(Request $request, Documento $documento) {
+    if(empty($documento->archivo)) {
+      $documento->archivo = 'tenant-' . Auth::user()->tenant_id . '/' . gs_file('pdf');
+    }   
+    $documento->paso(1);
 
-      $firma = EmpresaFirma::porEmpresa( $cotizacion->empresa_id, 'FIRMA');
-      $visado = EmpresaFirma::porEmpresa( $cotizacion->empresa_id, 'VISADO');
+    $dir_tmp = $documento->folder_workspace();
+    exec('/bin/rm -rf ' . $dir_tmp);
+    $dir_tmp = Helper::mkdir_p($dir_tmp);
 
-      if (gs_exists($logo_central) || gs_exists($logo_header)) {
-        $validaciones['empresa_logos'] = true;
-      }
-      if (!empty($firma) && !empty($visado) ){
-        $validaciones['sellos_firmas'] = true;          
-      }
-      if (!empty($empresa->representante_nombres ) &&  !empty($empresa->representante_documento) ){
-        $validaciones['representante'] = true;  
-      }
-      dd($cotizacion);
-      if ( !empty( $cotizacion->monto) && !empty($cotizacion->moneda_id)){
-        $validaciones['montos'] = true;
-      }*/  
-      return view('documento.inicio', compact('documento', 'validaciones'));
-
+    return redirect('/documentos/'. $documento->id . '/expediente/paso01');
   }
 
-  public function expediente_inicio_store(Request $request, Documento $documento ){
-      if(empty($documento->archivo)) {
-        $documento->archivo = 'tenant-' . Auth::user()->tenant_id . '/' . gs_file('pdf');
-      }   
-      $documento->elaborado_por   = Auth::user()->id;
-      $documento->elaborado_desde = DB::raw('now()');
-      $documento->save();
-
-      return redirect('/documentos/'. $documento->id . '/expediente/paso01');
-  }
-  
-  /*public function expediente( Request $request, Documento $documento ) {
+  public function expediente_paso01(Request $request, Documento $documento) {
+    if(!empty($documento->finalizado_el)) {
+      return redirect('/documentos/' . $documento->id . '/expediente/inicio');
+    }
     $workspace = $documento->json_load();
-    return view('documento.expediente', compact('workspace','documento'));
-    }*/
-
-  public function expediente_paso01( Request $request, Documento $documento){
+    if(!empty($workspace['parallel'])) {
+      $finished = Helper::parallel_finished_pool($workspace['parallel']['pids']);
+      if(!$finished) {
+        return redirect('/documentos/' . $documento->id . '/expediente/inicio?merror=espera');
+      }
+    }
+    $empresa      = $documento->cotizacion()->empresa()->toArray();
+    $licitacion   = $documento->licitacion();
+    if(!empty($workspace['inputs'])) {
+      $workspace['inputs'] = array_merge($workspace['inputs'], $empresa);
+    } else {
+      $workspace['inputs'] = $empresa;
+    }
+    $documento->json_save($workspace);
+    return view('documento.expediente.paso01', compact('documento','licitacion','workspace','plantillas'));
+  }
+  public function expediente_paso01_store(Documento $documento, Request $request) {
     $workspace = $documento->json_load();
-    return view('documento.expediente', compact('workspace','documento'));
+
+    if(!empty($documento->finalizado_el)) {
+      return redirect('/documentos/' . $documento->id . '/expediente/inicio');
+    }
+
+    $workspace['paso01'] = $_POST['anexos'] ?? [];
+    $workspace['paso02'] = [];
+
+    $dir_tmp = $documento->folder_workspace();
+    $dir_tmp = Helper::mkdir_p($dir_tmp);
+
+    foreach ($workspace['paso01'] as $key => $value) {
+      $doc = Documento::find($key);
+      $destino = $dir_tmp . $doc->filename;
+      $doc->generar_documento($documento->cotizacion(), $workspace['inputs'], $destino);
+      $workspace['paso02'][$key] = [
+        'generado_de_id' => $doc->id,
+        'tipo'           => $doc->tipo,
+        'nombre'         => $doc->tipo,
+        'rotulo'         => $doc->rotulo,
+        'filename'       => $doc->filename,
+        'root'           => $destino,
+        'uri'            => $documento->folder_workspace(true) . $doc->filename,
+        'timestamp'      => time(),
+      ];
+    }
+    $documento->json_save($workspace);
+
+    $documento->paso(2);
+
+    return redirect('/documentos/' . $documento->id . '/expediente/paso02');
   }
 
-  public function expediente_paso02( Request $request, Documento $documento){
+  public function expediente_paso02 (Request $request, Documento $documento) {
     $workspace = $documento->json_load();
-    return view('documento.paso02', compact('workspace','documento'));
+    if(!empty($documento->finalizado_el)) {
+      return redirect('/documentos/' . $documento->id . '/expediente/inicio');
+    }
+    if(!empty($workspace['parallel'])) {
+      $finished = Helper::parallel_finished_pool($workspace['parallel']['pids']);
+      if(!$finished) {
+        return redirect('/documentos/' . $documento->id . '/expediente/inicio?merror=espera');
+      }
+    }
+    if(!isset($workspace['paso02'])) {
+      return redirect('/documentos/' . $documento->id . '/expediente/paso01');
+    }
+    $licitacion = $documento->cotizacion()->oportunidad()->licitacion();
+    return view('documento.expediente.paso02', compact('documento','licitacion','workspace'));
   }
-  public function expediente_paso01_store( Documento $documento, Request $request) {
+
+  public function expediente_paso02_store(Request $request, Documento $documento) {
       $workspace = $documento->json_load();
 
-      $documento->procesarFolder($workspace, false);
+      if(!empty($documento->finalizado_el)) {
+        return redirect('/documento/' . $documento->id . '/expediente/inicio');
+      }
 
-      return redirect('/documentos/' . $documento->id . '/expediente/paso02');
+      $workspace['paso03'] = array();
+      $workspace['addons'] = [
+        'firma'  => [],
+        'visado' => [],
+      ];
+
+      $order = 0;
+      $commands = [];
+
+      foreach($workspace['paso02'] as $id => $file) {
+        $cid     = $id. '/n';
+        $input   = $file['root'];
+        $output  = Helper::replace_extension($file['root'], 'pdf');
+        $outputd = dirname(Helper::replace_extension($file['root'], 'pdf'));
+
+        $commands[] = '/bin/rm ' . $output;
+        $commands[] = '/usr/bin/libreoffice --convert-to pdf ' . $input . ' --outdir ' . $outputd;
+        $commands[] = '/usr/bin/php /var/www/html/interno.creainter.com.pe/util/oportunidades/expediente_folio_documento.php ' . $documento->id . " '" . $cid . "'";
+        #exec('/usr/bin/convert -alpha remove -density 150 '.  $output . ' -quality 100 '. $thumb);
+        #exec('/bin/mv ' . $thumb . ' ' . $thumb_0);
+
+//        $metadata = Helper::metadata($output);
+
+        $workspace['paso03'][$cid]  = Helper::formatoCard([
+          'orden'     => $order,
+          'hash'      => uniqid(),
+          'page'      => 0,
+          'folio'     => '#',
+          'tipo'      => $file['tipo'],
+          'rotulo'    => $file['rotulo'],
+          'archivo'   => Helper::replace_extension($file['root'], 'pdf'),
+          'root'      => Helper::replace_extension($file['root'], 'pdf'),
+          'is_part'   => false,
+          'timestamp' => time(),
+        ], $documento->cotizacion()->empresa_id);
+
+        if(!isset($workspace['addons']['visado'][$documento->cotizacion()->empresa_id])) {
+          $workspace['addons']['visado'][$documento->cotizacion()->empresa_id] = 0;
+        }
+        $workspace['addons']['visado'][$documento->cotizacion()->empresa_id] ++;
+        $order++;
+      }
+      $pid = Helper::parallel_command($commands);
+      unset($workspace['paso02']);
+
+      $documento->json_save($workspace);
+
+      $documento->paso(3);
+
+      return redirect('/documentos/' . $documento->id . '/expediente/paso03');
     }
-  public function store(StoreFileRequest $request)
-  {
+    public function expediente_paso03(Request $request, Documento $documento) {
+      $workspace = $documento->json_load();
+
+      $workspace['paso03'] = Helper::workspace_ordenar($workspace['paso03']);
+      if(isset($_GET['demo'])) {
+        echo "<pre>";
+        print_r($workspace);
+        exit;
+      }
+      if(!empty($documento->finalizado_el)) {
+        return redirect('/documentos/' . $documento->id . '/expediente/inicio');
+      }
+      if(!empty($workspace['parallel'])) {
+        $finished = Helper::parallel_finished_pool($workspace['parallel']['pids']);
+        if(!$finished) {
+          return redirect('/documentos/' . $documento->id . '/expediente/inicio?merror=espera');
+        }
+      }
+      $oportunidad = $documento->cotizacion()->oportunidad();
+      return view('documento.expediente.paso03', compact('documento','oportunidad' ,'workspace'));
+    }
+
+    public function expediente_paso03_store(Request $request, Documento $documento) {
+      $workspace = $documento->json_load();
+
+      if(!empty($documento->finalizado_el)) {
+        return redirect('/documentos/' . $documento->id . '/expediente/inicio');
+      }
+
+      foreach($workspace['paso03'] as $key => $file) {
+        if($file['folio'] == '#') {
+          return redirect('/documentos/' . $documento->id . '/expediente/paso03?verror=' . $key);
+        }
+      }
+
+      foreach($workspace['paso03'] as $key => $file) {
+        if (!file_exists($file['root'])) {
+          return redirect('/documentos/' . $documento->id . '/expediente/paso03?ferror=' . $file['root']);
+        }
+      }
+
+      $documento->paso(4);
+
+      $pid = $documento->procesarFolder($workspace, true, $metrados);
+      if(empty($pid)) {
+        return redirect('/documentos/' . $documento->id . '/expediente/paso03?verror=Ya-está-iniciado');
+      }
+    
+      return redirect('/documentos/' . $documento->id . '/expediente/inicio');
+    }
+    public function expediente_paso03_revisar(Request $request, Documento $documento) {
+      $workspace = $documento->json_load();
+
+      if(!empty($documento->finalizado_el)) {
+        return redirect('/documentos/' . $documento->id . '/expediente/inicio');
+      }
+
+      foreach($workspace['paso03'] as $key => $file) {
+        if($file['folio'] == '#') {
+          return redirect('/documentos/' . $documento->id . '/expediente/paso03?verror=' . $key);
+        }
+      }
+
+      foreach($workspace['paso03'] as $key => $file) {
+        if (!file_exists($file['root'])) {
+          return redirect('/documentos/' . $documento->id . '/expediente/paso03?ferror=' . $file['root']);
+        }
+      }
+
+      $documento->paso(5);
+
+      $pid = $documento->procesarFolder($workspace, true, $metrados);
+      if(empty($pid)) {
+        return redirect('/documentos/' . $documento->id . '/expediente/paso03?verror=Ya-está-iniciado');
+      }
+      return redirect('/documentos/' . $documento->id . '/expediente/inicio');
+    }
+    public function expediente_paso04(Request $request, Documento $documento) {
+      $workspace = $documento->json_load();
+      return redirect('/documentos/' . $documento->id . '/expediente/inicio');
+      return view('documento.expediente.paso04', compact('workspace','cotizacion','documento'));
+    }
+    public function expediente_cancelar_proceso(Request $request, Documento $documento) {
+      $workspace = $documento->json_load();
+
+      if(!empty($workspace['parallel'])) {
+        $finished = Helper::parallel_finished_pool($workspace['parallel']['pids']);
+        if(!$finished) {
+          $documento->paso(9);
+          exec("kill -9 " . $workspace['parallel']['pids']);
+          return redirect('/documentos/' . $documento->id . '/expediente/paso03');
+        }
+      }
+    }
+    public function expediente_aprobar(Request $request, Documento $documento) {
+      $workspace = $documento->json_load();
+
+      $documento->log('DOCUMENTO/REVISAR', 'Documento APROBADO');
+      $documento->revisado_por = Auth::user()->id;
+      $documento->revisado_el  = DB::raw('now()');
+      $documento->revisado_status = true;
+      $documento->save();
+
+      if(!Auth::user()->allow('PUEDE_APROBAR', $documento->elaborado_por)) {
+        return response()->json([
+          'status'   => false,
+          'disabled' => true,
+          'label'    => 'No disponible',
+          'message'  => 'No es posible aprobar por el mismo usuario.',
+          'refresh'  => false,
+          'class'    => 'warning',
+        ]);
+      }
+
+      return response()->json([
+        'status'   => true,
+        'disabled' => true,
+        'label'    => 'Documento Aprobado!',
+        'message'  => 'Aprobado',
+        'refresh'  => false,
+        'class'    => 'success',
+        'redirect' => '/documentos/' . $documento->id . '/expediente/inicio',
+      ]);
+    }
+    public function expediente_observar(Request $request, Documento $documento) {
+      $motivo = $request->input('value');
+
+      if(empty($motivo)) {
+        return response()->json([
+          'status'  => false,
+          'message' => 'Debe indicar el motivo',
+        ]);
+      }
+
+      if(!Auth::user()->allow('PUEDE_APROBAR', $documento->elaborado_por)) {
+        return response()->json([
+          'status'   => false,
+          'disabled' => true,
+          'label'    => 'No disponible',
+          'message'  => 'No es posible observar por el mismo usuario.',
+          'refresh'  => false,
+          'class'    => 'warning',
+        ]);
+      }
+      $workspace = $documento->json_load();
+
+      $documento->log('DOCUMENTO/REVISAR', 'Documento OBSERVADO POR: ' . $motivo);
+      $documento->revisado_por = Auth::user()->id;
+      $documento->revisado_el  = DB::raw('now()');
+      $documento->revisado_status = false;
+      $documento->save();
+
+      return response()->json([
+        'status'   => true,
+        'disabled' => true,
+        'label'    => 'Documento Observado!',
+        'message'  => 'Observado',
+        'refresh'  => false,
+        'class'    => 'success',
+        'redirect' => '/documentos/' . $documento->id . '/expediente/inicio',
+      ]);
+    }
+    public function expediente_reanudar(Request $request, Documento $documento) {
+      $workspace = $documento->json_load();
+
+      $documento->log('DOCUMENTO/PASO', 'Se ha reanudado la edición del expediente');
+
+      $documento->revisado_por    = null;
+      $documento->revisado_el     = null;
+      $documento->finalizado_el   = null;
+      $documento->finalizado_por  = null;
+      $documento->save();
+
+      return response()->json([
+        'status'   => true,
+        'disabled' => true,
+        'label'    => 'Documento Reanudado!',
+        'message'  => 'Reanuado',
+        'refresh'  => false,
+        'class'    => 'success',
+        'redirect' => '/documentos/' . $documento->id . '/expediente/inicio',
+      ]);
+    }
+
+  public function store(StoreFileRequest $request) {
     $data = $request->input();
     //$data['tenant_id']  = Auth::user()->tenant_id;
     //$data['created_by'] = Auth::user()->id;
@@ -362,6 +650,28 @@ class DocumentoController extends Controller {
       ]
     ]);
   }
+  public function expediente_actualizar(Documento $documento, StoreFileRequest $request) {
+
+      $cid = $request->input('cid');
+      $workspace = $documento->json_load();
+      if(!isset($workspace['paso02'][$cid])) {
+        return '404:' . $cid;
+      }
+      $card = $workspace['paso02'][$cid];
+      $dir = $documento->folder_workspace();
+      $destino = $card['root'];
+
+      $request->archivo->move($dir, $card['filename']);
+
+      $meta = Helper::metadata($destino);
+
+      $workspace['paso02'][$cid]['folio'] = $meta['Pages'];
+
+      $documento->json_save($workspace);
+
+      return response()->json(['status' => true]);
+    }
+
 
   public function update(StoreFileRequest $request, Documento $documento) {
     $data = $request->all();
@@ -422,7 +732,7 @@ class DocumentoController extends Controller {
         $doc->folio = $meta['Pages'];
       }
 
-      $doc->visitar();
+//      $doc->visitar();
 
       if(!empty($doc->es_ordenable)) {
         $workspace['paso03'] = Helper::workspace_space($workspace['paso03'], $orden, $doc->folio);

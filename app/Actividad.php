@@ -272,6 +272,9 @@ ORDER BY A.vinculado ASC, A.fecha ASC, 1 ASC, A.hora ASC", [
         return null;
       }
       $where = [];
+      if(!empty($into['documento_id'])) {
+        $where[] = 'A.documento_id = '. $into['documento_id'];
+      } else
       if(!empty($into['proyecto_id'])) {
         $where[] = 'A.proyecto_id = '. $into['proyecto_id'];
       } else

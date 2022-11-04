@@ -20,7 +20,7 @@
           <div class="card-header">
           </div> 
           <div class="card-body">
-            <form class="form" action="{{ route('contactos.update', [ 'contacto' => $contacto->id ])}}" method="post" id="form-data" >
+            <form class="form" action="{{ route('contactos.update', [ 'contacto' => $contacto->id ])}}" method="post">
             @method('PUT')  
                @include('contactos.form') 
             </form>
@@ -37,5 +37,4 @@
 {{-- page scripts --}}
 
 @section('page-scripts')
-<script src="{{asset('js/scripts/contacto/save.js')}}"></script>
 @endsection

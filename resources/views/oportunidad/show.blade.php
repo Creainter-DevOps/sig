@@ -234,6 +234,15 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="card">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        @include('licitacion.relacionadas', [
+                                            'licitacion' => $oportunidad->licitacion(),
+                                        ])
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -334,58 +343,45 @@
 
 <style>
 .editable_tag {
-    position:relative;
-    padding: 3px;
-    font-size: 9px;
-    box-shadow: none;
-    border: 1px solid #4b87f5;
-    background: #fff;
-    color: #000;
-    border-radius: 4px;
-    min-width: 30px;
-    width: 90px;
-    display: inline-block;
-    outline: none;
-    text-align:center;
+  margin: 0 auto;
+  display: block;
+  text-align: center;
 }
-.editable_tag:after {
-  position: absolute;
-  content: atr(title);
-  background: red;
-  width: 100px;
-  height:20px;
-  color:#000;
+.nota_cotizacion {
+  font-size: 11px;
+  text-align: center;
+  margin-top: 10px;
+  background: #f2f4f4;
+  padding: 4px;
+  border-radius: 4px;
+  border: 1px solid #e3e3e3;
+  color: #606060;
 }
-.editable_tag:focus {
-    background: #fff;
-    color: #000;
-    border: 1px solid #878787;
-    width: 99%;
-    outline: none;
-    font-size: 11px;
-    padding: 5px;
-    margin: 4px 0;
-    text-align:center;
-}
-
-.editable_tag::placeholder {
-  color: #b3b3b3;
-  opacity: 1;
-  font-size:10px;
-  background: #e1e0e0!important;
-}
-
 </style>
-        <h5>Elaboración de Propuestas</h5>
+<div class="card-header">
+        <h5>Relación de Cotizaciones</h5>
+        <div class="heading-elements">
+        <div class="dropdown">
+                <button class="btn btn-success btn-sm dropdown-toggle mr-1" type="button" id="dropdownMenuButton2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Nueva Cotización
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
+                  @foreach ($oportunidad->empresasMenu() as $e)
+                    <a class="dropdown-item" href="/oportunidades/{{ $oportunidad->id }}/interes/{{ $e->id }}" data-button-dinamic>Interés con {{ $e->razon_social }}</a>
+                  @endforeach
+                </div>
+              </div>
+              </div>
+              </div>
         <div class="row">
-            @foreach ($oportunidad->empresas() as $e)
+            @foreach ($oportunidad->cotizando() as $e)
                 <div class="col-2 col-sm-2" style="min-width: 250px;">
                     <div class="card">
                         <div class="card-header">
                             <h6 class="card-title" style="font-size: 15px;">
-                              {{ $e->razon_social }}<br />
+                              {{ substr($e->razon_social,0,18) }}<br />
                               @if(!empty($e->cotizacion))
-                              <span class="small">{{ $e->cotizacion->nomenclatura() }}</span>
+                              <span class="small">{{ Helper::fecha($e->cotizacion->interes_el) }} - {{ $e->cotizacion->interes_por }}</span>
                               @else
                               <span class="small">{{ $e->ruc }}</span>
                               @endif
@@ -396,13 +392,14 @@
               <li>
                 <i class="bx bx-dots-vertical-rounded" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></i>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                  <a class="dropdown-item" href="/cotizaciones/{{ $e->cotizacion->id }}/expediente"><i class="bx bx-blanket"></i>Expediente</a>
                   <a class="dropdown-item" href="javascript:void(0);" data-popup="/documentos/visor?path={{ $e->cotizacion->folder(true) }}&oid={{ $oportunidad->id }}&cid={{ $e->cotizacion->id }}">Mi Carpeta</a>
+                  <a class="dropdown-item" href="/cotizaciones/{{ $e->cotizacion->id }}/">Colocar Precio</a>
                   <a class="dropdown-item" href="/cotizaciones/{{ $e->cotizacion->id }}/registrar" target="_blank">Cotización por Items</a>
-                  <a class="dropdown-item" href="/cotizaciones/{{ $e->cotizacion->id }}/exportar" target="_blank">Descargar PDF</a>
-                  <a class="dropdown-item" href="/expediente/{{ $e->cotizacion->id }}/inicio" target="_blank">Abrir Expediente de Propuesta</a>
-                  <a class="dropdown-item" href="/cotizaciones/{{ $e->cotizacion->id }}/registrarParticipacion" data-confirm data-button-dinamic>Registrar Participación</a>
-                  <a class="dropdown-item" href="/cotizaciones/{{ $e->cotizacion->id }}/registrarPropuesta" data-confirm data-button-dinamic>Registrar Propuesta</a>
-                  <a class="dropdown-item" href="/cotizaciones/{{ $e->cotizacion->id }}/proyecto" data-confirm>Convertir a Proyecto</a>
+                  <a class="dropdown-item" href="/cotizaciones/{{ $e->cotizacion->id }}/exportar#" target="_blank"><i class="bx bx-download"></i>Descargar PDF</a>
+                  <a class="dropdown-item" href="/cotizaciones/{{ $e->cotizacion->id }}/registrarParticipacion" data-confirm data-button-dinamic>1. Registrar Participación</a>
+                  <a class="dropdown-item" href="/cotizaciones/{{ $e->cotizacion->id }}/registrarPropuesta" data-confirm data-button-dinamic>2. Registrar Propuesta</a>
+                  <a class="dropdown-item" href="/cotizaciones/{{ $e->cotizacion->id }}/proyecto" data-confirm data-button-dinamic>Convertir a Proyecto</a>
                 </div>
               </li>
             </ul>
@@ -420,9 +417,10 @@
                                             href="/oportunidades/{{ $oportunidad->id }}/interes/{{ $e->id }}" data-confirm data-button-dinamic>Interés</a>
                                     </div>
                                 @elseif(empty($e->cotizacion) && strtotime($oportunidad->fecha_participacion_hasta) <= time())
-                                    <div>Fuera de plazo</div>
+                                    <div><i>Fuera de plazo</i></div>
                                 @else
-<div style="padding-bottom: 15px;">                                
+@php
+/*<div style="padding-bottom: 15px;">
 <input class="editable_tag" type="text" data-editable="/cotizaciones/{{ $e->cotizacion->id }}?_update=rotulo" placeholder="Rótulo" value="{{ $e->cotizacion->rotulo }}">
 <input class="editable_tag" type="number" data-editable="/cotizaciones/{{ $e->cotizacion->id }}?_update=monto" placeholder="Monto" value="{{ $e->cotizacion->monto }}" min="0" max="999999999" step="0.01">
 <input class="editable_tag" type="date" data-editable="/cotizaciones/{{ $e->cotizacion->id }}?_update=fecha" placeholder="Fecha" value="{{ $e->cotizacion->fecha }}">
@@ -430,62 +428,62 @@
 <input class="editable_tag" type="text" data-editable="/cotizaciones/{{ $e->cotizacion->id }}?_update=plazo_instalacion" placeholder="Instalación" value="{{ $e->cotizacion->plazo_instalacion }}">
 <input class="editable_tag" type="text" data-editable="/cotizaciones/{{ $e->cotizacion->id }}?_update=plazo_servicio" placeholder="Servicio" value="{{ $e->cotizacion->plazo_servicio }}">
 <input class="editable_tag" type="text" data-editable="/cotizaciones/{{ $e->cotizacion->id }}?_update=plazo_garantia" placeholder="Garantía" value="{{ $e->cotizacion->plazo_garantia }}">
-</div>
-                                    <div class="wrapper">
-                                        <ul class="StepProgress">
-                                            <li class="StepProgress-item is-done">
-                                                <strong>Participación</strong>
-                                                    <div class="text-center mb-1">
-                                                        <span
-                                                            class="{{ $e->cotizacion->estado_participacion()['class'] }}">{{ $e->cotizacion->estado_participacion()['message'] }}</span>
-                                                            @if (empty($e->cotizacion->participacion_el))
-                                                              @if (!$e->cotizacion->estado()['timeout'])
-                                                                <div style="text-align: center;margin-top: 5px;font-size:10px;">
-                                                                @if(!empty($e->cotizacion->seace_participacion_log))
-                                                                  Se ha intentado realizar el registro automático sin éxito. Debe hacerlo manualmente en el SEACE y posteriormente hacer click abajo.<br/>
-                                                                @endif
-                                                                <a href="/cotizaciones/{{ $e->cotizacion->id }}/registrarParticipacion" data-confirm data-button-dinamic>Registrar Participación</a>
-                                                                </div>
-                                                              @endif
-                                                            @else
-                                                              <div style="text-align: center;margin-top: 5px;font-size:10px;">
-                                                                Registrado por {{ $e->cotizacion->participacion_por }} el {{ Helper::fecha($e->cotizacion->participacion_el, true) }}
-                                                              </div>
-                                                            @endif
+</div>*/
+@endphp
 
-                                                    </div>
-                                            </li>
-                                            <li class="StepProgress-item is-done">
-                                                <strong>Propuesta</strong>
-                                                <div class="text-center mb-1">
-                                                @if (!empty($e->cotizacion))
-                                                        <span
-                                                            class="{{ $e->cotizacion->estado_propuesta()['class'] }}">{{ $e->cotizacion->estado_propuesta()['message'] }}</span>
-                                                @endif
-                                                @if (!$e->cotizacion->estado()['timeout'])
-                                                    <div style="text-align: center;margin-top: 5px;font-size:10px;">
-                                                      Puede hacer uso de nuestra Mesa de trabajo para desarrollar sus expediente como su propuesta comercia, debe hacer click abajo.<br/>
-                                                      <a href="/expediente/{{ $e->cotizacion->id }}/inicio">Elaborar Expediente</a>
-                                                      @if(!empty($e->cotizacion->elaborado_por))
-                                                        <div>
-                                                        por {{ $e->cotizacion->elaborado_por }}
-                                                        </div>
-                                                      @endif
-                                                    </div>
-                                                @else
-                                                  <div style="text-align: center;margin-top: 5px;font-size:10px;">
-                                                      El plazo ha vencido, si ha enviado manualmente al seace haga click abajo.<br/>
-                                                      <a href="/cotizaciones/{{ $e->cotizacion->id }}/registrarPropuesta" data-confirm data-button-dinamic>Sí he enviado</a>
-                                                @endif
-                                                </div>
-                                            </li>
-                                        </ul>
-                                    </div>
+<div class="pb-0 d-flex align-items-center" title="Participación: por {{ $e->cotizacion->participacion_por }} el {{ Helper::fecha($e->cotizacion->participacion_el, true) }}">
+  @if (empty($e->cotizacion->participacion_el))
+    @if (!$e->cotizacion->estado_participacion()['timeout'])
+      @if(!empty($e->cotizacion->seace_participacion_log))
+      <i class="cursor-pointer bx bx-radio-circle-marked text-danger mr-25"></i>
+      <small>Registro sin exito.</small>
+      @else
+      <i class="cursor-pointer bx bx-radio-circle-marked text-warning mr-25"></i>
+      <small>Pendiente</small>
+      @endif
+    @else
+    <i class="cursor-pointer bx bx-radio-circle-marked text-danger mr-25"></i>
+    <small>{{ $e->cotizacion->estado_participacion()['message'] }}</small>
+    @endif
+  @else
+    <i class="cursor-pointer bx bx-radio-circle-marked text-success mr-25"></i>
+    <small>{{ $e->cotizacion->estado_participacion()['message'] }} ({{ $e->cotizacion->participacion_por }})</small>
+  @endif
+</div>
+<div class="pb-1 d-flex align-items-center" title="Propuesta: por {{ $e->cotizacion->participacion_por }} el {{ Helper::fecha($e->cotizacion->participacion_el, true) }}">
+  @if (empty($e->cotizacion->propuesta_el))
+    @if (!$e->cotizacion->estado_propuesta()['timeout'])
+      <i class="cursor-pointer bx bx-radio-circle-marked text-warning mr-25"></i>
+      <small>Pendiente</small>
+    @else
+    <i class="cursor-pointer bx bx-radio-circle-marked text-danger mr-25"></i>
+    <small>{{ $e->cotizacion->estado_propuesta()['message'] }}</small>
+    @endif
+  @else
+    <i class="cursor-pointer bx bx-radio-circle-marked text-success mr-25"></i>
+    <small>{{ $e->cotizacion->estado_propuesta()['message'] }} ({{ $e->cotizacion->propuesta_por }})</small>
+  @endif
+</div>
+<div>
+<input class="editable_tag" type="number" data-editable="/cotizaciones/{{ $e->cotizacion->id }}?_update=monto" placeholder="Monto" value="{{ $e->cotizacion->monto }}" min="0" max="999999999" step="0.01">
+</div>
+@if(!empty($e->cotizacion->elaborado_step))
+<div class="nota_cotizacion">
+  @if(!empty($e->cotizacion->finalizado_por))
+  Elaborado por <b>{{ $e->cotizacion->finalizado_por }}</b><br />
+  @if($e->cotizacion->revisado_status)
+  <div style="color:green">Aprobado por <b>{{ $e->cotizacion->revisado_por }}</b></div>
+  @else
+  <div style="color:red">Observado por <b>{{ $e->cotizacion->revisado_por }}</b></div>
+  @endif
+  @else
+  En desarrollo por <b>{{ $e->cotizacion->elaborado_por }}</b> en P#{{ $e->cotizacion->elaborado_step }}<br />
+  @endif
+</div>
+@endif
+
                                 @endif
                             </div>
-                            @if(!empty($e->cotizacion))
-                            <div style="position: absolute;bottom: 3px;right: 10px;font-size: 11px;">Registrado por {{ $e->cotizacion->interes_por }}</div>
-                            @endif
                         </div>
                     </div>
                 </div>

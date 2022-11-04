@@ -68,6 +68,16 @@ class Licitacion extends Model
       FROM osce.licitacion L WHERE id = ' . $this->id))->first();
       return $rp->ee; 
     }
+    public function relacionadas() {
+      $rp = DB::select("
+        SELECT L.*, (SELECT COUNT(O.id) FROM osce.oportunidad O WHERE O.licitacion_id = L.id AND O.tenant_id = :tenant AND O.fecha_propuesta IS NOT NULL) con_oportunidad,
+        (SELECT SUM(D.valor_referencial) FROM osce.licitacion_item D WHERE D.licitacion_id = L.id AND valor_referencial IS NOT NULL) valor_referencial
+        FROM (SELECT UNNEST(osce.fn_licitacion_similares_v2(:tenant, :referencia)) codigo) C
+        JOIN osce.licitacion L ON L.id = C.codigo
+        ORDER BY L.created_on ASC
+        LIMIT 10", ['tenant' => Auth::user()->tenant_id, 'referencia' => $this->id]);
+      return static::hydrate($rp);
+    }
     public function similares() {
       return DB::select("
         SELECT *, array_to_string(B.licitaciones_id,',') ids

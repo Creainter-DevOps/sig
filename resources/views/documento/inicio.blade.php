@@ -70,7 +70,7 @@
                           <div style="font-size: 27px;color: #fd4f1b;">Se ha encontrado el documento</div>
                           <div>Para continuar editando el documento, haga click abajo:</div>
                           <div style="padding: 10px 0px;">
-                            <a href="/documento/{{ $documento->id }}/paso0" class="btn btn-primary text-white btn-sm" style="margin-right: 5px;">Seguir Trabajando</a>
+                            <a href="/documentos/{{ $documento->id }}/paso0{{ $documento->elaborado_step }}" class="btn btn-primary text-white btn-sm" style="margin-right: 5px;">Seguir Trabajando</a>
                           </div>
                         </div>
                         @if (!empty($cotizacion->documento_id))

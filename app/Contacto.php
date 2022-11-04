@@ -20,7 +20,7 @@ class Contacto extends Model
      * @var array
      */
     protected $fillable = [
-       'dni' , 'nombres', 'area', 'apellidos', 'correo','area', 'celular','cliente_id','eliminado'
+       'dni' , 'nombres', 'area', 'apellidos', 'correo','area', 'celular','cliente_id','empresa_id','eliminado'
     ];
 
     /**
@@ -52,7 +52,9 @@ class Contacto extends Model
     public function timeline(){
       return $this->hasMany('App\Actividad','contacto_id')->orderBy('id' , 'DESC')->get();   
     }
-
+    public function empresa() {
+        return $this->belongsTo('App\Empresa', 'empresa_id')->first();
+    }
     public function persona() {
         return $this->belongsTo('App\Persona', 'persona_id')->first();
     }

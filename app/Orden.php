@@ -49,11 +49,7 @@ class Orden extends Model
     protected $casts = [
     ];
     public function monto() {
-      if(in_array(Auth::user()->id, [12,3,15])) {
-        $m = $this->monto;
-      } else {
-        $m = 1;
-      }
+      $m = $this->monto;
       return Helper::money($m, $this->moneda_id);
     }
     public function folder() {

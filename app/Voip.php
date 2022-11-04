@@ -53,12 +53,39 @@ class Voip extends Model
           'tenant' => Auth::user()->tenant_id
         ]));
     }
+    public static function llamadas() {
+      return static::hydrate(DB::select("
+        SELECT LL.*, C1.nombres desde, C2.nombres hasta, C3.nombres caller
+        FROM voip.llamada LL
+        LEFT JOIN osce.contacto C1 ON C1.id = LL.desde_contacto_id
+        LEFT JOIN osce.contacto C2 ON C2.id = LL.hasta_contacto_id
+        LEFT JOIN osce.contacto C3 ON C3.id = LL.caller_contacto_id
+        WHERE LL.tenant_id = :tenant
+        ORDER BY LL.id DESC
+        LIMIT 50", [
+          'tenant' => Auth::user()->tenant_id
+        ]));
+    }
     public function log( $evento = null, $texto = '' ){
       Actividad::create([
         'tipo'   => 'log',
         'evento' => $evento,
         'texto'  => $texto 
       ]);
-    } 
-
+    }
+    public static function audios($asterisk_id) {
+      $url  = 'http://asterisk.creainter.com.pe:8082/api/v1.0/cdr/audios';
+      $data = [
+        'id' => $asterisk_id,
+      ];
+      $ch = curl_init();
+      curl_setopt($ch, CURLOPT_URL, $url);
+      curl_setopt($ch, CURLOPT_POST, 1);
+      curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+      curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      $res = curl_exec($ch);
+      curl_close ($ch);
+      return json_decode($res);
+    }
 }

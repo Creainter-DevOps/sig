@@ -195,6 +195,28 @@ io.on('connection', function(client) {
       states: ls[device.tenant_id][device.user_id].states,
     });
   });
+  client.on('browser', function(data) {
+    ls[device.tenant_id][device.user_id].devices[device.id].link = data.link;
+
+    var ll = fell_get_list(device.tenant_id, device.user_id, true);
+    for(var ii in  ll) {
+      if (ll[ii].client) {
+        ll[ii].client.emit('fell_change', {
+          type: 'add',
+          sid:  client.id,
+          uid:  device.user_id,
+          tid:  device.tenant_id,
+          link: data.link,
+          name: device.name,
+        });
+      }
+    }
+    client.emit('browser', {
+      status: true,
+      id:     device.id,
+      fell:   fell_get_list(device.tenant_id, data.user_id, false),
+    });
+  });
   client.on('state', function(data) {
     if(typeof data.key === 'undefined') {
       return false;

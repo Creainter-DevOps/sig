@@ -11,7 +11,6 @@
 @section('content')
     <div class="row">
         <div class="offset-12 col-md-3" style="margin-bottom: 10px;">
-          <!--<a class="btn btn-primary" href="/cotizaciones/crear" style="" target="_blank"> + Nueva Cotización </a>-->
           <a class="btn btn-primary" href="/oportunidades/crear" style="">+ Oportunidad </a>
         </div>
     </div>
@@ -65,6 +64,7 @@
       </div>
       </div>
     </div>
+</div>
 </div>
 @endsection
 

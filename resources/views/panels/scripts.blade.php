@@ -30,6 +30,52 @@
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{{asset('js/scripts/helpers/toast.js')}}"></script>
     <script src="{{asset('assets/js/scripts.js')}}"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+  <script type="module" src="{{asset('vendors/js/calendar/moment.js')}}"></script>
+  <script>
+function actualizar_timeline(contenedor, data) {
+  moment.locale('es');
+  Fetchx({
+    url: '/actividades/timeline',
+    type: 'POST',
+    dataType: 'JSON',
+    data: data,
+    headers : {
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+    },
+    success: function(data) {
+      $(contenedor).empty();
+      $.each(data, function(y, n) {
+        let box = $('<li>').addClass('timeline-items timeline-icon-success active timeline-item');
+        box.attr('data-tipo', n.tipo);
+
+        box.css({'padding': '5px'});
+        if(n.importancia == 1) {
+          box.css({'border-left': '5px solid #5a8dee'});
+        } else if(n.importancia == 2) {
+          box.css({'border-left': '5px solid #38da8a'});
+        } else if(n.importancia == 3) {
+          box.css({'border-left': '5px solid #ff5b5c'});
+        }
+
+          var html = `<div class="timeline-time">${ moment( n.created_on ).fromNow() + ` ( ${moment(n.created_on).format('DD/MM/YYYY hh:MM:ss a') } ) `}</div>
+                      <h6 class="timeline-title">${n.texto}</h6>
+                      <p class="timeline-text">${ n.descripcion}</p>
+                      <p class="timeline-user" ><i style="font-size:inherit;" class="bx bxs-user"></i> ${n.usuario } </p>`;
+          box.append(html);
+
+          $(contenedor).append(box);
+      });
+      render_dom_popup();
+    },
+    error: function() {
+      //
+    }
+  });
+}
+</script>
+
     <!-- END: Theme JS-->
 @if(Auth::user())
 <style>
@@ -199,7 +245,7 @@ width: 100%;
     padding: 10px;
     background: #fff;
     position: relative;
-    height: 80px;
+    min-height: 70px;
     margin-bottom: 10px;
 }
 .voip_call i {
@@ -230,6 +276,11 @@ width: 100%;
 }
 .voip_side div {
   text-align: center;
+}
+.voip_message {
+  text-align: center;
+  padding: 0 10px;
+  padding-top: 60px;
 }
 .voip_time {
   position: absolute;
@@ -343,19 +394,32 @@ width: 100%;
 </div>
 <script>
 var xpageContent = $('.x-page-nav');
+xpageContent.closest('.x-page').attr('data-x-page-url', document.location.href);
+
 function xlink(url) {
   var xpage_nav  = $('<div>').addClass('x-page-nav');
   var xpage_body = $('<div>').addClass('x-page-body').addClass('x-page-loading');
   var xpage_over = $('<div>').addClass('x-page-overlay').on('click', function(e) {
-   xpageContent = $(this).closest('.x-page-nav');
-   xpage.remove();
- });
-  var xpage = $('<div>').addClass('x-page')
+    var link = $(this).closest('.x-page-nav').closest('.x-page').attr('data-x-page-url');
+    console.log('Regresar a', this, $(this).closest('.x-page'), link);
+    window.history.pushState(link, 'Creainter SAC', link);
+    socket.emit('browser', {
+      link: document.location.pathname,
+    });
+    xpageContent = $(this).closest('.x-page-nav');
+    xpage.remove();
+  });
+  var xpage = $('<div>').addClass('x-page').attr('data-x-page-url', url)
       .append(xpage_over)
       .append(xpage_body)
       .append(xpage_nav);
     $(xpageContent).append(xpage);
     xpageContent = xpage_nav;
+
+    window.history.pushState(url, 'Creainter SAC', url);
+    socket.emit('browser', {
+      link: document.location.pathname,
+    });
   fetch(url, {
     method: "GET",
     headers: {
@@ -375,7 +439,7 @@ function xlink(url) {
   });
 }
 $(document).on('click', 'a[href]', function(e) {
-  if(_hasTag(this)) {
+  if(!_hasTag(this) && !this.hasAttribute('download') && !this.getAttribute('href').includes('javascript') && !this.getAttribute('href').includes('#') && !this.getAttribute('target')) {
     e.preventDefault();
     xlink($(this).attr('href'));
     return false;
@@ -496,7 +560,8 @@ socket.on('connect', () => {
 });
 
 socket.on('caller', function(data) {
-  let html ='<div class="voip_side voip_from">';
+  let html = '<div class="voip_message">' + data.message + '</div>';
+  html += '<div class="voip_side voip_from">';
   html +='<input type="text" data-editable="/contactos/' + data.desde_id + '?_update=nombres" value="' + data.desde_rotulo + '">';
   html +='<div>' + data.desde + '</div>';
   html +='</div>';
@@ -569,7 +634,7 @@ function todo_mini() {
 }
 function todo_add(url, texto) {
   if(typeof url === 'undefined') {
-    url = '{{ $_SERVER['REQUEST_URI'] }}';
+    url = document.location.pathname;
   }
   if(typeof texto == 'undefined') {
     texto = prompt('Ingrese la petición');
@@ -732,7 +797,9 @@ function fell_render() {
       for(var kid in rp.others[uid]) {
         if(rp.others[uid].hasOwnProperty(kid)) {
           var circle = box.find(".others > [data-kid='" + kid + "']");
-          if(!circle.length) {
+          if(circle.length) {
+            circle.remove();
+          }
             box.find('.others').append(
               $('<a>').hide()
               .attr('data-kid', kid)
@@ -741,7 +808,6 @@ function fell_render() {
               .append($('<div>').addClass('fell_name').attr('data-name', fell_get_name(uid)).text(fell_get_name(uid).substr(0,1)))
               .slideDown()
             );
-          }
         }
       }
     }
@@ -751,7 +817,9 @@ function fell_render() {
 socket.on('fell_change', function(data) {
   console.log('FELL', data);
   if(data.type == 'add') {
-    fell_set_name(data.uid, data.name);
+    if(typeof data.name !== 'undefined') {
+      fell_set_name(data.uid, data.name);
+    }
     fell_add(data.sid, data.uid, data.link);
 
   } else if(data.type == 'del') {

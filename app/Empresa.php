@@ -88,6 +88,26 @@ class Empresa extends Model
         'empresa' => $this->id,
       ]));
     }
+    public function contactos() {
+      return Contacto::hydrate(DB::select("
+        SELECT C.*,
+        (
+          SELECT COUNT(LL.id)
+          FROM voip.llamada LL
+          WHERE LL.tenant_id = :tenant AND LL.desde_contacto_id = C.id OR LL.hasta_contacto_id = C.id
+        ) llamadas
+        FROM osce.contacto C
+        WHERE (C.empresa_id = :empresa OR C.cliente_id IN (
+          SELECT CC.id
+          FROM osce.cliente CC
+          WHERE CC.empresa_id = :empresa AND CC.tenant_id = :tenant
+        )) AND (C.tenant_id = :tenant OR C.tenant_id IS NULL)
+        ORDER BY C.nombres ASC
+      ", [
+        'empresa' => $this->id,
+        'tenant'  => Auth::user()->tenant_id
+      ]));
+    }
     public function rivales() {
       return collect(DB::select("
       SELECT

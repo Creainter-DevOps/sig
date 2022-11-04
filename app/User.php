@@ -54,6 +54,13 @@ class User extends Authenticatable
     public function tenants() {
       return $this->hasMany('App\Empresa', 'tenant_id', 'tenant_id')->get();
     }
+    public function allow($tipo, $externo = null) {
+      return (collect(DB::select("SELECT osce.fn_usuario_permiso(:id, :tipo, :externo) estado", [
+        'id'      => Auth::user()->id,
+        'tipo'    => $tipo,
+        'externo' => $externo
+      ]))->first())->estado;
+    }
     public static function empresas() {
       return collect(DB::select("
         SELECT id, razon_social

@@ -1,3 +1,6 @@
+@php
+$uid = uniqid();
+@endphp
 <div>
   <div class="row">
     <div class="col-12">
@@ -18,7 +21,7 @@
             </ul>
           </div>
           <div class="card-content collapse show">
-            <ul class="widget-timeline" id="timeline" style="height: 415px;overflow: auto;"></ul>
+            <ul class="widget-timeline" id="timeline{{ $uid }}" style="height: 415px;overflow: auto;"></ul>
           </div>
         </div>
       </div>
@@ -81,60 +84,10 @@
 
 @section('page-scripts')
   @parent
-  <script src="{{ asset('js/scripts/pages/app-invoice.js') }}"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
-  <script type="module" src="{{asset('vendors/js/calendar/moment.js')}}"></script>
   <script>
-function actualizar_timeline() {
-  moment.locale('es');
-  var ll = $('#timeline');
-  var llc = $('#timeline-cron');
-  Fetchx({
-    url: '/actividades/timeline',
-    type: 'POST',
-    dataType: 'JSON',
-    data: {!! json_encode($into) !!},
-    headers : {
-      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
-    },
-    success: function(data) {
-      ll.empty();
-      llc.empty();
-      $.each(data, function(y, n) {
-        let box = $('<li>').addClass('timeline-items timeline-icon-success active timeline-item');
-        box.attr('data-tipo', n.tipo);
-        
-        box.css({'padding': '5px'});
-        if(n.importancia == 1) {
-          box.css({'border-left': '5px solid #5a8dee'});
-        } else if(n.importancia == 2) {
-          box.css({'border-left': '5px solid #38da8a'});
-        } else if(n.importancia == 3) {
-          box.css({'border-left': '5px solid #ff5b5c'});
-        }
-
-          var html = `<div class="timeline-time">${ moment( n.created_on ).fromNow() + ` ( ${moment(n.created_on).format('DD/MM/YYYY hh:MM:ss a') } ) `}</div>
-                      <h6 class="timeline-title">${n.texto}</h6>
-                      <p class="timeline-text">${ n.descripcion}</p>
-                      <p class="timeline-user" ><i style="font-size:inherit;" class="bx bxs-user"></i> ${n.usuario } </p>`;
-          box.append(html);
-
-        if(n.estado ) {
-          ll.append(box);
-        } else {
-          llc.append(box);
-        }
-      });
-      render_dom_popup();
-    },
-    error: function() {
-      //
-    }
+  $(document).ready(function() {
+    actualizar_timeline($('#timeline{{ $uid }}'), {!! json_encode($into) !!});
   });
-}
-$(document).ready(function() {
-  actualizar_timeline();
-});
 </script>
 @endsection
 

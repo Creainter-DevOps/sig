@@ -33,6 +33,9 @@ Route::get('permissions/autocomplete_modulo', 'PermissionController@autocomplete
 Route::get('/dashboard-ecommerce','DashboardController@dashboardEcommerce');
 Route::get('/dashboard-analytics','DashboardController@dashboardAnalytics');
 
+
+Route::get('/static/seace2/{hash}','StaticController@seace');
+
 Route::get('/contable','ContableController@index');
 Route::get('/contable/pdf/facturas_por_cobrar','ContableController@facturas_por_cobrar');
 Route::get('/contable/pdf/licitaciones_semanal','ContableController@licitaciones_semanal');
@@ -65,6 +68,7 @@ Route::get('misempresas/{empresa}','EmpresaController@datos');
 Route::get('empresas/autocomplete', 'EmpresaController@autocomplete'); 
 Route::get('empresas/tags','EmpresaController@tags');
 
+Route::get('empresas/{empresa}/contactos','EmpresaController@contactos');
 Route::post('empresas/{empresa}/imagen', 'EmpresaController@actualizar_imagen'); 
 Route::get('empresas/{empresa}/tags','EmpresaController@tags_empresa');
 Route::post('empresas/tag/nuevo','EmpresaController@tagCreate');
@@ -153,6 +157,7 @@ Route::resource('productos', 'ProductoController')->parameters([
   'productos' => 'producto'
 ]);
 
+Route::get('cartas/{carta}/expediente', 'CartaController@expediente')->name('cartas.expediente');
 Route::get('carta/autocomplete', 'CartaController@autocomplete');
 Route::resource('cartas', 'CartaController')->parameters([
   'cartas' => 'carta'
@@ -190,10 +195,6 @@ Route::get('expediente/{cotizacion}/paso04','ExpedienteController@paso04');
 Route::post('expediente/{cotizacion}/paso04','ExpedienteController@paso04_store')->name('expediente.paso04');
 Route::get('expediente/{cotizacion}/cancelar_proceso','ExpedienteController@cancelar_proceso');
 
-Route::get('expediente/{cotizacion}/pendiente','ExpedienteController@pendiente');
-
-#Route::post('expediente/{cotizacion}/agregarDocumento/{documento}', 'ExpedienteController@agregarDocumento');
-
 Route::get('expediente/{cotizacion}/visualizar', 'ExpedienteController@visualizar_documento');
 
 Route::get('expediente/{cotizacion}/temporal', 'ExpedienteController@descargarTemporal');
@@ -221,6 +222,11 @@ Route::resource('etiquetas', 'EtiquetaController')->parameters([
   'etiquetas' => 'etiqueta'
 ]);
 
+Route::get('callcenter/llamadas','VoipController@llamadas');
+Route::get('callcenter/llamadas/audios','VoipController@audios');
+Route::post('callcenter/llamadas/render_audios','VoipController@render_audios');
+
+Route::get('documentos/explorer','DocumentoController@explorer');
 Route::post('documentos/{documento}/parallelStatus','DocumentoController@parallelStatus');
 Route::post('documentos/{documento}/agregarDocumento/{doc}','DocumentoController@agregarDocumento');
 Route::get('documentos/nuevo','DocumentoController@form_nuevo');
@@ -233,9 +239,23 @@ Route::post('documentos/{documento}/expediente/inicio','DocumentoController@expe
 Route::get('documentos/{documento}/expediente/paso01','DocumentoController@expediente_paso01')->name("documento.expediente_paso01");
 Route::post('documentos/{documento}/expediente/paso01','DocumentoController@expediente_paso01_store')->name("documento.expediente_paso01_store");
 Route::get('documentos/{documento}/expediente/paso02','DocumentoController@expediente_paso02')->name("documento.expediente_paso02");
-Route::post('documentos/{documento}/expediente/respaldar','DocumentoController@expediente_respaldar')->name("documento.expediente_reslpaldar");
+Route::post('documentos/{documento}/expediente/paso02','DocumentoController@expediente_paso02_store')->name("documento.expediente_paso02_store");
+Route::get('documentos/{documento}/expediente/paso03','DocumentoController@expediente_paso03')->name("documento.expediente_paso03");
+Route::post('documentos/{documento}/expediente/paso03','DocumentoController@expediente_paso03_store')->name("documento.expediente_paso03_store");
+Route::post('documentos/{documento}/expediente/paso03/revisar','DocumentoController@expediente_paso03_revisar')->name("documento.expediente_paso03_revisar");
+Route::get('documentos/{documento}/expediente/paso04','DocumentoController@expediente_paso04')->name("documento.expediente_paso04");
+Route::post('documentos/{documento}/expediente/paso04','DocumentoController@expediente_paso04_store')->name("documento.expediente_paso04_store");
+Route::get('documentos/{documento}/expediente/pendiente','DocumentoController@expediente_pendiente')->name("documento.expediente_pendiente");
+Route::post('documentos/{documento}/expediente/respaldar','DocumentoController@expediente_respaldar')->name("documento.expediente_respaldar");
 Route::post('documentos/{documento}/expediente/restaurar','DocumentoController@expediente_restaurar')->name("documento.expediente_restaurar");
+
+Route::post('documentos/{documento}/expediente/observar','DocumentoController@expediente_observar')->name("documento.expediente_observar");
+Route::post('documentos/{documento}/expediente/aprobar','DocumentoController@expediente_aprobar')->name("documento.expediente_aprobar");
+Route::post('documentos/{documento}/expediente/reanudar','DocumentoController@expediente_reanudar')->name("documento.expediente_reanudar");
+
+Route::get('documentos/{documento}/expediente/cancelar_proceso','DocumentoController@expediente_cancelar_proceso')->name("documento.expediente_cancelar_proceso");
 Route::post('documentos/{documento}/expediente/upload', 'DocumentoController@expediente_upload')->name('documentos.expediente_upload');
+Route::post('documentos/{documento}/expediente/actualizar','DocumentoController@expediente_actualizar');
 
 Route::get('documentos/{documento}/generarImagenTemporal','DocumentoController@generarImagenTemporal');
 Route::get('documentos/{documento}/generarImagen','DocumentoController@generarImagen');
@@ -270,8 +290,9 @@ Route::post('cotizaciones/{cotizacion}/registrarParticipacion','CotizacionContro
 Route::post('cotizaciones/{cotizacion}/registrarPropuesta','CotizacionController@registrarPropuesta');
 Route::get('cotizaciones/{cotizacion}/proyecto','CotizacionController@proyecto')->name( 'oportunidad.proyecto' );
 Route::post('cotizaciones/{cotizacion}/observacion', 'CotizacionController@observacion');
-Route::get('cotizaciones/{cotizacion}/proyecto', 'CotizacionController@proyecto')->name('cotizaciones.proyecto');
+Route::post('cotizaciones/{cotizacion}/proyecto', 'CotizacionController@proyecto')->name('cotizaciones.proyecto');
 Route::get('cotizaciones/{cotizacion}/exportar', 'CotizacionController@exportar')->name('cotizacion.exportar');
+Route::get('cotizaciones/{cotizacion}/expediente', 'CotizacionController@expediente')->name('cotizacion.expediente');
 Route::post('cotizaciones/{cotizacion}/exportar_repositorio', 'CotizacionController@exportar_repositorio')->name('cotizacion.exportar_repositorio');
 Route::get('cotizaciones/{cotizacion}/detalle', 'CotizacionController@detalle')->name('cotizacion.detalle');
 Route::post('cotizaciones/{cotizacion}/detalle', 'CotizacionController@detallesave');
@@ -302,6 +323,8 @@ Route::post('licitaciones/actualizar/{oportunidad}','LicitacionController@update
 Route::get('licitaciones/calendario','LicitacionController@calendario');
 Route::post('licitaciones/nuevas/mas','LicitacionController@listNuevasMas');
 Route::get('licitaciones/workspace','LicitacionController@workspace');
+Route::get('licitaciones/participaciones','LicitacionController@participaciones');
+Route::get('licitaciones/resultados','LicitacionController@resultados');
 Route::get('licitaciones/nuevas','LicitacionController@listNuevas');
 Route::get('licitaciones/archivadas','LicitacionController@listArchivadas');
 Route::get('licitaciones/eliminadas','LicitacionController@listEliminadas');

@@ -33,8 +33,15 @@
       <td>{{ $c->rotulo }}</td>
       <td class="text-center"><a href="#" onclick="window.location.href='odir:{!! addslashes(Auth::user()->dir_sharepoint . $c->folder()) !!}';">Folder</a></td>
       <td style="width: 55px;text-align: center;">
-         <a href="javascript:void(0)" data-popup="{{ route( 'cartas.edit', [ 'carta' => $c->id ] ) }}"><i class="bx bx-edit-alt"></i></a>
-         <a href="javascript:void(0)" data-confirm-remove="{{ route('cartas.destroy', [ 'carta' => $c->id ])}}"><i class="bx bx-trash"></i></a>
+        <div class="dropdown">
+          <span class="bx bx-dots-vertical-rounded font-medium-3 dropdown-toggle nav-hide-arrow cursor-pointer" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="menu">
+          </span>
+          <div class="dropdown-menu dropdown-menu-right" x-placement="top-end" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(19px, -7px, 0px);">
+            <a class="dropdown-item" href="{{ route( 'cartas.expediente', [ 'carta' => $c->id ] ) }}"><i class="bx bx-blanket"></i>Expediente</a>
+            <a class="dropdown-item" href="javascript:void(0)" data-popup="{{ route( 'cartas.edit', [ 'carta' => $c->id ] ) }}"><i class="bx bx-edit-alt"></i>Editar</a>
+            <a class="dropdown-item" href="javascript:void(0)" data-confirm-remove="{{ route('cartas.destroy', [ 'carta' => $c->id ])}}"><i class="bx bx-trash"></i>Eliminar</a>
+          </div>
+        </div>
       </td>
     </tr>
   @endforeach

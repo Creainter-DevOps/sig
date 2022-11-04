@@ -5,10 +5,10 @@
 ></input>
     <div class="col-md-6 col-12">
       <div class="form-label-group">
-          <input type="text" id="cliente_id" data-ajax="/clientes/autocomplete"
-          value="{{ old ('cliente', $contacto->cliente_id) }}" class="form-control autocomplete" name="cliente_id"
-@if(!empty($contacto->cliente_id))
-          data-value="{{ old( 'cliente',$contacto->cliente()->empresa()->razon_social ) }}"  placeholder="Empresa">
+          <input type="text" id="empresa_id" data-ajax="/empresas/autocomplete"
+          value="{{ old ('empresa_id', $contacto->empresa_id) }}" class="form-control autocomplete" name="empresa_id"
+@if(!empty($contacto->empresa_id))
+          data-value="{{ old( 'empresa',$contacto->empresa()->razon_social ) }}"  placeholder="Empresa">
 @endif
         <label for="">Empresa</label>
       </div>
