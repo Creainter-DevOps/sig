@@ -212,7 +212,7 @@ class Oportunidad extends Model
     }
     public function empresasMenu() {
       $rp = DB::select("
-        SELECT E.id, E.razon_social, (SELECT COUNT(C.id) FROM osce.cotizacion C WHERE C.oportunidad_id = :oid) cotizacion
+        SELECT E.id, E.razon_social, (SELECT COUNT(C.id) FROM osce.cotizacion C WHERE C.oportunidad_id = :oid AND C.empresa_id = E.id) cotizacion
         FROM osce.empresa E
           LEFT JOIN osce.oportunidad O ON O.id = :oid
           LEFT JOIN osce.licitacion L ON L.id = O.licitacion_id
@@ -301,15 +301,16 @@ SELECT
   (
     SELECT COUNT(DD.id)
     FROM osce.documento DD
-    WHERE DD.finalizado_el::date = x.fecha
+    WHERE DD.tenant_id = x.tenant_id AND DD.finalizado_el::date = x.fecha
   ) terminados,
   (
     SELECT COUNT(OO.id)
     FROM osce.oportunidad OO
-    WHERE OO.rechazado_el::date = x.fecha
+    WHERE OO.tenant_id = x.tenant_id AND OO.rechazado_el::date = x.fecha
   ) rechazados
 FROM (
 SELECT
+  O.tenant_id,
   O.fecha_propuesta_hasta::date fecha,
   COUNT(DISTINCT O.id) oportunidades,
   COUNT(C.oportunidad_id) participando,
@@ -320,7 +321,7 @@ LEFT JOIN osce.documento D ON D.id = C.documento_id AND D.finalizado_el IS NOT N
 WHERE O.estado IN (0,1,2) AND O.aprobado_el IS NOT NULL AND O.rechazado_el IS NULL AND O.archivado_el IS NULL
   AND O.fecha_propuesta_hasta >= NOW() - INTERVAL '15' DAY AND O.fecha_propuesta_hasta <= NOW() + INTERVAL '100' DAY
   AND O.tenant_id = :tenant
-GROUP BY O.fecha_propuesta_hasta::date
+GROUP BY O.tenant_id, O.fecha_propuesta_hasta::date
 ORDER BY 1 ASC
 ) x
 LIMIT 30", [
@@ -537,8 +538,8 @@ JOIN osce.licitacion L ON L.id = O.licitacion_id AND (
   (L.fecha_buena_desde >= NOW() AND L.fecha_buena_hasta <= NOW())
   OR (L.fecha_buena_hasta >= NOW() - INTERVAL '7' DAY AND L.fecha_buena_hasta <= NOW() + INTERVAL '60' DAY)
   OR (L.buenapro_fecha >= NOW() - INTERVAL '7' DAY))
-ORDER BY L.fecha_buena_hasta ASC, L.buenapro_fecha ASC, O.id ASC
-LIMIT 50", [
+ORDER BY (L.buenapro_fecha IS NOT NULL) DESC, L.fecha_buena_hasta ASC, L.buenapro_fecha ASC, O.id ASC
+LIMIT 80", [
   'tenant' => Auth::user()->tenant_id
 ]);
       $out = $rp->execute;

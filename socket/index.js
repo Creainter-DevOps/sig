@@ -130,6 +130,11 @@ app.post('/api/tenant/call', (req, res) => {
 //  io.sockets.emit('caller', req.body);
   res.send('Ok');
 });
+app.post('/api/tenant/notification', (req, res) => {
+  console.log('DATA-TENANT-MESSAGE', req.body);
+  broadcast_tenant(req.body.tenant_id, 'notification', req.body);
+  res.send('Ok');
+});
 app.post('/api/broadcast', (req, res) => {
   console.log('DATA-BROADCAST', req.body);
   io.sockets.emit('caller', req.body);
@@ -196,6 +201,9 @@ io.on('connection', function(client) {
     });
   });
   client.on('browser', function(data) {
+    if(typeof device.id == 'undefined') {
+      return false;
+    }
     ls[device.tenant_id][device.user_id].devices[device.id].link = data.link;
 
     var ll = fell_get_list(device.tenant_id, device.user_id, true);

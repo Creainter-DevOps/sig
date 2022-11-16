@@ -612,6 +612,13 @@ socket.on('todo', function(data) {
 socket.on('todo_mod', function(data) {
   todo_mod(data);
 });
+socket.on('notification', function(data) {
+  toastr[data.display](data.message, data.username + ':', {
+    timeOut: 60000,
+    extendedTimeOut: 60000,
+    positionClass:'toast-bottom-right',
+  });
+});
 var fell = null;
 var fell_names = {};
 var fell_list = {};

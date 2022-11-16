@@ -74,20 +74,22 @@ class Helper
     exec($cmd);
     return true;
   }
-  public static function parallel_command($cmd, $queue = null) {
+  public static function parallel_command($cmd, $queue = null, $alias = null) {
     $stdout = static::json_path('pid_' . uniqid() . '.log');
     $cmd = !is_array($cmd) ? [$cmd] : $cmd;
 
     if(!empty($queue)) {
       $matrix = static::json_load('queue_' . $queue);
-      $last_pid = !empty($matrix['pids']) ? end($matrix['pids']) : null;
+      $last_pid   = !empty($matrix['pids']) ? end($matrix['pids']) : null;
+      $last_pid   = @explode('@', $last_pid)[0];
+      $last_alias = @explode('@', $last_pid)[1];
 
       $file = static::json_path('queue_' . $queue);
       $cmd[] = '/usr/bin/php /var/www/html/interno.creainter.com.pe/util/background.php "queue_delete" "' . $file . '"';
     }
 
     if(!empty($last_pid)) {
-      $cmd = '(/var/www/html/interno.creainter.com.pe/util/waitProcess ' . $last_pid . ' "' . $queue . '"; ' . implode('; ', $cmd) . ')';
+      $cmd = '(/var/www/html/interno.creainter.com.pe/util/waitProcess ' . $last_pid . ' "' . $queue . '" "' . str_replace("'", '', $last_alias) . '"; ' . implode('; ', $cmd) . ')';
     } else {
       $cmd = '(' . implode('; ', $cmd) . ')';
     }
@@ -97,12 +99,13 @@ class Helper
     $pid = exec($command, $output);
 
     if(!empty($queue)) {
-      $matrix['pids'][] = $pid;
+      $matrix['pids'][] = $pid . '@' . $alias;
       static::json_save('queue_' . $queue, $matrix);
     }
 
     static::json_save('process_' . $pid, [
       'pid'          => $pid,
+      'alias'        => $alias,
       'finished'     => false,
       'percent'      => 0,
       'start_time'   => time(),

@@ -42,7 +42,11 @@
                         <div class="card widget-todo">
                           <div class="card-header border-bottom">
                             <h4 class="card-title d-flex">
-                              <i class='bx bx-check font-medium-5 pl-25 pr-75'></i>Plantillas
+                            @if(!empty($documento->licitacion_id))
+                              <i class='bx bx-check font-medium-5 pl-25 pr-75'></i>Plantillas para  <b> {{ $documento->cotizacion()->oportunidad()->licitacion()->tipo_objeto }}</b>
+                            @else
+                              <i class='bx bx-check font-medium-5 pl-25 pr-75'></i>Plantillas para Expediente
+                            @endif
                             </h4><br />
                             <ul class="list-inline d-flex mb-0">
                               <li class="d-flex align-items-center">
@@ -55,7 +59,7 @@
                             @csrf
                           <div class="card-body px-0 py-1">
                             <ul class="widget-todo-list-wrapper" id="list-anexos">
-                              @foreach(App\Documento::plantillas() as $p) 
+                              @foreach(App\Documento::plantillas($documento->oportunidad_id) as $p) 
                               <li class="widget-todo-item" data-id="{{$p->id }}" >
                                 <div class="widget-todo-title-wrapper d-flex justify-content-between align-items-center mb-50">
                                   <div class="widget-todo-title-area d-flex align-items-center">

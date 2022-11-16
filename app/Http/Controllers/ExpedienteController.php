@@ -98,7 +98,7 @@ class ExpedienteController extends Controller
           'es_reusable'   => false,
           'tipo'          => 'EXPEDIENTE',
           'folio'         => 0,
-          'rotulo'        => 'Expediente: ' . $cotizacion->oportunidad()->codigo,
+          'rotulo'        => $cotizacion->oportunidad()->codigo,
           'filename'      => 'Propuesta_Seace.pdf',
           'formato'       => 'PDF',
           'directorio'    => trim($cotizacion->folder(true), '/'),

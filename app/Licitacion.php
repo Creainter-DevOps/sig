@@ -52,7 +52,39 @@ class Licitacion extends Model
     public function rotulo() {
       return $this->rotulo;
     }
+    public function rango_precios() {
+      $rp = new \stdClass;
+      $rp->min = 0;
+      $rp->max = 0;
 
+      $prefijo = strtoupper(explode('-', $this->nomenclatura)[0]);
+
+      if($prefijo == 'LP') {
+        if($this->tipo_objeto == 'Bien') {
+          $rp->min = 400000;
+        } else if($this->tipo_objeto == 'Obra') {
+          $rp->min = 2800000;
+        }
+      } elseif($prefijo == 'CP') {
+        if($this->tipo_objeto == 'Consultoría de Obra') {
+          $rp->min = 400000;
+        }
+      } elseif($prefijo == 'AS') {
+        if($this->tipo_objeto == 'Bien' || $this->tipo_objeto == 'Servicio') {
+          $rp->min = 36800;
+          $rp->max = 400000;
+        } else if($this->tipo_objeto == 'Obra') {
+          $rp->min = 36800;
+          $rp->max = 2800000;
+        } elseif($this->tipo_objeto == 'Consultoría de Obra') {
+          $rp->min = 36800;
+          $rp->max = 400000;
+        }
+      } elseif($prefijo == 'DIRECTA') {
+        $rp->min = 36800;
+      }
+      return $rp;
+    }
     public function aprobar() {
       return collect(DB::select('SELECT * FROM osce.fn_licitacion_accion_aprobar(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ')'))->first();
     }

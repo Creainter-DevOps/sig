@@ -1,4 +1,7 @@
-            <table class="table table-sm mb-0 table-bordered table-vcenter"  style="width:100%;font-size:12px;">
+@php
+  $precio = $licitacion->rango_precios();
+@endphp
+<table class="table table-sm mb-0 table-bordered table-vcenter"  style="width:100%;font-size:12px;">
               <thead>
                 <th>Item</th>
                 <th>Descripción</th>
@@ -18,3 +21,8 @@
             @endforeach
             </tbody>
             </table>
+
+<div>
+  <b>Recomendaciones:</b><br />
+  Para este tipo de licitaciones el valor referencial está desde <b>{{ Helper::money($precio->min) }} - {{ Helper::money($precio->max) }}</b>
+</div>

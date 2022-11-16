@@ -94,7 +94,7 @@
                             <li class="nav-item {{(request()->is('licitaciones/resultados')) ? 'active' : '' }}">
                               <a href="/licitaciones/resultados">
                                 <i class="menu-livicon livicon-evo-holder" data-icon="line-chart"></i>
-                                <span class="menu-title">Resultados</span>
+                                <span class="menu-title">Buenas Pro</span>
                               </a>
                             </li>
                             <li class="nav-item {{(request()->is('licitaciones/nuevas')) ? 'active' : '' }}">
@@ -106,7 +106,7 @@
                             <li class="nav-item {{(request()->is('licitaciones')) ? 'active' : '' }}">
                               <a href="/licitaciones/">
                                 <i class="menu-livicon livicon-evo-holder" data-icon="line-chart"></i>
-                                <span class="menu-title">Licitaciones</span>
+                                <span class="menu-title">Todas las Licitaciones</span>
                               </a>
                             </li>
                             <li class="nav-item {{(request()->is('oportunidades')) ? 'active' : '' }}">

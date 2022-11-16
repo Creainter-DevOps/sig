@@ -49,7 +49,7 @@ class User extends Authenticatable
       return $this->clave;
     }
     public function username() {
-      return 'usuario';
+      return '@' . $this->usuario;
     }
     public function tenants() {
       return $this->hasMany('App\Empresa', 'tenant_id', 'tenant_id')->get();
@@ -60,6 +60,11 @@ class User extends Authenticatable
         'tipo'    => $tipo,
         'externo' => $externo
       ]))->first())->estado;
+    }
+    public function byId($id) {
+      return (collect(DB::select("SELECT osce.fn_usuario_rotulo(:id) user", [
+        'id' => $id,
+      ]))->first())->user;
     }
     public static function empresas() {
       return collect(DB::select("
@@ -96,26 +101,37 @@ class User extends Authenticatable
         'user'    => Auth::user()->id,
       ]))->first();
     }
+    public static function facturas_visibles($out) {
+      $rp  = DB::collect("
+        SELECT *, (COALESCE(F.monto_pagado, 0) = F.monto) es_pagado
+        FROM public.factura F
+        WHERE F.tenant_id = :tenant AND (F.saldo_a_favor < 0 OR F.fecha_vencimiento <= NOW())
+        	AND (F.fecha_pago >= NOW() - INTERVAL '5' DAY OR F.fecha_pago IS NULL)
+        ORDER BY F.fecha_emision ASC
+        LIMIT 4
+      ", [
+        'tenant' => Auth::user()->tenant_id,
+      ]);
+      $out = $rp->execute;
+      return static::hydrate($rp->toArray());
+    }
     public static function estadisticas($id = null) {
       $id = $id ?? Auth::user()->id;
       return collect(DB::select("
-      SELECT
-	x.usuario,
-	x.enviados,
-	x.ganados,
-	1100 sueldo_base,
-	(x.enviados * 11) sueldo_enviados,
-	(x.ganados * 300) sueldo_ganados,
-	(x.monto * 0.0025) sueldo_monto
-FROM (
-	SELECT U.usuario, COUNT(C.id) enviados, COUNT(P.id) ganados, SUM((CASE WHEN P.id IS NOT NULL THEN C.monto ELSE 0 END)) monto
-	FROM public.usuario U
-	LEFT JOIN osce.cotizacion C ON C.propuesta_por = U.id --AND C.propuesta_el >= DATE_TRUNC('month', NOW() - INTERVAL '1' MONTH)
-		AND C.propuesta_el >= DATE_TRUNC('month', NOW())
-	LEFT JOIN osce.proyecto P ON P.cotizacion_id = C.id
-  WHERE U.id = :id
-	GROUP BY U.usuario
-) x", ['id' => $id]))->first();
+        SELECT
+          SUM((CASE WHEN C.propuesta_el IS NOT NULL AND C.propuesta_por = :user AND C.propuesta_el >= DATE_TRUNC('week', NOW()) THEN 1 ELSE 0 END)) enviados_semana,
+          COUNT(D.id) elaborados, COUNT(C.id) enviados, COUNT(P.id) ganados, SUM((CASE WHEN P.id IS NOT NULL THEN C.monto ELSE 0 END)) monto,
+          (SELECT COUNT(D.id) FROM osce.documento D WHERE D.tenant_id = T.id) elaborados
+      	FROM osce.tenant T
+        LEFT JOIN osce.cotizacion C ON C.tenant_id = T.id AND C.elaborado_por IS NOT NULL
+          AND C.propuesta_el >= DATE_TRUNC('year', NOW())
+        LEFT JOIN osce.documento D ON D.id = C.documento_id AND D.finalizado_el IS NOT NULL
+        LEFT JOIN osce.proyecto P ON P.cotizacion_id = C.id
+        WHERE T.id = :tenant
+        GROUP BY T.id", [
+        'tenant' => Auth::user()->tenant_id,
+        'user'   => $id,
+      ]))->first();
     }
     public static function search($term ) {
       $term = strtolower(trim($term));

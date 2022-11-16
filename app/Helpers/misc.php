@@ -8,6 +8,17 @@ function fecha($x) {
   return date('d/m/Y', $x);
 }
 }
+if(!function_exists('byteConvert')) {
+function byteConvert($bytes){
+  if ($bytes == 0) {
+    return "0.00 B";
+  }
+  $s = array('B', 'KB', 'MB', 'GB', 'TB', 'PB');
+  $e = floor(log($bytes, 1024));
+  return round($bytes/pow(1024, $e), 2).$s[$e];
+}
+}
+if(!function_exists('hora')) {
 function hora($x) {
   $x = strtotime($x);
   if(empty($x)) {
@@ -15,8 +26,8 @@ function hora($x) {
   }
   return date('h:i A', $x);
 }
+}
 function SendMail($perfil, $data) {
-
   require_once(config('constants.internal') . 'conf.php');
 
   require_once(ABS_LIBRERIAS . 'xmail.php');
@@ -37,6 +48,9 @@ function SendMail($perfil, $data) {
     $data['body'] .= '<img src="https://sig.creainter.com.pe/static/cloud/' . $perfil->logo . '" style="height: 45px;">';
   }
   return xMailSend(XMAIL_SEND_NOW, $credenciales, $data);
+}
+function contextInternal() {
+  require_once(config('constants.internal') . 'conf.php');
 }
 function file_ext($file) {
   return strtolower(pathinfo($file, PATHINFO_EXTENSION));

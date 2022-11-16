@@ -27,7 +27,7 @@ class Documento extends Model
       'empresa_id','personal_id','vinculo_empresa_id','fecha_firma','fecha_desde','fecha_hasta','plazo_servicio','monto_texto','monto','fecha_acta','filename','es_reusable','tenant_id',
       'filesize','filename','directorio','oportunidad_id','cotizacion_id','licitacion_id','elaborado_json','elaborado_por','elaborado_desde','elaborado_hasta','usado',
       'es_mesa','respaldado_el','original','procesado_desde','elaborado_step',
-      'revisado_por','revisado_el','revisado_status'
+      'revisado_por','revisado_el','revisado_status','telegram_id',
     ];
     protected $casts = [
       'es_reusable'  => 'boolean',
@@ -41,14 +41,73 @@ class Documento extends Model
       return static::create($data);
     }
 
-    public static function plantillas() {
-      return static::hydrate(DB::select("SELECT * FROM osce.fn_documento_plantillas(:id)", ['id' => Auth::user()->tenant_id]));
+    public static function plantillas($oportunidad_id) {
+      return static::hydrate(DB::select("SELECT * FROM osce.fn_documento_plantillas(:uid, :oid)", [
+        'uid' => Auth::user()->tenant_id,
+        'oid' => $oportunidad_id
+      ]));
     }
     public static function obtenerArchivos($path) {
       return DB::select("SELECT * FROM osce.fn_documento_get_path(:tenant, :path)", [
         'tenant' => Auth::user()->tenant_id,
         'path'   => $path,
       ]);
+    }
+    public function aprobar() {
+      DB::select("SELECT osce.fn_documento_accion_revisar(:tenant, :id, :user, :estado, :texto)", [
+        'tenant' => Auth::user()->tenant_id,
+        'id'     => $this->id,
+        'user'   => Auth::user()->id,
+        'estado' => true,
+        'texto'  => null,
+      ]);
+      \contextInternal();
+      require_once(ABS_LIBRERIAS . 'curly.php');
+      require_once(ABS_LIBRERIAS . 'telegram.php');
+      if(!empty($this->telegram_id)) {
+        telegram_edit('5690110653:AAGkI1kjCAWMUaHCge5w0v0OB_BxpogzFrA', [
+          'chat_id'    => explode(',', $this->telegram_id)[0],
+          'message_id' => explode(',', $this->telegram_id)[1],
+          'text'       => 'Aprobado por ' . Auth::user()->username() . "\n https://sig.creainter.com.pe/documentos/" . $this->id . "/expediente/inicio",
+          'parse_mode' => 'HTML'
+        ]);
+      }
+      $url = 'https://127.0.0.1:4001/api/tenant/notification';
+      Curly2(CURLY_POST, $url, array('Content-Type:application/json'), json_encode([
+        'tenant_id' => Auth::user()->tenant_id,
+        'user_id'   => Auth::user()->id,
+        'username'  => Auth::user()->username(),
+        'message'   => "El Expediente ha sido aprobado,<br><i>" . $this->rotulo . "<br><a href='https://sig.creainter.com.pe/documentos/" . $this->id . "/expediente/inicio'>Abrir</a>",
+        'display'   => 'success',
+      ]));
+    }
+    public function observar($texto) {
+      return DB::select("SELECT osce.fn_documento_accion_revisar(:tenant, :id, :user, :estado, :texto)", [
+        'tenant' => Auth::user()->tenant_id,
+        'id'     => $this->id,
+        'user'   => Auth::user()->id,
+        'estado' => false,
+        'texto'  => $texto,
+      ]);
+      \contextInternal();
+      require_once(ABS_LIBRERIAS . 'curly.php');
+      require_once(ABS_LIBRERIAS . 'telegram.php');
+      if(!empty($this->telegram_id)) {
+        telegram_edit('5690110653:AAGkI1kjCAWMUaHCge5w0v0OB_BxpogzFrA', [
+          'chat_id'    => explode(',', $this->telegram_id)[0],
+          'message_id' => explode(',', $this->telegram_id)[1],
+          'text'       => 'Observado por ' . Auth::user()->username() . "\n https://sig.creainter.com.pe/documentos/" . $this->id . "/expediente/inicio",
+          'parse_mode' => 'HTML'
+        ]);
+      }
+      $url = 'https://127.0.0.1:4001/api/tenant/notification';
+      Curly2(CURLY_POST, $url, array('Content-Type:application/json'), json_encode([
+        'tenant_id' => Auth::user()->tenant_id,
+        'user_id'   => Auth::user()->id,
+        'username'  => Auth::user()->username(),
+        'message'   => "El expediente ha sido Observado,<br><i>" . $this->rotulo . "<br><a href='https://sig.creainter.com.pe/documentos/" . $this->id . "/expediente/inicio'>Abrir</a>",
+        'display'   => 'warning',
+      ]));
     }
     public function empresa() {
       return $this->belongsTo('App\Empresa', 'empresa_id')->first();
@@ -220,14 +279,18 @@ class Documento extends Model
 
      return $documento;
     }
-    public static  function search($term){
-         
+    public static function list() {
+      return static::whereRaw("tipo NOT IN ('EXPEDIENTE','ADJUNTO')")->whereRaw("es_reusable IS TRUE")->where(function($query) {
+            $query->WhereRaw("tenant_id = ?", [Auth::user()->tenant_id])
+              ->orWhereRaw("tenant_id IS NULL");
+          })->orderBy('created_on', 'desc');
+    }
+    public static  function search($term) {
       $term = strtolower(trim($term));
-        return static::where(function($query) use($term) {
-            $query->WhereRaw("LOWER(osce.documento.tipo) LIKE ?",["%{$term}%"])
-              ->orWhereRaw("LOWER(osce.documento.rotulo) LIKE ?",["%{$term}%"])
-            ;
-        })->select('osce.documento.*')->orderBy('osce.documento.id', 'ASC');
+        return static::list()->where(function($query) use($term) {
+             $query->WhereRaw("LOWER(documento.rotulo) LIKE ?", ["%{$term}%"]);
+        })
+        ->select('osce.documento.*')->orderBy('osce.documento.id', 'ASC');
     }
     public function folder_workspace($relative = false) {
       if($relative) {
@@ -239,21 +302,25 @@ class Documento extends Model
     public static function expedientesTrabajando() {
       return collect(DB::select("
   SELECT
-	D.elaborado_desde::date fecha, D.rotulo, D.id,
+	O.fecha_propuesta_hasta::date fecha, D.rotulo, D.id,
   D.oportunidad_id,
-  D.elaborado_desde, (CASE WHEN D.elaborado_hasta IS NULL THEN CONCAT((hora(NOW() - D.elaborado_desde))::text, '...') ELSE hora(D.elaborado_hasta - D.elaborado_desde)::text END) duracion_elaborado,
-  D.procesado_desde, (CASE WHEN D.procesado_desde IS NULL THEN NULL ELSE (CASE WHEN D.procesado_hasta IS NULL THEN CONCAT(hora(NOW() - D.procesado_desde)::text, '...') ELSE hora(D.procesado_hasta - D.procesado_desde)::text END) END) duracion_procesado,
+  D.elaborado_desde, (CASE WHEN D.elaborado_hasta IS NULL THEN CONCAT((hora(NOW() - D.elaborado_desde))::text, '->') ELSE hora(D.elaborado_hasta - D.elaborado_desde)::text END) duracion_elaborado,
+  D.procesado_desde, (CASE WHEN D.procesado_desde IS NULL THEN NULL ELSE (CASE WHEN D.procesado_hasta IS NULL THEN CONCAT(hora(NOW() - D.procesado_desde)::text, '->') ELSE hora(D.procesado_hasta - D.procesado_desde)::text END) END) duracion_procesado,
   osce.fn_usuario_rotulo(D.elaborado_por) usuario,
   osce.fn_usuario_rotulo(D.revisado_por) revisado_por,
   D.revisado_status,
   D.revisado_el,
-  osce.fn_usuario_rotulo(C.propuesta_por) propuesta_por
+  osce.fn_usuario_rotulo(C.propuesta_por) propuesta_por,
+  O.fecha_propuesta_hasta,
+  D.filesize,
+  (O.rotulo) descripcion,
+  D.folio
   FROM osce.documento D
   JOIN osce.oportunidad O ON O.id = D.oportunidad_id AND (O.rechazado_el IS NULL OR O.rechazado_el >= NOW() - INTERVAL '2' DAY)
   LEFT JOIN osce.cotizacion C ON C.id = D.cotizacion_id AND C.documento_id = D.id
   WHERE D.es_mesa IS TRUE AND D.elaborado_por IS NOT NULL AND D.elaborado_desde IS NOT NULL AND D.tenant_id = :tenant
-    AND (D.elaborado_desde::date = NOW()::date OR D.elaborado_hasta >= NOW() - INTERVAL '12' HOUR)
-ORDER BY 1 DESC, 9 DESC, 5 DESC", ['tenant' => Auth::user()->tenant_id]));
+    AND (D.elaborado_desde::date = NOW()::date OR O.fecha_propuesta_hasta >= NOW() - INTERVAL '12' HOUR)
+ORDER BY (D.elaborado_hasta IS NULL) DESC, 1 DESC, (D.revisado_el IS NULL) DESC, (D.revisado_status IS FALSE) DESC, (C.propuesta_el IS NULL) DESC, 9 DESC, 5 DESC", ['tenant' => Auth::user()->tenant_id]));
     }
     public function CompressWorkspace() {
       return 'doc-workspace-' . $this->id . '.tar.gz';
@@ -460,10 +527,26 @@ ORDER BY 1 DESC, 9 DESC, 5 DESC", ['tenant' => Auth::user()->tenant_id]));
       /* Unimos los PDFs */
       $commands[] = 'echo "Uniendo los documento en PDF del EXPEDIENTE"';
       $commands[] = '/usr/bin/convert -alpha remove -density 200 -quality 100 '. implode(' ', $pdf_individuales_expediente) . ' ' . $output_draw;
+      $commands[] = '/bin/cp ' . $output_draw . ' ' . $output_draw . '_unido';
+
+      $commands[] = 'echo "Proceso de compresión..."';
+      $commands[] = '/usr/bin/gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=' . $output_draw . '_out ' . $output_draw;
+      $commands[] = '/bin/cp ' . $output_draw . '_out ' . $output_draw . '_compress';
+      $commands[] = '/bin/mv ' . $output_draw . '_out ' . $output_draw;
+
       $commands[] = 'echo "Escaneando documento..."';
-      $commands[] = '/usr/bin/convert -density 140 ' . $output_draw . ' -rotate 0.5 -attenuate 0.1 +noise Multiplicative -attenuate 0.01 +noise Multiplicative -sharpen 0x1.0 ' . $output_draw;
+      $commands[] = '/usr/bin/convert -density 150 ' . $output_draw . ' -rotate 0.5 -attenuate 0.1 +noise Multiplicative -attenuate 0.01 +noise Multiplicative -sharpen 0x1.0 ' . $output_draw;
+      $commands[] = '/bin/cp ' . $output_draw . ' ' . $output_draw . '_escaneado';
+
       $commands[] = 'echo "Proceso de foliación de PDF"';
       $commands[] = '/bin/pdf-foliar ' . $output_draw;
+      $commands[] = '/bin/cp ' . $output_draw . ' ' . $output_draw . '_foliacion';
+
+      $commands[] = 'echo "Proceso de compresión(2)..."';
+      $commands[] = '/usr/bin/gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=' . $output_draw . '_out ' . $output_draw;
+      $commands[] = '/bin/cp ' . $output_draw . '_out ' . $output_draw . '_compress22';
+      $commands[] = '/bin/mv ' . $output_draw . '_out ' . $output_draw;
+
       $commands[] = "/snap/bin/gsutil -h Cache-Control:\"Cache-Control:private, max-age=0, no-transform\" cp '" . $output_draw . "' '" . config('constants.ruta_storage') . $documento->archivo . "'";
 
       if(!empty($pdf_individuales_secure)) {
@@ -473,12 +556,20 @@ ORDER BY 1 DESC, 9 DESC, 5 DESC", ['tenant' => Auth::user()->tenant_id]));
         $commands[] = '/usr/bin/convert -density 140 ' . $output_secure . ' -rotate 0.5 -attenuate 0.1 +noise Multiplicative -attenuate 0.01 +noise Multiplicative -sharpen 0x1.0 ' . $output_secure;
         $commands[] = 'echo "Proceso de foliación de PDF"';
         $commands[] = '/bin/pdf-foliar ' . $output_secure;
+        $commands[] = 'echo "Proceso de compresión..."';
+        $commands[] = '/usr/bin/gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=' . $output_secure . '_out ' . $output_secure;
+        $commands[] = '/bin/mv ' . $output_secure . '_out ' . $output_secure;
         $commands[] = "/snap/bin/gsutil -h Cache-Control:\"Cache-Control:private, max-age=0, no-transform\"  cp '" . $output_secure . "' '" . config('constants.ruta_storage') . $documento->getAttribute('original') . "'";
       }
 
+      //$commands[] = '/bin/rm ' . $dir . 'gs_*';
+      //$commands[] = '/bin/rm ' . $dir . 'temp_*';
+
+      $commands[] = '/usr/bin/php /var/www/html/interno.creainter.com.pe/util/background.php "expediente-revisar" "' . $documento->id . '" "' . $output_draw . '"';
+
       $commands[] = 'echo "Eliminando directorio de trabajo: ' . $documento->folder_workspace() . '"';
 
-      $commands[] = "/bin/rm -rf '" . $documento->folder_workspace() . "'";
+      //$commands[] = "/bin/rm -rf '" . $documento->folder_workspace() . "'";
 
       $commands[] = '/usr/bin/php /var/www/html/interno.creainter.com.pe/util/background.php "expediente-fin" ' . $documento->id;
 
@@ -490,17 +581,17 @@ ORDER BY 1 DESC, 9 DESC, 5 DESC", ['tenant' => Auth::user()->tenant_id]));
       unset($workspace['paso04']);
       $documentos_ids = array_unique($documentos_ids);
 
-      $pid = Helper::parallel_command($commands, 'expediente');
+      $pid = Helper::parallel_command($commands, 'expediente', $documento->rotulo);
       $workspace['parallel'] = [
         'method' => 'paso04',
         'pids'   => $pid,
       ];
 
-      $documento->filename      = Helper::replace_extension($documento->rotulo, 'pdf');
-      $documento->documentos_id = '{' . implode(',', $documentos_ids) . '}';
-      $documento->folio         = $folios;
-      $documento->filesize      = 10000;#filesize($output_final);
-      $documento->elaborado_por    = Auth::user()->id;
+      $documento->filename        = Helper::replace_extension($documento->rotulo, 'pdf');
+      $documento->documentos_id   = '{' . implode(',', $documentos_ids) . '}';
+      $documento->folio           = $folios;
+      $documento->filesize        = 1;#filesize($output_final);
+      $documento->elaborado_por   = Auth::user()->id;
       $documento->es_mesa         = true;
       $documento->elaborado_hasta = DB::raw('now()');
 

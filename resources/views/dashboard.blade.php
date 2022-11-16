@@ -78,7 +78,7 @@
     </div>
     <div class="row">
       <!-- Website Analytics Starts-->
-    <div class="col-lg-4 col-md-6 col-12 mb-3">
+    <div class="col-lg-3 col-md-3 col-12 mb-3">
     <div class="card" style="height:250px;">
       <div class="card-header">
         <h3 class="card-title mb-1">Bienvenido {{ '@' . Auth::user()->usuario }}!</h3>
@@ -87,8 +87,8 @@
       <div class="card-body">
         <div class="row align-items-end">
           <div class="col-6">
-            <h1 class="display-6 text-primary">{{ (int) ($chartjs['usuario']->enviados * 100 / 150) }}%</h1>
-            <small class="d-block mb-1">Nos falta poco para lograr nuestra meta.</small>
+            <h1 class="display-6 text-primary">{{ (int) ($chartjs['usuario']->enviados_semana * 100 / 150) }}%</h1>
+            <small class="d-block mb-1">Nos falta poco para lograr nuestra meta, hemos enviado {{ $chartjs['usuario']->enviados_semana }}.</small>
           </div>
         </div>
       </div>
@@ -99,13 +99,23 @@
         <div class="card">
           <div class="card-header d-flex justify-content-between align-items-center">
             <div class="card-title-content">
-              <h4 class="card-title">Ingresos</h4>
-              <small class="text-muted">Calculado en lo que va del mes</small>
+              <h4 class="card-title">Números</h4>
+              <small class="text-muted">Calculado en lo que va del año</small>
             </div>
             <i class="bx bx-dots-vertical-rounded font-medium-3 cursor-pointer"></i>
           </div>
           <div class="card-content">
             <div class="card-body">
+              <div class="d-flex justify-content-between my-1">
+                <div class="sales-info d-flex align-items-center">
+                  <i class='bx bx-bar-chart-alt-2 text-primary font-medium-5 mr-50'></i>
+                  <div class="sales-info-content">
+                    <h6 class="mb-0">Elaborados</h6>
+                    <small class="text-muted">Expedientes elaborados</small>
+                  </div>
+                </div>
+                <h6 class="mb-0">{{ $chartjs['usuario']->elaborados }}</h6>
+              </div>
               <div class="d-flex justify-content-between my-1">
                 <div class="sales-info d-flex align-items-center">
                   <i class='bx bx-bar-chart-alt-2 text-primary font-medium-5 mr-50'></i>
@@ -130,37 +140,17 @@
                 <div class="sales-info d-flex align-items-center">
                   <i class='bx bx-dollar text-primary font-medium-5 mr-50'></i>
                   <div class="sales-info-content">
-                    <h6 class="mb-0">Recaudado por Enviados</h6>
-                    <small class="text-muted">Comisión de S/. 11</small>
+                    <h6 class="mb-0">Monto Bruto</h6>
+                    <small class="text-muted">Monto recaudado</small>
                   </div>
                 </div>
-                <h6 class="mb-0">{{ Helper::money($chartjs['usuario']->sueldo_enviados, 1) }}</h6>
-              </div>
-              <div class="d-flex justify-content-between my-1">
-                <div class="sales-info d-flex align-items-center">
-                  <i class='bx bx-dollar text-primary font-medium-5 mr-50'></i>
-                  <div class="sales-info-content">
-                    <h6 class="mb-0">Recaudado por Ganados</h6>
-                    <small class="text-muted">Comisión de S/.300</small>
-                  </div>
-                </div>
-                <h6 class="mb-0">{{ Helper::money($chartjs['usuario']->sueldo_ganados, 1) }}</h6>
-              </div>
-              <div class="d-flex justify-content-between my-1">
-                <div class="sales-info d-flex align-items-center">
-                  <i class='bx bx-dollar text-primary font-medium-5 mr-50'></i>
-                  <div class="sales-info-content">
-                    <h6 class="mb-0">Recaudado por Monto</h6>
-                    <small class="text-muted">Comisión de S/.300</small>
-                  </div>
-                </div>
-                <h6 class="mb-0">{{ Helper::money($chartjs['usuario']->sueldo_monto, 1) }}</h6>
+                <h6 class="mb-0">{{ Helper::money($chartjs['usuario']->monto, 1) }}</h6>
               </div>-->
             </div>
           </div>
         </div>
       </div>
-      <div class="col-xl-5 col-lg-5 col-md-12 col-sm-12 dashboard-latest-update">
+      <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 dashboard-latest-update">
           <div class="card">
           <div class="card-header d-flex justify-content-between align-items-center pb-50">
             <h4 class="card-title">Atención en Licitaciones</h4>
@@ -192,8 +182,47 @@
             <div style="text-align:right;font-size:11px;padding: 0 5px;">Tiempo de consulta: {{ $execute->time }} ms</div>
           </div>
         </div>
-
-
+      </div>
+      <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 dashboard-latest-update">
+          <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center pb-50">
+            <h4 class="card-title">Facturación</h4>
+          </div>
+          <div class="card-content">
+            <div class="card-body p-0 pb-1">
+            @if(count($res = App\User::facturas_visibles($execute)) == 0)
+              <div style="text-align:center;padding:30px;">Usted se encuentra al día</div>
+            @else
+              <ul class="list-group list-group-flush">
+                @foreach($res as $o)
+                <li
+                  class="list-group-item list-group-item-action border-0 d-flex align-items-center justify-content-between">
+                  <div class="list-left d-flex">
+                    <div class="list-icon mr-1">
+                      <div class="avatar bg-rgba-success m-0">
+                        <div class="avatar-content">
+                          <i class="bx bx-money text-success font-size-base"></i>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="list-content">
+                      <span class="list-title">{{ Helper::fecha($o->fecha_vencimiento) }}</span>
+                      <small class="text-muted d-block">{{ $o->rotulo }}</small>
+                    </div>
+                  </div>
+                  @if(!empty($o->es_pagado))
+                  <span class="text-success" title="Monto abonado: {{ $o->monto_pagado }} - A favor: {{ $o->saldo_a_favor }}">{{ Helper::money($o->monto) }}</span>
+                  @else
+                  <span class="text-danger" title="Monto abonado: {{ $o->monto_pagado }} - A favor: {{ $o->saldo_a_favor }}">{{ Helper::money($o->monto) }}</span>
+                  @endif
+                </li>
+               @endforeach
+              </ul>
+            @endif
+            </div>
+            <div style="text-align:right;font-size:11px;padding: 0 5px;">Tiempo de consulta: {{ $execute->time }} ms</div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="row">

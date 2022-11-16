@@ -30,9 +30,15 @@
                       <div class="col-4 col-sm-4">
                         <div class="card widget-todo">
                           <div class="card-header border-bottom d-flex justify-content-between align-items-center" style="flex-direction: column;" >
-                            <h4 class="card-title d-flex">
+                            @if(!empty($documento->oportunidad_id))
+                            <h2 class="card-title d-flex">
+                              {{ $documento->oportunidad()->rotulo }}
+                            </h4>
+                            @else
+                            <h2 class="card-title d-flex">
                               Expediente Virtual
                             </h4>
+                            @endif
                           </div>
                           <br/>
                           <table>
@@ -46,7 +52,7 @@
                           </tr>
                           <tr>
                             <th>Elaborado Por:</th>
-                            <td>#{{ $documento->elaborado_por }}</td>
+                            <td>{{ Auth::user()->byId($documento->elaborado_por) }}</td>
                           </tr>
                           </table>
                           <hr>
@@ -75,13 +81,13 @@
                           @if(!empty($documento->finalizado_el))
                             @if(!empty($documento->revisado_el))
                               @if($documento->revisado_status)
-                              <div style="font-size: 27px;color: #fd4f1b;">Expediente APROBADO por U{{ $documento->revisado_por }}</div>
+                              <div style="font-size: 27px;color: #fd4f1b;">Expediente APROBADO por {{ Auth::user()->byId($documento->revisado_por) }}</div>
                               <div>Puede volver a editar el expediente en caso se requiera:</div>
                               <div style="padding: 10px 0px;">
                                 <a data-button-dinamic href="{{ route('documento.expediente_reanudar', ['documento' => $documento->id])}}" class="btn btn-warning text-white btn-sm" style="margin-right: 5px;">Habilitar Edición</a>
                               </div>
                               @else
-                              <div style="font-size: 27px;color: #fd4f1b;">Expediente OBSERVADO por U{{ $documento->revisado_por }}</div>
+                              <div style="font-size: 27px;color: #fd4f1b;">Expediente OBSERVADO por {{ Auth::user()->byId($documento->revisado_por) }}</div>
                               <div>Puede revisar el motivo de la observación en el cuadro izquierdo:</div>
                               <div style="padding: 10px 0px;">
                                 <a data-button-dinamic href="{{ route('documento.expediente_reanudar', ['documento' => $documento->id])}}" class="btn btn-warning text-white btn-sm" style="margin-right: 5px;">Habilitar Edición</a>
@@ -150,7 +156,7 @@
                   @if(empty($documento->cotizacion()->propuesta_el))
                     <a class="btn btn-secondary text-white" data-confirm data-button-dinamic href="/cotizaciones/{{ $documento->cotizacion()->id }}/registrarPropuesta" class="btn btn-sm btn-dark">Marcar como Enviado</a>
                   @else
-                    Ya se ha registrado el Envio:<br /> {{ Helper::fecha($documento->cotizacion()->propuesta_el, true) }} por {{ $documento->cotizacion()->propuesta_por }}
+                    Ya se ha registrado el Envio:<br /> {{ Helper::fecha($documento->cotizacion()->propuesta_el, true) }} por {{ Auth::user()->byId($documento->cotizacion()->propuesta_por) }}
                   @endif
                   @endif
                   </div>

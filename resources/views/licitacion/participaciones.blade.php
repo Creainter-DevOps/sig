@@ -42,11 +42,7 @@
               </thead>
               <tbody>
 @foreach(App\Oportunidad::listado_participanes_por_vencer($execute) as $v)
-                @if(!empty($v->correo_id))
-                  <tr data-link="/oportunidades/{{ $v->id }}/" style="background: #fff9dc;">
-                @else
-                  <tr data-link="/oportunidades/{{ $v->id }}/">
-                @endif
+                <tr data-link="/oportunidades/{{ $v->id }}/">
                   <td class="">
                     <div style="font-size:11px;">{!! $v->inx_rotulo !!}</div>
                     @if(empty($v->revisado_el))

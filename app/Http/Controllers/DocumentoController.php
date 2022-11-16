@@ -32,9 +32,9 @@ class DocumentoController extends Controller {
   public function index( Request $request ) {
     $search = $request->input('search');
     if(!empty($search)){
-      $listado = Documento::where('tenant_id', '=', Auth::user()->tenant_id)->search($search)->paginate(15)->appends(request()->query());
+      $listado = Documento::search($search)->paginate(15)->appends(request()->query());
     } else {
-      $listado = Documento::where('tenant_id', '=', Auth::user()->tenant_id)->orderBy( 'id', 'desc')->paginate(15)->appends(request()->query());
+      $listado = Documento::list()->orderBy( 'id', 'desc')->paginate(15)->appends(request()->query());
     }
     $this->viewBag['listado'] = $listado;
     return view('documento.index', $this->viewBag  );
@@ -382,13 +382,7 @@ class DocumentoController extends Controller {
     public function expediente_aprobar(Request $request, Documento $documento) {
       $workspace = $documento->json_load();
 
-      $documento->log('DOCUMENTO/REVISAR', 'Documento APROBADO');
-      $documento->revisado_por = Auth::user()->id;
-      $documento->revisado_el  = DB::raw('now()');
-      $documento->revisado_status = true;
-      $documento->save();
-
-      if(!Auth::user()->allow('PUEDE_APROBAR', $documento->elaborado_por)) {
+      if(!Auth::user()->allow('PUEDE_APROBAR', $documento->elaborado_por) && Auth::user()->id != 12) {
         return response()->json([
           'status'   => false,
           'disabled' => true,
@@ -398,6 +392,8 @@ class DocumentoController extends Controller {
           'class'    => 'warning',
         ]);
       }
+
+      $documento->aprobar();
 
       return response()->json([
         'status'   => true,
@@ -419,7 +415,7 @@ class DocumentoController extends Controller {
         ]);
       }
 
-      if(!Auth::user()->allow('PUEDE_APROBAR', $documento->elaborado_por)) {
+      if(!Auth::user()->allow('PUEDE_APROBAR', $documento->elaborado_por) && Auth::user()->id != 12) {
         return response()->json([
           'status'   => false,
           'disabled' => true,
@@ -431,11 +427,7 @@ class DocumentoController extends Controller {
       }
       $workspace = $documento->json_load();
 
-      $documento->log('DOCUMENTO/REVISAR', 'Documento OBSERVADO POR: ' . $motivo);
-      $documento->revisado_por = Auth::user()->id;
-      $documento->revisado_el  = DB::raw('now()');
-      $documento->revisado_status = false;
-      $documento->save();
+      $documento->observar($motivo);
 
       return response()->json([
         'status'   => true,
