@@ -20,7 +20,13 @@
                 <td>{{ fecha($d->fecha) }}</td>
                 <td><div style="background:#5c5a58;text-align:center;border-radius:5px;color:#fff;font-size: 11px;display: inline;padding: 3px 6px;">{{ $d->usuario }}</div></td>
                 <td><div title="Desde las {{ hora($d->elaborado_desde) }}">{{ $d->duracion_elaborado }}</div></td>
-                <td>{{ $d->duracion_procesado }}</td>
+@if(empty($d->finalizado_el))
+<td colspan="5" style="text-align:center">En Mesa de Trabajo por {{ $d->usuario }}</td>
+@else
+<td>{{ $d->duracion_procesado }}</td>
+@if(!empty($d->procesado_desde) && empty($d->procesado_hasta))
+                <td colspan="4" style="text-align:center;"><i class="bx bx-loader bx-spin" style="font-size:14px;"></i> Procesando {{ $d->folio }} pags.</td>
+@else
                 <td>{{ $d->folio }}</td>
                 <td>{{ byteConvert($d->filesize) }}</td>
                 <td>
@@ -29,6 +35,10 @@
 <div title="{{ $d->revisado_el }}" style="background:#61e561;text-align:center;border-radius:5px;color:#fff;font-size: 11px;display: inline;padding: 3px 6px;">{{ $d->revisado_por }}</div>
 @else
 <div title="{{ $d->revisado_el }}" style="background:#ff6159;text-align:center;border-radius:5px;color:#fff;font-size: 11px;display: inline;padding: 3px 6px;">{{ $d->revisado_por }}</div>
+@endif
+@else
+@if(!empty($d->finalizado_el))
+    <div title="Es requerido revisar el Expediente" style="background:#ffa83b;text-align:center;border-radius:5px;color:#fff;font-size: 11px;display: inline;padding: 3px 6px;">Revisar</div>
 @endif
 @endif
                 </td>
@@ -43,6 +53,8 @@
 @endif
 @endif
                 </td>
+@endif                
+@endif
               </tr>
               @endforeach
               </tbody>

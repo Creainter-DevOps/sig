@@ -382,7 +382,7 @@ class DocumentoController extends Controller {
     public function expediente_aprobar(Request $request, Documento $documento) {
       $workspace = $documento->json_load();
 
-      if(!Auth::user()->allow('PUEDE_APROBAR', $documento->elaborado_por) && Auth::user()->id != 12) {
+      if(!Auth::user()->allow('PUEDE_APROBAR', $documento->elaborado_por) && !in_array(Auth::user()->id, [12,3,10])) {
         return response()->json([
           'status'   => false,
           'disabled' => true,
@@ -415,7 +415,7 @@ class DocumentoController extends Controller {
         ]);
       }
 
-      if(!Auth::user()->allow('PUEDE_APROBAR', $documento->elaborado_por) && Auth::user()->id != 12) {
+      if(!Auth::user()->allow('PUEDE_APROBAR', $documento->elaborado_por) && !in_array(Auth::user()->id, [12,3,10])) {
         return response()->json([
           'status'   => false,
           'disabled' => true,

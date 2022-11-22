@@ -50,9 +50,20 @@
                             <th>Elaborado hasta:</th>
                             <td>{{ Helper::fecha($documento->elaborado_hasta, true) }}</td>
                           </tr>
-                          <tr>
                             <th>Elaborado Por:</th>
                             <td>{{ Auth::user()->byId($documento->elaborado_por) }}</td>
+                          </tr>
+                          <tr>
+                            <th>Procesado desde:</th>
+                            <td>{{ Helper::fecha($documento->procesado_desde, true) }}</td>
+                          </tr>
+                          <tr>
+                            <th>Procesado hasta:</th>
+                            <td>{{ Helper::fecha($documento->procesado_hasta, true) }}</td>
+                          </tr>
+                          <tr>
+                            <th>Procesado Por:</th>
+                            <td>{{ Auth::user()->byId($documento->finalizado_por) }}</td>
                           </tr>
                           </table>
                           <hr>

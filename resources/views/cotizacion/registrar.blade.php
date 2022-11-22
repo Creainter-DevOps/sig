@@ -253,15 +253,15 @@
           <hr>
           <div class="invoice-subtotal pt-50">
             <div class="row">
-              <div class="col-md-5 col-12">
+              <div class="col-md-7 col-12">
                 <div class="form-group">
-                  <input type="text" class="form-control" name="terminos" placeholder="Términos de Pago" value="{{ $cotizacion->terminos }}">
+                  <textarea  type="text" class="form-control" name="terminos" rows="6"  placeholder="Términos de Pago">{!!  $cotizacion->terminos !!} </textarea> 
                 </div>
                 <div class="form-group">
                   <input type="text" class="form-control" name="notas" placeholder="Notas para el Cliente" value="{{ $cotizacion->notas }}">
                 </div>
               </div>
-              <div class="col-lg-5 col-md-7 offset-lg-2 col-12">
+              <div class="col-lg-5 col-md-7  col-12">
                 <ul class="list-group list-group-flush">
                   <li class="list-group-item d-flex justify-content-between border-0 pb-0">
                     <span class="invoice-subtotal-title">Subtotal</span>

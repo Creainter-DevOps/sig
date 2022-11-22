@@ -113,9 +113,8 @@ class Empresa extends Model
       SELECT
         E2.id, E2.ruc, E2.razon_social, COUNT(*) cantidad, SUM(LI.monto_adjudicado) monto_adjudicado
       FROM osce.empresa E1
-      JOIN osce.cotizacion C ON C.empresa_id = E1.id AND C.participacion_el IS NOT NULL AND C.propuesta_el IS NOT NULL
-      JOIN osce.oportunidad O ON O.id = C.oportunidad_id AND O.licitacion_id IS NOT NULL
-      JOIN osce.licitacion_item LI ON LI.licitacion_id = O.licitacion_id AND LI.empresa_id <> E1.id
+      JOIN osce.licitacion_participante PP ON PP.empresa_id = E1.id
+      JOIN osce.licitacion_item LI ON LI.licitacion_id = PP.licitacion_id AND LI.item = PP.item AND LI.empresa_id <> PP.empresa_id
       JOIN osce.empresa E2 ON E2.id = LI.empresa_id
       WHERE E1.id = :id
       GROUP BY E2.id, E2.ruc, E2.razon_social

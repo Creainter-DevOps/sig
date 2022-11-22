@@ -33,6 +33,7 @@
           <th>Empresa</th>
           <th>Cliente</th>
           <th>Rótulo</th>
+          <th style="width:150px;">Monto</th>
           <th>Estado</th>
           <th>Fecha Inicio</th>
           <th>Fecha Límite</th>
@@ -47,6 +48,7 @@
           <td>{{ isset($proyecto->empresa_id) ?   $proyecto->empresa()->rotulo() : ''  }}</td>
           <td>{{ $proyecto->oportunidad()->institucion() }}</td>
           <td>{{ $proyecto->rotulo }}</td>
+          <td style="text-align:right;">{{ Helper::money($proyecto->cotizacion()->monto) }}</td>
           <td><div style="background-color:{{ $proyecto->estadoArray()['color'] }};font-size: 11px;padding: 2px;border-radius: 3px;color: #fff;text-align: center;">{{ $proyecto->estadoArray()['name'] }}</div></td>
           <td>{{ Helper::fecha($proyecto->fecha_desde) }}</td>
           <td>{{ Helper::fecha($proyecto->fecha_hasta) }}</td>

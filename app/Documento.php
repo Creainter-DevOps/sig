@@ -304,6 +304,7 @@ class Documento extends Model
   SELECT
 	O.fecha_propuesta_hasta::date fecha, D.rotulo, D.id,
   D.oportunidad_id,
+  D.procesado_desde, D.procesado_hasta,
   D.elaborado_desde, (CASE WHEN D.elaborado_hasta IS NULL THEN CONCAT((hora(NOW() - D.elaborado_desde))::text, '->') ELSE hora(D.elaborado_hasta - D.elaborado_desde)::text END) duracion_elaborado,
   D.procesado_desde, (CASE WHEN D.procesado_desde IS NULL THEN NULL ELSE (CASE WHEN D.procesado_hasta IS NULL THEN CONCAT(hora(NOW() - D.procesado_desde)::text, '->') ELSE hora(D.procesado_hasta - D.procesado_desde)::text END) END) duracion_procesado,
   osce.fn_usuario_rotulo(D.elaborado_por) usuario,
@@ -314,13 +315,14 @@ class Documento extends Model
   O.fecha_propuesta_hasta,
   D.filesize,
   (O.rotulo) descripcion,
-  D.folio
+  D.folio,
+  D.finalizado_el
   FROM osce.documento D
   JOIN osce.oportunidad O ON O.id = D.oportunidad_id AND (O.rechazado_el IS NULL OR O.rechazado_el >= NOW() - INTERVAL '2' DAY)
   LEFT JOIN osce.cotizacion C ON C.id = D.cotizacion_id AND C.documento_id = D.id
   WHERE D.es_mesa IS TRUE AND D.elaborado_por IS NOT NULL AND D.elaborado_desde IS NOT NULL AND D.tenant_id = :tenant
     AND (D.elaborado_desde::date = NOW()::date OR O.fecha_propuesta_hasta >= NOW() - INTERVAL '12' HOUR)
-ORDER BY (D.elaborado_hasta IS NULL) DESC, 1 DESC, (D.revisado_el IS NULL) DESC, (D.revisado_status IS FALSE) DESC, (C.propuesta_el IS NULL) DESC, 9 DESC, 5 DESC", ['tenant' => Auth::user()->tenant_id]));
+ORDER BY (D.elaborado_hasta IS NULL) DESC, (D.procesado_hasta IS NULL) DESC, 1 DESC, (D.revisado_el IS NULL) DESC, (D.revisado_status IS FALSE) DESC, (C.propuesta_el IS NULL) DESC, 9 DESC, 5 DESC", ['tenant' => Auth::user()->tenant_id]));
     }
     public function CompressWorkspace() {
       return 'doc-workspace-' . $this->id . '.tar.gz';
@@ -581,7 +583,7 @@ ORDER BY (D.elaborado_hasta IS NULL) DESC, 1 DESC, (D.revisado_el IS NULL) DESC,
       unset($workspace['paso04']);
       $documentos_ids = array_unique($documentos_ids);
 
-      $pid = Helper::parallel_command($commands, 'expediente', $documento->rotulo);
+      $pid = Helper::parallel_command($commands, 'ProcessExpediente', $documento->rotulo);
       $workspace['parallel'] = [
         'method' => 'paso04',
         'pids'   => $pid,

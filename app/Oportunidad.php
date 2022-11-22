@@ -308,6 +308,11 @@ SELECT
     FROM osce.oportunidad OO
     WHERE OO.tenant_id = x.tenant_id AND OO.rechazado_el::date = x.fecha
   ) rechazados
+--  (
+--    SELECT COUNT(*)
+--    FROM osce.seace L
+--    WHERE L.created_on = x.fecha AND L.licitacion_id IS NOT NULL
+--  ) licitaciones
 FROM (
 SELECT
   O.tenant_id,
