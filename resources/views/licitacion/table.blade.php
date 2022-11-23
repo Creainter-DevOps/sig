@@ -31,7 +31,11 @@
                   <td colspan="5">
                   <ul>
                   @php
-                    $token = file_get_contents(config('constants.internal') . 'util/alfresco/token.txt');
+                    if(file_exists(($d = config('constants.internal') . 'util/alfresco/token.txt'))) { 
+                      $token = file_get_contents($d);
+                    } else {
+                      $token = '--';
+                    }
                   @endphp
                   @foreach($licitacion->adjuntos() as $a)
                     <li>
