@@ -44,7 +44,7 @@ tr.block_details > td > div {
     <div class="col-12 col-sm-7">
       <div class="media mb-2">
         <a class="mr-1" href="#">
-          <img src="https://sig.creainter.com.pe/images/portrait/small/avatar-s-26.jpg" alt="users view avatar" class="users-avatar-shadow rounded-circle" height="64" width="64">
+          <img src="/images/portrait/small/avatar-s-26.jpg" alt="users view avatar" class="users-avatar-shadow rounded-circle" height="64" width="64">
         </a>
         <div class="media-body pt-25">
           <h4 class="media-heading">{{ $cotizacion->descripcion}}  </h4>

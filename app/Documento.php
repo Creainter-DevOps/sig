@@ -68,7 +68,7 @@ class Documento extends Model
         telegram_edit('5690110653:AAGkI1kjCAWMUaHCge5w0v0OB_BxpogzFrA', [
           'chat_id'    => explode(',', $this->telegram_id)[0],
           'message_id' => explode(',', $this->telegram_id)[1],
-          'text'       => 'Aprobado por ' . Auth::user()->username() . "\n https://sig.creainter.com.pe/documentos/" . $this->id . "/expediente/inicio",
+          'text'       => 'Aprobado por ' . Auth::user()->username() . "\n " . config('constants.app_url') . "/documentos/" . $this->id . "/expediente/inicio",
           'parse_mode' => 'HTML'
         ]);
       }
@@ -77,7 +77,7 @@ class Documento extends Model
         'tenant_id' => Auth::user()->tenant_id,
         'user_id'   => Auth::user()->id,
         'username'  => Auth::user()->username(),
-        'message'   => "El Expediente ha sido aprobado,<br><i>" . $this->rotulo . "<br><a href='https://sig.creainter.com.pe/documentos/" . $this->id . "/expediente/inicio'>Abrir</a>",
+        'message'   => "El Expediente ha sido aprobado,<br><i>" . $this->rotulo . "<br><a href='" . config('constants.app_url') . "/documentos/" . $this->id . "/expediente/inicio'>Abrir</a>",
         'display'   => 'success',
       ]));
     }
@@ -96,7 +96,7 @@ class Documento extends Model
         telegram_edit('5690110653:AAGkI1kjCAWMUaHCge5w0v0OB_BxpogzFrA', [
           'chat_id'    => explode(',', $this->telegram_id)[0],
           'message_id' => explode(',', $this->telegram_id)[1],
-          'text'       => 'Observado por ' . Auth::user()->username() . "\n https://sig.creainter.com.pe/documentos/" . $this->id . "/expediente/inicio",
+          'text'       => 'Observado por ' . Auth::user()->username() . "\n " . config('constants.app_url') . "/documentos/" . $this->id . "/expediente/inicio",
           'parse_mode' => 'HTML'
         ]);
       }
@@ -105,7 +105,7 @@ class Documento extends Model
         'tenant_id' => Auth::user()->tenant_id,
         'user_id'   => Auth::user()->id,
         'username'  => Auth::user()->username(),
-        'message'   => "El expediente ha sido Observado,<br><i>" . $this->rotulo . "<br><a href='https://sig.creainter.com.pe/documentos/" . $this->id . "/expediente/inicio'>Abrir</a>",
+        'message'   => "El expediente ha sido Observado,<br><i>" . $this->rotulo . "<br><a href='" . config('constants.app_url') . "/documentos/" . $this->id . "/expediente/inicio'>Abrir</a>",
         'display'   => 'warning',
       ]));
     }
@@ -597,7 +597,7 @@ ORDER BY (D.elaborado_hasta IS NULL) DESC, (D.procesado_hasta IS NULL) DESC, 1 D
       $documento->es_mesa         = true;
       $documento->elaborado_hasta = DB::raw('now()');
 
-      $workspace['documento_final'] = 'https://sig.creainter.com.pe/static/cloud/' . $documento->archivo . '?t=' . time();
+      $workspace['documento_final'] = config('constants.app_url') . '/static/cloud/' . $documento->archivo . '?t=' . time();
 
       $documento->json_save($workspace);
       $metrados['folios'] = $folios;

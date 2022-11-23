@@ -129,12 +129,12 @@ padding: 10px;
 @endsection
 
 @section('page-scripts')
-<script src="https://sig.creainter.com.pe/vendors/js/vendors.min.js"></script>
-<script src="https://sig.creainter.com.pe/assets/js/scripts.js"></script>
+<script src="/vendors/js/vendors.min.js"></script>
+<script src="/assets/js/scripts.js"></script>
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!--<script src="{{asset('js/scripts/helpers/swiped-events.js')}}"></script>-->
 <script src="{{asset('js/scripts/helpers/toast.js')}}"></script>
-<script src="https://sig.creainter.com.pe/vendors/js/extensions/toastr.min.js"></script>
+<script src="/vendors/js/extensions/toastr.min.js"></script>
 <script>
 
   var licitaciones = [] ;

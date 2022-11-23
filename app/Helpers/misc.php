@@ -45,7 +45,7 @@ function SendMail($perfil, $data) {
     $data['body'] .= '<p style="color:' . $perfil->color_primario . ';margin-bottom:0;">' . $perfil->nombre . '</p>';
     $data['body'] .= '<p style="margin-top:0;">' . $perfil->cargo . '</p>';
     $data['body'] .= '<p style="color:' . $perfil->color_primario . ';font-size:11px;">www.creainter.com.pe | ' . $perfil->correo . ' | Celular: ' . $perfil->celular . ' | Fijo: ' . $perfil->linea . ' Anexo ' . $perfil->anexo . '</p>';
-    $data['body'] .= '<img src="https://sig.creainter.com.pe/static/cloud/' . $perfil->logo . '" style="height: 45px;">';
+    $data['body'] .= '<img src="' . config('constants.app_url') . '/static/cloud/' . $perfil->logo . '" style="height: 45px;">';
   }
   return xMailSend(XMAIL_SEND_NOW, $credenciales, $data);
 }

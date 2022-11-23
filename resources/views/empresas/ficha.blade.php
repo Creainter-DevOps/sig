@@ -402,7 +402,9 @@
                                                                   </div>
                                                                   <div class="container-sellos" style=";display: {{ isset($sellos)? 'grid': 'none' }}; grid-template: repeat(5,1fr)/repeat(3,180px);grid-gap:15px;margin-bottom: 20px;width: 100%; ">
                                                                     @foreach ($sellos as $firma )        
-                                                                        <div class="" style="display:grid;place-items:center;border: 1px solid var(--primary);width:100%; padding: 10px;"> <img src="https://sig.creainter.com.pe/static/cloud/{{$firma['archivo']}}" style="max-width:100%;"  class="rounded "  alt="profile image" height="64"> </div>
+                                                                        <div class="" style="display:grid;place-items:center;border: 1px solid var(--primary);width:100%; padding: 10px;">
+                                                                          <img src="{{ config('constants.app_url') }}/static/cloud/{{$firma['archivo']}}" style="max-width:100%;"  class="rounded "  alt="profile image" height="64">
+                                                                        </div>
                                                                     @endforeach    
 </div>
 
@@ -1093,7 +1095,7 @@ width: 100%;grid-gap: 15px;justify-items: start;  " >
              console.log(response);
              containerImgSellos.innerHTML = '';
              response.files.forEach((image) => {
-                containerImgSellos.insertAdjacentHTML('beforeend',`<div class=""  data-filename="" data-folder=""  style="border: 1px solid var(--primary) ;padding: 10px; display:grid;place-items:center; width: 100%; gap: 15px; justify-items: start;" ><img src="https://sig.creainter.com.pe/static/temporal/${image}" class="rounded mr-75" style="max-width:100%; " alt="profile image" height="64"></div>`)
+                containerImgSellos.insertAdjacentHTML('beforeend',`<div class=""  data-filename="" data-folder=""  style="border: 1px solid var(--primary) ;padding: 10px; display:grid;place-items:center; width: 100%; gap: 15px; justify-items: start;" ><img src="{{ config('constants.app_url') }}/static/temporal/${image}" class="rounded mr-75" style="max-width:100%; " alt="profile image" height="64"></div>`)
              })  
              let folder_sellos = document.querySelector("#folder_sellos");
              folder_sellos.value = response.folder;

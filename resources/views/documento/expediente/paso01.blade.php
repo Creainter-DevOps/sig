@@ -32,7 +32,7 @@
                       <div class="col-8">
                         <div style="background: #efefef;border: 1px solid #d5d5d5;border-radius: 5px;padding: 5px;">
                           @if(!empty($documento->cotizacion()->oportunidad()->licitacion_id))
-                          <iframe class="doc" src="https://docs.google.com/gview?embedded=true&url={{ ('https://sig.creainter.com.pe/static/seace/' . $licitacion->bases_integradas) }}" frameborder='0' style="height:600px"></iframe>
+                          <iframe class="doc" src="https://docs.google.com/gview?embedded=true&url={{ (config('constants.app_url') . '/static/seace/' . $licitacion->bases_integradas) }}" frameborder='0' style="height:600px"></iframe>
                           @else
                           Solo Oportunidad
                           @endif
