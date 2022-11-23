@@ -31,7 +31,7 @@
                   <td colspan="5">
                   <ul>
                   @php
-                    $token = file_get_contents('/var/www/html/interno.creainter.com.pe/util/alfresco/token.txt');
+                    $token = file_get_contents(config('constants.internal') . 'util/alfresco/token.txt');
                   @endphp
                   @foreach($licitacion->adjuntos() as $a)
                     <li>
