@@ -40,7 +40,7 @@ class Helper
   }
   public static function gsutil_exists($file) {
     $cmd = 'export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"';
-    $cmd .= ";/snap/bin/gsutil -q stat '$file'; echo $?";
+    $cmd .= ";gsutil -q stat '$file'; echo $?";
     $out = shell_exec($cmd);
     $out = trim($out);
     return $out === '0';
@@ -48,9 +48,9 @@ class Helper
   public static function gsutil_cp($from, $to, $cache = true) {
     $cmd = 'export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"';
     if( $cache ){
-      $cmd .= ";/snap/bin/gsutil cp '" . $from . "' '" . $to . "'";
+      $cmd .= ";gsutil cp '" . $from . "' '" . $to . "'";
     }else{
-      $cmd .= ";/snap/bin/gsutil -D -h Cache-Control:\"Cache-Control:private, max-age=0, no-transform\"  cp '" . $from . "' '" . $to . "'";
+      $cmd .= ";gsutil -D -h Cache-Control:\"Cache-Control:private, max-age=0, no-transform\"  cp '" . $from . "' '" . $to . "'";
     }
     exec($cmd);
     return true;
@@ -58,7 +58,7 @@ class Helper
 
   public static function gsutil_rm($from) {
     $cmd = 'export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"';
-    $cmd .= ";/snap/bin/gsutil -D -h Cache-Control:\"Cache-Control:private, max-age=0, no-transform\"  rm '" . $from . "'"; 
+    $cmd .= ";gsutil -D -h Cache-Control:\"Cache-Control:private, max-age=0, no-transform\"  rm '" . $from . "'"; 
     exec($cmd);
     return true;
   }
@@ -66,11 +66,11 @@ class Helper
     $cmd = 'export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"';
 
     if( $cache ){
-      $cmd .= ";/snap/bin/gsutil mv '" . $from . "' '" . $to . "'";
+      $cmd .= ";gsutil mv '" . $from . "' '" . $to . "'";
     }else{
-      $cmd .= ";/snap/bin/gsutil -D -h Cache-Control:\"Cache-Control:private, max-age=0, no-transform\"  mv '" . $from . "' '" . $to . "'";
+      $cmd .= ";gsutil -D -h Cache-Control:\"Cache-Control:private, max-age=0, no-transform\"  mv '" . $from . "' '" . $to . "'";
     }
-    //$cmd .= ";/snap/bin/gsutil mv '" . $from . "' '" . $to . "'";
+    //$cmd .= ";gsutil mv '" . $from . "' '" . $to . "'";
     exec($cmd);
     return true;
   }
