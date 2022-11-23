@@ -5,8 +5,8 @@ require('dotenv').config();
 
 var app = express();
 var server = https.createServer({
-  key: fs.readFileSync('/etc/letsencrypt/live/sig.creainter.com.pe/privkey.pem'),
-  cert: fs.readFileSync('/etc/letsencrypt/live/sig.creainter.com.pe/fullchain.pem')
+  key: fs.readFileSync('/etc/letsencrypt/live/' + process.env.APP_DOMAIN + '/privkey.pem'),
+  cert: fs.readFileSync('/etc/letsencrypt/live/' + process.env.APP_DOMAIN + '/fullchain.pem')
 }, app);
 var io = require('socket.io')(server, {
   cors: {
