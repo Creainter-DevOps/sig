@@ -9,7 +9,6 @@
     "license": "MIT",
     "require": {
         "php": "^7.2.5",
-        "barryvdh/laravel-dompdf": "^0.8.7",
         "doctrine/dbal": "^2.10",
         "fideloper/proxy": "^4.2",
         "fruitcake/laravel-cors": "^1.0",
@@ -18,9 +17,6 @@
         "laravel/framework": "^7.0",
         "laravel/passport": "^9.4",
         "laravel/tinker": "^2.0",
-        "maatwebsite/excel": "^3.1",
-        "phpoffice/phpexcel": "dev-master",
-        "phpoffice/phpword": "^0.18.3",
         "spatie/laravel-permission": "^3.6"
     },
     "require-dev": {
