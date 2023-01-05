@@ -2,7 +2,7 @@
 @section('title', 'Etiquetas') 
 @section('page-styles')
 <meta name="csrf-token" content="{{ csrf_token() }}" />
-<link rel="stylesheet" type="text/css" href="https://sig.creainter.com.pe/css/themes/layout.css">
+<link rel="stylesheet" type="text/css" href="/css/themes/layout.css">
 <link rel="stylesheet" type="text/css" href="{{asset('css/sip.css')}}">
 <style>
   body {
@@ -133,7 +133,7 @@ padding: 10px;
     <div class="card-content card-container">
        <div class="card-body" style="padding:0;" >
        <!-- <a class="mr-1" href="#">
-          <img src="https://sig.creainter.com.pe/images/portrait/small/avatar-s-26.jpg" alt="users view avatar"
+          <img src="/images/portrait/small/avatar-s-26.jpg" alt="users view avatar"
             class="users-avatar-shadow rounded-circle" height="64" width="64">
 </a>-->
         <span class="badge ">  </span>
@@ -157,9 +157,9 @@ padding: 10px;
 @endsection
 
 @section('page-scripts')
-<script src="https://sig.creainter.com.pe/vendors/js/vendors.min.js"></script>
-<script src="https://sig.creainter.com.pe/js/scripts/typeahead.js"></script>
-<script src="https://sig.creainter.com.pe/assets/js/scripts.js"></script>
+<script src="/vendors/js/vendors.min.js"></script>
+<script src="/js/scripts/typeahead.js"></script>
+<script src="/assets/js/scripts.js"></script>
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="{{asset('js/scripts/helpers/swiped-events.js')}}"></script>
 <script src="{{asset('js/scripts/helpers/toast.js')}}"></script>

@@ -726,6 +726,9 @@ public static function subir_documento( $archivo, $name ){
     }
 
     public static function workspace_get_card( $matrix, $cid ) {
+      if(!isset($matrix[$cid])) {
+        return [];
+      }
       return $matrix[$cid];
     }
     public static function workspace_space($matrix, $orden, $space) {

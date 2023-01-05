@@ -554,10 +554,13 @@ ORDER BY (D.elaborado_hasta IS NULL) DESC, (D.procesado_hasta IS NULL) DESC, 1 D
       if(!empty($pdf_individuales_secure)) {
         $commands[] = 'echo "Uniendo los documento en PDF del SECURE"';
         $commands[] = '/usr/bin/convert -alpha remove -density 200 -quality 100 '. implode(' ', $pdf_individuales_secure) . ' ' . $output_secure;
+
         $commands[] = 'echo "Escaneando documento..."';
         $commands[] = '/usr/bin/convert -density 140 ' . $output_secure . ' -rotate 0.5 -attenuate 0.1 +noise Multiplicative -attenuate 0.01 +noise Multiplicative -sharpen 0x1.0 ' . $output_secure;
+
         $commands[] = 'echo "Proceso de foliación de PDF"';
         $commands[] = '/bin/pdf-foliar ' . $output_secure;
+
         $commands[] = 'echo "Proceso de compresión..."';
         $commands[] = '/usr/bin/gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=' . $output_secure . '_out ' . $output_secure;
         $commands[] = '/bin/mv ' . $output_secure . '_out ' . $output_secure;

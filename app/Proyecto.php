@@ -9,7 +9,7 @@ use Laravel\Passport\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Model;
 use App\Helpers\Helper;
-use Illuminate\Support\Facades\DB;
+use App\Facades\DB;
 use App\Empresa;
 use App\CandidatoOportunidad;
 use App\Actividad;
@@ -31,7 +31,7 @@ class Proyecto extends Model
      */
     protected $fillable = [
       'tenant_id','cliente_id','contacto_id','oportunidad_id','cotizacion_id','nombre','codigo','nomenclatura','rotulo',
-      'dias_servicio', 'estado', 'dias_garantia','dias_instalacion','tipo' ,'fecha_consentimiento','fecha_firma','fecha_desde','fecha_hasta', 'eliminado', 'empresa_id','color',
+      'dias_servicio', 'estado', 'dias_garantia','dias_instalacion','tipo' ,'fecha_consentimiento','fecha_firma','fecha_desde','fecha_hasta', 'eliminado', 'empresa_id','color','plazo_dias',
       'updated_by','alias','responsable_financiero','responsable_tecnico','responsable_entregable'
     ];
 
@@ -191,5 +191,16 @@ class Proyecto extends Model
       } else {
         return $this->metas;
       }
+    }
+    public static function requiere_atencion(&$out = null) {
+      $rp = DB::collect("
+        SELECT P.*, A.*, COALESCE(P.alias, P.codigo) alias
+        FROM osce.fn_proyectos_atencion(:tenant, :user) A
+        JOIN osce.proyecto P ON P.id = A.id", [
+        'tenant' => Auth::user()->tenant_id,
+        'user'   => Auth::user()->id,
+      ]);
+      $out = $rp->execute;
+      return $rp;
     }
 }

@@ -8,10 +8,10 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 use App\Oportunidad;
 use App\Actividad;
 use Auth;
+use App\Facades\DB;
 
 class Actividad extends Model
 {
@@ -28,7 +28,7 @@ class Actividad extends Model
     protected $fillable = [
       'tenant_id','tipo_id','usuario_id', 'oportunidad_id', 'cliente_id', 'contacto_id', 'cotizacion_id', 'entregable_id', 'proyecto_id', 'empresa_id','texto', 'created_by','estado', 'importancia', 'fecha_terminado',
       'fecha_limite', 'asignado_id','fecha_comienzo', 'color', 'orden', 'bloque_id' , 'nombre', 'eliminado','link','direccion','realizado','fecha','hora','importancia','contenido',
-      'fecha_hasta','callerid_id','callerid_to','llamada_id','updated_by'
+      'fecha_hasta','callerid_id','callerid_to','llamada_id','updated_by','postergado_el','postergado_por'
     ];
 
     /**
@@ -59,6 +59,35 @@ class Actividad extends Model
     }
     public function oportunidad(){
       return $this->belongsTo('App\Oportunidad', 'oportunidad_id', 'id')->first();
+    }
+    public function finalizar() {
+      return DB::collect("SELECT * FROM osce.fn_actividad_accion_completar(:tenant, :id, :user);", [
+        'tenant' => Auth::user()->tenant_id,
+        'id'     => $this->id,
+        'user'   => Auth::user()->id
+      ])->first();
+    }
+    public static function pendientes_widget() {
+      $rr = DB::collect("
+      SELECT
+        osce.fn_usuario_rotulo(A.created_by) creado_por,
+      	COALESCE(P.alias, P.codigo, C.nomenclatura, O.rotulo) proyecto,
+        A.*
+      FROM (
+      	SELECT *
+      	FROM osce.actividad A
+      	WHERE A.estado IN (1,2) AND A.eliminado IS FALSE
+      		AND :user = ANY(A.asignado_id)
+          AND (A.postergado_el IS NULL OR A.postergado_el <= NOW() - INTERVAL '45' MINUTE)
+          AND A.fecha <= NOW() + INTERVAL '15' DAY
+        	ORDER BY A.fecha ASC, A.hora ASC
+      	LIMIT 8) A
+      LEFT JOIN osce.proyecto P ON P.id = A.proyecto_id
+      LEFT JOIN osce.oportunidad O ON O.id = A.oportunidad_id
+      LEFT JOIN osce.cliente C ON C.id = O.cliente_id", [
+        'user' => Auth::user()->id,
+      ]);
+      return $rr;
     }
     public static function usuarios() {
       return collect(DB::select("

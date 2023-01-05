@@ -24,5 +24,5 @@
 @endsection
 @section('page-scripts')
   <script src="{{ asset('js/scripts/helpers/basic.crud.js') }}"></script>
-  <script src="https://sig.creainter.com.pe/js/scripts/pages/app-invoice.js"></script>  
+  <script src="/js/scripts/pages/app-invoice.js"></script>  
 @endsection

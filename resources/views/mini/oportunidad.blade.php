@@ -3,10 +3,10 @@
 @section('page-styles')
 <meta name="csrf-token" content="{{ csrf_token() }}" />
 <link rel="stylesheet" type="text/css" href="{{asset('css/sip.css')}}">
-<link rel="stylesheet" type="text/css" href="https://sig.creainter.com.pe/css/themes/layout.css">
-<link rel="stylesheet" type="text/css" href="https://sig.creainter.com.pe/vendors/css/extensions/toastr.css">
-<link rel="stylesheet" type="text/css" href="https://sig.creainter.com.pe/css/Bucket.css">
-<script src="https://sig.creainter.com.pe/js/Bucket.js"></script>
+<link rel="stylesheet" type="text/css" href="/css/themes/layout.css">
+<link rel="stylesheet" type="text/css" href="/vendors/css/extensions/toastr.css">
+<link rel="stylesheet" type="text/css" href="/css/Bucket.css">
+<script src="/js/Bucket.js"></script>
 <style>
   body {
     margin:0;
@@ -125,7 +125,7 @@ bottom:0;
     <div class="card-content card-container"  >
        <div class="card-body" style="padding:0; " >
        <!-- <a class="mr-1" href="#">
-          <img src="https://sig.creainter.com.pe/images/portrait/small/avatar-s-26.jpg" alt="users view avatar"
+          <img src="/images/portrait/small/avatar-s-26.jpg" alt="users view avatar"
             class="users-avatar-shadow rounded-circle" height="64" width="64">
         </a>-->
         <div class="content-swipe" data-url_aprobar=""  data-url_desaprobar="" data-id="" data-tipo="">
@@ -158,13 +158,13 @@ bottom:0;
 
 @section('page-scripts')
 
-<script src="https://sig.creainter.com.pe/vendors/js/vendors.min.js"></script>
-<script src="https://sig.creainter.com.pe/js/scripts/typeahead.js"></script>
-<script src="https://sig.creainter.com.pe/assets/js/scripts.js"></script>
+<script src="/vendors/js/vendors.min.js"></script>
+<script src="/js/scripts/typeahead.js"></script>
+<script src="/assets/js/scripts.js"></script>
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="{{asset('js/scripts/helpers/swiped-events.js')}}"></script>
 <script src="{{asset('js/scripts/helpers/toast.js')}}"></script>
-<script src="https://sig.creainter.com.pe/vendors/js/extensions/toastr.min.js"></script>
+<script src="/vendors/js/extensions/toastr.min.js"></script>
 <script>
 
   var oportunidades = [] ;

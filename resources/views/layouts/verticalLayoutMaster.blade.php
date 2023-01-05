@@ -13,7 +13,7 @@ html .content.app-content {
   overflow: unset!important;
 }
 html .navbar-static .content {
-  min-height: calc(100% - 9.3rem)!important;
+  min-height: calc(100% - 190px)!important;
   margin-top: 10px!important;
 }
 .app-content.content {
@@ -41,6 +41,7 @@ footer.footer {
   top: 0;
   left: 0;
   right: 0;
+  margin-bottom: 0;
 }
 .app-content.content .x-page {
   position: absolute;

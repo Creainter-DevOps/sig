@@ -289,11 +289,6 @@ width: 100%;
   font-size: 11px;
 }
 .todo_block {
-    position: fixed;
-    bottom: 0;
-    left: 270px;
-    background: #ffe27a;
-    max-width: 450px;
     width: 100%;
     min-height: 50px;
     z-index: 99;
@@ -309,15 +304,15 @@ width: 100%;
   cursor: pointer;
 }
 .todo_block_btn {
-  position: absolute;
-    top: -23px;
-    left: 10px;
+position: absolute;
+    bottom: -20px;
+    right: 5px;
     background: #fce173;
-    padding: 4px;
-    border-radius: 5px 5px 0 0;
-    font-size: 13px;
+    padding: 3px;
+    border-radius: 0 0 5px 5px;
+    font-size: 10px;
     color: #000;
-    cursor:pointer;
+    cursor: pointer;
 }
 .todo_block table {
   width: 100%;
@@ -326,6 +321,7 @@ width: 100%;
 .todo_block thead {
   background: #bb9500;
   color: #ffffff;
+  font-size:8px;
 }
 .todo_block tbody tr {
   background: #fff;
@@ -338,22 +334,6 @@ width: 100%;
 }
 </style>
 
-<div class="todo_block">
-  <div class="todo_block_btn" onclick="javascript:todo_add();">Solicitar</div>
-  <div>
-    <table>
-      <thead onclick="javascript:todo_mini();;">
-        <th>De</th>
-        <th>Petición</th>
-        <th>Link</th>
-        <th>Para</th>
-        <th>Estado</th>
-      </thead>
-      <tbody>
-      </tbody>
-    </table>
-  </div>
-</div>
 <div class="voip_callers"></div>
 
 <div class="actphone">
@@ -393,6 +373,79 @@ width: 100%;
   </form>
 </div>
 <script>
+var act_ls = [];
+function actividad_pendiente_accion(id, ff, cb) {
+  let box = $("[data-widget='actividad']");
+  box.slideUp(800, function() {
+    cb();
+  });
+  Fetchx({
+    url: '/actividades/json/pendiente/accion',
+    type: 'post',
+    dataType: 'JSON',
+    headers : {
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+    },
+    data: { aid: id, accion: ff },
+    success: function(res) {
+    }
+  });
+}
+function actividad_pendiente_show() {
+  let res = act_ls.shift();
+  if(typeof res == 'undefined') {
+    return actividad_pendiente_get();
+  }
+  let box = $("[data-widget='actividad']");
+      var tt = $('<div>').attr('data-id', res.id);
+      var btns = $('<div>').attr('style', 'position: relative;');
+      btns.append($('<div>').attr('style', 'position: absolute;position: absolute;left: 15px;top: 0px;')
+        .append($('<a>').attr('href', 'javascript:void(0)').addClass('btn').attr('style', 'font-size: 11px;background: #818181;padding: 2px 8px;color: #fff;line-height: 12px;').text('Postergar')
+        .on('click', function() {
+          actividad_pendiente_accion(res.id, 'postergar', function() {
+            actividad_pendiente_show();
+          });
+        })
+      ));
+      btns.append($('<div>').attr('style', 'position: absolute;position: absolute;right: 15px;top: 0px;')
+        .append($('<a>').attr('href', 'javascript:void(0)').addClass('btn').attr('style', 'font-size: 11px;background: #32b566;padding: 2px 8px;color: #fff;line-height: 12px;').text('Finalizar')
+        .on('click', function() {
+          actividad_pendiente_accion(res.id, 'finalizar', function() {
+            actividad_pendiente_show();
+          });
+        })
+      ));
+      tt.append(btns);
+      tt.append($('<div>').attr('style', 'padding: 0 20px;text-align: center;font-size: 10px;').text('¿Cual es el estado de esta actividad?'));
+      tt.append($('<div>').attr('style', 'padding: 0 20px;text-align: center;font-size: 10px;').text(res.creado_por + ' - ' + res.proyecto + ' - ' + res.fecha));
+      tt.append($('<div>').attr('style', 'padding: 0px 15px;text-align: center;font-size: 12px;white-space: normal;').text(res.texto));
+      box.html(tt);
+      box.slideDown();
+
+}
+function actividad_pendiente_get() {
+  let box = $("[data-widget='actividad']");
+  if(box.length == 0) {
+    return;
+  }
+  Fetchx({
+    title: 'Llamando',
+    url: '/actividades/json/pendiente/get',
+    success: function(res) {
+      console.log('ACTIVIDAD', res);
+
+      if(res.data.length == 0) {
+        box.html('').slideDown();
+        return;
+      }
+      act_ls = res.data;
+      actividad_pendiente_show();
+    }
+  });
+}
+$(document).ready(function() {
+  actividad_pendiente_get();
+});
 var xpageContent = $('.x-page-nav');
 xpageContent.closest('.x-page').attr('data-x-page-url', document.location.href);
 
@@ -546,8 +599,8 @@ $("form#actphone").on('submit', function(e) {
 });
 </script>
 <?php } ?>
-<script src="https://sig.creainter.com.pe:4001/socket.io/socket.io.js"></script><script>
-var socket = io.connect('sig.creainter.com.pe:4001');
+<script src="https://www.adjudica.com.pe:4001/socket.io/socket.io.js"></script><script>
+var socket = io.connect('www.adjudica.com.pe:4001');
 
 socket.on('connect', () => {
   console.log('SOCKET CONECTADO');
@@ -849,7 +902,7 @@ let sip = new WebPhone({
   server: 'asterisk.creainter.com.pe',
   wsif: 'wss://asterisk.creainter.com.pe:8089/ws',
   dom: document.getElementById('sip_body'),
-  proxy: '//sig.creainter.com.pe/actividades/proxy/calls',
+  proxy: '//adjudica.com.pe/actividades/proxy/calls',
   socket: socket,
 });
 function sip_initialize() {

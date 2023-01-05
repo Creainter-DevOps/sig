@@ -1,4 +1,4 @@
-<div class="limit-scroll">
+<div>
 <table class="table table-sm mb-0 table-bordered table-vcenter"  style="width:100%">
 <thead>
   <tr>
@@ -42,7 +42,7 @@
                       <a target="_blank" href="{{ config('constants.app_url') . config('constants.static_seace') . $a->codigoAlfresco }}" title="Publicado el {{ $a->fechaPublicacion }}">
                         {{ $a->tipoDocumento }}
                       </a>
-                      <a target="_blank" href="http://prodcont.seace.gob.pe/alfresco/d/a/workspace/SpacesStore/{{ $a->codigoAlfresco }}/{{ str_replace(' ', '_', $a->nombreArchivo) }}?ticket={{ $token }}">[Alt]</a>
+                      <a target="_blank" href="http://prodcont.seace.gob.pe/alfresco/d/a/workspace/SpacesStore/{{ $a->codigoAlfresco }}/{{ str_replace(' ', '_', $a->nombreArchivo) }}?ticket={{ $token }}"><b>[Alt]</b></a>
                       <small>{{ $a->fechaPublicacion }}</small>
                     </li>
                   @endforeach

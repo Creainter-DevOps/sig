@@ -46,6 +46,9 @@
 .tools > .delete{
   background-color: #FF5B5C;
 } 
+.tools > .regenerar {
+  background-color: #0066ff;  
+}
 </style>
 <div class="wizard-horizontal" style="padding: 0 15px;">
                 <div class="row">
@@ -54,6 +57,7 @@
                       <header class="StackedListHeader">
                         <h3 class="Heading Heading--size3 Heading--colorWhite">Mesa de Trabajo</h3>
                         <div style="margin-right: 25px;position: absolute;top: 0;right: 10px;">
+                          <a href="/documentos/{{ $documento->id }}/downloadDirectory" class="btn btn-secondary btn-sm" style="background-color: #6e00ff!important" id="btnDownload" download onclick="javascript:$(this).slideUp();">Descargar en ZIP</a>
                           <button class="btn btn-primary btn-sm" id="btnRepositorio">Agregar de Repositorio</button>
                           <button class="btn btn-primary btn-sm" data-popup="/documentos/nuevo">Subir Documento</button>
                         </div>
@@ -69,6 +73,9 @@
                         <img class="background_image" src="/documentos/{{ $documento->id }}/generarImagenTemporal?page=0&cid={{$k}}&t={{time()}}"/>
                         <div class="StackedListContent">
                           <div class="tools">
+                          @if(!empty($file['gid']))
+                          <a class="regenerar" href="javascript:regenerarCid('{{ $k }}');">Regenerar</a>
+                          @endif
                             <a class="download" href="/static/temporal/{{ str_replace('/tmp/', '', $file['root']) }}?t={{time()}}" download>Descargar</a>
                             <a class="edit"  href="javascript:void(0);" data-popup="/documentos/{{ $documento->id }}/visualizar?cid={{ $k }}">Editar</a>
                             <a class="delete" href="javascript:eliminarCid('{{ $k }}');">Eliminar</a>
@@ -109,6 +116,9 @@
                         <img class="background_image" src="/documentos/{{ $documento->id }}/generarImagenTemporal?page=0&cid={{$k}}&t={{time()}}"/>
                         <div class="StackedListContent">
                           <div class="tools">
+                          @if(!empty($file['gid']))
+                          <a class="regenerar" href="javascript:regenerarCid('{{ $k }}');">Regenerar</a>
+                          @endif
                             <a class="download" href="/static/temporal/{{ str_replace('/tmp/', '', $file['root']) }}?t={{time()}}" download>Descargar</a>
                             <a class="edit"  href="javascript:void(0);" data-popup="/documentos/{{ $documento->id }}/visualizar?cid={{ $k }}">Editar</a>
                             <a class="delete" href="javascript:eliminarCid('{{ $k }}');">Eliminar</a>
@@ -484,6 +494,22 @@ buscador.addEventListener('keyup', (e) => {
      realizar_busqueda(buscador.value);
   }
 })
+function regenerarCid(cid) {
+  let url = '/documentos/{{$documento->id}}/regenerarDocumento';
+  let formdata = new FormData();
+  formdata.append('cid', cid);
+  fetch(url, {
+    method: 'post',
+    headers: {
+      "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    },
+    body: formdata
+  })
+  .then( response => response.json() )
+  .then( data => {
+    respaldar();
+  });
+}
 function eliminarCid(cid) {
   let url = '/documentos/{{$documento->id}}/eliminarDocumento';
   $("[data-id='" + cid + "']").hide();

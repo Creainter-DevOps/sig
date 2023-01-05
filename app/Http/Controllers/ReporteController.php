@@ -15,7 +15,7 @@ class ReporteController extends Controller
 
     public function __construct()
     {
-      $this->middleware('auth');
+      //$this->middleware('auth');
       $this->viewBag['pageConfigs'] = ['pageHeader' => true ];
       $this->viewBag['breadcrumbs'] = [
         ["link" => "/dashboard", "name" => "Home" ],

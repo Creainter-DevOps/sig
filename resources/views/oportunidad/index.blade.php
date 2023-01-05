@@ -29,13 +29,18 @@
           <th>Respondido</th>
           <th>Costos</th>
           <th></th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
       @foreach ($listado as $oportunidad)
         <tr>
           <td style="width: 200px;">
+          @if(!empty($oportunidad->empresa_id))
+          <a href="{{ route('oportunidad.porEmpresa', ['empresa' => $oportunidad->empresa_id ]) }}">{{ $oportunidad->institucion() }}</a>
+          @else
           {{ $oportunidad->institucion() }}
+          @endif
           </td>
           @if($oportunidad->automatica)
           <td><i class="ficon bx bx-cloud" style="color:#00c506;"></i> {{ $oportunidad->rotulo() }}</td>
@@ -45,6 +50,11 @@
           <td style="width:100px;" title="{{ Helper::fecha($oportunidad->fecha_participacion, true) }}">{{ Helper::tiempo_transcurrido($oportunidad->fecha_participacion) }}</td>
           <td style="width:100px;" title="{{ Helper::fecha($oportunidad->fecha_propuesta, true) }}">{{ Helper::tiempo_transcurrido($oportunidad->fecha_propuesta) }}</td>
           <td style="width:100px;">{{ Helper::money($oportunidad->precios()->promedio, $oportunidad->precios()->moneda_id) }}</td>
+          <td>
+          @if(!empty($oportunidad->cantidadProyectos()))
+          <b style="color:#00df6e">PROYECT</b>
+          @endif
+          </td>
           <td class="text-center py-1">
               <div class="dropdown">
                 <span class="bx bx-dots-vertical-rounded font-medium-3 dropdown-toggle nav-hide-arrow cursor-pointer" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="menu">

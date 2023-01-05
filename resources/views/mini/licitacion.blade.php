@@ -3,7 +3,7 @@
 @section('page-styles')
 <meta name="csrf-token" content="{{ csrf_token() }}" />
 <link rel="stylesheet" type="text/css" href="{{asset('css/sip.css')}}">
-<link rel="stylesheet" type="text/css" href="https://sig.creainter.com.pe/vendors/css/extensions/toastr.css">
+<link rel="stylesheet" type="text/css" href="/vendors/css/extensions/toastr.css">
 <style>
   body {
     margin:0;

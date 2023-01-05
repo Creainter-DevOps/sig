@@ -46,6 +46,7 @@ class ActividadController extends Controller
 
       $actividad = new Actividad;
       $actividad->fecha = date('Y-m-d');
+      $actividad->hora  = date('H:i:s');
       $actividad->realizado = false;
       $actividad->importancia = 1;
       $actividad->tipo_id = $tipo_id;
@@ -243,6 +244,37 @@ class ActividadController extends Controller
         }, $data);
       }
       return response()->json($data);
+    }
+    public function pendiente_get(Request $request) {
+      $rr = Actividad::pendientes_widget();
+      return response()->json([
+        'data' => $rr,
+      ]);
+    }
+    public function pendiente_accion(Request $request) {
+      $accion = $request->input('accion');
+      $aid    = $request->input('aid');
+
+      if($accion == 'finalizar') {
+        $aa = Actividad::find($aid);
+        $aa->finalizar();
+        return response()->json(['aa' => $aa->id]);
+
+      } elseif($accion == 'postergar') {
+        $aa = Actividad::find($aid);
+        $aa->update([
+          'postergado_por' => Auth::user()->id,
+          'postergado_el'  => DB::raw('now()'),
+        ]);
+        return response()->json(['aa' => $aa->id]);
+      } else {
+        return response()->json(['error' => true]);
+      }
+
+      return response()->json([
+        'status'  => true,
+        'message' => ''
+      ]);
     }
     public function proxy_calls(Request $request) {
       $numero       = $request->input('numero');

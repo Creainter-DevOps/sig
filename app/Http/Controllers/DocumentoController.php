@@ -258,6 +258,7 @@ class DocumentoController extends Controller {
 //        $metadata = Helper::metadata($output);
 
         $workspace['paso03'][$cid]  = Helper::formatoCard([
+          'gid'       => $id,
           'orden'     => $order,
           'hash'      => uniqid(),
           'page'      => 0,
@@ -809,10 +810,53 @@ class DocumentoController extends Controller {
          'status' => true ,
          'datos' => preg_grep( '/'.( explode('/', $cid)[0] ) . '\/\d/i', array_keys($workspace['paso03']) )
        ]);
-
     }
+    public function regenerarDocumento(Request $request, Documento $documento) {
+      $workspace = $documento->json_load();
+      $cid = $request->get('cid');
 
-  public  function destroy(Documento $documento  ){
+      $dir_tmp = $documento->folder_workspace();
+      $dir_tmp = Helper::mkdir_p($dir_tmp);
+
+      $card = Helper::workspace_get_card($workspace['paso03'], $cid);
+      if(empty($card) && !empty($card['gid'])) {
+        return response()->json([]);
+      }
+
+      $doc = Documento::find($card['gid']);
+      if(empty($doc)) {
+        return response()->json([]);
+      }
+
+      $empresa = $documento->cotizacion()->empresa()->toArray();
+      $workspace['inputs'] = array_merge($workspace['inputs'], $empresa);
+
+
+      /* Plantilla =>  DOCX */
+      $destino = $dir_tmp . $doc->filename;
+      $doc->generar_documento($documento->cotizacion(), $workspace['inputs'], $destino);
+
+
+      /* DOCX => PDF */
+      $output  = Helper::replace_extension($destino, 'pdf');
+      $outputd = dirname(Helper::replace_extension($destino, 'pdf'));
+      exec('/bin/rm ' . $output);
+      exec('/usr/bin/libreoffice --convert-to pdf ' . $destino . ' --outdir ' . $outputd);
+      exec('/usr/bin/php /var/www/html/interno.creainter.com.pe/util/oportunidades/expediente_folio_documento.php ' . $documento->id . " '" . $cid . "'");
+      $workspace['paso03'][$cid]['timestamp'] = time();
+
+      $documento->json_save($workspace);
+      return response()->json([
+        'status' => true ,
+      ]);
+    }
+    public function downloadDirectory(Request $request, Documento $documento) {
+      $dir_tmp = $documento->folder_workspace();
+      exec('rm -f /tmp/doc-workspace-' . $documento->id . '/');
+      exec("cd /tmp; zip -r 'doc-workspace-" . $documento->id . ".zip' 'doc-workspace-" . $documento->id . "/'");
+      return redirect('/tmp/doc-workspace-' . $documento->id . '.zip');
+    }
+  public  function destroy(Documento $documento) {
     $documento->eliminado = true;
     $documento->save();
     $documento->log('eliminado');    

@@ -58,7 +58,8 @@ class Cotizacion extends Model
       'id','empresa_id','fecha','monto','numero','duracion_meses','oportunidad_id','interes_el','interes_por','participacion_el','participacion_por','propuesta_el','propuesta_por',
       'plazo_servicio','plazo_garantia','plazo_instalacion','validez','moneda_id','observacion','terminos','seace_participacion_log','seace_participacion_fecha','seace_participacion_html','documento_id',
       'elaborado_por','elaborado_desde','elaborado_hasta','elaborado_step','elaborado_json','rotulo','notas','subtotal','igv','updated_by','elaborado_step','finalizado_por',
-      'revisado_el','revisado_por','revisado_status',
+      'revisado_el','revisado_por','revisado_status','precio_por',
+      'subsanacion_cantidad',
     ];
 
     /**
@@ -89,6 +90,10 @@ class Cotizacion extends Model
     public function codigo() {
       return $this->oportunidad()->codigo . '-' . $this->numero;
 #. ': ' . substr($this->oportunidad()->rotulo(), 0, 20);
+    }
+    public function subsanaciones() {
+      return $this->hasMany('App\Subsanacion','cotizacion_id')
+        ->orderBy('id', 'asc')->get();
     }
     public function items() {
       return $this->hasMany('App\CotizacionDetalle','cotizacion_id')
@@ -139,6 +144,10 @@ class Cotizacion extends Model
 #        ]);
 #      }
     }
+    public function solicitudSubsanacion() {
+      return collect(DB::select('SELECT * FROM osce.fn_cotizacion_accion_subsanacion(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ')'))->first();
+    }
+
     public function migrateProyecto() {
       return DB::select('SELECT osce.fn_migrar_cotizacion_a_proyecto(' . Auth::user()->tenant_id . ', ' . $this->id . ', ' . Auth::user()->id . ') id;')[0]->id;
     }

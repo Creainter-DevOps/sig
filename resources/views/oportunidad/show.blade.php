@@ -133,7 +133,9 @@
                         href="/oportunidades/{{ $oportunidad->id }}/archivar"
                         class="btn btn-sm btn-danger mr-25" data-button-dinamic>Archivar</a>
                 @elseif (!empty($oportunidad->rechazado_el))
-                    <div class="text-center">Rechazado el {{ Helper::fecha($oportunidad->rechazado_el, true) }}</div>
+                    <div class="text-center" style="margin-right:10px;">Rechazado el {{ Helper::fecha($oportunidad->rechazado_el, true) }} por {{ Auth::user()->byId($oportunidad->rechazado_por) }}</div>
+                    <a href="/oportunidades/{{ $oportunidad->id }}/aprobar"
+                        class="btn btn-sm btn-success mr-25" data-button-dinamic>Volver a Aprobar</a>
 
                 @elseif(!empty($oportunidad->archivado_el))
                     <div class="text-center">Archivado el {{ Helper::fecha($oportunidad->archivado_el, true) }}</div>
@@ -247,52 +249,8 @@
                     </div>
                 </div>
             @endif
-            <div class="col-12">
-                <div class="row">
-                  <div class="col-6">
-                    <div class="card">
-                        <div class="card-content">
-                            <div class="card-body">
-                                @include('oportunidad.table', compact('oportunidad'))
-                            </div>
-                        </div>
-                    </div>
-                  </div>
-                  <div class="col-6">
-                @include('actividad.create', [
-                    'into' => [
-                        'licitacion_id' => $oportunidad->licitacion_id,
-                        'oportunidad_id' => $oportunidad->id,
-                    ],
-                ])
-                  </div>
-                </div>
-            </div>
         </div>
         <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-content">
-                        <div class="card-body">
-                            @if (!empty($oportunidad->id))
-                                <label>Apuntes</label>
-                                <div data-ishtml data-editable="/oportunidades/{{ $oportunidad->id }}?_update=observacion">
-                                @if(!empty($oportunidad->observacion))
-                                    {!! $oportunidad->observacion !!}
-                                @else
-                                <table class="table table-sm table-bordered" style="width: 100%;"><tbody>
-                                <tr>
-                                  <td style="max-width:33%;width: 33%;min-width: 33%;height: 40px;"></td>
-                                  <td style="max-width:33%;width: 33%;min-width: 33%;"></td>
-                                  <td style="max-width:33%;width: 33%;min-width: 33%;"></td>
-                                </tr></tbody></table>
-                                @endif
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
             @if(!empty($oportunidad->correo_id))
             <div class="col-12">
               <h5>Requerimientos por Correo</h5>
@@ -393,6 +351,7 @@
                 <i class="bx bx-dots-vertical-rounded" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></i>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                   <a class="dropdown-item" href="/cotizaciones/{{ $e->cotizacion->id }}/expediente"><i class="bx bx-blanket"></i>Expediente</a>
+                  <a class="dropdown-item" href="javascript:void(0);" data-popup="/cotizaciones/{{ $e->cotizacion->id }}/subsanaciones"><i class="bx bx-blanket"></i>Subsanaciones</a>
                   <a class="dropdown-item" href="javascript:void(0);" data-popup="/documentos/visor?path={{ $e->cotizacion->folder(true) }}&oid={{ $oportunidad->id }}&cid={{ $e->cotizacion->id }}">Mi Carpeta</a>
                   <a class="dropdown-item" href="/cotizaciones/{{ $e->cotizacion->id }}/">Colocar Precio</a>
                   <a class="dropdown-item" href="/cotizaciones/{{ $e->cotizacion->id }}/registrar" target="_blank">Cotización por Items</a>
@@ -466,9 +425,15 @@
 </div>
 <div>
 <input class="editable_tag" type="number" data-editable="/cotizaciones/{{ $e->cotizacion->id }}?_update=monto" placeholder="Monto" value="{{ $e->cotizacion->monto }}" min="0" max="999999999" step="0.01">
+@if(!empty($e->cotizacion->precio_por) && empty($e->cotizacion->elaborado_step))
+<div style="font-size: 10px;text-align: center;">Sugerido por {{ $e->cotizacion->precio_por }}</div>
+@endif
 </div>
 @if(!empty($e->cotizacion->elaborado_step))
 <div class="nota_cotizacion">
+  @if(!empty($e->cotizacion->precio_por))
+  <div style="color:#ff5e00;">Precio de <b>{{ $e->cotizacion->precio_por }}</b></div>
+  @endif
   @if(!empty($e->cotizacion->finalizado_por))
   Elaborado por <b>{{ $e->cotizacion->finalizado_por }}</b><br />
   @if($e->cotizacion->revisado_status)
@@ -478,6 +443,9 @@
   @endif
   @else
   En desarrollo por <b>{{ $e->cotizacion->elaborado_por }}</b> en P#{{ $e->cotizacion->elaborado_step }}<br />
+  @endif
+  @if(!empty($e->cotizacion->subsanacion_cantidad))
+  <div style="color: #8500ff;font-weight: bold;">Con Subsanación</div>
   @endif
 </div>
 @endif
@@ -491,6 +459,51 @@
         </div>
 
         <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-body">
+                            @if (!empty($oportunidad->id))
+                                <label>Apuntes</label>
+                                <div data-ishtml data-editable="/oportunidades/{{ $oportunidad->id }}?_update=observacion">
+                                @if(!empty($oportunidad->observacion))
+                                    {!! $oportunidad->observacion !!}
+                                @else
+                                <table class="table table-sm table-bordered" style="width: 100%;"><tbody>
+                                <tr>
+                                  <td style="max-width:33%;width: 33%;min-width: 33%;height: 40px;"></td>
+                                  <td style="max-width:33%;width: 33%;min-width: 33%;"></td>
+                                  <td style="max-width:33%;width: 33%;min-width: 33%;"></td>
+                                </tr></tbody></table>
+                                @endif
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="row">
+                  <div class="col-6">
+                    <div class="card">
+                        <div class="card-content">
+                            <div class="card-body">
+                                @include('oportunidad.table', compact('oportunidad'))
+                            </div>
+                        </div>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                @include('actividad.create', [
+                    'into' => [
+                        'licitacion_id' => $oportunidad->licitacion_id,
+                        'oportunidad_id' => $oportunidad->id,
+                    ],
+                ])
+                  </div>
+                </div>
+            </div>
+
             <div class="col-6">
             <div class="card ">
                 <div class="card-header">

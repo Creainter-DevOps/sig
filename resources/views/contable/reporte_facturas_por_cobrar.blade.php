@@ -28,7 +28,7 @@ td {
   $totales[$p->moneda_id]['detraccion'] += $p->monto_detraccion;
 ?>
       <tr>
-        <td style="width:100px;"><a href="https://sig.creainter.com.pe/proyectos/<?= $p->proyecto_id ?>" style="color:#000;" target="_blank"><?= $p->alias ?></a></td>
+        <td style="width:100px;"><a href="https://www.adjudica.com.pe/proyectos/<?= $p->proyecto_id ?>" style="color:#000;" target="_blank"><?= $p->alias ?></a></td>
         <td style=""><?= $p->descripcion; ?></td>
         <td class="texto-centrado" style="width:70px;"><?= $p->numero; ?></td>
         <td class="texto-centrado" style="width:90px;"><?= Helper::fecha($p->fecha); ?></td>

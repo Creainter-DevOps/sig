@@ -29,7 +29,7 @@ Route::match(['get', 'post'], 'permissions/grupo', 'PermissionController@crearGr
 Route::get('permissions/autocomplete_modulo', 'PermissionController@autocomplete_modulo');
 
 // dashboard Routes
-//Route::get('/','DashboardController@dashboardEcommerce');
+Route::post('/dashboard/part/competencias', 'DashboardController@part_competencias');
 Route::get('/dashboard-ecommerce','DashboardController@dashboardEcommerce');
 Route::get('/dashboard-analytics','DashboardController@dashboardAnalytics');
 
@@ -55,6 +55,7 @@ Route::resource('ordenes', 'OrdenController')->parameters([
 
 //Route::resource('proyectos', 'ProyectoController');
 Route::get('proyectos/autocomplete', 'ProyectoController@autocomplete'); 
+Route::get('proyectos/porCliente/{cliente}', 'ProyectoController@porCliente')->name('proyecto.porCliente');
 Route::post('proyectos/{proyecto}/observacion', 'ProyectoController@observacion'); 
 Route::get('proyectos/{proyecto}/financiero', 'ProyectoController@financiero');
 Route::get('proyectos/{proyecto}/pdf/situacion', 'ProyectoController@pdf_situacion');
@@ -110,6 +111,9 @@ Route::post('actividades/timeline', 'ActividadController@timeline');
 Route::get('actividades/autocomplete', 'ActividadController@autocomplete');
 Route::post('actividades/proxy/calls', 'ActividadController@proxy_calls');
 
+
+Route::get('actividades/json/pendiente/get', 'ActividadController@pendiente_get');
+Route::post('actividades/json/pendiente/accion', 'ActividadController@pendiente_accion');
 
 Route::get('actividades/kanban', 'ActividadController@kanban');
 Route::post('actividades/kanban/create', 'ActividadController@kanban_create');
@@ -262,10 +266,12 @@ Route::get('documentos/{documento}/generarImagen','DocumentoController@generarIm
 Route::get('documentos/{documento}/descargarParte','DocumentoController@descargarParte');
 
 
+Route::get('documentos/{documento}/downloadDirectory','DocumentoController@downloadDirectory');
 Route::post('documentos/{documento}/ordenar','DocumentoController@actualizar_orden');
 Route::post('documentos/{documento}/estampar', 'DocumentoController@estamparDocumento');
 Route::post('documentos/{documento}/eliminarEstampa', 'DocumentoController@eliminarFirmas');
 Route::post('documentos/{documento}/eliminarDocumento','DocumentoController@eliminarDocumento')->name('documento.eliminarDocumento');
+Route::post('documentos/{documento}/regenerarDocumento','DocumentoController@regenerarDocumento')->name('documento.regenerarDocumento');
 Route::get('documentos/filestore', 'DocumentoController@filestore')->name('documentos.filestore');
 Route::post('documentos/crearExpediente', 'DocumentoController@crearExpediente')->name('documentos.crearExpediente');
 Route::get('documentos/{documento}/expediente', 'DocumentoController@expediente')->name('documentos.expediente');
@@ -288,11 +294,14 @@ Route::get('cotizaciones/{cotizacion}/registrar', 'CotizacionController@registra
 Route::get('cotizaciones/autocomplete', 'CotizacionController@autocomplete');
 Route::post('cotizaciones/{cotizacion}/registrarParticipacion','CotizacionController@registrarParticipacion');
 Route::post('cotizaciones/{cotizacion}/registrarPropuesta','CotizacionController@registrarPropuesta');
+Route::post('cotizaciones/{cotizacion}/registrarSubsanacion','CotizacionController@registrarSubsanacion');
+Route::get('cotizaciones/{cotizacion}/expediente', 'CotizacionController@expediente')->name('cotizacion.expediente');
+Route::get('cotizaciones/{cotizacion}/expediente_subsanacion', 'CotizacionController@expediente_subsanacion')->name('cotizacion.expediente_subsanacion');
+Route::get('cotizaciones/{cotizacion}/subsanaciones', 'CotizacionController@subsanaciones')->name('cotizacion.subsanaciones');
 Route::get('cotizaciones/{cotizacion}/proyecto','CotizacionController@proyecto')->name( 'oportunidad.proyecto' );
 Route::post('cotizaciones/{cotizacion}/observacion', 'CotizacionController@observacion');
 Route::post('cotizaciones/{cotizacion}/proyecto', 'CotizacionController@proyecto')->name('cotizaciones.proyecto');
 Route::get('cotizaciones/{cotizacion}/exportar', 'CotizacionController@exportar')->name('cotizacion.exportar');
-Route::get('cotizaciones/{cotizacion}/expediente', 'CotizacionController@expediente')->name('cotizacion.expediente');
 Route::post('cotizaciones/{cotizacion}/exportar_repositorio', 'CotizacionController@exportar_repositorio')->name('cotizacion.exportar_repositorio');
 Route::get('cotizaciones/{cotizacion}/detalle', 'CotizacionController@detalle')->name('cotizacion.detalle');
 Route::post('cotizaciones/{cotizacion}/detalle', 'CotizacionController@detallesave');
@@ -302,6 +311,14 @@ Route::resource('cotizaciones', 'CotizacionController')->parameters([
 ]);
 
 
+Route::get('subsanaciones/{subsanacion}/expediente', 'SubsanacionController@expediente')->name('subsanacion.expediente');
+Route::resource('subsanaciones', 'SubsanacionController')->parameters([
+  'subsanaciones' => 'subsanacion',
+]);
+
+
+
+Route::get('oportunidades/porEmpresa/{empresa}', 'OportunidadController@porEmpresa')->name('oportunidad.porEmpresa');
 Route::post('oportunidades/{oportunidad}/part/licitaciones_similares','OportunidadController@part_licitaciones_similares');
 Route::post('oportunidades/{oportunidad}/part/oportunidades_similares','OportunidadController@part_oportunidades_similares');
 Route::post('oportunidades/{oportunidad}/favorito','OportunidadController@favorito');

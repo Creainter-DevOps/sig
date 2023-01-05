@@ -91,13 +91,22 @@ class CotizacionController extends Controller {
     }
     $data = $request->all();
     if(!empty($data['_update'])) {
+      if($data['value'] == '') {
+        return response()->json([
+          'status'  => false,
+          'message' => '¿Debes colocar algo?'
+        ]);
+      }
       $data[$data['_update']] = $data['value'];
       unset($data['value']);
       unset($data['_update']);
     }
     $data['updated_by'] = Auth::user()->id;
     $cotizacion->update($data);
-    return response()->json(['status' => true , 'refresh' => true ]);
+    return response()->json([
+      'status'  => true,
+      'refresh' => true
+    ]);
   }
   public function destroy(Cotizacion $cotizacion) {
     if($cotizacion->oportunidad()->estado == 3) {
@@ -158,6 +167,9 @@ class CotizacionController extends Controller {
       } else {
         return redirect('/documentos/'. $cotizacion->documento_id . '/expediente/inicio');
       }
+  }
+  public function subsanaciones(Request $request, Cotizacion $cotizacion) {
+    return view('cotizacion.subsanaciones', compact('cotizacion'));
   }
   public function exportar(Request $request, Cotizacion $cotizacion) {
     $empresa = $cotizacion->empresa();
@@ -233,6 +245,37 @@ class CotizacionController extends Controller {
       ]);
     }
     //return redirect('/oportunidades/' . $cotizacion->oportunidad_id . '/');
+  }
+  public function registrarSubsanacion(Cotizacion $cotizacion, Request $request) {
+    $proc = $cotizacion->solicitudSubsanacion();
+    if($proc->estado == 200) {
+    return response()->json([
+      'status'   => true,
+      'disabled' => true,
+      'label'    => 'Solicitud Registrada!',
+      'message'  => $proc->mensaje,
+      'refresh'  => true,
+      'class'    => 'success',
+    ]);
+  } else if($proc->estado == 500) {
+    return response()->json([
+        'status'   => false,
+        'disabled' => true,
+        'label'    => 'Ya existe',
+        'message'  => $proc->mensaje,
+        'refresh'  => false,
+        'class'    => 'warning',
+      ]);
+  } else {
+      return response()->json([
+        'status'   => false,
+        'disabled' => true,
+        'label'    => 'Ops! Un problema',
+        'message'  => $proc->mensaje,
+        'refresh'  => false,
+        'class'    => 'warning',
+      ]);
+  }
   }
   public function enviarPorCorreo(Cotizacion $cotizacion, Request $request) {
     $perfil_id = $request->input('value');

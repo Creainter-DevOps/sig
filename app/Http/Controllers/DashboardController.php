@@ -8,6 +8,7 @@ use App\Oportunidad;
 use App\Helpers\Chartjs;
 use App\User;
 use App\Cuota;
+use App\Dashboard;
 
 class DashboardController extends Controller
 {
@@ -77,5 +78,13 @@ class DashboardController extends Controller
     // analystic
   public function dashboardAnalytics(){
     return view('pages.dashboard-analytics');
+  }
+  public function json_competencias() {
+    return response()->json([
+      'data' => Dashboard::competencias()
+    ]);
+  }
+  public function part_competencias() {
+    return view('dashboard.part_competencias');
   }
 }

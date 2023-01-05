@@ -26,7 +26,12 @@ class OportunidadController extends Controller {
       ["link" => "/proyectos", "name" => "Oportunidades" ]
     ];
   }
-
+  public function porEmpresa(Request $request, Empresa $empresa)
+  {
+      $listado = Oportunidad::listAll()->where('empresa_id','=', $empresa->id)->paginate(100)->appends(request()->query());
+      $this->viewBag['listado'] = $listado;
+      return view('oportunidad.index', $this->viewBag );
+  }
   public function index(Request $request)
   {
       $search = $request->input('search');

@@ -29,7 +29,7 @@ class Licitacion extends Model
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password','buenapro_revision','bases_integradas','eliminado','monto','tipo_objeto',
+        'name', 'email', 'password','buenapro_revision','bases_integradas','eliminado','monto','tipo_objeto','estado'
     ];
 
     /**
@@ -48,6 +48,7 @@ class Licitacion extends Model
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'estado' => 'boolean',
       ];
     public function rotulo() {
       return $this->rotulo;
@@ -102,11 +103,14 @@ class Licitacion extends Model
     }
     public function relacionadas() {
       $rp = DB::select("
-        SELECT L.*, (SELECT COUNT(O.id) FROM osce.oportunidad O WHERE O.licitacion_id = L.id AND O.tenant_id = :tenant AND O.fecha_propuesta IS NOT NULL) con_oportunidad,
-        (SELECT SUM(D.valor_referencial) FROM osce.licitacion_item D WHERE D.licitacion_id = L.id AND valor_referencial IS NOT NULL) valor_referencial
+        SELECT
+          L.*, L.fecha_participacion_desde::date fecha,
+          (SELECT COUNT(O.id) FROM osce.oportunidad O WHERE O.licitacion_id = L.id AND O.tenant_id = :tenant AND O.fecha_propuesta IS NOT NULL) con_oportunidad,
+        (SELECT SUM(D.valor_referencial) FROM osce.licitacion_item D WHERE D.licitacion_id = L.id AND D.valor_referencial IS NOT NULL) valor_referencial,
+        (SELECT SUM(D.monto_adjudicado) FROM osce.licitacion_item D WHERE D.licitacion_id = L.id AND D.monto_adjudicado IS NOT NULL) valor_adjudicado
         FROM (SELECT UNNEST(osce.fn_licitacion_similares_v2(:tenant, :referencia)) codigo) C
         JOIN osce.licitacion L ON L.id = C.codigo
-        ORDER BY L.created_on ASC
+        ORDER BY L.fecha_participacion_desde DESC
         LIMIT 10", ['tenant' => Auth::user()->tenant_id, 'referencia' => $this->id]);
       return static::hydrate($rp);
     }
@@ -150,7 +154,22 @@ class Licitacion extends Model
     }
     public function items() {
       return $this->hasMany('App\LicitacionItem','licitacion_id')
-        ->orderBy('item', 'desc')->get();
+        ->orderBy('item', 'asc')->get();
+    }
+    public function hay_ganadora($json = -1) {
+      if($json === -1) {
+        $rp = collect(DB::select("SELECT COUNT(x) cantidad, SUM((CASE WHEN x->>'empresa' = 'Desierto' THEN 1 ELSE 0 END)) desiertos
+          FROM jsonb_array_elements(osce.licitacion_ganadores(" . Auth::user()->tenant_id . ", '" . $this->id . "'::int)) x"))->first();
+        if($rp->cantidad == 0) {
+          return '';
+        } elseif($rp->cantidad = $rp->desiertos) {
+          return 'Desierto';
+        } elseif($rp->desiertos == 0) {
+          return 'Otorgado';
+        } else {
+          return 'Parcial ' . ($rp->cantidad - $rp->desiertos) . '/' . $rp->cantidad;
+        }
+      }
     }
     public function ganadora($json = -1) {
       if($json === -1) {
@@ -207,7 +226,7 @@ class Licitacion extends Model
      FROM osce.tentativa T
      WHERE T.tenant_id = :tenant", ['tenant' => Auth::user()->tenant_id]))->first();
       $rp = DB::select("
-        SELECT L.*, O.licitacion_id
+        SELECT L.*, O.licitacion_id, osce.fn_etiquetas_a_rotulo(L.etiquetas_id) etiquetas
 FROM (
 	SELECT T.anho, T.licitacion_id
 	FROM osce.tentativa T

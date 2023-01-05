@@ -36,6 +36,12 @@ class ProyectoController extends Controller {
       $this->viewBag['listado'] = $listado;
       return view('proyectos.index',  $this->viewBag );
   }
+  public function porCliente(Request $request, Cliente $cliente)
+  {
+      $listado = Proyecto::list()->where('cliente_id','=', $cliente->id)->paginate(15)->appends(request()->query());
+      $this->viewBag['listado'] = $listado;
+      return view('proyectos.index',  $this->viewBag );
+  }
   public function create(Request $request, proyecto $proyecto)
   {
       $this->viewBag['proyecto'] = $proyecto;

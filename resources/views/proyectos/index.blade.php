@@ -46,7 +46,7 @@
           <td>{{ $proyecto->cotizacion_id }}</td>
           <td style="text-align:center;"><a href="/proyectos/{{ $proyecto->id }}/"><div style="color:#fff;padding:2px;background-color:#b3b3b3;background:{{ $proyecto->color }}">{{ $proyecto->codigo }}</div></a></td>
           <td>{{ isset($proyecto->empresa_id) ?   $proyecto->empresa()->rotulo() : ''  }}</td>
-          <td>{{ $proyecto->oportunidad()->institucion() }}</td>
+          <td><a href="{{ route('proyecto.porCliente', ['cliente' => $proyecto->cliente_id ]) }}">{{ $proyecto->oportunidad()->institucion() }}</a></td>
           <td>{{ $proyecto->rotulo }}</td>
           <td style="text-align:right;">{{ Helper::money($proyecto->cotizacion()->monto) }}</td>
           <td><div style="background-color:{{ $proyecto->estadoArray()['color'] }};font-size: 11px;padding: 2px;border-radius: 3px;color: #fff;text-align: center;">{{ $proyecto->estadoArray()['name'] }}</div></td>

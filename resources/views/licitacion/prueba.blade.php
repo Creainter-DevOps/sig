@@ -103,7 +103,7 @@
     <div class="card-content card-container"  >
        <div class="card-body" style="padding:0; " >
        <!-- <a class="mr-1" href="#">
-          <img src="https://sig.creainter.com.pe/images/portrait/small/avatar-s-26.jpg" alt="users view avatar"
+          <img src="/images/portrait/small/avatar-s-26.jpg" alt="users view avatar"
             class="users-avatar-shadow rounded-circle" height="64" width="64">
         </a>-->
         <div class="content-swipe" data-url_aprobar=""  data-url_desaprobar="" data-id="" data-tipo="">

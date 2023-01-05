@@ -121,11 +121,15 @@ class Oportunidad extends Model
       }
       return Correo::hydrate($rp);
     }
+    public static function listAll() {
+      return Oportunidad::whereNull('oportunidad.eliminado')
+        ->where('tenant_id', Auth::user()->tenant_id)
+        ->orderBy('created_on', 'desc');
+    }
     public static function list() {
       return Oportunidad::whereNull('oportunidad.licitacion_id')
         ->whereNull('oportunidad.eliminado')
         ->where('tenant_id', Auth::user()->tenant_id)
-        ->orderBy('estado', 'asc')
         ->orderBy('created_on', 'desc');
     }
     public static function search($query) {
@@ -238,7 +242,9 @@ class Oportunidad extends Model
           osce.fn_usuario_rotulo(D.finalizado_por) finalizado_por,
           osce.fn_usuario_rotulo(D.revisado_por) revisado_por,
           D.revisado_status,
-          D.revisado_el
+          D.revisado_el,
+          osce.fn_usuario_rotulo(C.precio_por) precio_por,
+          (SELECT COUNT(*) FROM osce.subsanacion S WHERE S.cotizacion_id = C.id) subsanacion_cantidad
         FROM osce.cotizacion C
         LEFT JOIN osce.empresa E ON E.id = C.empresa_id
         LEFT JOIN osce.documento D ON D.id = C.documento_id
@@ -248,6 +254,7 @@ class Oportunidad extends Model
           'tenant' => Auth::user()->tenant_id,
           'oid'    => $this->id,
         ]);
+//      dd($rp);
       return array_map(function($n) {
         return new Empresa((array) $n);
       }, $rp);
@@ -470,7 +477,8 @@ SELECT
     (CASE WHEN z.es_favorito IS NOT NULL THEN '<i class=\"bx bxs-circle\" style=\"color:orange;font-size: 10px;\"></i>' ELSE '' END),
     (CASE WHEN z.aprobado_el >= DATE_TRUNC('day', NOW()) - INTERVAL '1' DAY THEN '<i class=\"bx bxs-circle\" style=\"color:green;font-size: 10px;\"></i>' ELSE '' END),
     UPPER(z.rotulo)
-  ) inx_rotulo
+  ) inx_rotulo,
+  (SELECT array_length(L.similar_ids, 1) FROM osce.licitacion L WHERE L.id = z.licitacion_id LIMIT 1) cantidad_similar
 FROM (
   SELECT
     x.*,
@@ -490,10 +498,13 @@ FROM (
         WHERE C.oportunidad_id = O.id AND C.eliminado IS NULL AND C.interes_el IS NOT NULL) empresas_interes
     FROM (
       SELECT O.tenant_id, O.id, O.licitacion_id, O.aprobado_el, O.etiquetas_id, O.aprobado_por, O.rotulo, O.fecha_propuesta_hasta, O.correo_id, O.revisado_el, O.revisado_por, O.es_favorito, O.estado
-      FROM osce.oportunidad O
-      WHERE 
-		    O.tenant_id = :tenant AND O.estado IN (1,2) AND O.aprobado_el IS NOT NULL AND O.licitacion_id IS NOT NULL
-    		AND O.rechazado_el IS NULL AND O.archivado_el IS NULL
+      FROM (
+       	SELECT *
+        FROM osce.oportunidad O
+        WHERE O.tenant_id = :tenant AND O.estado IN (1,2)
+      ) O
+      WHERE O.aprobado_el IS NOT NULL AND O.licitacion_id IS NOT NULL
+        AND O.rechazado_el IS NULL AND O.archivado_el IS NULL
         AND O.fecha_propuesta_hasta >= NOW() - INTERVAL '7' DAY
         AND ((O.fecha_propuesta_hasta >= NOW() - INTERVAL '10' HOUR AND O.fecha_propuesta_hasta <= NOW() + INTERVAL '40' DAY) OR O.es_favorito IS NOT NULL)
     ) O
@@ -501,7 +512,7 @@ FROM (
   WHERE x.empresas_interes IS FALSE OR x.aprobado_el::date = NOW()::date OR x.es_favorito IS NOT NULL
 	OR x.fecha_propuesta_hasta <= NOW() + INTERVAL '40' DAY
 ) z
-ORDER BY z.correo_id IS NULL ASC, z.fecha_propuesta_hasta::date ASC, z.fecha_propuesta_hasta::time ASC, z.es_favorito IS NULL DESC, z.estado DESC, (z.expediente_step_min = 4) ASC, z.revisado_el IS NULL ASC, z.expediente_step_min DESC
+ORDER BY z.correo_id IS NULL ASC, z.fecha_propuesta_hasta::date ASC, z.fecha_propuesta_hasta::time ASC, z.es_favorito IS NULL DESC, z.estado DESC, (z.montos IS NOT NULL) DESC, z.id ASC
 LIMIT 140", ['tenant' => Auth::user()->tenant_id]);
       $out = $rp->execute;
       return static::hydrate($rp->toArray());
@@ -543,13 +554,39 @@ JOIN osce.licitacion L ON L.id = O.licitacion_id AND (
   (L.fecha_buena_desde >= NOW() AND L.fecha_buena_hasta <= NOW())
   OR (L.fecha_buena_hasta >= NOW() - INTERVAL '7' DAY AND L.fecha_buena_hasta <= NOW() + INTERVAL '60' DAY)
   OR (L.buenapro_fecha >= NOW() - INTERVAL '7' DAY))
-ORDER BY (L.buenapro_fecha IS NOT NULL) DESC, L.fecha_buena_hasta ASC, L.buenapro_fecha ASC, O.id ASC
+ORDER BY (L.buenapro_fecha IS NOT NULL) DESC, L.buenapro_fecha ASC, L.fecha_buena_hasta ASC, O.id ASC
 LIMIT 80", [
   'tenant' => Auth::user()->tenant_id
 ]);
       $out = $rp->execute;
       return static::hydrate($rp->toArray());
     }
+   static function listado_solicitud_subsanaciones(&$out = null) {
+     $rp = DB::collect("
+SELECT
+	S.id, C.id cotizacion_id, C.oportunidad_id, O.licitacion_id,
+	EE.razon_social entidad, O.rotulo, O.fecha_propuesta_hasta,
+	C.monto, S.fecha, S.dias_habiles, S.created_by,
+	S.respondido_el, osce.fn_usuario_rotulo(S.respondido_por) subsanacion_por,
+	C.propuesta_el, osce.fn_usuario_rotulo(C.propuesta_por) propuesta_por,
+	osce.fn_sumar_dias_habiles(S.fecha, S.dias_habiles) fecha_limite,
+	EXTRACT(day from AGE(osce.fn_sumar_dias_habiles(S.fecha, S.dias_habiles)::date, NOW()::date)) restan
+FROM osce.subsanacion S
+JOIN osce.cotizacion C ON C.id = S.cotizacion_id
+JOIN osce.oportunidad O ON O.id = C.oportunidad_id
+JOIN osce.empresa E ON E.id = C.empresa_id
+LEFT JOIN osce.empresa EE ON EE.id = O.empresa_id
+WHERE S.tenant_id = :tenant AND S.fecha >= NOW() - INTERVAL '5' DAY", [
+  'tenant' => Auth::user()->tenant_id
+]);
+      $out = $rp->execute;
+      return static::hydrate($rp->toArray());
+   }
+   public function cantidadProyectos() {
+     return (collect(DB::select("SELECT COUNT(*) cantidad FROM osce.proyecto P WHERE P.cotizacion_id IN (SELECT C.id FROM osce.cotizacion C WHERE C.oportunidad_id = :oid)", [
+      'oid' => $this->id,
+     ]))->first())->cantidad;
+   }
    static function listado_aprobadas() {
       $rp = DB::select("
         SELECT O.*
@@ -862,6 +899,14 @@ LIMIT 80", [
         'tenant' => Auth::user()->tenant_id,
         'user'   => Auth::user()->id,
       ]);
+    }
+    static function estadistica_al_dia(&$out = null) {
+      $rp = DB::collect("SELECT * FROM osce.fn_estadistica_avance_al_dia(:tenant, :user, NULL)", [
+        'tenant' => Auth::user()->tenant_id,
+        'user'   => Auth::user()->id,
+      ]);
+      $out = $rp->execute;
+      return $rp->first();
     }
     static function estadistica_cantidad_mensual() {
       return DB::select("

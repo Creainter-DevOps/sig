@@ -43,10 +43,17 @@
                   <td>
                     <input type="date" name="fecha_desde" data-editable="/proyectos/{{ $proyecto->id }}?_update=fecha_desde" value="{{ $proyecto->fecha_desde }}">
                   </td>
+                  <th>Días Calendario</th>
+                  <td>
+                    <input type="number" name="plazo_dias" data-editable="/proyectos/{{ $proyecto->id }}?_update=plazo_dias" value="{{ $proyecto->plazo_dias }}" min="1" max="1000">
+                  </td>
+                </tr>
+                <tr>
                   <th>Fecha de Fin:</th>
                   <td>
                     <input type="date" name="fecha_hasta" data-editable="/proyectos/{{ $proyecto->id }}?_update=fecha_hasta" value="{{ $proyecto->fecha_hasta }}">
                   </td>
+                  <td colspan="2"></td>
                 </tr>
                 <tr>
                   <th>Responsables:</th>

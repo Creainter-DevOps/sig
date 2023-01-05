@@ -5,7 +5,7 @@
 {{-- venodr style --}}
 @section('vendor-styles')
 <!--<link rel="stylesheet" type="text/css" href="{{asset('vendors/css/charts/apexcharts.css')}}">-->
-<link rel="stylesheet" type="text/css" href="{{asset('vendors/css/extensions/dragula.min.css')}}">-->
+<link rel="stylesheet" type="text/css" href="{{asset('vendors/css/extensions/dragula.min.css')}}">
 <link rel="stylesheet" type="text/css" href="{{asset('vendors/css/calendars/clndr.css')}}">
 @endsection
 
@@ -153,31 +153,46 @@
       <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 dashboard-latest-update">
           <div class="card">
           <div class="card-header d-flex justify-content-between align-items-center pb-50">
-            <h4 class="card-title">Atención en Licitaciones</h4>
+            <h4 class="card-title">Atención en Proyectos</h4>
           </div>
           <div class="card-content">
-            <div class="card-body p-0 pb-1">
-              <ul class="list-group list-group-flush">
-                @foreach(App\Oportunidad::requiere_atencion($execute) as $o)
-                <li
-                  class="list-group-item list-group-item-action border-0 d-flex align-items-center justify-content-between">
-                  <div class="list-left d-flex">
-                    <div class="list-icon mr-1">
-                      <div class="avatar bg-rgba-primary m-0">
-                        <div class="avatar-content">
-                          <i class="bx bxs-zap text-primary font-size-base"></i>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="list-content">
-                      <span class="list-title"><a href="/licitaciones/{{ $o->licitacion_id }}/detalles">{{ $o->codigo }}</a></span>
-                      <small class="text-muted d-block">{{ strtoupper(substr($o->licitacion_rotulo,0, 17)) }}</small>
-                    </div>
-                  </div>
-                  <span class="{{ $o->estado()['class'] }}">{{ $o->estado()['message'] }}</span>
-                </li>
+            <div class="card-body p-1">
+              <table class="table table-sm text-center" style="font-size:11px;">
+              <thead>
+                <th>Proyecto</th>
+                <th>Consentimiento</th>
+                <th>Contrato</th>
+                <th>Cúlmino</th>
+              </thead>
+              <tbody>
+                @foreach(App\Proyecto::requiere_atencion($execute) as $o)
+                <tr>
+                <td style="font-size:11px;" title="{{ $o->rotulo }}"><a href="{{ route('proyectos.show', ['proyecto' => $o->id]) }}">{{ substr($o->alias,0, 14) }}</a></td>
+                <td>
+                  @if(!empty($o->consentimiento_confirmado))
+                  <div>{{ Helper::fecha($o->consentimiento_fecha) }}</div>
+                  @else
+                  <div style="color: #b665ff;" title="{{ $o->consentimiento_resta }} días">{{ Helper::fecha($o->consentimiento_fecha) }}</div>
+                  @endif
+                </td>
+                <td>
+                  @if(!empty($o->perfeccionamiento_confirmado))
+                  <div>{{ Helper::fecha($o->perfeccionamiento_fecha) }}</div>
+                  @else
+                  <div style="color: #b665ff;" title="{{ $o->perfeccionamiento_resta }} días">{{ Helper::fecha($o->perfeccionamiento_fecha) }}</div>
+                  @endif
+                </td>
+                <td>
+                  @if(!empty($o->culmino_confirmado))
+                  <div>{{ Helper::fecha($o->culmino_fecha) }}</div>
+                  @else
+                  <div style="color: #b665ff;" title="{{ $o->culmino_resta }} días">{{ Helper::fecha($o->culmino_fecha) }}</div>
+                  @endif
+                </td>
+                </tr>
                @endforeach
-              </ul>
+              </tbody>
+              </table>
             </div>
             <div style="text-align:right;font-size:11px;padding: 0 5px;">Tiempo de consulta: {{ $execute->time }} ms</div>
           </div>

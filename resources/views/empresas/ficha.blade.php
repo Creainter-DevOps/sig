@@ -459,8 +459,7 @@
 grid-template: repeat(5,1fr)/repeat(3,180px);grip-gap:10px;margin-bottom: 20px;
 width: 100%;grid-gap: 15px;justify-items: start;  " >
                                                                     @foreach ($firmas as $firma )        
-
-                                                                        <div class="" style="display:grid;place-items:center;border: 1px solid var(--primary);width:100%; padding: 10px;" ><img src="https://sig.creainter.com.pe/static/cloud/{{ $firma['archivo'] }}" style="max-width: 100%;" class="rounded" alt="profile image" height="64"></div>
+                                                                        <div class="" style="display:grid;place-items:center;border: 1px solid var(--primary);width:100%; padding: 10px;" ><img src="/static/cloud/{{ $firma['archivo'] }}" style="max-width: 100%;" class="rounded" alt="profile image" height="64"></div>
                                                                     @endforeach    
                                                                   </div>
                                                             </div>
@@ -954,7 +953,7 @@ width: 100%;grid-gap: 15px;justify-items: start;  " >
 
                response.files.forEach((image) => {
                   containerImgFirmas.insertAdjacentHTML('beforeend',`
-                  <div class="" style="display:grid;place-items:center;border: 1px solid var(--primary);width:100%; padding: 10px;" ><img src="https://sig.creainter.com.pe/static/temporal/${image}" class="rounded " style="max-width:100%;"  alt="profile image" height="64"> </div>
+                  <div class="" style="display:grid;place-items:center;border: 1px solid var(--primary);width:100%; padding: 10px;" ><img src="/static/temporal/${image}" class="rounded " style="max-width:100%;"  alt="profile image" height="64"> </div>
                   `)
                 })  
 

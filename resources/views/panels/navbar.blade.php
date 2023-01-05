@@ -70,6 +70,9 @@ data-bgcolor="@if(isset($configData['navbarBgColor'])){{$configData['navbarBgCol
               <a class="dropdown-item" href="{{asset('logout')}}#"><i class="bx bx-power-off mr-50"></i>Salir</a>
             </div>
           </li>
+          <li class="nav-item" style="padding: 0 10px;vertical-align: middle;padding-left: 20px;">
+             <img src="https://www.adjudica.com.pe/images/logo-web.png" style="width: 250px;">
+          </li>
         </ul>
       </div>
     </div>
