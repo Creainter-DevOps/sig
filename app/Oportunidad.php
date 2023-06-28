@@ -16,10 +16,11 @@ use App\Actividad;
 use App\Correo;
 use Auth;
 use App\Scopes\MultiTenant;
+use App\Traits\hasFillable;
 
 class Oportunidad extends Model
 {
-  use Notifiable,HasApiTokens,HasRoles;
+  use Notifiable,HasApiTokens,HasRoles,hasFillable;
 
     protected $connection = 'interno';
     protected $table = 'osce.oportunidad';
@@ -55,6 +56,9 @@ class Oportunidad extends Model
       'rechazado_el' => 'datetime',
       'archivado_el' => 'datetime',
       'automatica'   => 'boolean',
+      'rotulo'       => 'string',
+      'monto_base'   => 'decimal:2',
+      'fecha_propuesta' => 'date',
     ];
     public function updateData($data) {
       DB::select('SELECT osce.fn_oportunidad_asignar_empresa(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . (!empty($data['empresa_id']) ? $data['empresa_id'] : 'null') . ',' . Auth::user()->id . ')');
@@ -125,6 +129,28 @@ class Oportunidad extends Model
       return Oportunidad::whereNull('oportunidad.eliminado')
         ->where('tenant_id', Auth::user()->tenant_id)
         ->orderBy('created_on', 'desc');
+    }
+    public static function pagination() {
+      return DB::PaginationQuery("
+        SELECT
+          O.*,
+          O.created_on::date fecha,
+          osce.empresa_rotulo(:tenant, O.empresa_id) cliente,
+          osce.oportunidad_variacion_montos(O.id) montos,
+          osce.fn_usuario_rotulo(o.aprobado_por) aprobado_por,
+          osce.fn_oportunidad_fecha_estado_propuesta(1, O.id) inx_estado_propuesta,
+          TT.rotulo estado
+        FROM osce.oportunidad O
+        LEFT JOIN osce.empresa E ON E.id = O.empresa_id
+        LEFT JOIN osce.actividad_tipo TT ON TT.id = O.estado
+        WHERE O.licitacion_id IS NULL AND O.tenant_id = :tenant AND O.eliminado IS NULL
+          --search AND (UPPER(O.rotulo) LIKE CONCAT('%', (:q)::text, '%') OR E.razon_social LIKE CONCAT('%', (:q)::text, '%') OR E.seudonimo LIKE CONCAT('%', (:q)::text, '%'))
+        ORDER BY O.created_on DESC
+      ", [
+        'tenant' => Auth::user()->tenant_id,
+//        'user'   => Auth::user()->id,
+      ])->hydrate('App\Oportunidad')
+      ;
     }
     public static function list() {
       return Oportunidad::whereNull('oportunidad.licitacion_id')
@@ -501,32 +527,36 @@ FROM (
       FROM (
        	SELECT *
         FROM osce.oportunidad O
-        WHERE O.tenant_id = :tenant AND O.estado IN (1,2)
+        WHERE O.tenant_id = :tenant 
+        AND O.estado IN (1,2)
       ) O
-      WHERE O.aprobado_el IS NOT NULL AND O.licitacion_id IS NOT NULL
-        AND O.rechazado_el IS NULL AND O.archivado_el IS NULL
-        AND O.fecha_propuesta_hasta >= NOW() - INTERVAL '7' DAY
-        AND ((O.fecha_propuesta_hasta >= NOW() - INTERVAL '10' HOUR AND O.fecha_propuesta_hasta <= NOW() + INTERVAL '40' DAY) OR O.es_favorito IS NOT NULL)
+      WHERE 
+       O.aprobado_el IS NOT NULL AND O.licitacion_id IS NOT NULL
+       AND O.rechazado_el IS NULL AND O.archivado_el IS NULL
+       AND O.fecha_propuesta_hasta >= NOW() - INTERVAL '30' DAY
+       AND ((O.fecha_propuesta_hasta >= NOW() - INTERVAL '10' HOUR AND O.fecha_propuesta_hasta <= NOW() + INTERVAL '60' DAY) OR O.es_favorito IS NOT NULL)
     ) O
   ) x
   WHERE x.empresas_interes IS FALSE OR x.aprobado_el::date = NOW()::date OR x.es_favorito IS NOT NULL
-	OR x.fecha_propuesta_hasta <= NOW() + INTERVAL '40' DAY
+	OR x.fecha_propuesta_hasta <= NOW() + INTERVAL '65' DAY
 ) z
 ORDER BY z.correo_id IS NULL ASC, z.fecha_propuesta_hasta::date ASC, z.fecha_propuesta_hasta::time ASC, z.es_favorito IS NULL DESC, z.estado DESC, (z.montos IS NOT NULL) DESC, z.id ASC
-LIMIT 140", ['tenant' => Auth::user()->tenant_id]);
+LIMIT 300", ['tenant' => Auth::user()->tenant_id]);
       $out = $rp->execute;
       return static::hydrate($rp->toArray());
     }
-    static function listado_por_aprobar($ids = "0" ){
+    static function listado_por_aprobar( $ids = "0" ){
+
       $rpta = DB::select("select O.id, O.licitacion_id, osce.fn_empresa_rotulo(".Auth::user()->tenant_id." , O.empresa_id ) entidad, O.empresa_id,  O.rotulo, coalesce( L.nomenclatura, O.codigo ) nomenclatura, O.correo_id,L.bases_integradas,coalesce( O.monto_base, L.monto ) monto, O.estado, L.moneda
-from osce.oportunidad O
-left join osce.licitacion L on L.id = O.licitacion_id
-where rechazado_el is null
-and aprobado_por is null
-and O.id not in (" . $ids . ")
-order by O.id DESC
-limit 15
-");
+      from osce.oportunidad O
+      left join osce.licitacion L on L.id = O.licitacion_id
+      where rechazado_el is null
+      and aprobado_por is null
+      and O.id not in (" . $ids . ")
+      order by O.id DESC
+      limit 15
+      ");
+
       return static::hydrate($rpta);  
     }
     static function listado_propuestas_buenas_pro(&$out = null) {

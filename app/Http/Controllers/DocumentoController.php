@@ -117,7 +117,15 @@ class DocumentoController extends Controller {
     $data['elaborado_desde'] = DB::raw('now()');
     $data['es_mesa']         = true;
 
-    Documento::nuevo($data);
+    $documento = Documento::nuevo($data);
+
+    if(empty($oid)) {
+      $documento->paso(3);
+      $workspace['paso01'] = [];
+      $workspace['paso02'] = [];
+      $workspace['paso03'] = [];
+      $documento->json_save($workspace);
+    }
 
     return response()->json([
       'status' => true,
@@ -126,6 +134,7 @@ class DocumentoController extends Controller {
   public function expediente_inicio (Request $request, Documento $documento) {
     $licitacion   = $documento->licitacion();
     $validaciones = [];
+    if(!empty($documento->cotizacion_id)) {
     $empresa      = $documento->cotizacion()->empresa();
 
     $logo_header  = config('constants.ruta_storage') . $empresa->logo_header;
@@ -137,6 +146,7 @@ class DocumentoController extends Controller {
     $validaciones['sellos_firmas'] = (!empty($firma) && !empty($visado)) ? true:false;
     $validaciones['representante'] = (!empty($empresa->representante_nombres ) &&  !empty($empresa->representante_documento) ) ? true : false;
     $validaciones['montos']        = (!empty( $cotizacion->monto) && !empty($cotizacion->moneda_id)) ? true : false;
+    }
 
     return view('documento.expediente.inicio', compact('documento', 'licitacion', 'validaciones'));
   }
@@ -164,12 +174,14 @@ class DocumentoController extends Controller {
         return redirect('/documentos/' . $documento->id . '/expediente/inicio?merror=espera');
       }
     }
-    $empresa      = $documento->cotizacion()->empresa()->toArray();
-    $licitacion   = $documento->licitacion();
-    if(!empty($workspace['inputs'])) {
-      $workspace['inputs'] = array_merge($workspace['inputs'], $empresa);
-    } else {
-      $workspace['inputs'] = $empresa;
+    if(!empty($documento->cotizacion_id)) {
+      $empresa      = $documento->cotizacion()->empresa()->toArray();
+      $licitacion   = $documento->licitacion();
+      if(!empty($workspace['inputs'])) {
+        $workspace['inputs'] = array_merge($workspace['inputs'], $empresa);
+      } else {
+        $workspace['inputs'] = $empresa;
+      }
     }
     $documento->json_save($workspace);
     return view('documento.expediente.paso01', compact('documento','licitacion','workspace','plantillas'));
@@ -304,7 +316,9 @@ class DocumentoController extends Controller {
           return redirect('/documentos/' . $documento->id . '/expediente/inicio?merror=espera');
         }
       }
-      $oportunidad = $documento->cotizacion()->oportunidad();
+      if(!empty($documento->cotizacion_id)) {
+        $oportunidad = $documento->cotizacion()->oportunidad();
+      }
       return view('documento.expediente.paso03', compact('documento','oportunidad' ,'workspace'));
     }
 

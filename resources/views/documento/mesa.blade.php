@@ -73,6 +73,7 @@
                         <img class="background_image" src="/documentos/{{ $documento->id }}/generarImagenTemporal?page=0&cid={{$k}}&t={{time()}}"/>
                         <div class="StackedListContent">
                           <div class="tools">
+                            <a href="#">{{-- byteConvert(filesize($file['root'])) --}}</a>
                           @if(!empty($file['gid']))
                           <a class="regenerar" href="javascript:regenerarCid('{{ $k }}');">Regenerar</a>
                           @endif
@@ -116,6 +117,7 @@
                         <img class="background_image" src="/documentos/{{ $documento->id }}/generarImagenTemporal?page=0&cid={{$k}}&t={{time()}}"/>
                         <div class="StackedListContent">
                           <div class="tools">
+                            <a href="#">{{-- byteConvert(filesize($file['root'])) --}}</a>
                           @if(!empty($file['gid']))
                           <a class="regenerar" href="javascript:regenerarCid('{{ $k }}');">Regenerar</a>
                           @endif

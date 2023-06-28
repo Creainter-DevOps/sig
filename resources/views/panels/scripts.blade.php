@@ -30,6 +30,7 @@
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{{asset('js/scripts/helpers/toast.js')}}"></script>
     <script src="{{asset('assets/js/scripts.js')}}"></script>
+    <script src="{{asset('assets/js/tablefy.js')}}"></script>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
   <script type="module" src="{{asset('vendors/js/calendar/moment.js')}}"></script>
@@ -83,24 +84,21 @@ function actualizar_timeline(contenedor, data) {
   background-color: #9dff9d!important;
 }
 .fell {
-    position: fixed;
-    z-index: 999999;
-    right: 10px;
-    bottom: 10px;  
+  position: absolute;
+  bottom: 0;
+  right: 20px;
+  z-index: 999;
+  display: inline-block;
 }
 .fell > .currents {
   display: flex;
 }
 .fell > .others {
-  position: fixed;
-  bottom: 65px;
-  right: 10px;
 }
 .fell > div > a {
-  position: relative;
   padding: 0;
-  margin: 0;
-  display: block;
+  margin: 0 2px;
+  display: inline-block;
 }
 .fell > div > a > .fell_name {
   text-transform: capitalize;
@@ -492,6 +490,7 @@ function xlink(url) {
   });
 }
 $(document).on('click', 'a[href]', function(e) {
+  console.log('CLICK x-link');
   if(!_hasTag(this) && !this.hasAttribute('download') && !this.getAttribute('href').includes('javascript') && !this.getAttribute('href').includes('#') && !this.getAttribute('target')) {
     e.preventDefault();
     xlink($(this).attr('href'));
@@ -816,11 +815,11 @@ function fell_separate() {
 function fell_render() {
   if(!$(".fell").length) {
     fell = $("<div>").addClass('fell');
-    fell.append($('<div>').addClass('currents'));
-    fell.append($('<div>').addClass('others'));
     $('body').append(fell);
-
-    fell.on('click', '[data-uid]>[data-name]', function() {
+  } else {
+    fell = $(".fell");
+  }
+    fell.off('click').on('click', '[data-uid]>[data-name]', function() {
       var name = $(this).attr('data-name');
       if(name == $(this).text()) {
         $(this).text(name.substr(0,1));
@@ -828,7 +827,13 @@ function fell_render() {
         $(this).text(name);
       }
     });
+  if(!fell.find('.currents').length) {
+    fell.append($('<div>').addClass('currents'));
   }
+  if(!fell.find('.others').length) {
+    fell.append($('<div>').addClass('others'));
+  }
+
   var box = $(".fell");
   var rp = fell_separate();
 

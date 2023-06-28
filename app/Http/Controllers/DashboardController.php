@@ -87,4 +87,7 @@ class DashboardController extends Controller
   public function part_competencias() {
     return view('dashboard.part_competencias');
   }
+  public function part_actividades() {
+    return view('dashboard.part_actividades');
+  }
 }

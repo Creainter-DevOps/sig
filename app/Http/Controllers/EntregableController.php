@@ -12,15 +12,16 @@ class EntregableController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+  public function tablefy(Request $request) {
+    $listado = Entregable::pagination()->appends(request()->input())->get();
+    return response()->json([
+      'success' => true,
+      'result' => $listado,
+    ]);
+  }
     public function index(Request $request )
     {
-         $search = $request->input('search');
-        if(!empty($search)) {
-            $listado = Entregable::search($search)->paginate(15)->appends(request()->query());
-        } else {
-            $listado = Entregable::orderBy('created_on', 'desc')->paginate(15)->appends(request()->query());
-        }
-        return view('entregable.index', ['listado' => $listado]); 
+        return view('entregable.index');
     }
 
     /**

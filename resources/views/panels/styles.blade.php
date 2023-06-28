@@ -10,7 +10,7 @@
     @yield('vendor-styles')
     <link rel="stylesheet" type="text/css" href="{{asset('vendors/css/extensions/toastr.css')}}">
     <!-- END: Vendor CSS-->
-
+    <script src="{{asset('assets/js/ready.js')}}"></script>
     <!-- BEGIN: Theme CSS-->
     <link rel="stylesheet" type="text/css" href="{{asset('css/bootstrap.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('css/themes/layout.css')}}">
@@ -41,4 +41,10 @@
     <link rel="stylesheet" type="text/css" href="{{asset('assets/css/style-rtl.css')}}">
     @endif
     <!-- END: Custom CSS-->
+    <link rel="stylesheet" type="text/css" href="{{asset('assets/css/tablefy.css')}}">
 
+    @if(!empty(Auth::user()))
+    <script>
+      window.baseUserDir = '{!! addslashes(Auth::user()->dir_sharepoint) !!}';
+    </script>
+    @endif

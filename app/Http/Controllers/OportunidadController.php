@@ -32,6 +32,25 @@ class OportunidadController extends Controller {
       $this->viewBag['listado'] = $listado;
       return view('oportunidad.index', $this->viewBag );
   }
+  public function tablefy(Request $request) {
+    $listado = Oportunidad::pagination()
+    ->appends(request()->input())
+    ->map(function($row) {
+      return [
+        'codigo'      => "javascript:status_wdir(row.codigo, '" . $row->folder(true) . "')",
+        'fecha'      => 'javascript:status_date(row.fecha)',
+        'cliente'    => $row->cliente,
+        'rotulo'     => '<a href="/oportunidades/' . $row->id . '">' . $row->rotulo . '</a>',
+        'monto_base' => $row->monto_base,
+        'montos'     => $row->montos,
+        'aprobado'   => $row->aprobado_por,
+        'estado_id'  => $row->estado_id,
+        'vence'      => 'javascript:status_date_vencimiento(row.fecha_propuesta_hasta, row.fecha_propuesta)',
+      ];
+    })
+    ->get();
+    return $listado->response();
+  }
   public function index(Request $request)
   {
       $search = $request->input('search');

@@ -98,7 +98,8 @@ public function login(Request $request) {
           'clave'   => $credenciales['password'],
         );
         if(Auth::attempt($credenciales)) {
-            return redirect()->route('dashboard');
+          Auth::user()->refreshLastSesion();
+          return redirect()->route('dashboard');
 //        } else {
 //          return back()
 //            ->withErrors(['username'=>'Datos de acceso invalidos!'])

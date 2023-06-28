@@ -31,6 +31,13 @@ class EmpresaController extends Controller {
         ["link" => "/empresas", "name" => "Empresas" ]
       ];
     }
+    public function tablefy(Request $request) {
+      $listado = Empresa::pagination()->appends(request()->input())->get();
+      return response()->json([
+        'success' => true,
+        'result' => $listado,
+      ]);
+    }
     public function contactos(Request $request, Empresa $empresa)
     {
       $this->viewBag['breadcrumbs'][]  = [ 'name' => 'Contactos' ];
@@ -67,14 +74,14 @@ class EmpresaController extends Controller {
       $empresa->save();
       
       $empresa->log('creado');
-      return response()->json([
-        'status' => "success",
-        'data' => [
+
+      if($request->ajax()) {
+        return response()->json([ 'status' => true , 'data' => [
           "value" => $empresa->razon_social,
           "id" => $empresa->id
-        ],
-        'redirect' => '/empresas'
-      ]);
+        ] ]);
+      }
+      return response()->json([ 'status' => true , 'redirect' => '/empresas']);
     }
 
     /**

@@ -9,15 +9,18 @@ use Laravel\Passport\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Model;
 use App\Helpers\Helper;
+use App\Traits\hasFillable;
 use App\Facades\DB;
 use App\Empresa;
 use App\CandidatoOportunidad;
 use App\Actividad;
 use Auth;
+use App\Scopes\MultiTenant;
+
 
 class Proyecto extends Model
 {
-  use Notifiable,HasApiTokens,HasRoles;
+  use Notifiable,HasApiTokens,HasRoles,hasFillable;
 
   protected $connection = 'interno';
   protected $table = 'osce.proyecto';
@@ -31,7 +34,8 @@ class Proyecto extends Model
      */
     protected $fillable = [
       'tenant_id','cliente_id','contacto_id','oportunidad_id','cotizacion_id','nombre','codigo','nomenclatura','rotulo',
-      'dias_servicio', 'estado', 'dias_garantia','dias_instalacion','tipo' ,'fecha_consentimiento','fecha_firma','fecha_desde','fecha_hasta', 'eliminado', 'empresa_id','color','plazo_dias',
+      'dias_servicio', 'estado_id', 'dias_garantia','dias_instalacion','tipo', 'eliminado', 'empresa_id','color','plazo_dias', 'monto','moneda_id',
+      'fecha_buenapro','fecha_consentimiento','fecha_firma','fecha_desde','fecha_hasta',
       'updated_by','alias','responsable_financiero','responsable_tecnico','responsable_entregable'
     ];
 
@@ -50,7 +54,84 @@ class Proyecto extends Model
      * @var array
      */
     protected $casts = [
+      'estado_id' => 'integer',
+      'rotulo' => 'string',
+      'fecha_buenapro' => 'date',
+      'fecha_consentimiento' => 'date',
+      'fecha_firma' => 'date',
+      'fecha_desde' => 'date',
+      'fecha_hasta' => 'date',
+      'monto'       => 'decimal:2',
+      'moneda_id'   => 'integer',
     ];
+
+    private function dinamicFillable() {
+      return [
+        'monto' => empty($this->licitacion_id),
+        'fecha_buenapro' => empty($this->licitacion_id),
+        'rotulo' => empty($this->licitacion_id),
+      ];
+    }
+    public static function pagination() {
+      return DB::PaginationQuery("
+        SELECT
+          P.*,
+          T1.rotulo tipo,
+          osce.empresa_rotulo(:tenant, P.empresa_id) proveedor_rotulo,
+          osce.empresa_rotulo(:tenant, C.empresa_id) cliente_rotulo,
+          T.rotulo estado,
+          T.color estado_color,
+          F1.fecha fecha_buenapro,
+          F2.fecha fecha_consentimiento,
+          F3.fecha fecha_perfeccionamiento,
+          F3.confirmado estado_perfeccionamiento,
+          F4.fecha fecha_termino,
+          F4.confirmado estado_termino
+        FROM osce.proyecto P
+        LEFT JOIN osce.actividad_tipo T ON T.id = P.estado_id
+        LEFT JOIN osce.actividad_tipo T1 ON T1.id = P.tipo_id
+        LEFT JOIN osce.cotizacion CC ON CC.id = P.cotizacion_id
+        LEFT JOIN osce.cliente C ON C.id = P.cliente_id
+        LEFT JOIN osce.empresa CP ON CP.id = C.empresa_id
+        LEFT JOIN osce.fn_proyecto_get_buenapro(P.tenant_id, P.id, :user) F1 ON TRUE
+        LEFT JOIN osce.fn_proyecto_get_consentimiento(P.tenant_id, P.id, :user) F2 ON TRUE
+        LEFT JOIN osce.fn_proyecto_get_perfeccionamiento(P.tenant_id, P.id, :user) F3 ON TRUE
+        LEFT JOIN osce.fn_proyecto_get_culmino(P.tenant_id, P.id, :user) F4 ON TRUE
+        WHERE P.tenant_id = :tenant AND P.eliminado IS FALSE
+          --search AND (UPPER(P.rotulo) LIKE CONCAT('%', (:q)::text, '%') OR CP.razon_social LIKE CONCAT('%', (:q)::text, '%') OR C.nomenclatura LIKE CONCAT('%', (:q)::text, '%'))
+          --filters
+        ORDER BY
+          --(P.estado NOT IN('concluido','cancelado')) desc,
+          --array_position(ARRAY['precontrato','contrato','instalacion_inicio','desarrollo_inicio','servicio_inicio','entregables','servicio_fin','garantia_inicio'], P.estado) asc,
+          P.id DESC
+      ", [
+        'tenant' => Auth::user()->tenant_id,
+        'user'   => Auth::user()->id,
+      ])
+      ->hydrate('App\Proyecto');
+    }
+    public static function tablefy($ce) {
+      return $ce->on('edit', 'estado_id', function($row) {
+        return [
+          'type' => 'select',
+          'attrs' => [],
+          'options' => [
+            58 => 'PRECONTRATO',
+            59 => 'CONTRATO',
+            60 => 'INICIO DE INSTALACIÓN',
+            61 => 'FIN DE INSTALACIÓN',
+            62 => 'INICIO DE DESARROLLO',
+            63 => 'FIN DE DESARROLLO',
+            64 => 'INICIO DE SERVICIO',
+            65 => 'FIN DE SERVICIO',
+            66 => 'INICIO DE GARANTÍA',
+            67 => 'FIN DE GARANTÍA',
+            68 => 'CANCELADO',
+            69 => 'CONCLUIDO',
+          ]
+        ];
+      });
+    }
     public static function list() {
       return static::where('eliminado', false)
       ->where('tenant_id', Auth::user()->tenant_id)
@@ -69,10 +150,11 @@ class Proyecto extends Model
       return 'xx';
     }
     public function folder($unix = false) {
+      $year = date('Y', strtotime($this->created_on));
       if($unix) {
-        return 'PROYECTOS/' . $this->codigo . '/';
+        return 'PROYECTOS/' . $year . '/' . $this->codigo . '/';
       }
-      return '\\PROYECTOS\\' . $this->codigo . '\\';
+      return '\\PROYECTOS\\' . $year . '\\' . $this->codigo . '\\';
     }
     public static function generarCodigo($year = null)
     {
@@ -202,5 +284,9 @@ class Proyecto extends Model
       ]);
       $out = $rp->execute;
       return $rp;
+    }
+    protected static function booted()
+    {
+        static::addGlobalScope(new MultiTenant);
     }
 }

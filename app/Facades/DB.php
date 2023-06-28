@@ -3,14 +3,36 @@
 namespace App\Facades;
 
 use Illuminate\Support\Facades\DB as originalDB;
+//use Illuminate\Pagination\Paginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 use App\Helpers\Helper;
+use App\Facades\Pagination;
 
 class DB extends originalDB
 {
+
+  public static function PaginationQuery($query, $params = []) {
+    $opo = new PaginationQuery;
+    $opo->query($query, $params);
+    return $opo;
+  }
+  public static function pagination($query, $params = []) {
+    $cantidad = "SELECT count(*) total FROM (" . $query . ")x";
+    $cantidad = static::collect($cantidad, $params)->first();
+    $opo = new LengthAwarePaginator([], $cantidad->total, 50);
+    $query = "SELECT * FROM (" . $query . ")x LIMIT " . $opo->perpage() . " OFFSET " . (($opo->currentPage() - 1) * 50);
+    $data = static::collect($query, $params);
+    $opo = new LengthAwarePaginator($data->all(), $cantidad->total, 50);
+    return $opo;
+  }
   public static function collect($query, $params = [])
     {
       $time_start = microtime(true);
-      $opo = collect(DB::select($query, $params));
+      //try {
+        $opo = collect(DB::select($query, $params));
+      //} catch(\Illuminate\Database\QueryException $err) {
+      //  $opo = collect([]);
+      //}
       $opo->execute = new \stdClass();
 
       $diff = microtime(true) - $time_start;

@@ -5,9 +5,9 @@
 @if(isset($configData['footerType'])) {{$configData['footerType']}} @endif {{$configData['bodyCustomClass']}} 
 @if($configData['isCardShadow'] === false){{'no-card-shadow'}}@endif" 
 data-open="hover" data-menu="horizontal-menu" data-col="2-columns">
-
+  <div id="sip_body"></div>
   <!-- BEGIN: Header-->
-  @include('panels.horizontal-navbar')
+  {{--include('panels.horizontal-navbar')--}}
   <!-- END: Header-->
 
   <!-- BEGIN: Main Menu-->
@@ -16,42 +16,18 @@ data-open="hover" data-menu="horizontal-menu" data-col="2-columns">
 
   <!-- BEGIN: Content-->
   <div class="app-content content">
-    {{-- Application page structure --}}
-	@if($configData['isContentSidebar'] === true)
-		<div class="content-area-wrapper">
-			<div class="sidebar-left">
-				<div class="sidebar">
-					@yield('sidebar-content')
-				</div>
-			</div>
-			<div class="content-right">
-        <div class="content-overlay"></div>
-				<div class="content-wrapper">
-            <div class="content-header row">
-            </div>
-            <div class="content-body">
-                @yield('content')
-            </div>
+    <div class="app-content-second">
+      <div class="fell"></div>
+      <div class="x-page">
+        <div class="x-page-body">
+        @include('layouts.contentLayoutCenter')
         </div>
-			</div>
-		</div>
-	@else
-    {{-- others page structures --}}
-    <div class="content-overlay"></div>
-		<div class="content-wrapper">
-			<div class="content-header row">
-        @if($configData['pageHeader'] === true && isset($breadcrumbs))
-          @include('panels.breadcrumbs')
-        @endif
-			</div>
-			<div class="content-body">
-				@yield('content')
-			</div>
-		</div>
-	@endif
+        <div class="x-page-nav"></div>
+      </div>
+    </div>
   </div>
   <!-- END: Content-->
-@if($configData['isCustomizer'] === true && isset($configData['isCustomizer']))
+@if(false && $configData['isCustomizer'] === true && isset($configData['isCustomizer']))
   <!-- BEGIN: Customizer-->
   <div class="customizer d-none d-md-block">
     <a class="customizer-close" href="#"><i class="bx bx-x"></i></a>
@@ -66,9 +42,9 @@ data-open="hover" data-menu="horizontal-menu" data-col="2-columns">
   </div>
   @endif
   <!-- demo chat-->
-  <div class="widget-chat-demo">
+  {{--<div class="widget-chat-demo">
     @include('pages.widget-chat')
-  </div>
+  </div>--}}
 
   <div class="sidenav-overlay"></div>
   <div class="drag-target"></div>
@@ -78,5 +54,8 @@ data-open="hover" data-menu="horizontal-menu" data-col="2-columns">
   <!-- END: Footer-->
 
   @include('panels.scripts')
+  <script>
+    callReadyLoad();
+  </script>
 </body>
 <!-- END: Body-->

@@ -35,6 +35,12 @@
         <label>Rótulo</label>
       </div>
     </div>
+    <div class="col-md-12 col-12">
+      <div class="form-label-group">
+        <input type="text" class="form-control" name="monto_base" min="10" max="9999999" step="0.01"  value="{{ @$oportunidad->monto_base}}" />
+        <label>Monto de la Oportunidad</label>
+      </div>
+    </div>
   <div class="col-12 d-flex justify-content-end">
     <button type="submit" class="btn btn-primary mr-1 mb-1">Guardar</button>
     <button type="reset" class="btn btn-light-secondary mr-1 mb-1">Limpiar</button>

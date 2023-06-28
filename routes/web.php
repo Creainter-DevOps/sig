@@ -16,8 +16,6 @@ Route::get('identificacion', 'Auth\LoginController@login');
 Route::post('identificacion', 'Auth\LoginController@login_check')->name('login');
 Route::get('logout', 'Auth\LoginController@logout')->name('logout');
 
-Route::match(['get', 'post'], '/', 'DashboardController@index')->name('dashboard');
-
 /* Permissions */
 Route::any('permissions', 'PermissionController@index');
 Route::match(['get', 'post'], 'permissions/usuario/{aclusuario}/permisos', 'PermissionController@UsuarioPermisos');
@@ -29,7 +27,10 @@ Route::match(['get', 'post'], 'permissions/grupo', 'PermissionController@crearGr
 Route::get('permissions/autocomplete_modulo', 'PermissionController@autocomplete_modulo');
 
 // dashboard Routes
+Route::get('/dashboard', 'DashboardController@index')->name('dashboard');
+Route::match(['get', 'post'], '/', 'DashboardController@index');
 Route::post('/dashboard/part/competencias', 'DashboardController@part_competencias');
+Route::post('/dashboard/part/actividades', 'DashboardController@part_actividades');
 Route::get('/dashboard-ecommerce','DashboardController@dashboardEcommerce');
 Route::get('/dashboard-analytics','DashboardController@dashboardAnalytics');
 
@@ -42,18 +43,27 @@ Route::get('/contable/pdf/licitaciones_semanal','ContableController@licitaciones
 Route::get('/contable/pdf/proyectos_activos','ContableController@proyectos_activos');
 Route::get('/contable/pdf/licitaciones_fechas','ContableController@licitaciones_fechas');
 
+Route::post('entregables/tablefy', 'EntregableController@tablefy');
 Route::get('entregables/autocomplete', 'EntregableController@autocomplete');
 Route::resource('entregables', 'EntregableController');
 
+
+Route::post('pagos/tablefy', 'PagoController@tablefy');
 Route::get('pagos/autocomplete', 'PagoController@autocomplete');
 Route::resource('pagos', 'PagoController');
 
+Route::post('ordenes/tablefy', 'OrdenController@tablefy');
 Route::get('ordenes/autocomplete', 'OrdenController@autocomplete');
 Route::resource('ordenes', 'OrdenController')->parameters([
   'ordenes' => 'orden'
 ]);
 
 //Route::resource('proyectos', 'ProyectoController');
+Route::post('proyectos/tablefy', 'ProyectoController@tablefy');
+Route::post('proyectos/{proyecto}/cartas/tablefy', 'ProyectoController@tablefy_cartas');
+Route::post('proyectos/{proyecto}/entregables/tablefy', 'ProyectoController@tablefy_entregables');
+Route::post('proyectos/{proyecto}/pagos/tablefy', 'ProyectoController@tablefy_pagos');
+Route::post('proyectos/{proyecto}/gastos/tablefy', 'ProyectoController@tablefy_gastos');
 Route::get('proyectos/autocomplete', 'ProyectoController@autocomplete'); 
 Route::get('proyectos/porCliente/{cliente}', 'ProyectoController@porCliente')->name('proyecto.porCliente');
 Route::post('proyectos/{proyecto}/observacion', 'ProyectoController@observacion'); 
@@ -68,7 +78,7 @@ Route::get('misempresas','EmpresaController@mis_empresas');
 Route::get('misempresas/{empresa}','EmpresaController@datos');
 Route::get('empresas/autocomplete', 'EmpresaController@autocomplete'); 
 Route::get('empresas/tags','EmpresaController@tags');
-
+Route::post('empresas/tablefy', 'EmpresaController@tablefy');
 Route::get('empresas/{empresa}/contactos','EmpresaController@contactos');
 Route::post('empresas/{empresa}/imagen', 'EmpresaController@actualizar_imagen'); 
 Route::get('empresas/{empresa}/tags','EmpresaController@tags_empresa');
@@ -317,7 +327,7 @@ Route::resource('subsanaciones', 'SubsanacionController')->parameters([
 ]);
 
 
-
+Route::post('oportunidades/tablefy', 'OportunidadController@tablefy');
 Route::get('oportunidades/porEmpresa/{empresa}', 'OportunidadController@porEmpresa')->name('oportunidad.porEmpresa');
 Route::post('oportunidades/{oportunidad}/part/licitaciones_similares','OportunidadController@part_licitaciones_similares');
 Route::post('oportunidades/{oportunidad}/part/oportunidades_similares','OportunidadController@part_oportunidades_similares');
@@ -335,11 +345,16 @@ Route::resource('oportunidades', 'OportunidadController')->parameters([
   'oportunidades' => 'oportunidad'
 ]);
 
+Route::post('licitaciones/tablefy', 'LicitacionController@tablefy');
+Route::post('licitaciones/buenapro/tablefy', 'LicitacionController@tablefy_buenapro');
+Route::post('licitaciones/propias/tablefy', 'LicitacionController@tablefy_propias');
+Route::get('licitaciones/propias','LicitacionController@propias');
 Route::get('licitaciones/autocomplete','LicitacionController@autocomplete');
 Route::post('licitaciones/actualizar/{oportunidad}','LicitacionController@update')->name("licitacion.update");
 Route::get('licitaciones/calendario','LicitacionController@calendario');
 Route::post('licitaciones/nuevas/mas','LicitacionController@listNuevasMas');
 Route::get('licitaciones/workspace','LicitacionController@workspace');
+Route::get('licitaciones/workspace/demo','LicitacionController@workspace_demo');
 Route::get('licitaciones/participaciones','LicitacionController@participaciones');
 Route::get('licitaciones/resultados','LicitacionController@resultados');
 Route::get('licitaciones/nuevas','LicitacionController@listNuevas');

@@ -31,7 +31,7 @@
                 <div class="row">
                       <div class="col-8">
                         <div style="background: #efefef;border: 1px solid #d5d5d5;border-radius: 5px;padding: 5px;">
-                          @if(!empty($documento->cotizacion()->oportunidad()->licitacion_id))
+                          @if(!empty($documento->cotizacion_id) && !empty($documento->cotizacion()->oportunidad()->licitacion_id))
                           <iframe class="doc" src="https://docs.google.com/gview?embedded=true&url={{ (config('constants.app_url') . '/static/seace/' . $licitacion->bases_integradas) }}" frameborder='0' style="height:600px"></iframe>
                           @else
                           Solo Oportunidad
@@ -51,7 +51,9 @@
                             <ul class="list-inline d-flex mb-0">
                               <li class="d-flex align-items-center">
                                 <i class='bx bx-check-circle font-medium-3 mr-50'></i>
+                                @if(!empty($documento->cotizacion_id))
                                 <div class=" mr-1">{{ $documento->cotizacion()->empresa()->razon_social }}</div>
+                                @endif
                               </li>
                             </ul>
                           </div>

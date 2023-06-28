@@ -7,7 +7,7 @@
 			</div>
 			<div class="content-right">
 				<div class="content-wrapper">
-          <div class="content-header row">
+          <div class="content-header row" style="margin: 0;">
           </div>
           <div class="content-body">
             @yield('content')
@@ -18,7 +18,7 @@
 	@else
     {{-- others page structures --}}
 		<div class="content-wrapper">
-			<div class="content-header row">
+			<div class="content-header row" style="margin: 0;">
         @if($configData['pageHeader']=== true && isset($breadcrumbs))
           @include('panels.breadcrumbs')
         @endif

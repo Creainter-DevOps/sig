@@ -341,9 +341,8 @@ ORDER BY (D.elaborado_hasta IS NULL) DESC, (D.procesado_hasta IS NULL) DESC, 1 D
       $destino  = config('constants.ruta_storage') . 'workspace/' . $this->CompressWorkspace();
       $commands[] = 'export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"';
       $commands[] = "cd " . config('constants.ruta_temporal');
-      $commands[] = "tar -zchvf '" . $this->CompressWorkspace() . "' '" . $this->folder_workspace(true) . "'";
+      $commands[] = "tar --exclude='temp_*' --exclude='Propuesta*' -zchvf '" . $this->CompressWorkspace() . "' '" . $this->folder_workspace(true) . "'";
       $commands[] = "/snap/bin/gsutil mv '" . $this->CompressWorkspace() . "' '" . $destino . "'";
-
       if(is_null($commands)) {
         $pid = Helper::parallel_command($commands);
       }
@@ -356,6 +355,7 @@ ORDER BY (D.elaborado_hasta IS NULL) DESC, (D.procesado_hasta IS NULL) DESC, 1 D
       if(file_exists($this->folder_workspace())) {
         return false;
       }
+
       $destino = config('constants.ruta_temporal') . $this->CompressWorkspace();
       $commands[] = "cd " . config('constants.ruta_temporal');
       $commands[] = 'export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"';

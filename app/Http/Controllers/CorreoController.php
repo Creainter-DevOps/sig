@@ -10,24 +10,32 @@ use App\Correo;
 class CorreoController extends Controller {
 
   protected $viewBag = [];
+
   public function __construct(){
+
     $this->middleware('auth');
     $this->viewBag['pageConfigs'] = ['pageHeader' => true];
     $this->viewBag['breadcrumbs'] = [
-      ["link" => "/dashboard", "name" => "Home" ],
-      ["link" => "/correos", "name" => "Correos" ]
+      [ "link" => "/dashboard", "name" => "Home" ],
+      [ "link" => "/correos", "name" => "Correos" ]
     ];
+
   }
    
   public function index(Request $request) {
+
     $search = $request->input('search');
+
     if(!empty($search)){
       $listado = Correo::search($search)->paginate(15)->appends(request()->query());
     } else {
-      $listado = Correo::where('eliminado', false )->orderBy( 'id', 'desc')->paginate(15)->appends(request()->query());
+      $listado = Correo::orderBy('fecha', 'desc')->paginate(15)->appends(request()->query());
     }
+
     $this->viewBag['listado'] = $listado;
-    return view('correos.index', $this->viewBag);
+
+    return view('correo.index', $this->viewBag);
+
   }
 
   public function ver(Request $request, Correo $correo ) {
@@ -44,14 +52,18 @@ class CorreoController extends Controller {
   }
   
   public function store(Request $request,Correo  $correo ) {
+
     $data = $request->all();
-    if(!empty($data['empresa_id'])) {
+
+    if( !empty($data['empresa_id']) ) {
       $cliente = Cliente::porEmpresaForce($data['empresa_id']);
       $data['cliente_id'] = $cliente->id;
     }
+
     $correo->fill($data);
     $correo->save();
     $correo->log( 'creado');
+
     return response()->json([ 
       'status' => "success",
       'data' => [
@@ -63,14 +75,17 @@ class CorreoController extends Controller {
   }
 
   public function edit(Request $request, Correo $correo) {
+
     $this->viewBag['correo'] = $correo;
     $this->viewBag['breadcrumbs'][]  = [ 'name' => "Editar Correo" ]; 
     return view('correos.edit',$this->viewBag );    
+
   }
 
   public function update( Request $request,Correo  $correo  ) {
+
     $correo->update($request->all());
-    #$correo->log('editado');
+
     return response()->json([ 
       'status' => true,
       'redirect' => '/correos',

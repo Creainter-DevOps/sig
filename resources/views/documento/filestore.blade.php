@@ -24,6 +24,7 @@
     </div>
   </div>
 </section>
+  <script src="{{asset('js/Bucket.js')}}"></script>
 @endsection
 
 {{-- vendor scripts --}}

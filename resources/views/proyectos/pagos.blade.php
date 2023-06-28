@@ -1,46 +1,93 @@
-<div style="margin-top: -25px;text-align: right;">
-  <a class="btn btn-sm m-0" href="/proyectos/{{ $proyecto->id }}/financiero" target="_blank">
-    <i class="bx bx-printer"></i> Reporte
-  </a>
+@php
+ $did = uniqid();
+@endphp
+
+<!--<div style="margin-bottom: 15px;text-align: right;">
   <button type="button" class="btn btn-sm m-0" data-popup="/pagos/crear?proyecto_id={{ $proyecto->id }}">
     <i class="bx bx-plus"></i>Nuevo Pago
   </button>
-</div>
-<table class="table table-sm mb-0 table-bordered table-vcenter"  style="width:100%">
-  <thead>
-    <tr>
-      <th colspan="7" class="table-head">
-        <a class="link-primary"  href="{{ route('proyectos.show', [ 'proyecto' => $proyecto->id ]) }}" target="_blank">Pagos del Proyecto</a>
-      </th>
-    </tr>
-    <tr class="text-center">
-      <th>Número</th>
-      <th>Fecha</th>
-      <th>Descripción</th>
-      <th>Monto</th>
-      <th>Estado</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-@if(count($proyecto->pagos()) == 0)
-    <tr>
-      <td colspan="7" style="text-align:center;"><i>No se ha registrado pagos</i></td>
-    </tr>
-@else
-  @foreach($proyecto->pagos() as $e)
-    <tr>
-      <td class="text-center">{{ $e->numero }}</td>
-      <td class="text-center">{{ Helper::fecha($e->fecha) }}</td>
-      <td>{{ $e->descripcion }}</td>
-      <td class="text-center">{{ $e->monto() }}</td>
-      <td class="text-center">{{ $e->estado() }}</td>
-      <td style="width: 55px;text-align: center;">
-         <a href="javascript:void(0)" data-popup="{{ route( 'pagos.edit', [ 'pago' => $e->id ] ) }}"><i class="bx bx-edit-alt"></i></a>
-         <a href="javascript:void(0)" data-confirm-remove="{{ route('pagos.destroy', [ 'pago' => $e->id ])}}"><i class="bx bx-trash"></i></a>
-      </td>
-    </tr>
-  @endforeach
-@endif
-  </tbody>
-</table>
+</div>-->
+<table id="{{ $did }}"></table>
+<script>
+readyLoad(function() {
+        window.t{{ $did }} = new Tablefy({
+            title: 'RELACIÓN DE PAGOS',
+            dom: '#{{ $did }}',
+            height: 480,
+            request: {
+              url: '/proyectos/{{ $proyecto->id }}/pagos/tablefy',
+              type: 'POST',
+              data: {},
+              headers : {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+              },
+            },
+            headers: [
+              {
+                name: 'Código',
+                width: 100,
+                style: {'text-align':'center'},
+              },
+              {
+                name: 'Usuario',
+                width: 80,
+              },
+              {
+                name: 'Fecha',
+                width: 90,
+              },
+              {
+                name: 'Número',
+                width: 70,
+              },
+              {
+                name: 'Descripción',
+                width: 350,
+              },
+              {
+                name: 'Monto',
+                width: 100,
+              },
+              {
+                name: 'Moneda',
+                width: 70,
+              },
+              {
+                name: 'Siaf',
+                width: 100,
+              },
+              {
+                name: 'Estado',
+                width: 80,
+              },
+              {
+                name: 'Deposito',
+                width: 100,
+              },
+              {
+                name: 'Deposito',
+                width: 80,
+              },
+              {
+                name: 'Detracción',
+                width: 80,
+              },
+              {
+                name: 'Penalidad',
+                width: 80,
+              },
+              {
+                name: 'Factura',
+              },
+            ],
+            enumerate: true,
+            selectable: true,
+            contextmenu: true,
+            draggable: false,
+            sorter: true,
+            countSelectable: 5,
+        })
+        .init(true)
+        .appendExtra('<a href="javascript:void(0)" data-popup="/pagos/crear?proyecto_id={{ $proyecto->id }}" data-popup-end="t{{ $did }}.refresh();" class="btn">Nuevo</a>');
+      });
+</script>

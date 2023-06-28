@@ -26,48 +26,41 @@
 <!-- Dashboard Analytics Start -->
 <section id="dashboard-analytics">
     <div class="row">
-      <div class="col-12">
-        <div class="card">
-        <div class="table-responsive">
-        <table class="table table-striped table-reduce table-sm" style="margin-bottom:0">
-          <tr>
-            <th style="width:180px;">DÍA</th>
-            @foreach($chartjs['resumen'] as $n)
-            <th class="text-center" style="padding: 1.15rem 10px;background:{{ date('d', strtotime($n->fecha)) == date('d') ? '#b7ffaf' : '' }}">{{ date('d/m', strtotime($n->fecha)) }}</th>
-            @endforeach
-          </tr>
-          <tr>
-            <th>LICITACIONES</th>
-            @foreach($chartjs['resumen'] as $n)
-            <td class="text-center" style="background:{{ date('d', strtotime($n->fecha)) == date('d') ? '#b7ffaf' : '' }}">{{ $n->oportunidades }}</td>
-            @endforeach
-          </tr>
-          <tr>
-            <th>PROPUESTAS</th>
-            @foreach($chartjs['resumen'] as $n)
-            <td class="text-center" style="background:{{ date('d', strtotime($n->fecha)) == date('d') ? '#b7ffaf' : '' }}">{{ $n->enviadas }}</td>
-            @endforeach
-          </tr>
-          <tr>
-            <th>SOLO HOY</th>
-            @foreach($chartjs['resumen'] as $n)
-            <td class="text-center" style="background:{{ date('d', strtotime($n->fecha)) == date('d') ? '#b7ffaf' : '' }}">{{ $n->terminados }}</td>
-            @endforeach
-          </tr>
-           <tr>
-            <th>RECHAZADOS</th>
-            @foreach($chartjs['resumen'] as $n)
-            <td class="text-center" style="background:{{ date('d', strtotime($n->fecha)) == date('d') ? '#b7ffaf' : '' }}">{{ $n->rechazados }}</td>
-            @endforeach
-          </tr>
-        </table>
-        </div>
-        <div style="text-align:right;font-size:11px;padding: 0 5px;">Tiempo de consulta: {{ $chartjs['execute']->time }} ms</div>
-        </div>
-      </div>
-    </div>
-    <div class="row">
       <div class="col-xl-6 col-12 dashboard-marketing-campaign">
+        <div class="card">
+          <div class="card-body">
+          <table class="table table-striped table-reduce text-center table-padding-less">
+            <thead>
+              <tr>
+                <th rowspan="2">Usuario</th>
+                <th rowspan="2" style="width:200px">U.Acceso</th>
+                <th colspan="2">Documentos</th>
+                <th colspan="3">Oportunidades</th>
+              </tr>
+              <tr>
+                <th>Elab.</th>
+                <th>Verif.</th>
+                <th>Aprob.</th>
+                <th>Rechaz.</th>
+                <th>Archiv.</th>
+              </tr>
+            </thead>
+            <tbody>
+            @foreach(App\Dashboard::usuarios_elaborados() as $u)
+              <tr>
+                <th>{{ $u->usuario }}</th>
+                <td style="width:200px;">{{ Helper::fecha($u->last_sesion, true) }}</td>
+                <td>{{ $u->elaborados }}</td>
+                <td>{{ $u->correctos }}</td>
+                <td>{{ $u->aprobados }}</td>
+                <td>{{ $u->rechazados }}</td>
+                <td>{{ $u->archivados }}</td>
+              </tr>
+            @endforeach
+            </tbody>
+          </table>
+          </div>
+        </div>
         <div class="card">
           <div class="card-header d-flex justify-content-between align-items-center pb-1">
             <h4 class="card-title">Expedientes en Elaboración</h4>

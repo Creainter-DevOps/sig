@@ -1,90 +1,106 @@
 @extends('layouts.contentLayoutMaster')
-{{-- title --}}
-@section('title','Cotizaciones')
-{{-- vendor style --}}
+@section('title','Entregables')
 @section('vendor-styles')
-<link rel="stylesheet" type="text/css" href="{{asset('vendors/css/tables/datatable/datatables.min.css')}}">
-<link rel="stylesheet" type="text/css" href="{{asset('vendors/css/charts/apexcharts.css')}}">
-<link rel="stylesheet" type="text/css" href="{{asset('vendors/css/themes/layout.css')}}">
-<meta name="csrf-token" content="{{ csrf_token() }}">
 @endsection
-{{-- page style --}}
 @section('page-styles')
-<link rel="stylesheet" type="text/css" href="{{ asset('css/themes/layout.css') }}">
 @endsection
-
+@php
+ $did = uniqid();
+@endphp
 @section('content')
-<!-- table Transactions start -->
-<div class="row">
-        <div class="offset-12 col-md-1" style="margin-bottom: 10px;text-align:right;">
-                <a class="btn btn-default" href="/contactos/crear" style="color: #fff; background-color: #007bff; border-color: #007bff;">
-                    Nuevo
-                </a>
+    <div class="card">
+      <div class="card-content">
+        <div class="card-body">
+          <table id="{{ $did }}"></table>
         </div>
-  </div>
-<!-- table Transactions end -->
-
-<!-- table success start -->
-<section id="table-success">
-  <div class="card">
-    <!-- datatable start -->
-    <div class="card-body" >
-    <div class="table-responsive table-sm ">
-      <table id="table-extended-success" class="table mb-0">
-        <thead>
-          <tr>
-            <th>Cliente</th>
-            <th>Nombres</th>
-            <th>Apellidos</th>
-            <th>Celular</th>
-            <th>Correo</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="table-body" >
-          @foreach ( $listado as $contacto ) 
-          <tr>
-            <td class="">{{ (!empty($contacto->cliente()) ? $contacto->cliente()->rotulo() : '') }}</td>
-            <td class="pr-0">{{ $contacto->nombres }}</td>
-            <td class="text-success" align ="left" >{{ $contacto->apellidos }}</td>
-            <td class="" align ="left" >
-              <span data-outgoing="{{ $contacto->celular}}" data-outgoing-title="{{ $contacto->nombres }}"></span>
-            </td>
-            <td class="" align ="left" >{{ $contacto->correo }}</td>
-            <td>
-              <div class="dropdown">
-                <span class="bx bx-dots-vertical-rounded font-medium-2 dropdown-toggle nav-hide-arrow cursor-pointer"
-                  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="menu"></span>
-                <div class="dropdown-menu dropdown-menu-right">
-                  <a class="dropdown-item" href="{{ route( 'contactos.show', [ 'contacto' => $contacto->id ] ) }}"><i class="bx bx-show-alt mr-1"></i> Ver más</a>
-                  <a class="dropdown-item" href="{{ route( 'contactos.edit', [ 'contacto' => $contacto->id ] ) }}"><i class="bx bx-edit-alt mr-1"></i> Editar</a>
-                  <a class="dropdown-item" data-confirm-remove="{{ route('contactos.destroy', [ 'contacto' => $contacto->id ])}}" href="#" ><i class="bx bx-trash mr-1"></i> Eliminar</a>
-                </div>
-              </div>
-            </td>
-          </tr>
-        @endforeach
-        </tbody>
-      </table>
-    </div>
-    </div>
-      <div class="card-footer" >
-        {{ $listado->links() }}
       </div>
-      <div class="form-group" style="margin-left:20px;">Mostrando {{ count($listado) }} de {{ $listado->total() }} registros</div>
     </div>
-    <!-- datatable ends -->
-  </div>
-</section>
 @endsection
 
-{{-- vendor scripts --}}
 @section('vendor-scripts')
-<script src="{{asset('vendors/js/tables/datatable/datatables.min.js')}}"></script>
-<script src="{{asset('vendors/js/tables/datatable/datatables.checkboxes.min.js')}}"></script>
-<script src="{{asset('vendors/js/charts/apexcharts.min.js')}}"></script>
-<script src="{{asset('vendors/js/pickers/daterange/moment.min.js')}}"></script>
-<script src="{{asset('vendors/js/pickers/daterange/daterangepicker.js')}}"></script>
-<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="{{asset('js/scripts/helpers/basic.crud.js')}}"></script>
+@endsection
+@section('page-scripts')
+<script>
+        var tablaPautas = new Tablefy({
+            title: 'RELACIÓN DE MIS ENTREGABLES',
+            dom: '#{{ $did }}',
+            height: 480,
+            request: {
+              url: '/entregables/tablefy',
+              type: 'POST',
+              data: {},
+              headers : {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+              },
+            },
+            headers: [
+              {
+                name: 'Código',
+                width: 90,
+                style: {'text-align':'center'},
+              },
+              {
+                name: 'Proyecto',
+                width: 350,
+              },
+              {
+                name: 'Fecha',
+                width: 90,
+              },
+              {
+                name: 'Número',
+                width: 60,
+              },
+              {
+                name: 'Descripción',
+                width: 150,
+              },
+              {
+                name: 'Monto',
+                width: 80,
+              },
+              {
+                name: 'Moneda',
+                width: 70,
+              },
+              {
+                name: 'Estado',
+                width: 80,
+              },
+              {
+                name: 'Propuesta Hasta',
+                width: 120,
+              },
+              {
+                name: 'Propuesta',
+              },
+            ],
+            enumerate: true,
+            selectable: true,
+            contextmenu: true,
+            draggable: false,
+            sorter: true,
+            countSelectable: 5,
+            onComplete: function(object) {
+            },
+            onProcessRequest: function(x) {
+              x.result.items = x.result.items.map((v) => {
+                return {
+                  codigo: status_wdir('ENTT-' + v.proyecto_id + '-' + v.id, v.folder),
+                  proyecto: v.proyecto,
+                  fecha: status_date_vencimiento(v.fecha, v.estado),
+                  numero: v.numero,
+                  descripcion: v.descripcion,
+                  monto: v.monto,
+                  moneda: v.moneda,
+                  estado: v.estado,
+                  vence: status_date_vencimiento(v.fecha_propuesta_hasta, v.fecha_propuesta),
+                  ss: status_date(v.fecha_propuesta),
+                };
+              });
+              return x;
+            },
+        });
+        tablaPautas.init(true);
+</script>
 @endsection

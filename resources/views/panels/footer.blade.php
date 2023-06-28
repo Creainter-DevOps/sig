@@ -32,7 +32,7 @@
   margin-top: 8px;
 }
 .card_footer:hover .card_details {
-  display: block;
+  display: revert!important;
 }
 .card_footer_show {
   position: absolute;
@@ -43,7 +43,7 @@
 <footer class="footer footer-light @if(isset($configData['footerType'])){{$configData['footerClass']}}@endif">
   <div style="padding: 5px;white-space: nowrap;">
   <div class="row">
-    <div class="col-4">
+    <div class="col-3">
       <div class="footer_widget">
       <div class="card_footer">
       <!-- Card 01 -->
@@ -79,10 +79,10 @@
         </div>
       </div>
     </div>
-    <div class="col-2">
+    <div class="col-3">
       <div class="footer_widget">
         <div class="card_footer">
-          <!-- Muy Pronto -->
+          <div data-block-dinamic="/dashboard/part/actividades" data-block-auto="true"></div>
         </div>
       </div>
     </div>

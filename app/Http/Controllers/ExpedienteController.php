@@ -10,7 +10,7 @@ use App\Cotizacion;
 use App\Oportunidad;
 use App\Documento;
 use App\Helpers\Helper;
-use PhpOffice\PhpWord; 
+use PhpOffice\PhpWord;
 use Illuminate\Http\UploadedFile;
 use App\Http\Requests\StoreFileRequest;
 use Auth;
@@ -27,7 +27,7 @@ class ExpedienteController extends Controller
     {
        return view('expediente.index');
     }
-    
+
 
     /**
      * Show the form for creating a new resource.
@@ -60,25 +60,22 @@ class ExpedienteController extends Controller
       if(!empty($cotizacion->finalizado_el)) {
         return redirect('/expediente/' . $cotizacion->id . '/pendiente');
       }
-      
+
       $licitacion = $cotizacion->oportunidad()->licitacion();
-      $validaciones = [];   
+      $validaciones = [];
       $empresa = $cotizacion->empresa();
       $logo_header = config('constants.ruta_storage') . $empresa->logo_header;
       $logo_central = config('constants.ruta_storage') . $empresa->logo_central;
       $firma = EmpresaFirma::porEmpresa( $cotizacion->empresa_id, 'FIRMA');
       $visado = EmpresaFirma::porEmpresa( $cotizacion->empresa_id, 'VISADO');
 
-      $validaciones['empresa_logos'] = (gs_exists($logo_central) || gs_exists($logo_header)) ? true : false; 
-
+      $validaciones['empresa_logos'] = ( gs_exists($logo_central) || gs_exists($logo_header)) ? true : false;
       $validaciones['sellos_firmas'] = (!empty($firma) && !empty($visado)) ? true:false;
-
       $validaciones['representante'] = (!empty($empresa->representante_nombres ) &&  !empty($empresa->representante_documento) ) ? true : false;
-
       $validaciones['montos'] = (!empty( $cotizacion->monto) && !empty($cotizacion->moneda_id)) ? true : false;
 
       if( $request->ajax()){
-        return response()->json([ 'status' => true, 'validaciones' => $validaciones ]);  
+        return response()->json([ 'status' => true, 'validaciones' => $validaciones ]);
       }
       return view('expediente.inicio', compact('cotizacion','licitacion', 'validaciones'));
 
@@ -110,19 +107,24 @@ class ExpedienteController extends Controller
           'archivo'        => 'tenant-' . Auth::user()->tenant_id . '/' . gs_file('pdf'),
           'original'       => 'tenant-' . Auth::user()->tenant_id . '/' . gs_file('pdf')
         ]);
+
         $cotizacion->documento_id = $documento->id;
         $cotizacion->elaborado_por   = Auth::user()->id;
         $cotizacion->elaborado_step  = 1;
         $cotizacion->save();
+
       } else {
+
         $documento = Documento::find($cotizacion->documento_id);
         $documento->directorio     = trim($cotizacion->folder(true), '/');
         $documento->respaldado_el  = null;
         $documento->elaborado_por   = Auth::user()->id;
         $documento->elaborado_desde = DB::raw('now()');
+
         if(empty($documento->original)) {
           $documento->original = 'tenant-' . Auth::user()->tenant_id . '/' . gs_file('pdf');
         }
+
         if(empty($documento->archivo)) {
           $documento->archivo = 'tenant-' . Auth::user()->tenant_id . '/' . gs_file('pdf');
         }
@@ -149,7 +151,7 @@ class ExpedienteController extends Controller
       if(!empty($cotizacion->finalizado_el)) {
         return redirect('/expediente/' . $cotizacion->id . '/pendiente');
       }
-      
+
       if(!empty($workspace['parallel'])) {
         $finished = Helper::parallel_finished_pool($workspace['parallel']['pids']);
         if(!$finished) {
@@ -212,11 +214,11 @@ class ExpedienteController extends Controller
     public function cancelar_proceso(Cotizacion $cotizacion) {
       $documento = $cotizacion->documento();
       $workspace = $documento->json_load();
-      
+
       if(!empty($workspace['parallel']) ) {
         $finished = Helper::parallel_finished_pool($workspace['parallel']['pids']);
         if( !$finished ){
-          exec("kill -9 " . $workspace['parallel']['pids'] );  
+          exec("kill -9 " . $workspace['parallel']['pids'] );
           return redirect('/expediente/' . $cotizacion->id . '/paso03');
         }
       }
@@ -396,7 +398,7 @@ class ExpedienteController extends Controller
     }
     public function descargarTemporal(Request $request, Cotizacion $cotizacion) {
       /*
-      Usado en el PASO02 
+      Usado en el PASO02
       */
       $documento = $cotizacion->documento();
       $workspace = $documento->json_load();
@@ -413,8 +415,8 @@ class ExpedienteController extends Controller
 
       if(!file_exists($root)) {
         if( Helper::gs_exists(config('constants.ruta_storage') . $archivo )){
-          echo "Restaurar";  
-          exit; 
+          echo "Restaurar";
+          exit;
         }
 
         echo "404;" . $root;

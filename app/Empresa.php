@@ -75,6 +75,22 @@ class Empresa extends Model
             3 => 'Bajo',
         ];
     }
+    public static function pagination() {
+      return DB::PaginationQuery("
+        SELECT
+          E.*,
+          C.id cliente_id,
+          (SELECT SUM(O.monto_base) FROM osce.oportunidad O WHERE O.empresa_id = E.id AND O.tenant_id = :tenant) monto_oportunidades,
+          (SELECT SUM(CC.monto) FROM osce.proyecto P JOIN osce.cotizacion CC ON CC.id = P.cotizacion_id WHERE P.cliente_id = C.id AND P.tenant_id = :tenant) monto_proyectos
+        FROM osce.empresa E
+        LEFT JOIN osce.cliente C ON C.empresa_id = E.id AND C.tenant_id = :tenant
+          --search WHERE (UPPER(E.razon_social) LIKE CONCAT('%', (:q)::text, '%') OR E.ruc::text LIKE CONCAT('%', (:q)::text, '%'))
+        ORDER BY E.created_on DESC
+      ", [
+        'tenant' => Auth::user()->tenant_id,
+//        'user'   => Auth::user()->id,
+      ]);
+    }
     public function getCategoria() {
         return static::TipoCategorias()[$this->categoria_id];
     }

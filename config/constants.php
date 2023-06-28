@@ -7,5 +7,5 @@
     'static_temp'   => '/static/temporal/',
     'static_cloud'  => '/static/cloud/',
     'ruta_cloud'    => env('APP_URL','localhost') . '/static/cloud/',
-    'internal'      => env('DIR_INTERNAL','./'),
+    'internal'      => env('DIR_INTERNAL','./')
   ];

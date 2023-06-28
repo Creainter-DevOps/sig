@@ -10,7 +10,130 @@ NOTE:
 PLACE HERE YOUR OWN SCSS CODES AND IF NEEDED, OVERRIDE THE STYLES FROM THE OTHER STYLESHEETS.
 WE WILL RELEASE FUTURE UPDATES SO IN ORDER TO NOT OVERWRITE YOUR STYLES IT'S BETTER LIKE THIS.  */
 
-
+/* .card {
+  margin-right: 0!important;
+  margin-left: 0!important;
+} */
 .header-navbar .navbar-container ul.nav li.dropdown .dropdown-menu {
   z-index: 999999999999;
 }
+.heading-upper {
+  position: absolute;
+  top: -45px!important;
+  right: 0!important;
+}
+.heading-upper .btn {
+  padding: 3px 15px!important;
+}
+html .content.app-content {
+  overflow: unset!important;
+}
+html .navbar-static .content {
+  min-height: calc(100% - 190px)!important;
+  margin-top: 10px!important;
+}
+.app-content.content {
+  margin-top: 70px;
+}
+.app-content.content .content-wrapper {
+/*  position: absolute; */
+}
+html .navbar-static .app-content .content-wrapper {
+  padding: 0px!important;
+  height: 100%;
+  height: -webkit-fill-available;
+}
+.content-wrapper > .content-body {
+  height: 100%;
+  height: -webkit-fill-available;
+}
+.header-navbar .navbar-container ul.nav li.dropdown-user .dropdown-menu-right {
+  z-index: 999;
+}
+footer.footer {
+  padding: 2px 10px!important;
+  font-size: 11px!important;
+}
+.app-content-second {
+/*  border: 1px solid #dbdbdb;*/
+  border-radius: 0;
+  margin: 15px;
+  position: absolute;
+  bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  margin-bottom: 0;
+}
+
+.app-content.content .x-page {
+  position: absolute;
+  bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+.app-content.content .x-page > .x-page-overlay {
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  position: relative;
+  background: rgb(0 0 0 / 48%);
+  position: absolute;
+  z-index: 99;
+  cursor:pointer;
+}
+.app-content.content .x-page > .x-page-overlay:hover {
+  background: rgb(123 194 255 / 45%);
+}
+.app-content.content .x-page > .x-page-body {
+  background: #f2f4f4;
+  position: relative;
+  z-index: 99;
+  overflow: auto;
+  max-height: 100%;
+  min-height: 100%;
+  padding: 0 20px; /* TODO */
+}
+.app-content.content .x-page > .x-page-body.x-page-loading {
+  height: 800px;
+  background: #fff;
+}
+.app-content.content .x-page > .x-page-body.x-page-loading:before {
+  content: ' ';
+  color: #816bff;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  width: 400px;
+  height: 400px;
+  margin: 0 auto;
+  font-size: 25px;
+  font-family: 'Rubik';
+  background: #fff no-repeat center center;
+  background-image: url(https://cdn.dribbble.com/users/503653/screenshots/3143656/fluid-loader.gif);
+}
+.app-content.content .x-page > .x-page-body > .content-wrapper {
+  margin-top: 0;
+}
+.app-content.content .x-page > .x-page-nav {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  margin-left: 100px;
+  width: 100%;
+  max-width: 95%;
+  max-width: calc(100% - 100px);
+}
+.app-content.content .x-page > .x-page-nav > .x-page > .x-page-overlay {
+  left: -100px;
+}
+.table-padding-less td {
+  padding: 2px 0px;
+}
+.table-padding-less th {
+  padding: 2px 0px;
+}
+

@@ -1,9 +1,6 @@
 @php
 $uid = uniqid();
 @endphp
-<div>
-  <div class="row">
-    <div class="col-12">
       <div class="card">
         <div class="card-body">
           <h4 class="card-title">Historial</h4>
@@ -25,9 +22,6 @@ $uid = uniqid();
           </div>
         </div>
       </div>
-    </div>
-  </div>
-</div>
 @section('page-styles')
 @parent
 <style>

@@ -15,13 +15,16 @@ class User extends Authenticatable
     use Notifiable,HasApiTokens,HasRoles;
 
     protected $table = 'public.usuario';
+    const UPDATED_AT = null;
+    const CREATED_AT = null;
+
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'usuario', 'clave','tenant_id',
+        'usuario', 'clave','tenant_id','last_sesion'
     ];
 
     /**
@@ -45,6 +48,11 @@ class User extends Authenticatable
 //    public function getAuthIdentifier() {
 //        return $this->getKey();
 //    }
+    public function refreshLastSesion() {
+      $this->update([
+        'last_sesion' => DB::raw('now()')
+      ]);
+    }
     public function getAuthPassword() {
       return $this->clave;
     }

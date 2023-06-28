@@ -423,7 +423,7 @@ $(document).ready(function () {
       height: 250,
       type: "radialBar"
     },
-    series: [{{ (int) ($oportunidades->usado * 100 / $oportunidades->limite) }}],
+    series: [{{ empty($oportunidades->limite) ? 0 : ((int) ($oportunidades->usado * 100 / $oportunidades->limite)) }}],
     plotOptions: {
       radialBar: {
         offsetY: -10,
@@ -462,7 +462,7 @@ $(document).ready(function () {
       height: 250,
       type: "radialBar"
     },
-    series: [{{ (int) ($etiquetas->usado_total * 100 / $etiquetas->limite_total) }}],
+    series: [{{ empty($etiquetas->limite_total) ? 0 : ((int) ($etiquetas->usado_total * 100 / $etiquetas->limite_total)) }}],
     colors: [$success],
     plotOptions: {
       radialBar: {
@@ -503,7 +503,7 @@ $(document).ready(function () {
       height: 250,
       type: "radialBar"
     },
-    series: [{{ (int) ($empresas->usado * 100 / $empresas->limite) }}],
+    series: [{{ empty($empresas->limite) ? 0 : ((int) ($empresas->usado * 100 / $empresas->limite)) }}],
     colors: [$danger],
     plotOptions: {
       radialBar: {

@@ -7,8 +7,11 @@ use App\Proyecto;
 use App\Contacto;
 use App\Empresa;
 use App\Cliente;
-use App\Persona;
+use App\Pago;
+use App\Orden;
 use App\Ubigeo;
+use App\Carta;
+use App\Entregable;
 use App\Helpers\Helper;
 use Auth;
 
@@ -25,16 +28,114 @@ class ProyectoController extends Controller {
       ["link" => "/proyectos", "name" => "Proyectos" ]
     ];
   }
+  public function tablefy(Request $request) {
+    $listado = Proyecto::pagination()
+    ->appends(request()->input())
+    ->map(function($row) {
+      return [
+        //'codigo' =>  '<span style="border-bottom: 5px solid ' . $row->color . ';">' . $row->codigo . '</span>',
+        'codigo'      => "javascript:status_wdir(row.codigo, '" . $row->folder(true) . "')",
+        'tipo'   =>  $row->tipo,
+        'proveedor' =>  $row->proveedor_rotulo,
+        'cliente' => $row->cliente_rotulo,
+        'rotulo' => '<a href="/proyectos/' . $row->id . '">' . $row->rotulo . '</a>',
+        'monto'       => 'javascript:status_monto(row.moneda_id, row.monto)',
+        'fecha_buenapro'  => 'javascript:status_date(row.fecha_buenapro)',
+        'fecha_consentimiento' => 'javascript:status_date(row.fecha_consentimiento)',
+        'fecha_firma' => 'javascript:status_date_vencimiento(row.fecha_perfeccionamiento, row.estado_perfeccionamiento)',
+        'fecha_hasta' => 'javascript:status_date_vencimiento(row.fecha_termino, row.estado_termino)',
+        'estado_id'   => 'javascript:status_contrato_estado(row.estado_id)',
+        'pagos' => '<div style="width: 10px;height: 10px;border-radius: 30px;margin: 0 auto;background: ' . $row->estado_color . ';"></div>AL DÍA',
+      ];
+    })
+    ->get();
+    return $listado->response();
+  }
+  public function tablefy_cartas(Request $request, Proyecto $proyecto) {
+    $listado = Carta::paginationPorProyecto($proyecto)
+    ->appends(request()->input())
+    ->map(function($row) {
+      return [
+        'codigo' => "javascript:status_wdir('CTT-' + row.proyecto_id + '-' + row.id, '" . $row->folder(true) . "')",
+        'fecha'  => "javascript:status_date_vencimiento(row.fecha, row.estado)",
+        'numero' =>  $row->numero,
+        'nomenclatura' => $row->nomenclatura,
+        'rotulo' => $row->rotulo,
+        'hojas'  => $row->hojas,
+        'estado_id' => 'javascript:status_select_estado(row.estado_id)',
+        'cuenta' => $row->cuenta_id,
+        'folder' => "javascript:status_wdir('" . $row->folder(true) . "', '" . $row->folder(true) . "')",
+      ];
+    })
+    ->get();
+    return $listado->response();
+  }
+  public function tablefy_entregables(Request $request, Proyecto $proyecto) {
+    $listado = Entregable::paginationPorProyecto($proyecto)
+    ->appends(request()->input())
+    ->map(function($row) {
+      return [
+        'codigo' => "javascript:status_wdir('ENTT-' + row.proyecto_id + '-' + row.id, '" . $row->folder(true) . "')",
+        'fecha'  => "javascript:status_date_vencimiento(row.fecha, row.estado)",
+        'numero' =>  $row->numero,
+        'descripcion' => $row->descripcion,
+        'folder' => "javascript:status_wdir('" . $row->folder(true) . "', '" . $row->folder(true) . "')",
+        'monto'       => 'javascript:status_monto(row.moneda_id, row.monto)',
+        'estado_id' => 'javascript:status_select_estado(row.estado_id)',
+      ];
+    })->get();
+    return $listado->response();
+  }
+  public function tablefy_pagos(Request $request, Proyecto $proyecto) {
+    $listado = Pago::paginationPorProyecto($proyecto)
+    ->appends(request()->input())
+    ->map(function($row) {
+      return [
+        'codigo'      => "javascript:status_wdir('PAGO-' + row.proyecto_id + '-' + row.id, '" . $row->folder(true) . "')",
+        'usuario'   =>  $row->usuario,
+        'fecha'       => 'javascript:status_date_vencimiento(row.fecha, row.estado)',
+        'numero'      => $row->numero,
+        'descripcion' => $row->descripcion,
+        'monto'       => 'javascript:status_monto(row.moneda_id, row.monto)',
+        'moneda_id'   => 'javascript:status_moneda(row.moneda_id)',
+        'codigo_siaf' => $row->codigo_siaf,
+        'estado_id'   => 'javascript:status_select_estado(row.estado_id)',
+        'fecha_deposito'   => 'javascript:status_date_vencimiento(row.fecha_deposito, 1)',
+        'monto_depositado' => $row->monto_depositado,
+        'monto_detraccion' => $row->monto_detraccion,
+        'monto_penalidad'  => $row->monto_penalidad,
+        'factura_codigo'   => $row->factura_codigo,
+      ];
+    })
+    ->get();
+    return $listado->response();
+  }
+  public function tablefy_gastos(Request $request, Proyecto $proyecto) {
+    $listado = Orden::paginationPorProyecto($proyecto)
+    ->appends(request()->input())
+    ->map(function($row) {
+      return [
+        'codigo'      => "javascript:status_wdir('GASTO-' + row.proyecto_id + '-' + row.id, '" . $row->folder(true) . "')",
+        'usuario'   =>  $row->usuario,
+        'fecha'       => 'javascript:status_date_vencimiento(row.fecha, row.estado)',
+        'numero'      => $row->numero,
+        'descripcion' => $row->descripcion,
+        'monto'       => 'javascript:status_monto(row.moneda_id, row.monto)',
+        'moneda_id'   => 'javascript:status_moneda(row.moneda_id)',
+        'estado_id'   => 'javascript:status_select_estado(row.estado_id)',
+        'fecha_deposito'   => 'javascript:status_date_vencimiento(row.fecha_deposito, 1)',
+        'monto_depositado' => $row->monto_depositado,
+        'monto_detraccion' => $row->monto_detraccion,
+        'monto_penalidad'  => $row->monto_penalidad,
+        'factura_codigo'   => $row->factura_codigo,
+      ];
+    })
+    ->get();
+    return $listado->response();
+  }
   public function index(Request $request)
   {
-      $search = $request->input('search');
-      if(!empty($search)) {
-          $listado = Proyecto::search($search)->paginate(15)->appends(request()->query());
-      } else {
-          $listado = Proyecto::list()->paginate(15)->appends(request()->query());
-      }
-      $this->viewBag['listado'] = $listado;
-      return view('proyectos.index',  $this->viewBag );
+      return view('proyectos.index',  $this->viewBag);
   }
   public function porCliente(Request $request, Cliente $cliente)
   {

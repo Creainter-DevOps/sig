@@ -13,15 +13,34 @@ class OrdenController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+  public function tablefy(Request $request) {
+    $listado = Orden::pagination()
+    ->appends(request()->input())
+    ->map(function($row) {
+      return [
+        'codigo'      => "javascript:status_wdir('GASTO-' + row.proyecto_id + '-' + row.id, '" . $row->folder(true) . "')",
+        'usuario'   =>  $row->usuario,
+        'proyecto'    =>  $row->proyecto_rotulo,
+        'fecha'       => 'javascript:status_date_vencimiento(row.fecha, row.estado)',
+        'numero'      => $row->numero,
+        'descripcion' => $row->descripcion,
+        'monto'       => 'javascript:status_monto(row.moneda_id, row.monto)',
+        'moneda_id'   => 'javascript:status_moneda(row.moneda_id)',
+        'estado_id'   => 'javascript:status_select_estado(row.estado_id)',
+        'fecha_deposito'   => 'javascript:status_date_vencimiento(row.fecha_deposito, 1)',
+        'monto_depositado' => $row->monto_depositado,
+        'monto_detraccion' => $row->monto_detraccion,
+        'monto_penalidad'  => $row->monto_penalidad,
+        'factura_codigo'   => $row->factura_codigo,
+      ];
+    })
+    ->get();
+    return $listado->response();
+  }
     public function index(Request $request )
     {
-         $search = $request->input('search');
-        if(!empty($search)) {
-            $listado = Orden::search($search)->paginate(15)->appends(request()->query());
-        } else {
-            $listado = Orden::orderBy('created_on', 'desc')->paginate(15)->appends(request()->query());
-        }
-        return view('orden.index', ['listado' => $listado]); 
+        return view('orden.index');
     }
 
     /**

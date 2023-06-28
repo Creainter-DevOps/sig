@@ -24,4 +24,16 @@ class Dashboard extends Model
       $file  = json_decode(file_get_contents($file), true);
       return $file['competencia'];
     }
+    public static function actividades() {
+      $file  = config('constants.internal') . 'config_' . Auth::user()->tenant_id . '.json';
+      $file  = json_decode(file_get_contents($file), true);
+      return $file['actividades'];
+    }
+    public static function usuarios_elaborados() {
+      return DB::collect('SELECT * FROM osce.fn_usuario_rendimiento_fecha(:tenant, :id, :fecha)', [
+        'tenant' => Auth::user()->tenant_id,
+        'id'     => Auth::user()->id,
+        'fecha'  => date('Y-m-d'),
+      ]);
+    }
 }

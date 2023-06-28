@@ -76,7 +76,7 @@ class Actividad extends Model
       FROM (
       	SELECT *
       	FROM osce.actividad A
-      	WHERE A.estado IN (1,2) AND A.eliminado IS FALSE
+      	WHERE A.tenant_id = :tenant AND A.estado IN (1,2) AND A.eliminado IS FALSE
       		AND :user = ANY(A.asignado_id)
           AND (A.postergado_el IS NULL OR A.postergado_el <= NOW() - INTERVAL '45' MINUTE)
           AND A.fecha <= NOW() + INTERVAL '15' DAY
@@ -86,6 +86,7 @@ class Actividad extends Model
       LEFT JOIN osce.oportunidad O ON O.id = A.oportunidad_id
       LEFT JOIN osce.cliente C ON C.id = O.cliente_id", [
         'user' => Auth::user()->id,
+        'tenant' => Auth::user()->tenant_id,
       ]);
       return $rr;
     }

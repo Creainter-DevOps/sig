@@ -43,7 +43,6 @@
                id="seudonimo"
                value="{{ old('seudonimo', @$empresa->seudonimo) }}"
                placeholder="Seudonimo"
-               required
                class="form-control">
               @if ($errors->has('seudonimo'))
               <div class="invalid-feedback">{{ $errors->first('seudonimo') }}</div>

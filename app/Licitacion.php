@@ -9,7 +9,7 @@ use Laravel\Passport\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Model;
 use App\Helpers\Helper;
-use Illuminate\Support\Facades\DB;
+use App\Facades\DB;
 use App\Empresa;
 use App\Oportunidad;
 use App\Cotizacion;
@@ -50,6 +50,93 @@ class Licitacion extends Model
         'email_verified_at' => 'datetime',
         'estado' => 'boolean',
       ];
+
+    public static function paginationTotal() {
+      return DB::PaginationQuery("
+        SELECT
+          L.*,
+          L.created_on::date fecha,
+          osce.empresa_rotulo(:tenant, L.empresa_id) cliente,
+          (SELECT COUNT(*) FROM osce.licitacion_item I WHERE I.licitacion_id = L.id) items
+          FROM (
+            SELECT 
+              L.*
+            FROM osce.licitacion L
+            --search WHERE (UPPER(L.rotulo) LIKE CONCAT('%', (:q)::text, '%') OR L.nomenclatura LIKE CONCAT('%', (:q)::text, '%'))
+            ORDER BY L.id DESC
+            --pagination
+          ) L
+      ", [
+        'tenant' => Auth::user()->tenant_id,
+//        'user'   => Auth::user()->id,
+      ])->countEstimate();
+    }
+    public static function paginationPropias() {
+      return DB::PaginationQuery("
+        SELECT
+          L1.*,
+          osce.empresa_rotulo(:tenant, L1.empresa_id) cliente,
+          osce.oportunidad_variacion_montos(L1.id) monto_propio,
+          osce.fn_oportunidad_fecha_estado_propuesta(1, L1.id) inx_estado_participacion,
+          osce.fn_oportunidad_fecha_estado_propuesta(1, L1.id) inx_estado_propuesta,
+          osce.licitacion_ganadores(:tenant, L1.licitacion_id::int) ganadores
+        FROM (
+          --started
+          SELECT 
+            O.id,
+            O.created_on fecha,
+            L.empresa_id,
+            O.licitacion_id,
+            L.rotulo,
+            L.tipo_objeto,
+            L.nomenclatura,
+            L.monto
+          FROM osce.oportunidad O
+          JOIN osce.licitacion L ON L.id = O.licitacion_id
+          LEFT JOIN osce.actividad_tipo TT ON TT.id = O.estado
+          WHERE O.tenant_id = :tenant AND O.eliminado IS NULL
+            --search AND (UPPER(O.rotulo) LIKE CONCAT('%', (:q)::text, '%') OR L.nomenclatura LIKE CONCAT('%', (:q)::text, '%'))
+          ORDER BY O.id DESC
+          --pagination
+        ) L1
+      ", [
+        'tenant' => Auth::user()->tenant_id,
+//        'user'   => Auth::user()->id,
+      ]);#->countEstimate();
+    }
+    public static function paginationBuenaPro() {
+      return DB::PaginationQuery("
+        SELECT
+          L1.*,
+          osce.empresa_rotulo(:tenant, L1.empresa_id) cliente,
+          osce.oportunidad_variacion_montos(L1.id) monto_propio,
+          osce.fn_oportunidad_fecha_estado_propuesta(1, L1.id) inx_estado_participacion,
+          osce.fn_oportunidad_fecha_estado_propuesta(1, L1.id) inx_estado_propuesta,
+          osce.licitacion_ganadores(:tenant, L1.licitacion_id::int) ganadores
+        FROM (
+          --started
+          SELECT
+            O.id,
+            O.created_on fecha,
+            L.empresa_id,
+            O.licitacion_id,
+            L.rotulo,
+            L.tipo_objeto,
+            L.nomenclatura,
+            L.monto
+          FROM osce.oportunidad O
+          JOIN osce.licitacion L ON L.id = O.licitacion_id AND L.buenapro_fecha IS NOT NULL
+          LEFT JOIN osce.actividad_tipo TT ON TT.id = O.estado
+          WHERE O.tenant_id = :tenant AND O.eliminado IS NULL
+            --search AND (UPPER(O.rotulo) LIKE CONCAT('%', (:q)::text, '%') OR L.nomenclatura LIKE CONCAT('%', (:q)::text, '%'))
+          ORDER BY O.id DESC
+          --pagination
+        ) L1
+      ", [
+        'tenant' => Auth::user()->tenant_id,
+//        'user'   => Auth::user()->id,
+      ]);#->countEstimate();
+    }
     public function rotulo() {
       return $this->rotulo;
     }

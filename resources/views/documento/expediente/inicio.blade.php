@@ -164,18 +164,19 @@
                   </div>
                   <div class="col-3">
                   @if(!empty($documento->revisado_status))
+                  @if(!empty($documento->cotizacion_id))
                   @if(empty($documento->cotizacion()->propuesta_el))
                     <a class="btn btn-secondary text-white" data-confirm data-button-dinamic href="/cotizaciones/{{ $documento->cotizacion()->id }}/registrarPropuesta" class="btn btn-sm btn-dark">Marcar como Enviado</a>
                   @else
                     Ya se ha registrado el Envio:<br /> {{ Helper::fecha($documento->cotizacion()->propuesta_el, true) }} por {{ Auth::user()->byId($documento->cotizacion()->propuesta_por) }}
                   @endif
                   @endif
+                  @endif
                   </div>
                 </div>
               </div>
             </div>
-
-            @if(!empty($documento->cotizacion()->oportunidad()->correo_id))
+            @if(!empty($documento->cotizacion_id) && !empty($documento->cotizacion()->oportunidad()->correo_id))
             <div class="blockSendMail" style="max-width: 700px;margin:0 auto;background: #f3f3f3;border: 1px solid #e1e1e1;color: #000;padding: 10px;border-radius: 3px;">
               <fieldset class="form-group">
                   <div class="input-group">

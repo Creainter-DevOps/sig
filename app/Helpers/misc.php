@@ -70,7 +70,9 @@ function gs_exists($file) {
   }
   return false;
 }
+
 function gs($file, $folder = null) {
+
   $path_basic    = config('constants.ruta_temporal');
   $path_temporal = $folder ?? config('constants.ruta_temporal');
 
@@ -90,6 +92,7 @@ function gs($file, $folder = null) {
     return $file;
   }
 }
+
 function gs_async($file, $folder = null, &$commands = null) {
   $path_basic    = config('constants.ruta_temporal');
   $path_temporal = $folder ?? config('constants.ruta_temporal');

@@ -1,3 +1,115 @@
+function status_contrato_estado(cid) {
+  let fft = {
+    58: 'PRECONTRATO',
+    59: 'CONTRATO',
+    60: 'INICIO DE INSTALACIÓN',
+    61: 'FIN DE INSTALACIÓN',
+    62: 'INICIO DE DESARROLLO',
+    63: 'FIN DE DESARROLLO',
+    64: 'INICIO DE SERVICIO',
+    65: 'FIN DE SERVICIO',
+    66: 'INICIO DE GARANTÍA',
+    67: 'FIN DE GARANTÍA',
+    68: 'CANCELADO',
+    69: 'CONCLUIDO',
+  };
+  if(typeof fft[cid] !== 'undefined') {
+    return fft[cid];
+  } else {
+    return '--';
+  }
+}
+function status_moneda(mid) {
+  if(mid == 1) {
+    return 'SOLES';
+  } else if (mid == 2) {
+    return 'DOLARES';
+  } else if (mid == 3) {
+    return 'EUROS';
+  }
+}
+function status_monto(mid, nn) {
+  var pre = '';
+  var pos = '';
+  if(mid == 1) {
+    pre = 'S/. ';
+  } else if(mid == 2) {
+    pos = ' USD';
+  } else if(mid == 3) {
+    pos = ' EUR';
+  }
+  nn = parseFloat(nn);
+  return pre + nn.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + pos;
+}
+function wdir(file) {
+  console.log('wdir', this);
+  if(typeof window.baseUserDir == 'undefined') {
+    return alert('no dir');
+  }
+  var comm = decodeURI('odir:' + window.baseUserDir + '/' + file);
+  comm = comm.replace(/\//g, "\\")
+  console.log('execute', comm);
+  window.location.href = comm;
+}
+function status_wdir(txt, dir) {
+  return "<a href=\"javascript:wdir('" + encodeURI(dir) + "');\">" + txt + '</a>';
+}
+function status_select_estado(eid) {
+  if(eid == 1) {
+    return '<div style="color:#c1c1c1;">PENDIENTE</div>';
+  } else if(eid == 2) {
+    return '<div style="color:#ff7600;">EN PROCESO</div>';
+  } else if(eid == 3) {
+    return '<div style="color:#6ed130;">FINALIZADO</div>';
+  } else {
+    return '';
+  }
+}
+function status_date_vencimiento(dd, estado) {
+  if(dd == '' || dd == null) {
+    return '';
+  }
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const pp = new Date(dd);
+  pp.setHours(0, 0, 0, 0);
+
+  var diff = new Date(+today) - new Date(+pp);
+  diff = Math.round(diff/8.64e7);
+
+  if(pp <= today) {
+    if(estado) {
+      return '<span><-' + pp.toLocaleString().split(',')[0] + '</span>';
+    } else {
+      return '<span style="color:red"><-' + pp.toLocaleString().split(',')[0] + '</span>';
+    }
+  } else if(diff > 7) {
+    return '<span>->' + pp.toLocaleString().split(',')[0] + '</span>';
+  } else if(diff <= 7) {
+    return '<span style="color: orange">->' + pp.toLocaleString().split(',')[0] + '</span>';
+  } else {
+    return '<span>' + pp.toLocaleString().split(',')[0] + '</span>';
+  }
+}
+function status_date(dd, estado) {
+  if(dd == '' || dd == null) {
+    return '';
+  }
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const pp = new Date(dd);
+  if(pp < today) {
+    return '<span><-' + pp.toLocaleString().split(',')[0] + '</span>';
+  } else if(pp > today) {
+    return '<span>->' + pp.toLocaleString().split(',')[0] + '</span>';
+  } else {
+    return '<span>' + pp.toLocaleString().split(',')[0] + '</span>';
+  }
+}
+function status_badge(tt) {
+  tt = JSON.parse(tt);
+  return '<span class="' + tt.class + '">' + tt.message + '</span>';
+}
 function _hasTag(box, tag) {
   if(typeof box.tags !== 'undefined') {
     return true;
@@ -68,7 +180,7 @@ function Fetchx(params, inmediate) {
                 .slideDown();
         }
         if(typeof params.title !== 'undefined') {
-          idToast = toastr.info('Se está procesando la solicitud', params.title, { positionClass: 'toast-top-right', containerId: 'toast-top-right', 'timeOut': 0 });
+          idToast = toastr.info('Se está procesando la solicitud', params.title, { positionClass: 'toast-bottom-right', containerId: 'toast-bottom-right', 'timeOut': 0 });
         }
     };
     var ocultar = function () {
@@ -99,7 +211,7 @@ function Fetchx(params, inmediate) {
             temp_success($x, params);
             if(typeof params.title !== 'undefined') {
               toastr.clear(idToast);
-              toastr.success('Se ha realizado con éxito', params.title, { positionClass: 'toast-top-right', containerId: 'toast-top-right', 'timeOut': 2000 });
+              toastr.success('Se ha realizado con éxito', params.title, { positionClass: 'toast-bottom-right', containerId: 'toast-bottom-right', 'timeOut': 2000 });
             }
         };
     } else {
@@ -107,7 +219,7 @@ function Fetchx(params, inmediate) {
             ocultar($x, params);
             if(typeof params.title !== 'undefined') {
               toastr.clear(idToast);
-              toastr.success('Se ha realizado con éxito', params.title, { positionClass: 'toast-top-right', containerId: 'toast-top-right', 'timeOut': 2000 });
+              toastr.success('Se ha realizado con éxito', params.title, { positionClass: 'toast-bottom-right', containerId: 'toast-bottom-right', 'timeOut': 2000 });
             }
         };
     }
@@ -117,7 +229,7 @@ function Fetchx(params, inmediate) {
       ocultar($x, params);
       if(typeof params.title !== 'undefined') {
         toastr.clear(idToast);
-        toastr.error('Ocurrió un problema durante la ejecución', params.title, { positionClass: 'toast-top-right', containerId: 'toast-top-right', 'timeOut': 2000 });
+        toastr.error('Ocurrió un problema durante la ejecución', params.title, { positionClass: 'toast-bottom-right', containerId: 'toast-bottom-right', 'timeOut': 2000 });
       }
     };
     return $.ajax(params);
@@ -989,6 +1101,11 @@ function render_dom_popup() {
                 });
             }
             modal.modal("show");
+            modal.on('hide.bs.modal', function () {
+              if(typeof box.attr("data-popup-end") !== 'undefined') {
+                eval(box.attr("data-popup-end"));
+              }
+            });
         });
     });
 }
@@ -1124,12 +1241,12 @@ function render_button_dinamic() {
           if(!res.status) {
             return n.fire("Denegado", res.message, "error");
           } else {
-            toastr.success(res.message, res.label, { positionClass: 'toast-top-right', containerId: 'toast-top-right', 'timeOut': 2000 });
+            toastr.success(res.message, res.label, { positionClass: 'toast-bottom-right', containerId: 'toast-bottom-right', 'timeOut': 2000 });
           }
           return res;
         },
         error: function() {
-          toastr.error('Ocurrió un problema durante la ejecución', 'Ops!', { positionClass: 'toast-top-right', containerId: 'toast-top-right', 'timeOut': 2000 });
+          toastr.error('Ocurrió un problema durante la ejecución', 'Ops!', { positionClass: 'toast-bottom-right', containerId: 'toast-bottom-right', 'timeOut': 2000 });
         }
       });
     });

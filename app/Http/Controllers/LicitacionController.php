@@ -34,6 +34,46 @@ class LicitacionController extends Controller {
   public function part_avance_expedientes(Request $request) {
     return view('licitacion.part_avance_expedientes');
   }
+  public function tablefy(Request $request) {
+    $listado = Licitacion::paginationTotal()
+    ->appends(request()->input())
+    ->map(function($row) {
+      return [
+        'codigo' => $row->nomenclatura,
+        'fecha'  => 'javascript:status_date(row.fecha)',
+        'cliente' => $row->cliente,
+        'tipo_objeto'  =>  $row->tipo_objeto,
+        'rotulo' =>  '<a href="/licitaciones/' . $row->id . '">' . $row->rotulo . '</a>',
+        'monto' =>  $row->monto,
+        'items' =>  $row->items,
+        'participa' => 'javascript:status_date_vencimiento(row.fecha_participacion_hasta, row.fecha_propuesta)',
+        'propuesta' => 'javascript:status_date_vencimiento(row.fecha_propuesta_hasta, row.fecha_propuesta)',
+        'ss' =>  'javascript:status_date(row.fecha_propuesta)',
+
+      ];
+    })
+    ->get();
+    return $listado->response();
+  }
+  public function tablefy_propias(Request $request) {
+    $listado = Licitacion::paginationPropias()
+    ->appends(request()->input())
+    ->get();
+    return response()->json([
+      'success' => true,
+      'result' => $listado,
+    ]);
+  }
+  public function tablefy_buenapro(Request $request) {
+    $listado = Licitacion::paginationBuenaPro()
+    ->appends(request()->input())
+    ->map()
+    ->get();
+    return $listado->response();
+  }
+  public function propias(Request $request ) {
+    return view('licitacion.propias', $this->viewBag);
+  }
   public function index(Request $request ) {
     $search = $request->input('search');
       if(!empty($search)) {
@@ -47,6 +87,7 @@ class LicitacionController extends Controller {
     return view('licitacion.index', $this->viewBag);
   }
   public function workspace(Request $request) {
+
     if (!empty($request->input("search"))) {
       $query = strtolower($request->input("search")); 
       $list = Licitacion::search($query)->take(200)->orderBy('fecha_participacion_hasta', 'DESC')->get();
@@ -55,8 +96,15 @@ class LicitacionController extends Controller {
 
     $chartjs['resumen'] = Oportunidad::estadistica_enviado_diario($out);
     $chartjs['execute'] = $out;
+
     return view('licitacion.workspace', compact('chartjs','actividades'));
+
   }
+
+  public function workspace_demo(Request $request) {
+    dd( Oportunidad::listado_propuestas_por_vencer() ) ;
+  }
+
   public function participaciones(Request $request) {
     return view('licitacion.participaciones');
   }

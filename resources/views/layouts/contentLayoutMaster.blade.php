@@ -23,15 +23,13 @@ lang="es"
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Creainter - @yield('title')</title>
+    <title>Adjudica - @yield('title')</title>
     <link rel="apple-touch-icon" href="{{asset('images/ico/apple-icon-120.png')}}">
     <link rel="shortcut icon" type="image/x-icon" href="{{asset('images/ico/favicon.ico')}}">
     <link rel="stylesheet" href="{{asset('css/sip.css')}}" />
 
-    {{-- Include core + vendor Styles --}}
     @include('panels.styles')
     </head>
-    <!-- END: Head-->
 
      @if(!empty($configData['mainLayoutType']) && isset($configData['mainLayoutType']))
      @include(($configData['mainLayoutType'] === 'horizontal-menu') ? 'layouts.horizontalLayoutMaster':'layouts.verticalLayoutMaster')
