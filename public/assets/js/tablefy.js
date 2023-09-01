@@ -531,7 +531,8 @@ function Tablefy (params) {
               }
               td.closest('tr').data('row', res.row);
               td.addClass('xedit-success');
-              if(typeof res.row._map[vlv] !== 'undefined' && typeof res.row._map[vlv].indexOf === 'function' && res.row._map[vlv].indexOf('javascript:') === 0) {
+              console.log('List0', res.row);
+              if(typeof res.row._map[vlv] !== 'undefined' && res.row._map[vlv] !== null && typeof res.row._map[vlv].indexOf === 'function' && res.row._map[vlv].indexOf('javascript:') === 0) {
                 row = res.row;
                 box.html(eval(res.row._map[vlv].substr(11)));
               } else {
@@ -586,12 +587,25 @@ function Tablefy (params) {
                 field.val(row[vlv]);
               }
             }
+            if(typeof res.result.attrs !== 'undefined') {
+              for(var ii in res.result.attrs) {
+                field.attr(ii, res.result.attrs[ii]);
+              }
+            }
             box.html(field);
             if(!(typeof res.result.attrs !== 'undefined' && typeof res.result.attrs.value !== 'undefined') && field !== null) {
               field.val(anterior);
             }
-            td.off('change').on('change', guardarInput);
             td.focus();
+            if(typeof res.result.attrs !== 'undefined' && typeof res.result.attrs.multiple !== 'undefined') {
+              td.off('focusout').on('focusout', function() {
+                guardarInput();
+              });
+            } else {
+              td.off('change').on('change', function() {
+                guardarInput();
+              });
+            }
             if(typeof field[0].select === 'function') {
               field[0].select();
             }

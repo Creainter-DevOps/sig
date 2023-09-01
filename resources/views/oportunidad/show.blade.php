@@ -122,8 +122,12 @@
                             class="users-avatar-shadow rounded-circle" height="64" width="64" />
                     </a>
                     <div class="media-body pt-25">
-                        <h4 class="media-heading">Oportunidad de Negocio</h4>
-                        <span>Licitación del SEACE</span>
+                        <h4 class="media-heading">Oportunidad de Negocio: {{ $oportunidad->codigo }}</h4>
+                        @if(!empty($oportunidad->correo_id))
+                        <span>Oportunidad iniciada por requerimiento via Correo Electrónico.</span>
+                        @else
+                        <span>Oportunidad iniciada por Licitación Pública.</span>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -271,7 +275,14 @@
         <tr>
           <td>{{ Helper::fecha($r->fecha, true) }}</td>
           <td>{{ $r->correo_desde }}</td>
-          <td>{{ $r->asunto }}</td>
+          <td>{{ $r->asunto }}
+          @if(!empty($r->metadata))
+          <br />
+          @foreach(json_decode($r->metadata, true) as $k => $v)
+            <b>{{ $k }}: </b> {{ $v }}<br />
+          @endforeach
+          @endif
+          </td>
           <td>{{ $r->adjuntos_cantidad }}</td>
           <td><a href="javascript:void(0)" data-popup="/correos/{{ $r->id }}/ver">Abrir</a></td>
         </tr>

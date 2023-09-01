@@ -63,6 +63,12 @@
           "name": "WorkSpace",
           "icon": "bx bx-right-arrow-alt",
           "slug": "form-elements"
+        },
+        {
+          "url": "/correos",
+          "name": "Correos",
+          "icon": "bx bx-right-arrow-alt",
+          "slug": "form-elements"
         }
       ]
     },

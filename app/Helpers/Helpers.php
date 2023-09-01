@@ -3,7 +3,7 @@ namespace App\Helpers;
 
 use Config;
 use Illuminate\Support\Str;
-use PhpOffice\PhpWord; 
+use \PhpOffice\PhpWord; 
 use App\Helpers\NumeroALetras;
 
 class Helper
@@ -37,7 +37,9 @@ class Helper
       $valor = $valor2;
     }
     return '<span style="color:' . ($color ?? 'inherent') . '">' . $valor . '</span>';
+
   }
+
   public static function gsutil_exists($file) {
     $cmd = 'export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"';
     $cmd .= ";gsutil -q stat '$file'; echo $?";
@@ -45,6 +47,7 @@ class Helper
     $out = trim($out);
     return $out === '0';
   }
+
   public static function gsutil_cp($from, $to, $cache = true) {
     $cmd = 'export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"';
     if( $cache ){

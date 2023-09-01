@@ -1,4 +1,33 @@
 <?php
+function tiempo_transcurrido($fecha) {
+    // Convertir la fecha proporcionada a un objeto de fecha y hora
+    $fecha_actual = new DateTime();
+    $fecha_dada = new DateTime($fecha);
+
+    // Calcular la diferencia entre la fecha proporcionada y la fecha actual
+    $intervalo = $fecha_dada->diff($fecha_actual);
+
+    // Obtener los componentes del intervalo
+    $anios = $intervalo->y;
+    $meses = $intervalo->m;
+    $dias = $intervalo->d;
+    $horas = $intervalo->h;
+    $minutos = $intervalo->i;
+
+    // Construir el texto corto basado en el tiempo transcurrido
+    if ($dias >= 2) {
+        return $fecha_dada->format('d/m/Y');
+    } elseif ($dias == 1) {
+        return 'Ayer, ' . $fecha_dada->format('h:i A');
+    } elseif ($horas > 0) {
+        return $fecha_dada->format('h:i A');
+    } elseif ($minutos > 0) {
+        return 'hace ' . $minutos . ' minuto' . (($minutos > 1) ? 's' : '');
+    } else {
+        // Si es el mismo día, mostrar la hora en formato "H:i"
+        return ($fecha_dada->format('Y-m-d') === $fecha_actual->format('Y-m-d')) ? $fecha_dada->format('H:i') : $fecha_dada->format('d/m/Y, H:i');
+    }
+}
 if(!function_exists('fecha')) {
 function fecha($x) {
   $x = strtotime($x);
@@ -91,6 +120,15 @@ function gs($file, $folder = null) {
   } else if(file_exists($file)) {
     return $file;
   }
+}
+
+
+function quitar_tildes($str){
+  return strtolower(str_replace(
+    array('á', 'é', 'í', 'ó', 'ú', 'ñ', 'Á', 'É', 'Í', 'Ó', 'Ú', 'Ñ','Ò'),
+    array('a', 'e', 'i', 'o', 'u', 'n', 'a', 'e', 'i', 'o', 'u', 'n','o'),
+    trim($str)
+  ));
 }
 
 function gs_async($file, $folder = null, &$commands = null) {

@@ -32,7 +32,7 @@ h1 {
   @php
     $i = 0;
   @endphp
-    @foreach($listado as $o)
+  @foreach($listado as $o)
     @php
       $i++;
     @endphp
@@ -77,5 +77,5 @@ h1 {
       </tr>
       </tbody>
     @endif
-    @endforeach
+  @endforeach
 </table>

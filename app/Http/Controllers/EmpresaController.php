@@ -373,7 +373,7 @@ class EmpresaController extends Controller {
      public function autocomplete(Request $request) {
        $query = $request->input('query');
        $data = Empresa::search($query)
-         ->selectRaw('(CASE WHEN osce.cliente.id IS NULL THEN osce.empresa.razon_social ELSE CONCAT(\'=> \', COALESCE(osce.cliente.nomenclatura, osce.empresa.razon_social)) END) as value, osce.empresa.id');
+         ->selectRaw('CONCAT(ruc, \': \', (CASE WHEN osce.cliente.id IS NULL THEN osce.empresa.razon_social ELSE CONCAT(\'=> \', COALESCE(osce.cliente.nomenclatura, osce.empresa.razon_social)) END)) as value, osce.empresa.id');
        if(isset($_GET['propias'])) {
          $data->whereRaw('osce.empresa.tenant_id = ' . Auth::user()->tenant_id);
        }

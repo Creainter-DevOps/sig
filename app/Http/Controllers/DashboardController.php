@@ -18,9 +18,7 @@ class DashboardController extends Controller
   public function index(Request $request)
   {
     $cliente = new Cliente;
-
     $actividades = Oportunidad::actividades();
-
     $chartjs['usuario'] = User::estadisticas();
     $chartjs['barras'] = Oportunidad::estadistica_barra_cantidades();
     $chartjs['barras'] = Chartjs::line($chartjs['barras'], [

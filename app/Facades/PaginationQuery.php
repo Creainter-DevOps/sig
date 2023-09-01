@@ -138,7 +138,7 @@ class PaginationQuery
       return false;
     }
     $ddtype = $ccname::getCastType($column);
-    if(in_array($column, $this->fillable_columns) && (in_array($ddtype, ['date','string','integer','decimal']))) {
+    if(in_array($column, $this->fillable_columns) && (in_array($ddtype, ['date','string','integer','decimal','array']))) {
       if($event == 'edit') {
         $this->on('edit', $column, function($row, $res) use($ddtype, $column) {
           return [
@@ -356,7 +356,11 @@ class PaginationQuery
       }
     } else {
       $this->items = $data->all();
-      $keys = (array) $this->items[0];
+      if(!empty($this->items[0])) {
+        $keys = (array) $this->items[0];
+      } else {
+        $keys = null;
+      }
     }
     if(!empty($keys)) {
       $keys = array_keys($keys);

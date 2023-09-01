@@ -33,7 +33,7 @@ class ClienteController extends Controller
         if(!empty($search)) {
             $listado = Cliente::search($search)->paginate(15)->appends(request()->query());
         } else {
-            $listado = Cliente::where('eliminado',false )->orderBy('created_on', 'desc')->paginate(15)->appends(request()->query());
+            $listado = Cliente::where('tenant_id' , Auth::user()->tenant_id)->where('eliminado',false )->orderBy('created_on', 'desc')->paginate(15)->appends(request()->query());
         }
         $this->viewBag['listado'] = $listado; 
         return view('clientes.index', $this->viewBag ); 

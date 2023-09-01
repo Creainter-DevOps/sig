@@ -135,7 +135,7 @@
       <div class="email-user-list list-group">
         <ul class="users-list-wrapper media-list">
           @foreach( $listado as $email )
-          <li class="media mail-read">
+          <li class="media mail-read" data-id="{{ $email->id }}">
             <div class="user-action">
               <div class="checkbox-con mr-25">
                 <div class="checkbox checkbox-shadow checkbox-sm">
@@ -155,66 +155,30 @@
             <div class="media-body">
               <div class="user-details">
                 <div class="mail-items">
-                  <span class="list-group-item-text text-truncate">{{ $email->asunto }}</span>
+                  <span class="list-group-item-text text-truncate" style="text-wrap:balance;">{{ $email->asunto }} - <strong> {{ $email->correo_desde}}</strong></span>
                 </div>
                 <div class="mail-meta-item">
                   <span class="float-right">
-                    <span class="mail-date">{{ Helper::tiempo_transcurrido( $email->fecha ) }} ( {{ Helper::fecha( $email->fecha , true) }} )</span>
+                    <span class="mail-date">{{ Helper::tiempo_transcurrido( $email->fecha ) }} ( {{ Helper::fecha( $email->fecha, true) }} )</span>
                   </span>
                 </div>
               </div>
+              <!--
               <div class="mail-message">
                 <p class="list-group-item-text truncate mb-0"> 
                 </p>
+
                 <div class="mail-meta-item">
                   <span class="float-right">
                     <span class="bullet bullet-success bullet-sm"></span>
                   </span>
                 </div>
               </div>
+              -->
             </div>
           </li>
           @endforeach
-          <!--<li class="media mail-read">
-            <div class="user-action">
-              <div class="checkbox-con mr-25">
-                <div class="checkbox checkbox-shadow checkbox-sm">
-                  <input type="checkbox" id="checkboxsmall2">
-                  <label for="checkboxsmall2"></label>
-                </div>
-              </div>
-              <span class="favorite"><i class="bx bx-star"></i></span>
-            </div>
-            <div class="pr-50">
-              <div class="avatar">
-                <img class="rounded-circle" src="{{asset('images/portrait/small/avatar-s-17.jpg')}}"
-                  alt="Generic placeholder image">
-              </div>
-            </div>
-            <div class="media-body">
-              <div class="user-details">
-                <div class="mail-items">
-                  <span class="list-group-item-text text-truncate">Ecommerce website Paypal integration 😃</span>
-                </div>
-                <div class="mail-meta-item">
-                  <span class="float-right">
-                    <span class="mail-date">2:15 AM</span>
-                  </span>
-                </div>
-              </div>
-              <div class="mail-message">
-                <p class="list-group-item-text mb-0 truncate">
-                  We will start the new application development soon once
-                  this will be completed.
-                </p>
-                <div class="mail-meta-item">
-                  <span class="float-right">
-                    <span class="bullet bullet-danger bullet-sm"></span>
-                  </span>
-                </div>
-              </div>
-            </div>
-          </li>
+          <!--
           <li class="media">
             <div class="user-action">
               <div class="checkbox-con mr-25">
@@ -662,8 +626,7 @@
             </i>
           </span>
         </span>
-        <h5 class="email-detail-title font-weight-normal mb-0">
-          Advertising Internet Online
+        <h5 class="email-detail-title font-weight-normal mb-0 "> Advertising Internet Online
           <span class="badge badge-light-danger badge-pill ml-1">PRODUCT</span>
         </h5>
       </div>
@@ -760,7 +723,7 @@
       <div class="row">
         <div class="col-12">
           <div class="collapsible email-detail-head">
-            <div class="card collapse-header" role="tablist">
+            <!--<div class="card collapse-header" role="tablist">
               <div id="headingCollapse5" class="card-header d-flex justify-content-between align-items-center"
                 data-toggle="collapse" role="tab" data-target="#collapse5" aria-expanded="false"
                 aria-controls="collapse5">
@@ -912,7 +875,8 @@
                   </div>
                 </div>
               </div>
-            </div>
+            </div>-->
+            
             <div class="card collapse-header open" role="tablist">
               <div id="headingCollapse7" class="card-header d-flex justify-content-between align-items-center"
                 data-toggle="collapse" role="tab" data-target="#collapse7" aria-expanded="false"
@@ -925,13 +889,13 @@
                     </div>
                   </div>
                   <div class="media-body mt-25">
-                    <span class="text-primary">Elnora Reese</span>
-                    <span class="d-sm-inline d-none">&lt;elnora@gmail.com&gt;</span>
-                    <small class="text-muted d-block">to Lois Jimenez</small>
+                    <span class="text-primary personal_name">Elnora Reese</span>
+                    <span class="d-sm-inline d-none email">&lt;elnora@gmail.com&gt;</span>
+                    <small class="text-muted d-block email_to">para Comercial Creainter</small>
                   </div>
                 </div>
                 <div class="information d-sm-flex d-none align-items-center">
-                  <small class="text-muted mr-50">05 Jul 2019, 10:30</small>
+                  <small class="text-muted mr-50 email_date">05 Jul 2019, 10:30</small>
                   <span class="favorite warning">
                     <i class="bx bxs-star mr-25"></i>
                   </span>
@@ -959,7 +923,7 @@
               </div>
               <div id="collapse7" role="tabpanel" aria-labelledby="headingCollapse7" class="collapse show">
                 <div class="card-content">
-                  <div class="card-body py-1">
+                  <div class="card-body py-1 body-email">
                     <p class="text-bold-500">Greetings!</p>
                     <p>
                       It is a long established fact that a reader will be distracted by the readable content of a page
@@ -975,17 +939,25 @@
                     <p class="mb-0">Sincerely yours,</p>
                     <p class="text-bold-500">Envato Design Team</p>
                   </div>
+                  <template id="template-attchement">
+                  <li class="cursor-pointer pb-25">
+                        <img src="https://www.adjudica.com.pe/images/icon/pdf.png" height="30" alt="psd.png">
+                        <a href="{{config('constants.ruta_cloud') }}" class="attchement-url" target="_blank" >
+                          <small class="text-muted ml-1 attchement-text">uikit-design.psd</small>
+                         </a>
+                      </li>
+                  </template>
                   <div class="card-footer pt-0 border-top">
-                    <label class="sidebar-label">Attached Files</label>
-                    <ul class="list-unstyled mb-0">
-                      <li class="cursor-pointer pb-25">
+                    <label class="sidebar-label">Archivos adjuntos</label>
+                    <ul class="list-unstyled mb-0 file-list">
+                      <!--<li class="cursor-pointer pb-25">
                         <img src="{{asset('images/icon/psd.png')}}" height="30" alt="psd.png">
                         <small class="text-muted ml-1 attchement-text">uikit-design.psd</small>
                       </li>
                       <li class="cursor-pointer">
                         <img src="{{asset('images/icon/sketch.png')}}" height="30" alt="sketch.png">
                         <small class="text-muted ml-1 attchement-text">uikit-design.sketch</small>
-                      </li>
+                      </li>-->
                     </ul>
                   </div>
                 </div>
@@ -1038,5 +1010,6 @@
 @endsection
 
 @section('page-scripts')
-<script src="{{asset('js/scripts/pages/app-email.js')}}"></script>
+  <!--<script src="{{asset('js/scripts/pages/app-email.js')}}"></script>-->
+    <script src="{{ asset('js/scripts/correo/app-email.js') }}"></script>
 @endsection

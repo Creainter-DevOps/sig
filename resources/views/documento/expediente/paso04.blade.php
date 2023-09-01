@@ -93,7 +93,7 @@
                 </div>
               </div>
             </div>
-            @if(!empty($documento->cotizacion()->oportunidad()->correo_id))
+            @if(!empty($documento->cotizacion()->oportunidad()->correo_id) && false)
             <div class="blockSendMail" style="max-width: 700px;margin:0 auto;background: #f3f3f3;border: 1px solid #e1e1e1;color: #000;padding: 10px;border-radius: 3px;">
               <fieldset class="form-group">
                   <div class="input-group">

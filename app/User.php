@@ -10,8 +10,8 @@ use Spatie\Permission\Traits\HasRoles;
 use App\Facades\DB;
 use Auth;
 
-class User extends Authenticatable
-{
+class User extends Authenticatable {
+
     use Notifiable,HasApiTokens,HasRoles;
 
     protected $table = 'public.usuario';
@@ -24,7 +24,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'usuario', 'clave','tenant_id','last_sesion'
+        'id','displayName','mail', 'usuario', 'clave','tenant_id','last_sesion'
     ];
 
     /**
@@ -84,29 +84,33 @@ class User extends Authenticatable
         'tenant' => Auth::user()->tenant_id
       ]));
     }
-    public static function perfiles($empresa_id = null, $id_usuario = null ) {
-      return collect(DB::select("SELECT * FROM osce.fn_usuario_perfiles(:tenant, :id, :empresa)", [
+    public static function perfiles($empresa_id = null, $id_usuario = null, $correos = null) {
+      return collect(DB::select("SELECT * FROM osce.fn_usuario_perfiles(:tenant, :id, :empresa, :correos)", [
         'tenant'  => Auth::user()->tenant_id,
         'id'      => $id_usuario == null ? Auth::user()->id :  $id_usuario ,
         'empresa' => $empresa_id,
+        'correos' => $correos,
       ]));
     }
     public static function space() {
       return ceil(((disk_total_space('/') - disk_free_space('/')) * 100) / disk_total_space('/'));
     }
-    public static function perfil($id) {
+    public static function perfil($id, $correo_id = null) {
       return collect(DB::select("
         SELECT
-          UE.linea, UE.anexo, UE.celular, UE.cargo, UE.correo_id,
-        	C.correo, C.usuario, C.clave, C.nombre, C.servidor_smtp, C.puerto_smtp, E.color_primario, E.logo_head logo
+          UE.linea, UE.anexo, UE.celular, UE.cargo, UE.correo,
+        	E.color_primario, E.logo_head logo,
+          C.ex_user_id, C.ex_access_token,
+          (SELECT CC.cid FROM osce.correo CC WHERE CC.id = :cid LIMIT 1) correo_cid,
+          (SELECT CC.asunto FROM osce.correo CC WHERE CC.id = :cid LIMIT 1) correo_asunto
         FROM public.usuario_empresa UE
-        JOIN public.usuario U ON U.id = UE.usuario_id AND U.habilitado
-        JOIN osce.empresa E ON E.id = UE.empresa_id
-        LEFT JOIN osce.credencial C ON C.id = UE.correo_id
-        WHERE UE.id = :id AND U.tenant_id = :tenant AND U.id = :user", [
+        LEFT JOIN osce.empresa E ON E.id = UE.empresa_id
+        LEFT JOIN osce.credencial C ON C.id = UE.credencial_id
+        WHERE UE.id = :id AND UE.tenant_id = :tenant AND (UE.usuario_id = :user OR UE.usuario_id IS NULL)", [
         'id'      => $id,
         'tenant'  => Auth::user()->tenant_id,
         'user'    => Auth::user()->id,
+        'cid'     => $correo_id,
       ]))->first();
     }
     public static function facturas_visibles($out) {
@@ -136,7 +140,8 @@ class User extends Authenticatable
         LEFT JOIN osce.documento D ON D.id = C.documento_id AND D.finalizado_el IS NOT NULL
         LEFT JOIN osce.proyecto P ON P.cotizacion_id = C.id
         WHERE T.id = :tenant
-        GROUP BY T.id", [
+        GROUP BY T.id
+        LIMIT 100", [
         'tenant' => Auth::user()->tenant_id,
         'user'   => $id,
       ]))->first();

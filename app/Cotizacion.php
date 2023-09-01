@@ -145,7 +145,7 @@ class Cotizacion extends Model
 #      }
     }
     public function solicitudSubsanacion() {
-      return collect(DB::select('SELECT * FROM osce.fn_cotizacion_accion_subsanacion(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ')'))->first();
+      return collect(DB::select('SELECT * FROM osce.fn_cotizacion_accion_subsanacion(' . Auth::user()->tenant_id . ',' . $this->id . ', ' . Auth::user()->id . ', NOW()::date, 1)'))->first();
     }
 
     public function migrateProyecto() {

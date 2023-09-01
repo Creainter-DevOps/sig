@@ -16,6 +16,14 @@ use Auth;
 use App\User;
 use Illuminate\Support\Facades\DB;
 
+use Microsoft\Graph\Graph;
+use Microsoft\Graph\Http\GraphRequest;
+use Microsoft\Graph\Http\GraphResponse;
+use Microsoft\Graph\Exception\GraphException;
+
+use GuzzleHttp\Exception\ServerException;
+use GuzzleHttp\Exception\ClientException;
+
 class CotizacionController extends Controller {
 
   protected $viewBag = [];
@@ -286,34 +294,115 @@ class CotizacionController extends Controller {
         'message'  => 'Debe seleccionar una empresa',
       ]);
     }
-
-    $perfil = User::perfil($perfil_id);
-
-    $m = '<p>Buenos días, Estimado:</p>';
-    $m .= '<p>Ante todo, espero que usted y su familia se encuentre bien, en esta etapa de pandemia es necesario cuidarnos todos.</p>';
-    $m .= '<p>En relación con la oportunidad de negocio “<b>' . $cotizacion->oportunidad()->rotulo . '</b>”, ';
-    $m .= 'hacemos el envío de nuestra cotización con código <b>' . $cotizacion->codigo() . '</b>.</p>';
-    $m .= '<p>Así mismo quiero poder ayudarlo a resolver cualquier duda que pueda tener en relación con nuestro servicio, estaré para apoyarlo y brindarle la mejor atención.</p>';
-    $m .= '<p>Muchas gracias,</p>';
-
-
-    $archivo = gs(config('constants.ruta_storage') . $cotizacion->documento()->archivo);
-      SendMail($perfil, [
-        'to' => 'diego.anccas@gmail.com',
-        'subject' => 'COTIZACIÓN ' . $cotizacion->codigo() . ': ' . substr(strtoupper($cotizacion->oportunidad()->rotulo), 0, 60) . '...',
-        'body' => $m,
-        'attachments' => [
-          [$archivo, $cotizacion->codigo() . '.pdf']
-        ]
-      ]);
-    if($request->ajax()) {
+    $perfil = User::perfil($perfil_id, $cotizacion->oportunidad()->correo_id);
+    if(empty($perfil)) {
       return response()->json([
-        'status'   => true,
-        'refresh'  => false,
-        'disabled' => true,
-        'label'    => 'Correo enviado correctamente!',
+        'status'   => false,
+        'message'  => 'Perfil incorrecto',
       ]);
     }
+    if(empty($cotizacion->documento()->revisado_por) || empty($cotizacion->documento()->revisado_status)) {
+        return response()->json([
+          'status'   => false,
+          'disabled' => true,
+          'label'    => 'Requiere Aprobación',
+          'message'  => 'Es necesario la aprobación del expediente.',
+          'refresh'  => false,
+          'class'    => 'warning',
+        ]);
+    }
+    $m = '<p>Estimado:</p>';
+    $m .= '<p>Es un placer atender su solicitud de cotización y adjunto encontrará el archivo PDF con la cotización detallada para “<b>' . mb_strtoupper($cotizacion->oportunidad()->rotulo, 'utf-8') . '</b>”, con código interno ' . $cotizacion->codigo() . '.</p>';
+    $m .= '<p>Hemos realizado un exhaustivo análisis de sus requerimientos y hemos elaborado una propuesta que creemos se ajusta a sus necesidades.</p>';
+    $m .= '<p>Agradecemos sinceramente la oportunidad de presentarle nuestra propuesta y estamos seguros de que nuestra empresa puede brindarle soluciones confiables y de calidad. Si tiene alguna pregunta o desea realizar alguna modificación en la cotización, no dude en ponerse en contacto con nuestro equipo de ventas. Estaremos encantados de asistirlo en todo lo que necesite.</p>';
+    $m .= '<p>Esperamos contar con su confianza y colaboración. Agradecemos su atención a este asunto y esperamos tener la oportunidad de servirle en un futuro cercano.</p>';
+    $m .= '<p>Atentamente,</p>';
+
+    $f  = '<br><table><tr><td style="width:200px;">';
+    $f .= "<img src=\"cid:logo\" style=\"width:170px;\">";
+    $f .= '</td><td style="width:400px;font-size:11px;">';
+    $f .= '<b>' . $perfil->cargo . '</b><br>';
+    $f .= 'Tel. ' . $perfil->linea . ' Anexo ' . $perfil->anexo . '<br/>';
+    $f .= 'Mail: ' . $perfil->correo . '<br/>';
+    $f .= '</td></tr></table>';
+
+    $archivo = gs(config('constants.ruta_storage') . $cotizacion->documento()->archivo);
+    
+    if(!empty($perfil->logo)) {
+      $archivo_logo = gs(config('constants.ruta_storage') . $perfil->logo);
+    }
+    $graph = new Graph();
+    $graph->setAccessToken($perfil->ex_access_token);
+
+    $replyMessage = array(
+    "message" => array(
+    "from" => array(
+        "emailAddress" => array(
+          "address" => $perfil->correo,
+        )
+    ),
+    "toRecipients" => array(
+      array(
+        "emailAddress" => array(
+          "address" => $cotizacion->oportunidad()->correo()->correo_desde,
+        )
+      )
+    ),
+    "subject" => "RE: " . $perfil->correo_asunto,
+    "body" => array(
+      "contentType" => "html",
+      "content" => $m . $f,
+    ),
+    "attachments" => array(
+      array(
+        "@odata.type" => "#microsoft.graph.fileAttachment",
+        "name" => $cotizacion->codigo() . '.pdf',
+        "contentBytes" => base64_encode(file_get_contents($archivo))
+      )
+    )
+  ),
+    "saveToSentItems" => true
+  );
+    if(!empty($archivo_logo)) {
+      $replyMessage['message']['attachments'][] = array(
+        "@odata.type" => "#microsoft.graph.fileAttachment",
+        "name" => "logo.png",
+        "contentBytes" => base64_encode(file_get_contents($archivo_logo)),
+        "isInline" => true,
+        "contentId" => "logo"
+      );
+    }
+  try {
+     $response = $graph->createRequest('POST', '/users/' . $perfil->ex_user_id . '/messages/' . $perfil->correo_cid . '/reply')
+      ->attachBody($replyMessage)
+      ->execute();
+  } catch (ClientException | ServerException $err) {
+    $response = false;
+  }
+
+  if(!$response) {
+    try {
+      $response = $graph->createRequest('POST', '/users/' . $perfil->ex_user_id . '/sendMail')
+        ->attachBody($replyMessage)
+        ->execute();
+    } catch (ClientException | ServerException $err) {
+      $response = false;
+    }
+  }
+
+  if(!empty($response)) {
+    $cotizacion->registrar_propuesta();
+    $cotizacion->log('CORREO', 'Se ha enviado la propuesta por Correo a ' . $cotizacion->oportunidad()->correo()->correo_desde);
+  }
+
+  if($request->ajax()) {
+      return response()->json([
+        'status'   => !empty($response),
+        'refresh'  => false,
+        'disabled' => true,
+        'label'    => !empty($response) ? 'Correo enviado correctamente!' : 'No fue posible enviar el correo.',
+      ]);
+  }
     return redirect()->route('oportunidades.show', ['oportunidad' => $cotizacion->oportunidad_id]);
   }
 

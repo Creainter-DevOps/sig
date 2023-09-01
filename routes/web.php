@@ -95,7 +95,8 @@ Route::resource('empresas','EmpresaController')->parameters([
 Route::get('usuarios/autocomplete', 'UsuarioController@autocomplete'); 
 
 
-Route::get('usuarios/perfil/crear','UsuarioController@crear_perfil');
+Route::post('usuarios/perfiles/tablefy','UsuarioController@perfiles_tablefy')->name('perfil.tablefy');
+Route::get('usuarios/perfiles','UsuarioController@perfiles');
 Route::get('usuarios/perfil/{perfil}/editar','UsuarioController@editar_perfil');
 Route::delete('usuarios/perfil/{perfil}/eliminar','UsuarioController@eliminar_perfil');
 Route::post('usuarios/perfil','UsuarioController@perfil_store')->name('perfil_store');
@@ -182,6 +183,7 @@ Route::post('reportes/actividad/pdf/listado', 'ReporteController@pdf_actividad_l
 Route::get('reportes/licitacion/participaciones', 'ReporteController@licitacion_participaciones');
 Route::get('reportes/usuarios', 'ReporteController@usuarios');
 Route::get('reportes/usuarios/descargar', 'ReporteController@descargar_reporte');
+Route::get('reportes/avance_mensual', 'ReporteController@avance_mensual');
 //Route::get('reportes/usuarios', 'ReporteController@index');
 
 Route::get('actas/autocomplete', 'ActaController@autocomplete');
@@ -378,7 +380,13 @@ Route::get('mini/etiquetas/nuevas','MiniController@etiquetas_nuevas');
 Route::get('mini/etiquetas/solicitadas','MiniController@etiquetas_solicitadas');
 Route::get('mini/oportunidades','MiniController@oportunidades');
 
+
+Route::get('correos/{correo}/responder','CorreoController@responder')->name('correos.responder');
+Route::post('correos/{correo}/responder','CorreoController@responder_store')->name('correos.responder_store');
 Route::get('correos/{correo}/ver','CorreoController@ver')->name('correos.ver');
+Route::get('correos/{correo}/descargar/{uid}','CorreoController@descargar')->name('correos.descargar');
+Route::post('correos/buzon','CorreoController@buzon')->name('correos.buzon');
+Route::post('correos/tablefy/{credencial}', 'CorreoController@tablefy');
 Route::resource('correos', 'CorreoController')->parameters([
   'correos' => 'correo'
 ]);

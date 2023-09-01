@@ -35,10 +35,13 @@ class ReporteController extends Controller
       ]);
       return Helper::pdf('reportes.licitacion_participaciones', compact('empresas','listado'))->stream('exportado.pdf');
     }
+    public function avance_mensual() {
+      $listado  = Reporte::mensual();
+      return Helper::pdf('reportes.avance_mensual', compact('listado'))->stream('exportado.pdf');
+    }
     public function usuarios(){
      $licitacion = Helper::array_group_by( Actividad::aprobadas_desaprobadas()->toArray(), ['key'=> 'tipo'] ) ;
-
-     $apro = Helper::array_group_by( $licitacion['LICITACION/APROBAR'] , ['key'=> 'created_on'] ) ;
+     $apro = [];#Helper::array_group_by( $licitacion['LICITACION/APROBAR'] , ['key'=> 'created_on'] ) ;
 
      $desapro = Helper::array_group_by( $licitacion['LICITACION/RECHAZAR'] , ['key'=> 'created_on'] ) ;
 

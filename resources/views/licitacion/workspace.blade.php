@@ -209,7 +209,7 @@
               <td>
                 <small style="font-size: 9px;">{{ $v->entidad }}</small>
                 <div style="font-size:12px;"><a href="{{ route('oportunidades.show', ['oportunidad' => $v->oportunidad_id]) }}" style="color:#606060;">{{ $v->rotulo }}</a></div>
-                <div style="font-size:11px;">Cotizado el {{ Helper::fecha($v->propuesta_el, true) }} por {{ $v->elaborado_por }}</div>
+                <div style="font-size:11px;">Cotizado el {{ Helper::fecha($v->propuesta_el, true) }}, por {{ $v->elaborado_por }}</div>
               </td>
               <td class="text-center">
                 <div style="font-size:11px;">{{ Helper::fecha($v->fecha) }}</div>
@@ -221,7 +221,7 @@
                 <div style="background: #74e559;color: #fff;text-align: center;border-radius: 4px;padding: 2px 5px;">por {{ $v->respondido_por }}</div>
                 <small>{{ Helper::fecha($v->respondido_el, true) }}</small>
                 @else
-                @if(!empty($v->restan))
+                @if($v->restan >= 0)
                 <div style="background: #f8a72b;color: #fff;text-align: center;border-radius: 4px;padding: 2px 5px;">Pendiente</div>
                 @else
                 <div style="background: #f82b2b;color: #fff;text-align: center;border-radius: 4px;padding: 2px 5px;">Vencido</div>

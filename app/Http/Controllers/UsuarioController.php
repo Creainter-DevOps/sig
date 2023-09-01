@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\User;
 use App\UsuarioEmpresa;
+use App\Perfil;
+use App\Empresa;
+use App\Credencial;
 
 class UsuarioController extends Controller
 {
@@ -25,7 +28,30 @@ class UsuarioController extends Controller
         ["link" => "/usuarios", "name" => "Usuarios" ]
       ];
     }
-
+    public function perfiles_tablefy(Request $request) {
+    $listado = Perfil::pagination()
+    ->appends(request()->input())
+    ->map(function($row) {
+      return [
+        'empresa_id'   => substr($row->razon_social, 0, 20),
+        'credencial_id' => Credencial::find($row->credencial_id)->usuario,
+        'correo'    => $row->correo,
+        'habilitado' => $row->habilitado,
+        'usuario_id'   =>  $row->usuarios,
+        'linea'     => $row->linea,
+        'anexo'     => $row->anexo,
+        'celular'   => $row->celular,
+        'cargo'     => $row->cargo,
+        'firma'     => $row->firma,
+      ];
+    })
+    ->get();
+    return $listado->response();
+  }
+  public function perfiles(Request $request)
+  {
+      return view('usuarios.perfiles');
+  }
     public function index()
     {
       $this->viewBag['listado'] = User::paginate(15);      

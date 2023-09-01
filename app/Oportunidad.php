@@ -143,8 +143,8 @@ class Oportunidad extends Model
         FROM osce.oportunidad O
         LEFT JOIN osce.empresa E ON E.id = O.empresa_id
         LEFT JOIN osce.actividad_tipo TT ON TT.id = O.estado
-        WHERE O.licitacion_id IS NULL AND O.tenant_id = :tenant AND O.eliminado IS NULL
-          --search AND (UPPER(O.rotulo) LIKE CONCAT('%', (:q)::text, '%') OR E.razon_social LIKE CONCAT('%', (:q)::text, '%') OR E.seudonimo LIKE CONCAT('%', (:q)::text, '%'))
+        WHERE O.licitacion_id IS NULL AND O.tenant_id = :tenant AND O.eliminado IS NULL AND O.rechazado_el IS NULL
+          --search AND ((UPPER(O.rotulo) LIKE CONCAT('%', (:q)::text, '%') OR E.razon_social LIKE CONCAT('%', (:q)::text, '%') OR E.seudonimo LIKE CONCAT('%', (:q)::text, '%')))
         ORDER BY O.created_on DESC
       ", [
         'tenant' => Auth::user()->tenant_id,
@@ -183,7 +183,8 @@ class Oportunidad extends Model
       });
     }
 
-    public static function actividades(){
+    public static function actividades() {
+      return [];
       $rp = DB::select("SELECT U.id user_id, U.usuario title, A1.created_on::date date, date_part('day', A1.created_on::date) dia, COUNT(DISTINCT A1.oportunidad_id) oportunidades,
         SUM(A1.tiempo_estimado) tiempo
         FROM (
@@ -194,6 +195,7 @@ class Oportunidad extends Model
           WHERE A1.tiempo_estimado is not null
           GROUP BY U.id, U.usuario, A1.created_on::date
           ORDER BY 1, 2
+          LIMIT 100
           ;");
      return static::hydrate($rp);
     }
@@ -489,7 +491,7 @@ FROM (
   WHERE x.empresas_interes IS FALSE OR x.aprobado_el::date = NOW()::date OR x.es_favorito IS NOT NULL
   OR x.fecha_propuesta_hasta <= NOW() + INTERVAL '40' DAY
 ) z
-ORDER BY z.correo_id IS NULL ASC, z.fecha_propuesta_hasta::date ASC, z.fecha_propuesta_hasta::time ASC, z.es_favorito IS NULL DESC, z.estado DESC, (z.expediente_step_min = 4) ASC, z.revisado_el IS NULL ASC, z.expediente_step_min DESC
+ORDER BY z.correo_id IS NULL ASC, (z.fecha_propuesta_hasta::date <= NOW() - INTERVAL '1' DAY) ASC, (z.fecha_propuesta_hasta::date <= NOW()::date) DESC, z.fecha_propuesta_hasta::date DESC, z.fecha_propuesta_hasta::time ASC, z.es_favorito IS NULL DESC, z.estado DESC, (z.expediente_step_min = 4) ASC, z.revisado_el IS NULL ASC, z.expediente_step_min DESC
 LIMIT 140", ['tenant' => Auth::user()->tenant_id]);
       $out = $rp->execute;
       return static::hydrate($rp->toArray());
@@ -559,7 +561,7 @@ LIMIT 300", ['tenant' => Auth::user()->tenant_id]);
 
       return static::hydrate($rpta);  
     }
-    static function listado_propuestas_buenas_pro(&$out = null) {
+   static function listado_propuestas_buenas_pro(&$out = null) {
       $rp = DB::collect("
     SELECT
       O.*,
@@ -582,29 +584,31 @@ WHERE O.aprobado_el IS NOT NULL AND O.rechazado_el IS NULL AND O.archivado_el IS
 ) O
 JOIN osce.licitacion L ON L.id = O.licitacion_id AND (
   (L.fecha_buena_desde >= NOW() AND L.fecha_buena_hasta <= NOW())
-  OR (L.fecha_buena_hasta >= NOW() - INTERVAL '7' DAY AND L.fecha_buena_hasta <= NOW() + INTERVAL '60' DAY)
+  OR (L.fecha_buena_hasta >= NOW() - INTERVAL '30' DAY AND L.fecha_buena_hasta <= NOW() + INTERVAL '60' DAY)
   OR (L.buenapro_fecha >= NOW() - INTERVAL '7' DAY))
 ORDER BY (L.buenapro_fecha IS NOT NULL) DESC, L.buenapro_fecha ASC, L.fecha_buena_hasta ASC, O.id ASC
-LIMIT 80", [
+LIMIT 150", [
   'tenant' => Auth::user()->tenant_id
 ]);
       $out = $rp->execute;
       return static::hydrate($rp->toArray());
-    }
+   }
    static function listado_solicitud_subsanaciones(&$out = null) {
      $rp = DB::collect("
 SELECT
-	S.id, C.id cotizacion_id, C.oportunidad_id, O.licitacion_id,
-	EE.razon_social entidad, O.rotulo, O.fecha_propuesta_hasta,
-	C.monto, S.fecha, S.dias_habiles, S.created_by,
-	S.respondido_el, osce.fn_usuario_rotulo(S.respondido_por) subsanacion_por,
-	C.propuesta_el, osce.fn_usuario_rotulo(C.propuesta_por) propuesta_por,
-	osce.fn_sumar_dias_habiles(S.fecha, S.dias_habiles) fecha_limite,
-	EXTRACT(day from AGE(osce.fn_sumar_dias_habiles(S.fecha, S.dias_habiles)::date, NOW()::date)) restan
+  S.id, C.id cotizacion_id, C.oportunidad_id, O.licitacion_id,
+  EE.razon_social entidad, O.rotulo, O.fecha_propuesta_hasta,
+  C.monto, S.fecha, S.dias_habiles, S.created_by,
+  S.respondido_el, osce.fn_usuario_rotulo(S.respondido_por) subsanacion_por,
+  C.propuesta_el, osce.fn_usuario_rotulo(C.propuesta_por) propuesta_por,
+  D.finalizado_el, osce.fn_usuario_rotulo(C.elaborado_por) elaborado_por,
+  osce.fn_sumar_dias_habiles(S.fecha, S.dias_habiles) fecha_limite,
+  EXTRACT(day from AGE(osce.fn_sumar_dias_habiles(S.fecha, S.dias_habiles)::date, NOW()::date)) restan
 FROM osce.subsanacion S
 JOIN osce.cotizacion C ON C.id = S.cotizacion_id
 JOIN osce.oportunidad O ON O.id = C.oportunidad_id
 JOIN osce.empresa E ON E.id = C.empresa_id
+LEFT JOIN osce.documento D ON D.id = C.documento_id
 LEFT JOIN osce.empresa EE ON EE.id = O.empresa_id
 WHERE S.tenant_id = :tenant AND S.fecha >= NOW() - INTERVAL '5' DAY", [
   'tenant' => Auth::user()->tenant_id
