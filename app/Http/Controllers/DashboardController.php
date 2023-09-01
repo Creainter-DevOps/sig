@@ -9,7 +9,7 @@ use App\Helpers\Chartjs;
 use App\User;
 use App\Cuota;
 use App\Dashboard;
-
+use Auth;
 class DashboardController extends Controller
 {
   public function __construct() {

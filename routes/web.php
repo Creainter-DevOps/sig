@@ -11,7 +11,6 @@ use App\Http\Controllers\LanguageController;
 |
  */
 
-Route::get('/', 'Auth\LoginController@index');
 Route::get('identificacion', 'Auth\LoginController@login');
 Route::post('identificacion', 'Auth\LoginController@login_check')->name('login');
 Route::get('logout', 'Auth\LoginController@logout')->name('logout');

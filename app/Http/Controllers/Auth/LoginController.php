@@ -43,6 +43,10 @@ class LoginController extends Controller
     {
 //        $this->middleware('guest')->except('logout');
     }
+    public function index() {
+      echo 123;
+exit;
+    }
 
     /*public function login()
     {
